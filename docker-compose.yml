@@ -1,0 +1,90 @@
+version: "3.4"
+
+volumes:
+  db-data:
+    name: controlled-vocabulary-designer-db-data
+
+services:
+  # NGINX(PROXY)_CONTAINER
+  gw:
+    container_name: gw
+    build:
+      context: .
+      dockerfile: ./gw/Dockerfile
+    ports:
+      - 10080:10080
+    volumes:
+      - "./gw/conf.d:/etc/nginx/conf.d:ro"
+    links:
+      - app
+      - api
+    depends_on:
+      - app
+      - api
+
+  # FRONTEND_CONTAINER
+  app:
+    container_name: app
+    build:
+      context: .
+      dockerfile: ./app/Dockerfile
+    environment:
+    - http_proxy=${HTTP_PROXY}
+    - https_proxy=${HTTP_PROXY}
+    - HTTP_PROXY=${HTTP_PROXY}
+    - HTTPS_PROXY=${HTTP_PROXY}
+    volumes:
+      - ./app/app:/usr/src/app
+    tty: true
+    command: ["/tmp/lunch.sh"]
+    depends_on:
+      - api
+
+  # BACKEND_CONTAINER
+  api:
+    container_name: api
+    build:
+      context: .
+      dockerfile: ./api/Dockerfile
+      args:
+      - PROXY=${HTTP_PROXY}
+    environment:
+    - http_proxy=
+    - https_proxy=
+    - HTTP_PROXY=
+    - HTTPS_PROXY=
+    tty: true
+    volumes:
+      - ./db/work:/tmp/work
+    depends_on:
+      - db
+
+  # DB(PostgreSQL)
+  db:
+    image: postgres
+    container_name: db
+    build:
+      context: .
+      dockerfile: ./db/Dockerfile
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./db/work:/tmp/work
+    environment:
+      - POSTGRES_USER=commonvocabulary
+      - POSTGRES_PASSWORD=commonvocabulary
+      - POSTGRES_DB=commonvocabulary
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "commonvocabulary", "-d", "commonvocabulary"]
+      interval: 10s
+      timeout: 5s
+      retries: 100
+
+  # DBAPI(PostgREST)
+  dbrest:
+    image: postgrest/postgrest
+    container_name: dbrest
+    environment:
+      PGRST_DB_URI: "postgres://commonvocabulary:commonvocabulary@db:5432"
+      PGRST_DB_SCHEMA: "public"
+      PGRST_DB_ANON_ROLE: "commonvocabulary"

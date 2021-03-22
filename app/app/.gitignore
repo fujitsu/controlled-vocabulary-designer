@@ -1,0 +1,4 @@
+build/
+node_modules/
+client/.eslintrc
+public/app/js/app.js

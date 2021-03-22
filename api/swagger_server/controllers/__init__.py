@@ -1,0 +1,3 @@
+"""
+__init__.py COPYRIGHT FUJITSU LIMITED 2021
+"""

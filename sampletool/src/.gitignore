@@ -1,0 +1,7 @@
+*.pkl
+*.npy
+*.csv
+*.model
+*.txt
+*.ttl
+ExternalVocabulary.json

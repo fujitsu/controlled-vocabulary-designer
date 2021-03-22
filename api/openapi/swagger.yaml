@@ -1,0 +1,653 @@
+openapi: 3.0.1
+info:
+  title: Swagger CVD
+  description: CVD api description
+  version: 1.0.0
+servers:
+- url: http://{host}:{port}/api/v1
+  variables:
+    host:
+      default: localhost
+    port:
+      default: "10080"
+tags:
+- name: file
+  description: File operation
+- name: vocabulary
+  description: Vocabulary data operation
+- name: example
+  description: Example data operation
+paths:
+  /upload:
+    post:
+      tags:
+      - file
+      summary: Upload the file to the server
+      description: "Uploads the file selected by the client to the server.  \n  When\
+        \ 'editing_vocabulary' uploaded, its check integrity.  \n"
+      operationId: upload_file
+      requestBody:
+        description: Select the file to upload.
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Upload'
+      responses:
+        "200":
+          description: "Upload is complete.  \nIf the client uploads the vocabulary\
+            \ data, call the load API.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: |
+            File Format Error.
+            ex. Invalid file uploaded.
+            Set the error file name for the message.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                result: 0
+                message: editing_vocabulary.xlsx
+        "404":
+          description: |
+            Database Error.
+            ex. Database is timeout.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                result: 0
+                message: Database connection timeout.
+        "409":
+          description: |
+            Integrity check Error.
+            phase : Returns the phase in which the error occurred.
+            "2" means it was in the preferred_label check phase error.
+            "3" means it was in the uri check phase error.
+            "4" means it was in the broader_term check phase error.
+            terms : Returns terms in which the error occurred.
+            reason : Returns the check error reason code.
+            If phase is 2 and reason is 0, the client will display
+            "同義関係と思われる、用語a,b,cの標目を1つに揃えてください".
+            If phase is 3 and reason is 0, the client will display
+            "用語a,b,cの標目のURIの個数を1つに絞ってください".
+            If phase is 3 and reason is 1, the client will display
+            "用語a,b,cの標目のURIを統一してください".
+            If phase is 3 and reason is 2, the client will display
+            "標目a,b,cについて、同じ標目のURIが設定されています。標目のURIを修正してください".
+            If phase is 3 and reason is 3, the client will display
+            "用語a,b,cの標目のURIを1つに揃えてください".
+            If phase is 4 and reason is 0, the client will display
+            "標目aの上位語の標目が一致するように上位語を修正してください".
+            If phase is 4 and reason is 1, the client will display
+            "標目a,b,cは、関係性が循環しています。上位語を修正してください。".
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckErrorResponse'
+              example:
+                phase: 2
+                terms:
+                - a
+                - b
+                - c
+                reason: 0
+      x-swagger-router-controller: swagger_server.controllers.file_controller
+      x-codegen-request-body-name: body
+      x-openapi-router-controller: swagger_server.controllers.file_controller
+  /download/{file_type}:
+    get:
+      tags:
+      - file
+      summary: Download the file from the server
+      operationId: download_file
+      parameters:
+      - name: file_type
+        in: path
+        description: "Specify for editing_vocabulary or controlled_vocabulary.  \n\
+          'editing_vocabulary' get editing vocabulary file.  \n'controlled_vocabulary'\
+          \ get controlled vocabulary file.  \n"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: out_format
+        in: query
+        description: "Specify the file format.  \nwhen editing_vocabulary, format\
+          \ is csv or xlsx.  \nwhen controlled_vocabulary, format is n3, nquads, nt,\
+          \ trix, turtle, xml, json-ld.\n"
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Download is complete.
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+                x-content-type: application/octet-stream
+        "400":
+          description: |
+            Bad Request
+            ex. Invalid parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: "Not Found  \nex. Download file not found.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-swagger-router-controller: swagger_server.controllers.file_controller
+      x-openapi-router-controller: swagger_server.controllers.file_controller
+  /vocabulary/{file_type}:
+    get:
+      tags:
+      - vocabulary
+      summary: Get vocabulary data by type
+      operationId: get_vocabulary_data
+      parameters:
+      - name: file_type
+        in: path
+        description: "Specify for editing_vocabulary, reference_vocabulary1, etc.\
+          \  \n'editing_vocabulary' get editing vocabulary data.  \n'reference_vocabulary1'\
+          \ get reference vocabulary1 data.  \n'reference_vocabulary2' get reference\
+          \ vocabulary2 data.  \n'reference_vocabulary3' get reference vocabulary3\
+          \ data.  \n"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Get vocabulary data is Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetAllSuccessResponse'
+        "400":
+          description: |
+            Bad Request
+            ex. Invalid parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: "Not Found  \nex. Download file not found.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
+      x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
+    post:
+      tags:
+      - vocabulary
+      summary: Delete editing vocabulary term
+      operationId: delete_vocabulary_term
+      parameters:
+      - name: file_type
+        in: path
+        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
+          \ editing vocabulary data.  \n"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        description: |
+          Specify the term id to request.
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: integer
+        required: true
+      responses:
+        "200":
+          description: |
+            Delete editing vocabulary data success.
+            Return updated EditingVocabulary list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EditingVocabulary'
+        "400":
+          description: |
+            Bad Request
+            ex. Invalid parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: "Not Found  \nex. Request term not found.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
+      x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
+      x-codegen-request-body-name: body
+  /vocabulary/{file_type}/{term}:
+    get:
+      tags:
+      - vocabulary
+      summary: Get editing vocabulary term
+      operationId: get_vocabulary_term
+      parameters:
+      - name: file_type
+        in: path
+        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
+          \ editing vocabulary data.  \n"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: term
+        in: path
+        description: |
+          Specify the term to request.
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      responses:
+        "200":
+          description: |
+            Return to vocabulary data.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EditingVocabulary'
+                x-content-type: application/json
+        "400":
+          description: |
+            Bad Request
+            ex. Invalid parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: "Not Found  \nex. Request term not found.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
+      x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
+    post:
+      tags:
+      - vocabulary
+      summary: Add or Update editing vocabulary terms
+      operationId: post_vocabulary_term
+      parameters:
+      - name: file_type
+        in: path
+        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
+          \ editing vocabulary data.  \n"
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: term
+        in: path
+        description: Specify the update term
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/EditingVocabulary'
+        required: true
+      responses:
+        "200":
+          description: |
+            Add or Update editing vocabulary data success.
+            Return updated EditingVocabulary list.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EditingVocabulary'
+        "400":
+          description: |
+            Bad Request
+            ex. Invalid parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "404":
+          description: "Not Found  \nex. Request term not found.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
+      x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
+      x-codegen-request-body-name: body
+  /example/{term}:
+    get:
+      tags:
+      - example
+      summary: Get example phrases
+      operationId: get_example_phrases
+      parameters:
+      - name: term
+        in: path
+        description: Get example phrases
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: string
+      - name: index
+        in: query
+        description: Get example phrases
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchSuccessResponse'
+        "404":
+          description: "Not Found  \nex. Request term is empty.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-swagger-router-controller: swagger_server.controllers.example_controller
+      x-openapi-router-controller: swagger_server.controllers.example_controller
+  /filter:
+    get:
+      tags:
+      - filter
+      summary: Get part of speech filter data.
+      operationId: get_filter_data
+      responses:
+        "200":
+          description: Filter Data Get Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PosFilter'
+        "400":
+          description: "Filter Data Get Failed. \nex. Database Connection Error.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-swagger-router-controller: swagger_server.controllers.filter_controller
+      x-openapi-router-controller: swagger_server.controllers.filter_controller
+    post:
+      tags:
+      - filter
+      summary: Post part of speech filter data.
+      operationId: post_filter_data
+      requestBody:
+        description: Post part of speech filter data.
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PosFilter'
+      responses:
+        "200":
+          description: Filter Data Get Success.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        "400":
+          description: "Filter Data Post Failed. \nex. Database Connection Error.\n"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      x-swagger-router-controller: swagger_server.controllers.filter_controller
+      x-openapi-router-controller: swagger_server.controllers.filter_controller
+components:
+  schemas:
+    Upload:
+      type: object
+      properties:
+        editing_vocabulary:
+          type: string
+          description: editing_vocabulary is xlsx file
+          format: binary
+        reference_vocabulary1:
+          type: string
+          description: reference_vocabulary1 is xlsx file
+          format: binary
+        reference_vocabulary2:
+          type: string
+          description: reference_vocabulary2 is xlsx file
+          format: binary
+        reference_vocabulary3:
+          type: string
+          description: reference_vocabulary3 is xlsx file
+          format: binary
+        example_phrases:
+          type: string
+          description: example_phrases is txt file
+          format: binary
+    ExamplePhrases:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        phrase:
+          type: string
+      example:
+        id: 1
+        phrase: 括弧内の数字は在籍車両の車番を示す
+    EditingVocabulary:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        term:
+          type: string
+        preferred_label:
+          type: string
+        uri:
+          type: string
+        broader_term:
+          type: string
+        synonym:
+          type: array
+          items:
+            type: string
+        synonym_candidate:
+          type: array
+          items:
+            type: string
+        broader_term_candidate:
+          type: array
+          items:
+            type: string
+        part_of_speech:
+          type: string
+        postion_x:
+          type: string
+        postion_y:
+          type: string
+        color1:
+          type: string
+        color2:
+          type: string
+      example:
+        id: 1
+        term: os
+        preferred_label: os
+        uri: http://test/0/os
+        broader_term: ソフトウェア
+        synonym: オペレーティングシステム
+        synonym_candidate: 基本ソフト
+        broader_term_candidate: プログラム
+        part_of_speech: 名詞
+        postion_x: "100"
+        postion_y: "100"
+        color1: black
+        color2: black
+    ReferenceVocabulary:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        term:
+          type: string
+        preferred_label:
+          type: string
+        uri:
+          type: string
+        broader_term:
+          type: string
+      example:
+        id: 1
+        term: linux
+        preferred_label: linux
+        uri: http://test/8/linux
+        broader_term: os
+    GetAllSuccessResponse:
+      type: object
+      properties:
+        EditingVocabulary:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditingVocabulary'
+        ReferenceVocabulary:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReferenceVocabulary'
+      example:
+        EditingVocabulary:
+        - id: 1
+          term: os
+          preferred_label: os
+          uri: http://test/0/os
+          broader_term: ソフトウェア
+          synonym: オペレーティングシステム
+          synonym_candidate: 基本ソフト
+          broader_term_candidate: プログラム
+          part_of_speech: 名詞
+          postion_x: "100"
+          postion_y: "100"
+          color1: black
+          color2: black
+        ReferenceVocabulary:
+        - id: 1
+          term: linux
+          preferred_label: linux
+          uri: http://test/8/linux
+          broader_term: os
+    SearchSuccessResponse:
+      type: object
+      properties:
+        AllResultCount:
+          type: integer
+          description: Number of search results
+          format: int64
+        ExamplePhrases:
+          type: array
+          description: Search results data(MAX100)
+          items:
+            $ref: '#/components/schemas/ExamplePhrases'
+      example:
+        AllResultCount: 0
+        ExamplePhrases:
+        - id: 1
+          phrase: 括弧内の数字は在籍車両の車番を示す
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: request is success.
+    ErrorResponse:
+      type: object
+      properties:
+        result:
+          type: integer
+        message:
+          type: string
+    CheckErrorResponse:
+      type: object
+      properties:
+        phase:
+          type: integer
+        terms:
+          type: array
+          items:
+            type: string
+        reason:
+          type: integer
+    PosFilter:
+      type: object
+      properties:
+        noun:
+          type: boolean
+        verb:
+          type: boolean
+        adjective:
+          type: boolean
+        adverb:
+          type: boolean
+        adnominal:
+          type: boolean
+        interjection:
+          type: boolean
+        other:
+          type: boolean
+      example:
+        adjective: true
+        other: true
+        adnominal: true
+        interjection: true
+        verb: true
+        noun: true
+        adverb: true

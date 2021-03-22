@@ -1,0 +1,9 @@
+werkzeug==0.16.1
+connexion == 2.2.0
+python_dateutil == 2.6.0
+setuptools >= 21.0.0
+xlrd==1.2.0
+rdflib >= 5.0.0
+openpyxl
+psycopg2
+rdflib-jsonld

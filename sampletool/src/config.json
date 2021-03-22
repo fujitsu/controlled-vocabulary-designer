@@ -1,0 +1,32 @@
+{
+  "Hensyugoi": {
+    "Hensyugoi": {
+        "VectorMagnification": 10
+    },
+    "WordEmbedding": {
+      "Algorithm": "word2vec",
+      "word2vec": {},
+      "fasttext": {}
+    },
+    "SynonymExtraction": {
+      "SimilarityThreshold": 0.30,
+      "SimilarityLimit": 10
+    },
+    "HypernymExtraction": {
+        "Algorithm": "hypernym",
+        "hypernym": {}
+    }
+  },
+  "SanSyogoi": {
+    "ExternalVocabulary": {
+        "Algorithm": "wordnet",
+        "wordnet": {},
+        "CVO": {
+           "File": "cvo_ver_2_03.ttl"
+        }
+    },
+    "WordEmbedding2": {
+        "poincare.epochs": 2000
+    }
+  }
+}
