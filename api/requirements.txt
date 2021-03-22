@@ -1,9 +1,32 @@
-werkzeug==0.16.1
-connexion == 2.2.0
-python_dateutil == 2.6.0
-setuptools >= 21.0.0
+certifi==2020.12.5
+chardet==3.0.4
+click==7.1.2
+clickclick==20.10.2
+connexion==2.2.0
+Cython==0.29.21
+et-xmlfile==1.0.1
+Flask==1.1.2
+idna==2.10
+inflection==0.5.1
+isodate==0.6.0
+itsdangerous==1.1.0
+jdcal==1.4.1
+Jinja2==2.11.2
+jsonschema==2.6.0
+MarkupSafe==1.1.1
+numpy==1.19.4
+openapi-spec-validator==0.2.9
+openpyxl==3.0.5
+pandas==1.1.5
+psycopg2==2.8.6
+pyparsing==2.4.7
+python-dateutil==2.8.1
+pytz==2020.4
+PyYAML==5.3.1
+rdflib==5.0.0
+rdflib-jsonld==0.5.0
+requests==2.25.0
+six==1.15.0
+urllib3==1.26.2
+Werkzeug==0.16.1
 xlrd==1.2.0
-rdflib >= 5.0.0
-openpyxl
-psycopg2
-rdflib-jsonld
