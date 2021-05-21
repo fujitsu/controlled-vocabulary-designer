@@ -51,13 +51,13 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
-    "@material-ui/lab": "latest",
+    "@material-ui/lab": "4.0.0-alpha.58",
     "express": "^4.17.1",
     "forever": "^3.0.0",
     "webpack-dev-server": "^3.11.0",
-    "react-window": "latest",
-    "axios": "latest",
-    "jquery": "latest",
-    "form-data": "latest"
+    "react-window": "1.8.6",
+    "axios": "0.21.1",
+    "jquery": "3.6.0",
+    "form-data": "4.0.0"
   }
 }
