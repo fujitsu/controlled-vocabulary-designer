@@ -21,7 +21,6 @@ import itertools
 from gensim.models import word2vec
 from gensim.models import KeyedVectors
 from sklearn.metrics import pairwise_distances
-from MulticoreTSNE import MulticoreTSNE as TSNE
 
 
 def filt(domain_word_file, domain_text_preprocessed_file, vec):
