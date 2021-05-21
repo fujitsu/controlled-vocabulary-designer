@@ -17,14 +17,12 @@ RUN if [ ! -z "${MS_UID}" -a "${MS_UID}" -ge 1000 ] ;\
 
 # apt-packages
 RUN apt-get -q update && \
-    apt-get install -y -q mecab libmecab-dev mecab-ipadic-utf8
+    apt-get install -y -q mecab=0.996-3.1 libmecab-dev=0.996-3.1 mecab-ipadic-utf8=2.7.0-20070801+main-1
 
 # python-packages
 COPY requirements.txt /tmp/requirements.txt
-RUN pip install --upgrade pip
+RUN pip install pip==21.1.1
 RUN pip install --default-timeout=1000 --no-cache-dir -r /tmp/requirements.txt
-RUN wget https://files.pythonhosted.org/packages/c1/d8/bde94b8e012cae4b25274d3633289ca3f79ef580fed46c583a27b0254cdb/MulticoreTSNE-0.0.1.1-py2.py3-none-manylinux1_x86_64.whl
-RUN pip install MulticoreTSNE-0.0.1.1-py2.py3-none-manylinux1_x86_64.whl
 
 WORKDIR /tmp
 
