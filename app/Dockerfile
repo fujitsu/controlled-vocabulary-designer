@@ -1,4 +1,4 @@
-FROM node:lts
+FROM node:14
 
 WORKDIR /usr/src/app
 
