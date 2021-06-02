@@ -1,11 +1,11 @@
-regex
-MeCab
-openpyxl
-pandas
-nltk
-plotly
-gensim
-bs4
-sklearn
-rdflib >= 5.0.0
-jsonpointer
+regex==2021.4.4
+MeCab==0.996.2
+openpyxl==3.0.7
+pandas==1.2.4
+nltk==3.6.1
+plotly==4.14.3
+gensim==3.8.3
+bs4==0.0.1
+sklearn==0.0
+rdflib==5.0.0
+jsonpointer==2.1
