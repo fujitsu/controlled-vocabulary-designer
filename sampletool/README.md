@@ -1,13 +1,12 @@
-# Sample tool
+# Example input data creation
 
-CVD input data generation tool.
-This tool generate editing vocabulary, reference vocabulary and corpus.
+Example of generating editing vocabulary, reference vocabulary and corpus.
 
 
 ## How to generate
 
 1. Put wiki.txt and tag.csv in src folder. (The examples of wiki.txt and tag.csv are shown near the bottom of this README)
-2. ```$ cd sampletool```
+2. ```$ cd example-inputdata-creation```
 3. ```$ chmod o+w src```
 4. ```$ docker-compose build```
 5. ```$ docker-compose run python /bin/bash```
