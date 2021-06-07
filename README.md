@@ -71,12 +71,11 @@ Corpus includes set of space-separated terms which is written in one row.
 永続 ボリューム の 上 に 構成 され サービス を 終了 させても データ は 揮発 しない
 ```
 
-## Sample tool
+## Example input data creation
 
-CVD input data generation tool.
-This tool generate editing vocabulary, reference vocabulary and corpus.
+Example of generating editing vocabulary, reference vocabulary and corpus.
 
-[Read More](sampletool/README.md)
+[Read More](example-inputdata-creation/README.md)
 
 
 # URI Prefix
