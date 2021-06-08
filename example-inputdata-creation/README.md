@@ -1,4 +1,4 @@
-# Example input data creation
+# Input data creation example
 
 Example of generating editing vocabulary, reference vocabulary and corpus.
 
