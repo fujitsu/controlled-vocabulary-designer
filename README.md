@@ -71,7 +71,7 @@ Corpus includes set of space-separated terms which is written in one row.
 永続 ボリューム の 上 に 構成 され サービス を 終了 させても データ は 揮発 しない
 ```
 
-## Example input data creation
+## Input data creation example
 
 Example of generating editing vocabulary, reference vocabulary and corpus.
 
