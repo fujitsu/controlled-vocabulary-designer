@@ -4,6 +4,7 @@ WordEmbedding.py COPYRIGHT FUJITSU LIMITED 2021
 """
 # -*- coding: utf-8 -*-
 
+import copy
 import argparse
 import os
 import sys
@@ -127,8 +128,20 @@ def vector(txt_preprocessed_file, domain_word_file, domain_text_preprocessed_fil
     #distance_matrix = pairwise_distances_chunked(v_word2vec, v_word2vec, metric='cosine', n_jobs=-1)
     #tsne = TSNE(metric="precomputed", n_jobs=multiprocessing.cpu_count(), n_components=2)
     #v_tsne = tsne.fit_transform(distance_matrix)
+
+    # Vector normalization
+    model_normalized = copy.deepcopy(model)
+    v_word2vec_normalized = []
+    for voc in vocab:
+        if(np.linalg.norm(model.wv[voc], ord=2) == 0):
+            model_normalized.wv[voc] = np.zeros(np.shape(v_word2vec)[1])
+        else:
+            model_normalized.wv[voc] = model.wv[voc] / np.linalg.norm(model.wv[voc], ord=2)
+
+    v_word2vec_normalized = model_normalized.wv[vocab]
+
     tsne = TSNE(metric="euclidean", n_jobs=multiprocessing.cpu_count(), n_components=2)
-    v_tsne = tsne.fit_transform(v_word2vec)
+    v_tsne = tsne.fit_transform(v_word2vec_normalized)
 
     # 2D vector dictionary {keys: value} = {term: [x-coordinate, y-coordinate]}
     vec = {}
