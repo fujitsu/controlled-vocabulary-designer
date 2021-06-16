@@ -17,7 +17,7 @@ The created controlled vocabulary can be exported as RDF file.
 2. Access this URL from your browser.
 
 ```
-http://(hostname):10080/
+http://(hostname):10081/
 ```
 
 # Supported browsers
