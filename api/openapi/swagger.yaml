@@ -9,7 +9,7 @@ servers:
     host:
       default: localhost
     port:
-      default: "10080"
+      default: "10081"
 tags:
 - name: file
   description: File operation
