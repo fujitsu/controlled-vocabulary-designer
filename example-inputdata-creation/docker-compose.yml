@@ -14,5 +14,5 @@ services:
     - HTTPS_PROXY=${HTTP_PROXY}
     restart: always
     volumes:
-    - ./src:/work
+    - ./mountdir:/mountdir
     command: ["tail", "-f", "/dev/null"]
