@@ -1,19 +1,17 @@
 FROM python:3.7-stretch
 
 ARG PROXY
+ARG HOST_USER_ID
 ENV http_proxy ${PROXY}
 ENV https_proxy ${PROXY}
 ENV HTTP_PROXY ${PROXY}
 ENV HTTPS_PROXY ${PROXY}
+ENV HOST_USER_ID ${HOST_USER_ID}
 
 USER root
 
 # create-user uid
-RUN useradd -m user
-RUN if [ ! -z "${MS_UID}" -a "${MS_UID}" -ge 1000 ] ;\
-         then usermod -u ${MS_UID} user ;\
-         else usermod -u 1000 user ; \
-    fi
+RUN useradd -u ${HOST_USER_ID} -m user
 
 # apt-packages
 RUN apt-get -q update && \
