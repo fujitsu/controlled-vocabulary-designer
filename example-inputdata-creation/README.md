@@ -8,7 +8,7 @@ Example of generating editing vocabulary, reference vocabulary and corpus.
 1. Put wiki.txt and tag.csv in src folder. (The examples of wiki.txt and tag.csv are shown near the bottom of this README)
 2. ```$ cd example-inputdata-creation```
 3. ```$ find mountdir -type d -exec chmod o+w {} \;```
-4. ```$ docker-compose build```
+4. ```$ docker-compose build --build-arg HOST_USER_ID=$(id -u)```
 5. ```$ docker-compose run python /bin/bash```
 
 ### Case editing vocabulary and corpus
