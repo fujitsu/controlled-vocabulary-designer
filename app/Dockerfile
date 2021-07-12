@@ -1,6 +1,12 @@
 FROM node:14
 
+ARG PROXY
+ENV HTTPS_PROXY ${PROXY}
+
 WORKDIR /usr/src/app
 
-COPY ./app/launch.sh /tmp
-RUN chmod 755 /tmp/launch.sh
+COPY ./app/app /usr/src/app
+ENV npm config -g set https-proxy ${HTTPS_PROXY}
+RUN npm install
+RUN npm run build
+RUN npm run watch &
