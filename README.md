@@ -134,7 +134,9 @@ You can set Positive and Negative numbers.
     <img src="https://img.shields.io/badge/Flask--white.svg?style=plastic&logo=Flask">
 </div>
 
+# Acknowledgments
+
+This work was supported by Council for Science, Technology and Innovation, “Cross-ministerial Strategic Innovation Promotion Program (SIP), Big-data and AI-enabled Cyberspace Technologies”. (funding agency: NEDO)
+
 # Contact
 labs-cvd-contact@dl.jp.fujitsu.com
-
-
