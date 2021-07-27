@@ -3,7 +3,7 @@
 TEST_OK=OK
 
 echo Sahsyougoi.sh start.
-echo 
+echo
 
 PHASE="ExternalVocabulary"
 echo ${PHASE}
@@ -23,7 +23,7 @@ fi
 
 PHASE="Sansyougoi"
 echo ${PHASE}
-python3 ./${PHASE}.py -c config.json -i ExternalVocabulary.json WordEmbedding2.npy tag.csv -o SansyougoiAll.xlsx SansyougoiTarget.xlsx || TEST_OK=NG
+python3 ./${PHASE}.py -c config.json -i ExternalVocabulary.json WordEmbedding2.npy ../data/tag.csv -o ../data/SansyougoiAll.xlsx ../data/SansyougoiTarget.xlsx || TEST_OK=NG
 if [ "${TEST_OK}" != "OK" ]; then
     echo "${PHASE} Failed"
     exit 1
