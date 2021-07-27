@@ -13,9 +13,7 @@ ENV HTTP_PROXY ${PROXY}
 ENV HTTPS_PROXY ${PROXY}
 
 RUN pip3 install --upgrade pip
-RUN pip3 install --no-cache-dir cython numpy
 RUN pip3 install --no-cache-dir -r requirements.txt
-RUN pip3 install --no-cache-dir pandas --no-build-isolation
 
 COPY ./api /usr/src/app
 

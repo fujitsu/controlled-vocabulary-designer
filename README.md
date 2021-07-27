@@ -17,7 +17,7 @@ The created controlled vocabulary can be exported as RDF file.
 2. Access this URL from your browser.
 
 ```
-http://(hostname):10080/
+http://(hostname):10081/
 ```
 
 # Supported browsers
@@ -71,12 +71,11 @@ Corpus includes set of space-separated terms which is written in one row.
 永続 ボリューム の 上 に 構成 され サービス を 終了 させても データ は 揮発 しない
 ```
 
-## Sample tool
+## Input data creation example
 
-CVD input data generation tool.
-This tool generate editing vocabulary, reference vocabulary and corpus.
+Example of generating editing vocabulary, reference vocabulary and corpus.
 
-[Read More](sampletool/README.md)
+[Read More](example-inputdata-creation/README.md)
 
 
 # URI Prefix
@@ -135,7 +134,9 @@ You can set Positive and Negative numbers.
     <img src="https://img.shields.io/badge/Flask--white.svg?style=plastic&logo=Flask">
 </div>
 
+# Acknowledgments
+
+This work was supported by Council for Science, Technology and Innovation, “Cross-ministerial Strategic Innovation Promotion Program (SIP), Big-data and AI-enabled Cyberspace Technologies”. (funding agency: NEDO)
+
 # Contact
 labs-cvd-contact@dl.jp.fujitsu.com
-
-
