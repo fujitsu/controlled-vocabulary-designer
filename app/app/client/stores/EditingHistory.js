@@ -698,7 +698,7 @@ class EditingHistory {
     let message = '';
     if (target.preferred_label) {
       message =
-          '「標目：' + target.preferred_label + '」の情報を変更しました。\n';
+          '「代表語：' + target.preferred_label + '」の情報を変更しました。\n';
     } else {
       message =
           '「用語：' + target.term + '」の情報を変更しました。\n';
@@ -903,7 +903,7 @@ class EditingHistory {
       delWord = prePrfdLbl;
     }
 
-    message += '\n　標目 : ';
+    message += '\n　代表語 : ';
     if ( (addWord) && (delWord) ) {
       message += '"' + delWord + '"から';
       message += '"' + addWord + '"に変更しました。';
