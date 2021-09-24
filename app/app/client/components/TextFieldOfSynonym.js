@@ -67,7 +67,7 @@ export default
     if (this.props.editingVocabulary.isRelationSynonym(newValue)) {
       const currentTerm = this.props.editingVocabulary.currentNode.term;
       const errorMsg = '下位語テキストボックスに、 \"' + currentTerm +
-                       '\" あるいは \"' + currentTerm + '\" の標目' +
+                       '\" あるいは \"' + currentTerm + '\" の代表語' +
                        'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
                        '同義語テキストボックスには、 \"' + currentTerm +
                        '\" と上下関係を持たないように、¥n' +
@@ -81,7 +81,7 @@ export default
       const preferredLabelLength =
         this.props.editingVocabulary.tmpPreferredLabel.list.length;
       if (preferredLabelLength > 1) {
-        const errorMsg = '標目テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+        const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
         this.openSnackbar(errorMsg);
       }
     }
