@@ -212,35 +212,35 @@ export default class DialogFileSelecter extends React.Component {
                      (errResponse.data.reason == 0)) {
                   errMsg = '同義関係と思われる、用語「' +
                     this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の標目を1つに揃えてください。';
+                    '」の代表語を1つに揃えてください。';
                 } else if ((errResponse.data.phase == 3) &&
                     (errResponse.data.reason == 0)) {
                   errMsg = '用語「' +
                     this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の標目のURIの個数を1つに絞ってください。';
+                    '」の代表語のURIの個数を1つに絞ってください。';
                 } else if ((errResponse.data.phase == 3) &&
                     (errResponse.data.reason == 1)) {
                   errMsg = '用語「' +
                     this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の標目のURIを統一してください。';
+                    '」の代表語のURIを統一してください。';
                 } else if ((errResponse.data.phase == 3) &&
                     (errResponse.data.reason == 2)) {
-                  errMsg = '標目「' +
+                  errMsg = '代表語「' +
                   this.getErrorTerms(errResponse.data.terms, ',') +
-                  '」について、同じ標目のURIが設定されています。標目のURIを修正してください。';
+                  '」について、同じ代表語のURIが設定されています。代表語のURIを修正してください。';
                 } else if ((errResponse.data.phase == 3) &&
                     (errResponse.data.reason == 3)) {
                   errMsg = '用語「' +
                     this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の標目のURIを1つに揃えてください。';
+                    '」の代表語のURIを1つに揃えてください。';
                 } else if ((errResponse.data.phase == 4) &&
                     (errResponse.data.reason == 0)) {
-                  errMsg = '標目「' +
+                  errMsg = '代表語「' +
                     errResponse.data.terms[0] +
-                    '」の上位語の標目が一致するように上位語を修正してください。';
+                    '」の上位語の代表語が一致するように上位語を修正してください。';
                 } else if ((errResponse.data.phase == 4) &&
                     (errResponse.data.reason == 1)) {
-                  errMsg = '標目「' +
+                  errMsg = '代表語「' +
                     this.getErrorTerms(errResponse.data.terms, ',') +
                     '」は、関係性が循環しています。上位語を修正してください。';
                 }
