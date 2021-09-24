@@ -249,21 +249,21 @@ export default
       // Preferred label error /////////////////////////////
       // Preferred label:Multiple Input Error
       case 'multiPreferredLabel':
-        errorMsg = '標目テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+        errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
         break;
       // Preferred label:Invalid input error
       case 'invalidPreferredLabel':
         const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[0];
-        errorMsg = '標目テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
+        errorMsg = '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
                    '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
-                   '標目テキストボックスには、¥n' +
+                   '代表語テキストボックスには、¥n' +
                    '\"' + currentTerm +'\" または同義語の中から選んで記入してください。';
         errorMsg = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
       // Preferred label:Missing error
       case 'needToPreferredLabel':
-        errorMsg = '標目テキストボックスには \"' + currentTerm +
+        errorMsg = '代表語テキストボックスには \"' + currentTerm +
                    '\" または同義語の中から選んで記入してください。';
         break;
 
@@ -271,7 +271,7 @@ export default
       // Synonym:Synonym error registered in the hierarchical relationship
       case 'relationSynonym':
         errorMsg = '下位語テキストボックスに、 \"' + currentTerm +
-                   '\" あるいは \"' + currentTerm + '\" の標目' +
+                   '\" あるいは \"' + currentTerm + '\" の代表語' +
                    'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
                    '同義語テキストボックスには、 \"' + currentTerm +
                    '\" と上下関係を持たないように、¥n' +
@@ -283,11 +283,11 @@ export default
       // URI error /////////////////////////////
       // URI:Duplicate input error
       case 'equalUri':
-        errorMsg = '標目のURIテキストボックスに、¥n' +
-                   '同義関係でない別の標目 \"' + editingVocabulary.equalUriPreferredLabel +
-                   '\" と同じ標目のURIが記入されています。¥n' +
-                   '標目のURIテキストボックスには、¥n' +
-                   '既に登録されている他の標目のURIとは異なる値を記入してください。';
+        errorMsg = '代表語のURIテキストボックスに、¥n' +
+                   '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
+                   '\" と同じ代表語のURIが記入されています。¥n' +
+                   '代表語のURIテキストボックスには、¥n' +
+                   '既に登録されている他の代表語のURIとは異なる値を記入してください。';
         errorMsg = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
@@ -300,9 +300,9 @@ export default
       // Broader term:Invalid input error
       case 'invalidBroaderTerm':
         errorMsg = '上位語テキストボックスに、¥n' +
-                   '\"' + currentTerm + '\" の標目あるいは同義語が記入されています。¥n' +
+                   '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
                    '上位語テキストボックスには、¥n' +
-                   '\"' + currentTerm + '\" の標目と同義語以外の値を記入してください。';
+                   '\"' + currentTerm + '\" の代表語と同義語以外の値を記入してください。';
         errorMsg = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
@@ -311,7 +311,7 @@ export default
         const brdrTrm = editingVocabulary.tmpBroaderTerm.list[0];
         errorMsg = '上位語テキストボックスに \"'+
                    brdrTrm +'\" を記入することで、¥n';
-        errorMsg += '標目 ';
+        errorMsg += '代表語 ';
         editingVocabulary.cycleBroaderTerm.forEach((term) => {
           errorMsg += '\"';
           errorMsg += term;
@@ -326,7 +326,7 @@ export default
           errorMsg += '\", ';
         });
         errorMsg = errorMsg.slice( 0, -2 );
-        errorMsg += ' 以外の標目を持つ用語を記入してください。';
+        errorMsg += ' 以外の代表語を持つ用語を記入してください。';
         errorMsg = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
@@ -510,7 +510,7 @@ export default
             <Grid container spacing={2}>
               <Grid item xs={3}>
                 <Box mt={1}>
-                  標目
+                  代表語
                 </Box>
               </Grid>
               <Grid item xs={7}>
@@ -530,7 +530,7 @@ export default
             <Grid container spacing={2}>
               <Grid item xs={3}>
                 <Box mt={1}>
-                  標目のURI
+                  代表語のURI
                 </Box>
               </Grid>
               <Grid item xs={9}>
