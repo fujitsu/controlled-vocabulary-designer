@@ -81,9 +81,9 @@ export default
           currentTerm = this.props.editingVocabulary.tmpPreferredLabel.list[0];
         }
         const errorMsg = '上位語テキストボックスに、¥n' +
-                       '\"' + currentTerm + '\" の標目あるいは同義語が記入されています。¥n' +
+                       '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
                        '上位語テキストボックスには、¥n' +
-                       '\"' + currentTerm + '\" の標目と同義語以外の値を記入してください。';
+                       '\"' + currentTerm + '\" の代表語と同義語以外の値を記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
@@ -95,7 +95,7 @@ export default
 
           let errorMsg = '上位語テキストボックスに \"'+
                          nextBroaderTerm +'\" を記入することで、¥n';
-          errorMsg += '標目 ';
+          errorMsg += '代表語 ';
           cycleBroaderTerm.forEach((term) => {
             errorMsg += '\"';
             errorMsg += term;
@@ -110,7 +110,7 @@ export default
             errorMsg += '\", ';
           });
           errorMsg = errorMsg.slice( 0, -2 );
-          errorMsg += ' 以外の標目を持つ用語を記入してください。';
+          errorMsg += ' 以外の代表語を持つ用語を記入してください。';
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
