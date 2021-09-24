@@ -460,12 +460,12 @@ def _make_bulk_data_reference_vocabulary(excel_data, r_extension):
     for index, item in df.iterrows():
         insert_data = {}
         insert_data['term'] = item['用語名']
-        if '標目' in item:
+        if '代表語' in item:
             insert_data['preferred_label'] =\
-                item['標目'] if pd.notnull(item['標目']) else None
-        if '標目のURI' in item:
+                item['代表語'] if pd.notnull(item['代表語']) else None
+        if '代表語のURI' in item:
             insert_data['uri'] =\
-                item['標目のURI'] if pd.notnull(item['標目のURI']) else None
+                item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
         if '上位語' in item:
             insert_data['broader_term'] =\
                 item['上位語'] if pd.notnull(item['上位語']) else None
@@ -490,12 +490,12 @@ def _make_bulk_data_editing_vocabulary(data_frame):
     for index, item in data_frame.iterrows():
         insert_data = {}
         insert_data['term'] = item['用語名']
-        if '標目' in item:
+        if '代表語' in item:
             insert_data['preferred_label'] =\
-                item['標目'] if pd.notnull(item['標目']) else None
-        if '標目のURI' in item:
+                item['代表語'] if pd.notnull(item['代表語']) else None
+        if '代表語のURI' in item:
             insert_data['uri'] =\
-                item['標目のURI'] if pd.notnull(item['標目のURI']) else None
+                item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
         if '上位語' in item:
             insert_data['broader_term'] =\
                 item['上位語'] if pd.notnull(item['上位語']) else None
@@ -660,13 +660,13 @@ def _read_file_strage(file_strage, r_extension):
 
 # check column
 def _check_columns(data_frame):
-    # columns = '用語名 標目 標目のURI 上位語 同義語候補 上位語候補 品詞 x座標値 y座標値 色1 色2'
+    # columns = '用語名 代表語 代表語のURI 上位語 同義語候補 上位語候補 品詞 x座標値 y座標値 色1 色2'
     # ins_f = lambda x:columns not in x
     for index, item in data_frame.iterrows():
         # if any(map(ins_f, item)):
         if ('用語名' not in item
-         or '標目' not in item
-         or '標目のURI' not in item
+         or '代表語' not in item
+         or '代表語のURI' not in item
          or '上位語' not in item
          or '同義語候補' not in item
          or '上位語候補' not in item
@@ -764,14 +764,14 @@ def _check_synonymous_relationship(df):
 
     # 1-1 Extraction of synonymous relationship
     # sort
-    payload_s = df.sort_values('標目')
+    payload_s = df.sort_values('代表語')
 
     # Only the preferred labels to be a Key is picked up and a list is created.
     for index, item in payload_s.iterrows():
-        wk_preferred = item['標目'] if pd.notnull(item['標目']) else None
+        wk_preferred = item['代表語'] if pd.notnull(item['代表語']) else None
         if preferred_group != wk_preferred:
             preferred_group = wk_preferred
-            group_uri = item['標目のURI'] if pd.notnull(item['標目のURI']) else None
+            group_uri = item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
         # Recursive call
         looplist = []
         looplist.append(wk_preferred)
@@ -1022,11 +1022,11 @@ def _chk_preferred_group(payload_s, preferredlist, looplist, key_preferred):
     name_p2 = payload_s.query("用語名 == \""+key_preferred.replace("'", "\'")+"\"")
     ret_flg = 1
     for index2, item2 in name_p2.iterrows():
-        if str(item2['用語名']) == str(item2['標目']):
+        if str(item2['用語名']) == str(item2['代表語']):
             _add_preferred_list(preferredlist, item2)
             return 0
         else:
-            wk_preferred = item2['標目'] if pd.notnull(item2['標目']) else None
+            wk_preferred = item2['代表語'] if pd.notnull(item2['代表語']) else None
             # 循環チェック
             for loopitem in looplist:
                 if loopitem == wk_preferred:
@@ -1054,10 +1054,10 @@ def _chk_preferred_list_group(payload_s,
         return 0
     if len(payload_s) <= 1:
         return 0
-    name_p2 = payload_s.query("標目 == \""+key_preferred.replace("'", "\'")+"\"")
+    name_p2 = payload_s.query("代表語 == \""+key_preferred.replace("'", "\'")+"\"")
     for index2, item2 in name_p2.iterrows():
         _add_list(paylist, item2, preferred_group, group_uri)
-        if str(item2['用語名']) != str(item2['標目']):
+        if str(item2['用語名']) != str(item2['代表語']):
             wk_term = item2['用語名'] if pd.notnull(item2['用語名']) else None
             # Loop check
             for loopitem in looplist:
@@ -1080,16 +1080,16 @@ def _add_list(paylist, item, preferred_group, group_uri):
     # Duplicate check
     for payitem in paylist:
         if payitem['term'] ==\
-                item['用語名'] and payitem['preferred_label'] == item['標目']:
+                item['用語名'] and payitem['preferred_label'] == item['代表語']:
             return False
 
     insert_data = {}
     insert_data['term'] =\
         item['用語名'] if pd.notnull(item['用語名']) else None
     insert_data['preferred_label'] =\
-        item['標目'] if pd.notnull(item['標目']) else None
+        item['代表語'] if pd.notnull(item['代表語']) else None
     insert_data['uri'] =\
-        item['標目のURI'] if pd.notnull(item['標目のURI']) else None
+        item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
     insert_data['broader_term'] =\
         item['上位語'] if pd.notnull(item['上位語']) else None
 
@@ -1105,16 +1105,16 @@ def _add_preferred_list(paylist, item):
 
     # Duplicate check
     for payitem in paylist:
-        if payitem['preferred_label'] == item['標目']:
+        if payitem['preferred_label'] == item['代表語']:
             return False
 
     insert_data = {}
     insert_data['term'] =\
         item['用語名'] if pd.notnull(item['用語名']) else None
     insert_data['preferred_label'] =\
-        item['標目'] if pd.notnull(item['標目']) else None
+        item['代表語'] if pd.notnull(item['代表語']) else None
     insert_data['uri'] =\
-        item['標目のURI'] if pd.notnull(item['標目のURI']) else None
+        item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
     insert_data['broader_term'] =\
         item['上位語'] if pd.notnull(item['上位語']) else None
     paylist.append(insert_data)
@@ -1275,8 +1275,8 @@ def _download_file_ev_serialize(pl_simple, p_format):
     df_org.drop(columns=['id', 'hidden'], inplace=True)
     # header change
     df_org = df_org.rename(columns={'term': '用語名',
-                                    'preferred_label': '標目',
-                                    'uri': '標目のURI',
+                                    'preferred_label': '代表語',
+                                    'uri': '代表語のURI',
                                     'broader_term': '上位語',
                                     'broader_term_candidate': '上位語候補',
                                     'synonym_candidate': '同義語候補',
