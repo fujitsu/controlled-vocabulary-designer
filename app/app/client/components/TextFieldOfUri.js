@@ -126,12 +126,12 @@ export default
     const prfrrdLbl = this.props.editingVocabulary.tmpPreferredLabel.list[0];
 
     if (this.props.editingVocabulary.isInvalidUri(uri, prfrrdLbl)) {
-      let errorMsg = '標目のURIテキストボックスに、¥n' +
-                     '同義関係でない別の標目 \"' +
+      let errorMsg = '代表語のURIテキストボックスに、¥n' +
+                     '同義関係でない別の代表語 \"' +
                      this.props.editingVocabulary.equalUriPreferredLabel +
-                     '\" と同じ標目のURIが記入されています。¥n' +
-                     '標目のURIテキストボックスには、¥n' +
-                     '既に登録されている他の標目のURIとは異なる値を記入してください。';
+                     '\" と同じ代表語のURIが記入されています。¥n' +
+                     '代表語のURIテキストボックスには、¥n' +
+                     '既に登録されている他の代表語のURIとは異なる値を記入してください。';
       errorMsg = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.setState({modeChange: true});
