@@ -41,7 +41,7 @@ def sansyougoi(relations_file, vec_file, input_file):
 
     # ######### File output (all wordnet terms) ##########
     # xlsx
-    header = ["用語名", "標目", "標目のURI", "上位語", "品詞", "x座標値", "y座標値"]
+    header = ["用語名", "代表語", "代表語のURI", "上位語", "品詞", "x座標値", "y座標値"]
     df1 = pd.DataFrame(output_all, columns=header)
     # df1.to_excel(output_file_xlsx_all, index=False)
 

@@ -73,19 +73,19 @@ paths:
             terms : Returns terms in which the error occurred.
             reason : Returns the check error reason code.
             If phase is 2 and reason is 0, the client will display
-            "同義関係と思われる、用語a,b,cの標目を1つに揃えてください".
+            "同義関係と思われる、用語a,b,cの代表語を1つに揃えてください".
             If phase is 3 and reason is 0, the client will display
-            "用語a,b,cの標目のURIの個数を1つに絞ってください".
+            "用語a,b,cの代表語のURIの個数を1つに絞ってください".
             If phase is 3 and reason is 1, the client will display
-            "用語a,b,cの標目のURIを統一してください".
+            "用語a,b,cの代表語のURIを統一してください".
             If phase is 3 and reason is 2, the client will display
-            "標目a,b,cについて、同じ標目のURIが設定されています。標目のURIを修正してください".
+            "代表語a,b,cについて、同じ代表語のURIが設定されています。代表語のURIを修正してください".
             If phase is 3 and reason is 3, the client will display
-            "用語a,b,cの標目のURIを1つに揃えてください".
+            "用語a,b,cの代表語のURIを1つに揃えてください".
             If phase is 4 and reason is 0, the client will display
-            "標目aの上位語の標目が一致するように上位語を修正してください".
+            "代表語aの上位語の代表語が一致するように上位語を修正してください".
             If phase is 4 and reason is 1, the client will display
-            "標目a,b,cは、関係性が循環しています。上位語を修正してください。".
+            "代表語a,b,cは、関係性が循環しています。上位語を修正してください。".
           content:
             application/json:
               schema:
