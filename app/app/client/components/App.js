@@ -199,6 +199,11 @@ const useStyles = (theme) => ({
     marginLeft: '45px',
   },
 
+  'selectTerm': {
+    width: '100%',
+    textAlign: 'center',
+  },
+  
 });
 
 /**
