@@ -1158,7 +1158,6 @@ class EditingVocabulary {
 
     // Center the selected vocabulary in the visualization screen vocabulary tab and update each NodeStyle
     this.fitToCurrent();
-    this.scrollToCurrent();
   }
 
   /**
@@ -1588,27 +1587,6 @@ class EditingVocabulary {
   }
 
   // //////////////////////////////////////////////////////
-
-  /**
-   * Ref for term list
-   * @type {Object}
-   */
-  sortedNodeListRef = React.createRef();
-
-  /**
-   * Scroll to the selected term in the term list
-   * @type {Number}
-   */
-  @action scrollToCurrent() {
-    const index = this.sortedNodeList.findIndex(
-        (node) => node.term === this.currentNode.term,
-    );
-    if (index != -1) {
-      // console.log('[scrollToCurrent] term: ' +
-      //   this.currentNode.term + ', index: ' + index);
-      this.sortedNodeListRef.current.scrollToItem(index, 'center');
-    }
-  }
 
   // node display MAX number
   DISP_NODE_MAX = 100;
