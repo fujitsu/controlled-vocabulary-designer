@@ -441,7 +441,6 @@ export default
     this.cy.on('click', 'node', (event) => {
       const target = event.target.data();
       this.props.editingVocabulary.setCurrentNodeByTerm(target.term);
-      this.props.editingVocabulary.scrollToCurrent();
     });
 
     this.cy.on('pan', (event) => {
