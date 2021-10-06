@@ -27,11 +27,11 @@ def filt(domain_word_file, domain_text_preprocessed_file, vec):
 
     # Returns only field terms if domain _ word _ file exists in the same folder
     if os.path.exists(domain_word_file) is True:
-        # Read and normalize tag data (terms for the field)
+        # Read tag data (terms for the field)
         tag_file = pd.read_csv(domain_word_file, header=None)
         tag = list(tag_file[0])
-        tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalize term strings to match case
-        tag = list(set(tag)) # normalize term strings and reduce term duplication by using lowercase letters
+        tag = list(set(tag)) # reduce term duplication by using lowercase letters
+
         return tag
 
     # If domain _ word _ file is not present and domain _ text _ preprocessed _ file is present, returns all text data terms in the field
