@@ -122,9 +122,9 @@ const useStyles = (theme) => ({
   },
 
   'visualizationVocabularyHead': {
-    width: '50%',
-    position: 'absolute',
-    zIndex: 2,
+    width: '100%',
+    margin: 0,
+    backgroundColor: 'rgb(227, 227, 227)',
   },
 
   'fileSelecter': {

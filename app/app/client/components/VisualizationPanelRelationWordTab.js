@@ -941,7 +941,7 @@ export default
           spacing={2}
           className={this.props.classes.visualizationVocabularyHead}
         >
-          <Grid item xs={8}>
+          <Grid item xs={9}>
             <Box>
               <Search
                 classes={this.props.classes}
@@ -949,7 +949,7 @@ export default
               />
             </Box>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={3} >
             <Box>
               <FormControl className={this.props.classes.fileSelecter}>
                 <Select
