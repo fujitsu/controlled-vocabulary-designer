@@ -10,7 +10,7 @@ import Box from '@material-ui/core/Box';
 import {observer} from 'mobx-react';
 
 import ColorChartCheckBoxes from './ColorChartCheckBoxes';
-import TextFieldOfTerm from './TextFieldOfTerm';
+import SelectOfTerm from './SelectOfTerm';
 import TextFieldOfPos from './TextFieldOfPos';
 import TextFieldOfPosition from './TextFieldOfPosition';
 import CheckboxPartOfSpeechHiddenLabels
@@ -60,9 +60,9 @@ export default
           </Grid>
           <Grid item xs={9}>
             <Box>
-              <TextFieldOfTerm
+              <SelectOfTerm
                 classes={this.props.classes}
-                text={this.props.editingVocabulary.currentNode.term}
+                editingVocabulary={this.props.editingVocabulary}
               />
             </Box>
           </Grid>
