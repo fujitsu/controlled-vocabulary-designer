@@ -11,7 +11,6 @@ import Box from '@material-ui/core/Box';
 import ControlPanel from './ControlPanel';
 import VisualizationPanel from './VisualizationPanel';
 import EditPanel from './EditPanel';
-import TermsIndexPanel from './TermsIndexPanel';
 import DialogApiError from './DialogApiError';
 
 import editingVocabularyStore from '../stores/EditingVocabulary';
@@ -123,7 +122,7 @@ const useStyles = (theme) => ({
   },
 
   'visualizationVocabularyHead': {
-    width: '50%',
+    width: '64%',
     position: 'absolute',
     zIndex: 2,
   },
@@ -136,6 +135,7 @@ const useStyles = (theme) => ({
     paddingBottom: '0px',
     paddingTop: '0px',
     backgroundColor: 'white',
+    float: 'right',
   },
 
   'tabs': {
@@ -199,6 +199,11 @@ const useStyles = (theme) => ({
     marginLeft: '45px',
   },
 
+  'selectTerm': {
+    width: '100%',
+    textAlign: 'center',
+  },
+  
 });
 
 /**
@@ -234,14 +239,9 @@ class App extends React.Component {
           </Grid>
         </Grid>
         <Grid container spacing={3}>
-          <Grid item xs={6}>
+          <Grid item xs={8}>
             <Box border={1} className={this.props.classes.mainPanel}>
               <VisualizationPanel classes={this.props.classes}/>
-            </Box>
-          </Grid>
-          <Grid item xs={2}>
-            <Box border={1} className={this.props.classes.mainPanel}>
-              <TermsIndexPanel classes={this.props.classes}/>
             </Box>
           </Grid>
           <Grid item xs={4}>

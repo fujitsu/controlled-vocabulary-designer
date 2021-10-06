@@ -59,7 +59,6 @@ export default class Search extends React.Component {
           if (result) {
             editingVocabulary.setCurrentNodeByTerm(
                 result.data.term, '', null, true);
-            editingVocabulary.scrollToCurrent();
           } else {
             this.handleClickOpen(this.state.value);
           }
@@ -72,7 +71,6 @@ export default class Search extends React.Component {
           if (result) {
             editingVocabulary.setCurrentNodeByTerm(
                 result.term, '', null, true);
-            editingVocabulary.scrollToCurrent();
           } else {
             this.handleClickOpen(this.state.value);
           }
