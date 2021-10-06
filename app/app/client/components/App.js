@@ -122,9 +122,9 @@ const useStyles = (theme) => ({
   },
 
   'visualizationVocabularyHead': {
-    width: '100%',
-    margin: 0,
-    backgroundColor: 'rgb(227, 227, 227)',
+    width: '64%',
+    position: 'absolute',
+    zIndex: 2,
   },
 
   'fileSelecter': {
@@ -135,6 +135,7 @@ const useStyles = (theme) => ({
     paddingBottom: '0px',
     paddingTop: '0px',
     backgroundColor: 'white',
+    float: 'right',
   },
 
   'tabs': {
