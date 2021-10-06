@@ -27,6 +27,7 @@ def synonymous(domain_word_file, domain_text_preprocessed_file, domain_added_mod
         # Read and normalize tag data (terms for the field)
         tag_file = pd.read_csv(domain_word_file, header=None)
         tag = list(tag_file[0])
+        tag_no_normalized = list(set(tag))
         tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalize term strings to match case
         tag = list(set(tag)) # normalized and lowercase to remove term duplication
         target_words = tag
@@ -53,12 +54,33 @@ def synonymous(domain_word_file, domain_text_preprocessed_file, domain_added_mod
         target_words = model.wv.index2word
 
     # For all the terms that are the target of synonym extraction, up to the n-most similarity learned in the model is extracted.
-    syn = {} # {key: value} = {term name: synonym}
+    syn_normalized = {} # {key: value} = {term name: synonym}
     model = KeyedVectors.load(domain_added_model_file)
     for word in target_words:
         results = model.most_similar(positive=word, topn=syn_limit)
         results = list(filter(lambda x: x[1] >= syn_threshold, results))
-        syn[word] = [x[0] for x in results]
+        syn_normalized[word] = [x[0] for x in results]
+
+    con_sim = {} # {key：value} = {(term, term):cos sim}
+    for w1 in tag_no_normalized:
+        for w2 in tag_no_normalized:
+            try:
+                con_sim[w1, w2] = model.similarity(unicodedata.normalize("NFKC", w1).lower(), unicodedata.normalize("NFKC", w2).lower())
+            except KeyError:
+                continue
+
+    # sort by values
+    con_sim_sorted = sorted(con_sim.items(), key=lambda x:x[1], reverse=True)
+
+    syn = {} # {key: value} = {term name: synonym}
+    for word in tag_no_normalized:
+        res = []
+        for comb in con_sim_sorted:
+            if comb[0][0] == word:
+                if len(res) <= int(syn_limit * 0.5):
+                    res.append(comb[0][1])
+        res.remove(word)
+        syn[word] = res + syn_normalized[unicodedata.normalize("NFKC", word).lower()]
 
     return syn
 
