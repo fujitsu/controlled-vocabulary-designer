@@ -36,8 +36,7 @@ def wordnet():
         # syn_word[synset] = synset.lemma_names("jpn")
         # + synset.lemma_names("eng")
         # normalize term strings to match case
-        syn_word[synset] = [(unicodedata.normalize("NFKC", char)).lower()
-                            for char in synset.lemma_names("jpn")]
+        syn_word[synset] = [char for char in synset.lemma_names("jpn")]
         syn_pos[synset] = "名詞"
     print(datetime.datetime.now(), "---all_synsets syn_word End", location())
 
