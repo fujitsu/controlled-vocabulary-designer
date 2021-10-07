@@ -59,7 +59,6 @@ def sansyougoi(relations_file, vec_file, input_file):
     tag_file = pd.read_csv(input_file, header=None)
     tag = list(tag_file[0])
     # normalize term strings to match case
-    tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalized and lowercase to remove term duplication
     tag = list(set(tag))
 
     # If there is a term name that is the same as the term name of the tag, extract the preferred label
