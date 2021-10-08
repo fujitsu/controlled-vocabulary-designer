@@ -13,8 +13,6 @@ import ColorChartCheckBoxes from './ColorChartCheckBoxes';
 import SelectOfTerm from './SelectOfTerm';
 import TextFieldOfPos from './TextFieldOfPos';
 import TextFieldOfPosition from './TextFieldOfPosition';
-import CheckboxPartOfSpeechHiddenLabels
-  from './CheckboxPartOfSpeechHiddenLabels';
 // import CheckboxTermHiddenLabels from './CheckboxTermHiddenLabels';
 import DialogApiError from './DialogApiError';
 
@@ -148,24 +146,6 @@ export default
         </Grid>
         */}
 
-        <Grid container spacing={2}>
-          <Grid item xs={3}>
-            <Box mt={1}>
-              フィルター
-            </Box>
-          </Grid>
-          <Grid item xs={9}>
-            <Box border={1} p={1}>
-              <CheckboxPartOfSpeechHiddenLabels
-                checkList={
-                  this.props.editingVocabulary.tmpPartOfSpeechCheckList
-                }
-                check={(e) => this.props.editingVocabulary.checkPartOfSpeech(e)}
-                up={(e) => this.props.editingVocabulary.upPartOfSpeech(e)}
-              />
-            </Box>
-          </Grid>
-        </Grid>
         <DialogApiError
           open={this.props.editingVocabulary.apiErrorDialog.open}
           classes={this.props.classes}
