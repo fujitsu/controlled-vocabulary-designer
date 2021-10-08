@@ -160,9 +160,6 @@ class EditingHistory {
       case 'hidden':
         this.execHidden(type, history);
         break;
-      case 'part_of_speech':
-        this.execPosFilter(type, history);
-        break;
       case 'vocabulary':
         this.execVocabulary(type, history);
         break;
@@ -253,27 +250,6 @@ class EditingHistory {
     } else {
       EditingVocabulary.changeHidden(true);
     }
-  }
-
-  /**
-   * Part of speech filter undo/redo execution
-   * @param  {string} type 'undo' or 'redo' string.
-   * @param  {object} history - information of history
-   */
-  execPosFilter(type, history) {
-    const EditingVocabulary = editingVocabularyStore;
-
-    let req;
-    if (this.STR_UNDO === type) {
-      req = history.previous;
-    } else { // redo
-      req = history.following;
-    }
-
-    EditingVocabulary.deepCopyPosObj(
-        EditingVocabulary.tmpPartOfSpeechCheckList, req,
-    );
-    EditingVocabulary.upPartOfSpeech(true);
   }
 
   /**
@@ -512,9 +488,6 @@ class EditingHistory {
       case 'hidden':
         result = this.makeHiddenMessage(type, history);
         break;
-      case 'part_of_speech':
-        result = this.makePosMessage(type, history);
-        break;
       case 'vocabulary':
         result = this.makeVocabularyMessage(type, history);
         break;
@@ -591,42 +564,6 @@ class EditingHistory {
         this.convHiddenStr(history.following) +
         '"';
     }
-
-    return message;
-  }
-
-  /**
-   * Create part of speech undo/redo message
-   * @param  {string} type 'undo' or 'redo' string.
-   * @param  {object} history - information of history
-   * @return {string} - message
-   */
-  makePosMessage(type, history) {
-    let message = '「品詞フィルター」の情報を変更しました。';
-
-    Object.keys(history.previous).forEach( (key) => {
-      if (history.previous[key].value !== history.following[key].value) {
-        if (this.STR_UNDO === type) {
-          message +=
-            '\n　' +
-            history.previous[key].name +
-            ' : "' +
-            this.convPosStr(history.following[key].value) +
-            '"から"' +
-            this.convPosStr(history.previous[key].value) +
-            '"';
-        } else { // redo
-          message +=
-            '\n　' +
-            history.previous[key].name +
-            ' : "' +
-            this.convPosStr(history.previous[key].value) +
-            '"から"' +
-            this.convPosStr(history.following[key].value) +
-            '"';
-        }
-      }
-    });
 
     return message;
   }

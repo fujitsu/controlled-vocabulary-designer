@@ -216,7 +216,6 @@ class App extends React.Component {
    * Get db data
    */
   componentDidMount() {
-    editingVocabularyStore.getPartOfSpeechFilter();
     editingVocabularyStore.getReferenceVocabularyDataFromDB('1');
     editingVocabularyStore.getReferenceVocabularyDataFromDB('2');
     editingVocabularyStore.getReferenceVocabularyDataFromDB('3');
