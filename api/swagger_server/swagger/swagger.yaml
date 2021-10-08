@@ -397,53 +397,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-swagger-router-controller: swagger_server.controllers.example_controller
       x-openapi-router-controller: swagger_server.controllers.example_controller
-  /filter:
-    get:
-      tags:
-      - filter
-      summary: Get part of speech filter data.
-      operationId: get_filter_data
-      responses:
-        "200":
-          description: Filter Data Get Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PosFilter'
-        "400":
-          description: "Filter Data Get Failed. \nex. Database Connection Error.\n"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-swagger-router-controller: swagger_server.controllers.filter_controller
-      x-openapi-router-controller: swagger_server.controllers.filter_controller
-    post:
-      tags:
-      - filter
-      summary: Post part of speech filter data.
-      operationId: post_filter_data
-      requestBody:
-        description: Post part of speech filter data.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PosFilter'
-      responses:
-        "200":
-          description: Filter Data Get Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        "400":
-          description: "Filter Data Post Failed. \nex. Database Connection Error.\n"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-swagger-router-controller: swagger_server.controllers.filter_controller
-      x-openapi-router-controller: swagger_server.controllers.filter_controller
 components:
   schemas:
     Upload:
@@ -624,28 +577,3 @@ components:
             type: string
         reason:
           type: integer
-    PosFilter:
-      type: object
-      properties:
-        noun:
-          type: boolean
-        verb:
-          type: boolean
-        adjective:
-          type: boolean
-        adverb:
-          type: boolean
-        adnominal:
-          type: boolean
-        interjection:
-          type: boolean
-        other:
-          type: boolean
-      example:
-        adjective: true
-        other: true
-        adnominal: true
-        interjection: true
-        verb: true
-        noun: true
-        adverb: true
