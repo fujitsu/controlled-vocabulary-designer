@@ -129,16 +129,6 @@ export default
       const eles = cy.$id(node.data.id);
       eles.addClass(node.data.relationTermColor);
 
-      // Hidden filter
-      if (node.data.hidden) {
-        eles.addClass('displayNone');
-      }
-
-      // Part of speech filter
-      if (this.props.editingVocabulary.isFilterNode(node.data.part_of_speech)) {
-        eles.addClass('displayNone');
-      }
-
       if (node.data.term === this.props.editingVocabulary.currentNode.term) {
         eles.addClass('selected');
         eles.addClass('showText');
@@ -809,19 +799,6 @@ export default
   render() {
     const currentNode = this.props.editingVocabulary.currentNode;
     /* eslint-disable no-unused-vars */
-    // For part of speech filter update monitoring
-    const Noun = this.props.editingVocabulary.partOfSpeechCheckList.Noun.value;
-    const Verb = this.props.editingVocabulary.partOfSpeechCheckList.Verb.value;
-    const Adjective =
-        this.props.editingVocabulary.partOfSpeechCheckList.Adjective.value;
-    const Adverb =
-        this.props.editingVocabulary.partOfSpeechCheckList.Adverb.value;
-    const Adnominal =
-        this.props.editingVocabulary.partOfSpeechCheckList.Adnominal.value;
-    const Interjection =
-        this.props.editingVocabulary.partOfSpeechCheckList.Interjection.value;
-    const Other =
-        this.props.editingVocabulary.partOfSpeechCheckList.Other.value;
     const color = currentNode.color1;
     /* eslint-enable no-unused-vars */
 
