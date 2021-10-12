@@ -11,7 +11,6 @@ import {observer} from 'mobx-react';
 
 import ColorChartCheckBoxes from './ColorChartCheckBoxes';
 import SelectOfTerm from './SelectOfTerm';
-import TextFieldOfPos from './TextFieldOfPos';
 import TextFieldOfPosition from './TextFieldOfPosition';
 // import CheckboxTermHiddenLabels from './CheckboxTermHiddenLabels';
 import DialogApiError from './DialogApiError';
@@ -61,22 +60,6 @@ export default
               <SelectOfTerm
                 classes={this.props.classes}
                 editingVocabulary={this.props.editingVocabulary}
-              />
-            </Box>
-          </Grid>
-        </Grid>
-
-        <Grid container spacing={2}>
-          <Grid item xs={3}>
-            <Box mt={1}>
-              品詞
-            </Box>
-          </Grid>
-          <Grid item xs={9}>
-            <Box>
-              <TextFieldOfPos
-                classes={this.props.classes}
-                text={this.props.editingVocabulary.currentNode.part_of_speech}
               />
             </Box>
           </Grid>
