@@ -1284,26 +1284,8 @@ class EditingVocabulary {
         default: break;
       }
 
-      // When the homotopic ratio is 0, only the editing vocabulary is displayed. When the homotopic ratio is 100, only the reference vocabulary is displayed. The middle is a composite display.
-      if (this.editPanelPosTrigger == 0) {
-        targetData = editingVocabulary
-      } else if(this.editPanelPosTrigger >= 100) {
-        targetData = referenceVocabulary
-      } else {
-        // Add only terms that are not in the editing vocabulary
-        const margeData = [];
-        referenceVocabulary.forEach((merge) => {
-          const find = editingVocabulary.find((data) => data.term === merge.term);
-          if (!find) {
-            margeData.push(merge);
-          }
-        });
-
-        targetData = [
-          ...editingVocabulary,
-          ...margeData,
-        ];
-      }
+      //  only the editing vocabulary is displayed. 
+      targetData = editingVocabulary
     } else {
       targetData = this.getTargetFileData(this.selectedFile.id);
     }
@@ -1378,17 +1360,11 @@ class EditingVocabulary {
     this.tmpDataClear();
   }
 
-  // Slider value of homotopic in the visualization screen
-  // (edit operation tab render panel re-render trigger)
-  @observable editPanelPosTrigger = 0;
-
   /**
    * Edit operation tab map panel get coordinates for display
    * @return {object} - edit operation tab coordinates panel display coordinates
    */
   getCurrentNodePosition() {
-    // t (0 <= t <= 1)
-    const t = this.editPanelPosTrigger / 100;
     const editingVocabFile = this.editingVocabulary;
     const currentRefFile = this.getTargetFileData(this.homotopicFile.id);
     let currentPos = {
@@ -1423,13 +1399,9 @@ class EditingVocabulary {
       }
     }
 
-    // ((1 - t) * vec0) + (t * vec1)
-    if (edit && refere) {
-      // Calculates line coordinates for common editing and reference vocabulary
-      currentPos.position_x =
-         ((1 - t) * edit.position_x) + (t * posXMultipliedByMag);
-      currentPos.position_y =
-        ((1 - t) * edit.position_y) + (t * posYMultipliedByMag);
+    if (edit && refere) {;
+      currentPos.position_x = edit.position_x;
+      currentPos.position_y = edit.position_y;
 
       selectedPosX = edit.position_x;
       selectedPosY = edit.position_y;
@@ -1438,58 +1410,29 @@ class EditingVocabulary {
         selectedPosY = refere.position_y;
       }
 
-      // Hides the coordinate values in the edit operations panel when the slider value is 0 or 100 for the coordinate values (0, 0)
-      if (this.editPanelPosTrigger === 0 &&
-      !(selectedPosX == 0 &&
-      selectedPosY == 0) &&
+      // Hides the coordinate values in the edit operations panel when for the coordinate values (0, 0)
+      if (!(selectedPosX == 0 && selectedPosY == 0) &&
         (currentPos.position_x === 0 && currentPos.position_y === 0)) {
         selectedPosX = edit.position_x;
         selectedPosY = edit.position_y;
         currentPos = null;
-      } else if (this.editPanelPosTrigger === 100 &&
-      !(refere.position_x == 0 &&
-      refere.position_y == 0) &&
-        (currentPos.position_x === 0 && currentPos.position_y === 0)) {
-        selectedPosX = refere.position_x;
-        selectedPosY = refere.position_y;
-        currentPos = null;
       }
     } else if (edit) {
-      // For terms in editing vocabulary only 
-      currentPos.position_x =
-         ((1 - t) * edit.position_x) + (t * 0);
-      currentPos.position_y =
-        ((1 - t) * edit.position_y) + (t * 0);
+      currentPos.position_x = edit.position_x;
+      currentPos.position_y = edit.position_y;
 
       selectedPosX = edit.position_x;
       selectedPosY = edit.position_y;
 
-      // Hides the coordinate value of the edit operation panel when the slider value is 100 in the coordinate value (0, 0).
-      if (this.editPanelPosTrigger === 100 ||
-        !(edit.position_x == 0 &&
-         edit.position_y == 0) &&
-        (currentPos.position_x === 0 && currentPos.position_y === 0) &&
-        this.editPanelPosTrigger === 100) {
-        currentPos = null;
-      }
     } else if (refere) {
       // For terms in reference vocabulary only
-      currentPos.position_x =
-         ((1 - t) * 0) + (t * posXMultipliedByMag);
-      currentPos.position_y =
-        ((1 - t) * 0) + (t * posYMultipliedByMag);
+      currentPos.position_x = 0;
+      currentPos.position_y = 0;
 
       selectedPosX = refere.position_x;
       selectedPosY = refere.position_y;
 
-      // Hide the coordinate values in the Edit Operation panel when the slider value is 0 at the coordinate values (0, 0)
-      if (this.editPanelPosTrigger === 0 ||
-         !(refere.position_x == 0 &&
-         refere.position_y == 0) &&
-        (currentPos.position_x === 0 && currentPos.position_y === 0) &&
-        this.editPanelPosTrigger === 0) {
-        currentPos = null;
-      }
+      currentPos = null;
     }
 
     if (currentPos) {
@@ -1651,12 +1594,6 @@ class EditingVocabulary {
   }
 
   /**
-   * Homotopic slider adjustment value on the visualization screen related terms tab
-   * @type {Number}
-   */
-  homotopicValue = 0;
-
-  /**
    * Create nodedata for related terms tab
    * @param {object} data editing or reference vocabulary
    * @param {object} refer reference vocabulary
@@ -1671,7 +1608,7 @@ class EditingVocabulary {
     const randomId =
       Math.floor(Math.random() * Math.floor(1000000000000000));
     const position =
-      this.calcPositionValueForHomotopic(data, refer, this.homotopicValue);
+      this.calcPositionValueForHomotopic(data, refer);
 
     return {
       data: {
@@ -1701,32 +1638,12 @@ class EditingVocabulary {
    * Related terms tab coordinate value calculation
    * @param  {object} relationTerm - editing vocabulary data or reference vocabulary data
    * @param  {object} refer - reference vocabulary data with the same term as relationTerm
-   * @param  {number} homotopic - homotopic slide bar adjustment value
    * @return {object} - related term coordinate value
    */
-  calcPositionValueForHomotopic(relationTerm, refer, homotopic) {
-    // (0 <= t <= 1)
-    const t = homotopic / 100;
+  calcPositionValueForHomotopic(relationTerm, refer) {
     const position = {x: null, y: null};
     const editingVocabFile = this.editingVocabulary;
     const magForRef = config.magnification[0].reference;
-
-    let posXMultipliedByMag;
-    let posYMultipliedByMag;
-
-    if (refer) {
-      posXMultipliedByMag = refer.position_x;
-      posYMultipliedByMag = refer.position_y;
-
-      // Set the magnification of the reference vocabulary
-      if (magForRef > 0) {
-        posXMultipliedByMag *= magForRef;
-        posYMultipliedByMag *= magForRef;
-      } else if (magForRef < 0) {
-        posXMultipliedByMag /= magForRef * -1;
-        posYMultipliedByMag /= magForRef * -1;
-      }
-    }
 
     const edit = editingVocabFile.find(
         (edit) => relationTerm.term === edit.term);
@@ -1734,21 +1651,21 @@ class EditingVocabulary {
     if (edit && refer) {
       // Calculates line coordinates for common editing and reference terms
       position.x =
-      this.calcPositionByHomotopic(edit.position_x, posXMultipliedByMag, t);
+      this.calcPositionByHomotopic(edit.position_x);
       position.y =
-      this.calcPositionByHomotopic(edit.position_y, posYMultipliedByMag, t);
+      this.calcPositionByHomotopic(edit.position_y);
     } else if (edit) {
       // For terms in editing vocabulary only
       position.x =
-        this.calcPositionByHomotopic(edit.position_x, 0, t);
+        this.calcPositionByHomotopic(edit.position_x);
       position.y =
-        this.calcPositionByHomotopic(edit.position_y, 0, t);
+        this.calcPositionByHomotopic(edit.position_y);
     } else if (refer) {
       // For reference terms only
       position.x =
-      this.calcPositionByHomotopic(0, posXMultipliedByMag, t);
+      this.calcPositionByHomotopic(0);
       position.y =
-      this.calcPositionByHomotopic(0, posYMultipliedByMag, t);
+      this.calcPositionByHomotopic(0);
     }
     position.y *= -1;
     return position;
@@ -1768,12 +1685,10 @@ class EditingVocabulary {
   /**
    * [calcPositionByHomotopic description]
    * @param  {Number} a vec0 - coordinate value
-   * @param  {Number} b vec1 - coordinate value
-   * @param  {Number} t (0 <= t <= 1)
    * @return {Number} - coordinate value
    */
-  calcPositionByHomotopic(a, b, t) {
-    const value = ((1 - t) * a) + (t * b);
+  calcPositionByHomotopic(a) {
+    const value = a;
     return this.calcPosition(value);
   }
 
