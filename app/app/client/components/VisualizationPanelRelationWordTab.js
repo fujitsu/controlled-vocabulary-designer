@@ -168,8 +168,7 @@ export default
           selectedPosY = foundRef.position_y;
         }
 
-        if (!(selectedPosX == 0 &&
-        selectedPosY == 0) &&
+        if (!(selectedPosX == 0 && selectedPosY == 0) &&
           (node.position.x === 0 && node.position.y === 0)) {
           selectedPosX = foundEdit.position_x;
           selectedPosY = foundEdit.position_y;
