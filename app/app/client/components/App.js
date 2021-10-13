@@ -183,22 +183,6 @@ const useStyles = (theme) => ({
     height: '75px',
   },
 
-  'sliderGridRoot': {
-    width: '40%',
-    position: 'absolute',
-    zIndex: 1,
-    marginTop: 530,
-    marginLeft: theme.spacing(3),
-  },
-
-  'homotopicSlider': {
-    marginLeft: '5px',
-  },
-
-  'opacitySlider': {
-    marginLeft: '45px',
-  },
-
   'selectTerm': {
     width: '100%',
     textAlign: 'center',
