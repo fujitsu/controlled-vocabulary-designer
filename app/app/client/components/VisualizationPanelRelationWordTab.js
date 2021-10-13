@@ -5,8 +5,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {withStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Slider from '@material-ui/core/Slider';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -42,8 +40,6 @@ export default
     // this.state = {nodeNum: 0};
     this.setInitialPanZoom = false;
     this.zoomTimeoutId = -1;
-    this.opacityValue = 0;
-    this.homotopicValue = 0;
   }
 
   /**
@@ -121,10 +117,6 @@ export default
       'border-width': 0});
     cy.nodes().unselect();
 
-    const opacityValue = this.opacityValue;
-    const backgroundOpacity = opacityValue*(-0.006)+0.6;
-    const opacity = opacityValue*(-0.01)+1;
-
     termListForRelationWord.forEach((node, index) => {
       const eles = cy.$id(node.data.id);
       eles.addClass(node.data.relationTermColor);
@@ -163,16 +155,6 @@ export default
       const foundEdit = this.props.editingVocabulary.editingVocabulary.find(
           (data) => data.term === node.data.term);
 
-      if (!foundEdit) {
-        eles.style({
-          'background-opacity': backgroundOpacity,
-          'opacity': opacity,
-        });
-      }
-
-      // Value of the homotopic slider
-      const homotopicValue = this.props.editingVocabulary.homotopicValue;
-
       let selectedPosX;
       let selectedPosY;
       let visible = true;
@@ -186,35 +168,20 @@ export default
           selectedPosY = foundRef.position_y;
         }
 
-        if (homotopicValue === 0 &&
-        !(selectedPosX == 0 &&
-        selectedPosY == 0) &&
+        if (!(selectedPosX == 0 && selectedPosY == 0) &&
           (node.position.x === 0 && node.position.y === 0)) {
           selectedPosX = foundEdit.position_x;
           selectedPosY = foundEdit.position_y;
-          visible = false;
-        } else if (homotopicValue === 100 &&
-        !(foundRef.position_x == 0 &&
-        foundRef.position_y == 0) &&
-          (node.position.x === 0 && node.position.y === 0)) {
-          selectedPosX = foundRef.position_x;
-          selectedPosY = foundRef.position_y;
           visible = false;
         }
       } else if (foundEdit) {
         selectedPosX = foundEdit.position_x;
         selectedPosY = foundEdit.position_y;
-
-        if (homotopicValue === 100) {
-          visible = false;
-        }
       } else if (foundRef) {
         selectedPosX = foundRef.position_x;
         selectedPosY = foundRef.position_y;
 
-        if (homotopicValue === 0) {
-          visible = false;
-        }
+        visible = false;
       }
 
       if (!selectedPosX && !selectedPosY) {
@@ -443,228 +410,6 @@ export default
   }
 
   /**
-   * Homotopic display slider action event
-   * @param  {object} event - information of event
-   * @param  {num} newValue - slider change value
-   */
-  homotopicSliderChange(event, newValue) {
-    const cy = this.cy;
-    const editingVocabulary = this.props.editingVocabulary;
-    this.homotopicValue = newValue;
-    editingVocabulary.homotopicValue = newValue;
-    // Triggers that change the coordinate values of the edit operations panel
-    editingVocabulary.editPanelPosTrigger = newValue;
-
-    const editingVocabFile = editingVocabulary.editingVocabulary;
-
-    const referenceVocabFile =
-       editingVocabulary.getTargetFileData(editingVocabulary.homotopicFile.id);
-
-    // Add reference vocabulary to avoid overlapping with editorial vocabulary
-    const refereList = [];
-    referenceVocabFile.forEach((ref) => {
-      const foundData =
-         editingVocabFile.find((edit) => edit.term === ref.term);
-      if (!foundData) {
-        refereList.push(ref);
-      }
-    });
-
-    // Related terms all terms displayed on the screen
-    const mergedData = [
-      ...editingVocabFile,
-      ...refereList,
-    ];
-
-    mergedData.forEach((termData, index) => {
-      // Extracts reference vocabulary data for homotopic display
-      const foundRef = referenceVocabFile.find(
-          (ref) => termData.term === ref.term);
-
-      const position =
-        editingVocabulary.calcPositionValueForHomotopic(
-            termData, foundRef, newValue);
-
-      const foundNode =
-         editingVocabulary.termListForRelationWord.find((node) =>
-           node.data.term === termData.term);
-
-      if (foundNode) {
-        const ele = cy.$id(foundNode.data.id);
-
-        const foundEdit = editingVocabFile.find(
-            (edit) => termData.term === edit.term);
-
-        let selectedPosX;
-        let selectedPosY;
-        let visible = true;
-
-        if (foundEdit && foundRef) {
-          selectedPosX = foundEdit.position_x;
-          selectedPosY = foundEdit.position_y;
-
-          if (!selectedPosX && !selectedPosY) {
-            selectedPosX = foundRef.position_x;
-            selectedPosY = foundRef.position_y;
-          }
-
-          if (newValue === 0 &&
-          !(selectedPosX == 0 &&
-          selectedPosY == 0) &&
-            (position.x === 0 && position.y === 0)) {
-            selectedPosX = foundEdit.position_x;
-            selectedPosY = foundEdit.position_y;
-            visible = false;
-          } else if (newValue === 100 &&
-          !(foundRef.position_x == 0 &&
-          foundRef.position_y == 0) &&
-            (position.x === 0 && position.y === 0)) {
-            selectedPosX = foundRef.position_x;
-            selectedPosY = foundRef.position_y;
-            visible = false;
-          }
-        } else if (foundEdit) {
-          selectedPosX = foundEdit.position_x;
-          selectedPosY = foundEdit.position_y;
-
-          if (newValue === 100) {
-            visible = false;
-          }
-        } else if (foundRef) {
-          selectedPosX = foundRef.position_x;
-          selectedPosY = foundRef.position_y;
-
-          if (newValue === 0) {
-            visible = false;
-          }
-        }
-
-        if (!selectedPosX && !selectedPosY) {
-          visible = false;
-        }
-
-        if (visible) {
-          ele.style({
-            visibility: 'visible',
-          });
-        } else {
-          ele.style({
-            visibility: 'hidden',
-          });
-        }
-
-        // Hides if the value of the homotopic slider is 0 and the target term is only in the reference vocabulary or if the value of the homotopic slider is 100 and the target term is only in the edited vocabulary.
-        // if ((foundEdit && foundRef) &&
-        //   (position.x === 0 && position.y === 0)) {
-        //   console.log('x');
-        //   if ((newValue === 100 &&
-        //     !(foundRef.position_x == 0 && foundRef.position_y == 0)) ||
-        //     (newValue === 0 &&
-        //       !(foundEdit.position_x == 0 && foundEdit.position_y == 0)) ||
-        //        !(foundRef.position_x == 0 && foundRef.position_y == 0) &&
-        //         !node.data.has_position) {
-        //     console.log('hidden');
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   } else {
-        //     console.log('visible');
-        //     ele.style({
-        //       visibility: 'visible',
-        //     });
-        //   }
-        // } else if ((position.x === 0 && position.y === 0) &&
-        //  (newValue === 100 && foundEdit)) {
-        //
-        //   ele.style({
-        //     visibility: 'hidden',
-        //   });
-        // } else if ((position.x === 0 && position.y === 0) &&
-        //  (newValue === 0 && foundRef)) {
-        //   ele.style({
-        //     visibility: 'hidden',
-        //   });
-        // } else {
-        //   ele.style({
-        //     visibility: 'visible',
-        //   });
-        // }
-
-
-        // if (foundEdit && foundRef) {
-        //   if (!node.data.has_position &&
-        //     (!(foundEdit.position_x == 0 && foundEdit.position_y == 0) &&
-        //       !(foundRef.position_x == 0 && foundRef.position_y == 0))) {
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   }
-        // } else if (foundEdit) {
-        //
-        //   if (
-        //     (foundEdit.position_x == 0 && foundEdit.position_y == 0)) {
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   } else if (newValue === 100) {
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   } else {
-        //     ele.style({
-        //       visibility: 'visible',
-        //     });
-        //   }
-        // } else if (foundRef) {
-        //   if (newValue === 0) {
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   } else {
-        //     ele.style({
-        //       visibility: 'visible',
-        //     });
-        //   }
-        // }
-
-        ele.unlock();
-        ele.position(position);
-        ele.lock();
-      }
-    });
-    this.showRandomNode();
-  }
-
-  /**
-   * Transparency slider action event
-   * @param  {num} newValue - slider change value
-   */
-  opacitySliderChange(newValue) {
-    this.opacityValue = newValue;
-    const backgroundOpacity = this.opacityValue*(-0.006)+0.6;
-    const opacity = this.opacityValue*(-0.01)+1;
-
-    const cy = this.cy;
-    const editingVocabulary = this.props.editingVocabulary;
-    const editingVocabFile = editingVocabulary.editingVocabulary;
-
-    editingVocabulary.termListForRelationWord.forEach((node) => {
-      // Change the transparency of terms that exist only in reference terms from within related terms
-      const foundTermData =
-        editingVocabFile.find((editData) =>
-          node.data.term === editData.term);
-
-      if (!foundTermData) {
-        const ele = cy.$id(node.data.id);
-        ele.style({
-          'background-opacity': backgroundOpacity,
-          'opacity': opacity,
-        });
-      }
-    });
-  }
-
-  /**
    * Random display of up to 100 nodes other than those shown in the visualization screen
    */
   showRandomNode() {
@@ -805,112 +550,6 @@ export default
     const termListForRelationWord =
         this.props.editingVocabulary.termListForRelationWord;
 
-    const homotopicMarks = [
-      {
-        value: 0,
-        label: '編集用語彙',
-      },
-      {
-        value: 10,
-      },
-      {
-        value: 20,
-      },
-      {
-        value: 30,
-      },
-      {
-        value: 40,
-      },
-      {
-        value: 50,
-      },
-      {
-        value: 60,
-      },
-      {
-        value: 70,
-      },
-      {
-        value: 80,
-      },
-      {
-        value: 90,
-      },
-      {
-        value: 100,
-        label: '参照用語彙',
-      },
-    ];
-
-    const opacityMarks = [
-      {
-        value: 0,
-        label: '0%',
-      },
-      {
-        value: 10,
-      },
-      {
-        value: 20,
-      },
-      {
-        value: 30,
-      },
-      {
-        value: 40,
-      },
-      {
-        value: 50,
-      },
-      {
-        value: 60,
-      },
-      {
-        value: 70,
-      },
-      {
-        value: 80,
-      },
-      {
-        value: 90,
-      },
-      {
-        value: 100,
-        label: '100%',
-      },
-    ];
-
-    const VisualizationSlider = withStyles({
-      root: {
-        color: '#3f51b5',
-        height: 2,
-        padding: '15px 0',
-      },
-      valueLabel: {
-        'top': -15,
-        '& *': {
-          background: 'transparent',
-          color: '#000',
-        },
-      },
-      track: {
-        height: 2,
-      },
-      rail: {
-        height: 2,
-        opacity: 0.5,
-        backgroundColor: '#3f51b5',
-      },
-      mark: {
-        backgroundColor: '#3f51b5',
-        height: 8,
-        width: 1,
-        marginTop: -3,
-      },
-    })(Slider);
-
-
     return (
       <div>
         <Grid
@@ -941,55 +580,6 @@ export default
                 </Select>
               </FormControl>
             </Box>
-          </Grid>
-        </Grid>
-
-        <Grid
-          container
-          spacing={3}
-          className={this.props.classes.sliderGridRoot}
-        >
-          <Grid item xs={6} className={this.props.classes.homotopicSlider}>
-            <Typography id="homotopic-slider" gutterBottom>
-              homotopic
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs>
-                <VisualizationSlider
-                  defaultValue={this.homotopicValue}
-                  track={false}
-                  aria-labelledby="discrete-slider-restrict"
-                  step={null}
-                  onChange={
-                    (event, newValue) =>
-                      this.homotopicSliderChange(event, newValue)
-                  }
-                  marks={homotopicMarks}
-                  valueLabelDisplay="on"
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-
-          <Grid item xs={4} className={this.props.classes.opacitySlider}>
-            <Typography id="opacity-slider" gutterBottom>
-              opacity
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs>
-                <VisualizationSlider
-                  defaultValue={this.opacityValue}
-                  track={false}
-                  aria-labelledby="discrete-slider-restrict"
-                  step={null}
-                  onChange={
-                    (event, newValue) => this.opacitySliderChange(newValue)
-                  }
-                  marks={opacityMarks}
-                  valueLabelDisplay="on"
-                />
-              </Grid>
-            </Grid>
           </Grid>
         </Grid>
 
