@@ -5,8 +5,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {withStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Slider from '@material-ui/core/Slider';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -42,7 +40,6 @@ export default
     // this.state = {nodeNum: 0};
     this.setInitialPanZoom = false;
     this.zoomTimeoutId = -1;
-    this.homotopicValue = 0;
   }
 
   /**
@@ -158,9 +155,6 @@ export default
       const foundEdit = this.props.editingVocabulary.editingVocabulary.find(
           (data) => data.term === node.data.term);
 
-      // Value of the homotopic slider
-      const homotopicValue = this.props.editingVocabulary.homotopicValue;
-
       let selectedPosX;
       let selectedPosY;
       let visible = true;
@@ -174,35 +168,21 @@ export default
           selectedPosY = foundRef.position_y;
         }
 
-        if (homotopicValue === 0 &&
-        !(selectedPosX == 0 &&
+        if (!(selectedPosX == 0 &&
         selectedPosY == 0) &&
           (node.position.x === 0 && node.position.y === 0)) {
           selectedPosX = foundEdit.position_x;
           selectedPosY = foundEdit.position_y;
           visible = false;
-        } else if (homotopicValue === 100 &&
-        !(foundRef.position_x == 0 &&
-        foundRef.position_y == 0) &&
-          (node.position.x === 0 && node.position.y === 0)) {
-          selectedPosX = foundRef.position_x;
-          selectedPosY = foundRef.position_y;
-          visible = false;
         }
       } else if (foundEdit) {
         selectedPosX = foundEdit.position_x;
         selectedPosY = foundEdit.position_y;
-
-        if (homotopicValue === 100) {
-          visible = false;
-        }
       } else if (foundRef) {
         selectedPosX = foundRef.position_x;
         selectedPosY = foundRef.position_y;
 
-        if (homotopicValue === 0) {
-          visible = false;
-        }
+        visible = false;
       }
 
       if (!selectedPosX && !selectedPosY) {
