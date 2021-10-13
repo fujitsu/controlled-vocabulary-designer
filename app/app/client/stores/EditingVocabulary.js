@@ -1284,7 +1284,7 @@ class EditingVocabulary {
         default: break;
       }
 
-      //  only the editing vocabulary is displayed. 
+      // only the editing vocabulary is displayed. 
       targetData = editingVocabulary
     } else {
       targetData = this.getTargetFileData(this.selectedFile.id);
