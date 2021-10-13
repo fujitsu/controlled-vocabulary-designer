@@ -10,7 +10,6 @@ import Tab from '@material-ui/core/Tab';
 
 import EditPanelRelationWordTab from './EditPanelRelationWordTab';
 import EditPanelVocabularyTab from './EditPanelVocabularyTab';
-import EditPanelExampleTab from './EditPanelExampleTab';
 import EditTabPanel from './EditTabPanel';
 import editingVocabularyStore from '../stores/EditingVocabulary';
 
@@ -68,11 +67,6 @@ export default class EditPanel extends React.Component {
               {...this.a11yProps(1)}
               classes={{root: this.props.classes.tabs}}
             />
-            <Tab
-              label="例文"
-              {...this.a11yProps(2)}
-              classes={{root: this.props.classes.tabs}}
-            />
           </Tabs>
         </AppBar>
         <EditTabPanel value={this.state.value} index={0}>
@@ -83,12 +77,6 @@ export default class EditPanel extends React.Component {
         </EditTabPanel>
         <EditTabPanel value={this.state.value} index={1}>
           <EditPanelVocabularyTab
-            classes={this.props.classes}
-            editingVocabulary={editingVocabularyStore}
-          />
-        </EditTabPanel>
-        <EditTabPanel value={this.state.value} index={2}>
-          <EditPanelExampleTab
             classes={this.props.classes}
             editingVocabulary={editingVocabularyStore}
           />
