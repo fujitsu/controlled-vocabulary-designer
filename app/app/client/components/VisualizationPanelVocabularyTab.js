@@ -194,17 +194,31 @@ export default
         nodesInView = cy.nodes();
       }
 
-      // 100 random nodesInView
-      const nodesInViewLimit100 = nodesInView.length < 100 ?
-          nodesInView :
-          nodesInView.filter((n) => {
-            return Math.floor(Math.random() * nodesInView.length) < 100;
-          });
+      // get element near center
+      const zoom = cy.zoom();
+      const cpX = ( ext.x1 + ext.w / 2 ) / zoom;
+      const cpY = ( ext.y1 + ext.h / 2 ) / zoom;
+      let sortArr=[];
+      nodesInView.map((n, index)=>{
+        const bb = n.boundingBox();
+        sortArr = [...sortArr, {
+          'index': index,
+          'distance': Math.abs( bb.x1 / zoom - cpX ) + Math.abs( bb.y1 / zoom - cpY )
+        }]
+      })
+
+      sortArr.sort((a, b)=> { return a.distance - b.distance; });
+      if( sortArr.length > 100 ) sortArr.splice( 100);
+
+      // 100 visibleNodesInView
+      let nodesInViewLimit100 = [];
+      sortArr.forEach((data)=>{
+        nodesInViewLimit100 =
+          [...nodesInViewLimit100, nodesInView[data.index]];
+      })
 
       this.initStyleByPanZoom();
 
-      // console.log('showText class refresh.');
-      // console.log('nodesInViewLimit100: ' + nodesInViewLimit100.length);
       cy.batch(function() {
         nodesInViewLimit100.forEach((node)=>{
           node.addClass('showText');
