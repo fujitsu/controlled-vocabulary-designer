@@ -297,28 +297,33 @@ export default
                 bb.y2 < ext.y2;
       });
 
-      // Homotopic hide and filter node (s) not visible
+      // get visible node
       const visibleNodesInView = nodesInView.filter((n) => {
         return n.style('visibility') === 'visible' &&
                !(n.hasClass('displayNone'));
       });
 
-      // 100 random visibleNodesInView
+      // get element near center
+      const cpX = ( ext.x1 + ext.w / 2 ) / zoom;
+      const cpY = ( ext.y1 + ext.h / 2 ) / zoom;
+      let sortArr=[];
+      visibleNodesInView.map((n, index)=>{
+        const bb = n.boundingBox();
+        sortArr = [...sortArr, {
+          'index': index,
+          'distance': Math.abs( bb.x1 / zoom - cpX ) + Math.abs( bb.y1 / zoom - cpY )
+        }]
+      })
+
+      sortArr.sort((a, b)=> { return a.distance - b.distance; });
+      if( sortArr.length > 100 ) sortArr.splice( 100);
+
+      // 100 visibleNodesInView
       let nodesInViewLimit100 = [];
-      if (visibleNodesInView.length > 100) {
-        let last = -1;
-        while (nodesInViewLimit100.length < 100) {
-          let ran;
-          do {
-            ran = Math.floor(Math.random() * visibleNodesInView.length);
-          } while (ran === last);
-          last = ran;
-          nodesInViewLimit100 =
-            [...nodesInViewLimit100, visibleNodesInView[ran]];
-        }
-      } else {
-        nodesInViewLimit100 = visibleNodesInView;
-      }
+      sortArr.forEach((data)=>{
+        nodesInViewLimit100 =
+          [...nodesInViewLimit100, visibleNodesInView[data.index]];
+      })
 
       const nodeInViewStyle = {
         'width': 'label',
@@ -407,125 +412,6 @@ export default
     this.cy.on('zoom', (event) => {
       this.onPanZoom();
     });
-  }
-
-  /**
-   * Random display of up to 100 nodes other than those shown in the visualization screen
-   */
-  showRandomNode() {
-    const cy = this.cy;
-
-    cy.nodes().removeStyle('width height border-width font-size padding');
-    cy.nodes().removeClass('bgBlack');
-
-    // List of nodes in view
-    const ext = cy.extent();
-    const nodesInView = cy.nodes().filter((n) => {
-      const bb = n.boundingBox();
-      return bb.x1 > ext.x1 &&
-              bb.x2 < ext.x2 &&
-              bb.y1 > ext.y1 &&
-              bb.y2 < ext.y2 &&
-              n.style('visibility') === 'visible' &&
-              !(n.hasClass('displayNone'));
-    });
-
-    // List of labeled nodes
-    let visibleNodesInView = nodesInView.filter((n) => {
-      return n.hasClass('showText');
-    });
-
-    // List of unlabeled nodes
-    let invisibleNodesInView = nodesInView.filter((n) => {
-      return !n.hasClass('showText');
-    });
-
-    const termListForRelationWord =
-       this.props.editingVocabulary.termListForRelationWord;
-    const zoom = this.cy.zoom();
-    termListForRelationWord.forEach((node, index) => {
-      const ele = cy.$id(node.data.id);
-      ele.removeClass('showText');
-      ele.removeClass('bgBlack');
-      ele.addClass(node.data.relationTermColor);
-      ele.style({'width': Math.max(6/zoom, 0.01),
-        'height': Math.max(6/zoom, 0.01),
-        'border-width': 0});
-    });
-
-    visibleNodesInView.forEach((node) => {
-      node.addClass('showText');
-    });
-
-    const nodeInViewStyle = {
-      'width': 'label',
-      'height': 'label',
-      'font-size': Math.min(4800, Math.max(16/zoom, 0.01)),
-      'border-width': Math.max(2.0/zoom, 0.01),
-      'padding': Math.max(3.0/zoom, 0.01),
-    };
-
-    if (nodesInView.length > 100) {
-      const shuffle = ([...array]) => {
-        for (let i = array.length - 1; i >= 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-      };
-
-      invisibleNodesInView = shuffle(invisibleNodesInView);
-
-      let visibleCnt = visibleNodesInView.length;
-      let invisibleCnt = 0;
-      nodesInView.forEach((node) => {
-        if (visibleCnt >= 100) return;
-        if (!node.hasClass('showText')) {
-          invisibleNodesInView[invisibleCnt].addClass('showText');
-          invisibleNodesInView[invisibleCnt].style(nodeInViewStyle);
-
-          visibleCnt++;
-          invisibleCnt++;
-        }
-      });
-    } else {
-      nodesInView.forEach((node) => {
-        node.addClass('showText');
-        node.style(nodeInViewStyle);
-      });
-    }
-
-
-    // Updating the list of labeled nodes
-    visibleNodesInView = nodesInView.filter((n) => {
-      return n.hasClass('showText');
-    });
-
-    visibleNodesInView.forEach((node, index)=>{
-      // node.addClass('showText');
-      node.style(nodeInViewStyle);
-      this.setConfirmStyle(node, node.data().confirm);
-    });
-
-    // Special precessing for selected
-    const currentTerm = this.props.editingVocabulary.currentNode.term;
-    const currentNode = termListForRelationWord.find((node) => {
-      return currentTerm === node.data.term;
-    });
-
-    if (currentNode) {
-      const selectedele = cy.$id(currentNode.data.id);
-      selectedele.addClass('showText');
-      this.setConfirmStyle(selectedele, selectedele.data().confirm);
-      selectedele.addClass('selected');
-      selectedele.style({
-        'width': 'label',
-        'height': 'label',
-        'font-size': Math.min(4800, Math.max(16/zoom, 0.01)),
-        'border-width': Math.max(4.0/zoom, 0.01),
-        'padding': Math.max(3.0/zoom, 0.01),
-      });
-    }
   }
 
   /**
