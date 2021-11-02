@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import TextField from '@material-ui/core/TextField';
 
 import {grey} from '@material-ui/core/colors';
 import {brown} from '@material-ui/core/colors';
@@ -35,6 +36,8 @@ import TextFieldOfPreferredLabel from './TextFieldOfPreferredLabel';
 import TextFieldOfUri from './TextFieldOfUri';
 import TextFieldOfBroaderTerm from './TextFieldOfBroaderTerm';
 import TextFieldOfSubordinateTerm from './TextFieldOfSubordinateTerm';
+import TextFieldOfTermDescription from './TextFieldOfTermDescription';
+import TextFieldOfOtherVocSynUri from './TextFieldOfOtherVocSynUri';
 
 /**
  * Edit Operation panel Vocabulary tab Component
@@ -55,6 +58,7 @@ export default
       synymact: false,
       prfrrdlblact: false,
       broadertermact: false,
+      termdescriptionact: false,
     };
 
     this.switchStyles = {
@@ -182,6 +186,9 @@ export default
       if (this.state.broadertermact) {
         this.props.editingVocabulary.popBroaderTerm();
       }
+      if (this.state.termdescriptionact) {
+        this.props.editingVocabulary.popTermDescription();
+      }
     }
     if (event.keyCode === 13) {
       event.preventDefault();
@@ -204,6 +211,9 @@ export default
       case 'broaderTerm':
         this.setState({broadertermact: value});
         break;
+      case 'TermDescription':
+        this.setState({termdescriptionact: value});
+          break;  
         defalut:
         break;
     }
@@ -254,11 +264,11 @@ export default
       // Preferred label:Invalid input error
       case 'invalidPreferredLabel':
         const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[0];
-        errorMsg = '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
-                   '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
-                   '代表語テキストボックスには、¥n' +
+        errorMsg = '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、\n' +
+                   '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。\n' +
+                   '代表語テキストボックスには、\n' +
                    '\"' + currentTerm +'\" または同義語の中から選んで記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
+        errorMsg = errorMsg.split('\n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
       // Preferred label:Missing error
@@ -272,23 +282,23 @@ export default
       case 'relationSynonym':
         errorMsg = '下位語テキストボックスに、 \"' + currentTerm +
                    '\" あるいは \"' + currentTerm + '\" の代表語' +
-                   'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
+                   'あるいは \"' + currentTerm + '\" の同義語が記入されています。\n' +
                    '同義語テキストボックスには、 \"' + currentTerm +
-                   '\" と上下関係を持たないように、¥n' +
+                   '\" と上下関係を持たないように、\n' +
                    'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
+        errorMsg = errorMsg.split('\n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
 
       // URI error /////////////////////////////
       // URI:Duplicate input error
       case 'equalUri':
-        errorMsg = '代表語のURIテキストボックスに、¥n' +
+        errorMsg = '代表語のURIテキストボックスに、\n' +
                    '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
-                   '\" と同じ代表語のURIが記入されています。¥n' +
-                   '代表語のURIテキストボックスには、¥n' +
+                   '\" と同じ代表語のURIが記入されています。\n' +
+                   '代表語のURIテキストボックスには、\n' +
                    '既に登録されている他の代表語のURIとは異なる値を記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
+        errorMsg = errorMsg.split('\n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
 
@@ -299,18 +309,18 @@ export default
         break;
       // Broader term:Invalid input error
       case 'invalidBroaderTerm':
-        errorMsg = '上位語テキストボックスに、¥n' +
-                   '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
-                   '上位語テキストボックスには、¥n' +
+        errorMsg = '上位語テキストボックスに、\n' +
+                   '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。\n' +
+                   '上位語テキストボックスには、\n' +
                    '\"' + currentTerm + '\" の代表語と同義語以外の値を記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
+        errorMsg = errorMsg.split('\n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
       // Broader term:Loop error
       case 'cycleBroaderTerm':
         const brdrTrm = editingVocabulary.tmpBroaderTerm.list[0];
         errorMsg = '上位語テキストボックスに \"'+
-                   brdrTrm +'\" を記入することで、¥n';
+                   brdrTrm +'\" を記入することで、\n';
         errorMsg += '代表語 ';
         editingVocabulary.cycleBroaderTerm.forEach((term) => {
           errorMsg += '\"';
@@ -318,8 +328,8 @@ export default
           errorMsg += '\", ';
         });
         errorMsg = errorMsg.slice( 0, -2 );
-        errorMsg += ' は、¥n上下関係が循環してしまいます。¥n';
-        errorMsg += '上位語テキストボックスには、¥n';
+        errorMsg += ' は、\n上下関係が循環してしまいます。\n';
+        errorMsg += '上位語テキストボックスには、\n';
         editingVocabulary.cycleBroaderTerm.forEach((term) => {
           errorMsg += '\"';
           errorMsg += term;
@@ -327,7 +337,7 @@ export default
         });
         errorMsg = errorMsg.slice( 0, -2 );
         errorMsg += ' 以外の代表語を持つ用語を記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
+        errorMsg = errorMsg.split('\n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
     }
@@ -382,6 +392,7 @@ export default
     // console.log('[seletConfirmColor] change to ');
     this.props.editingVocabulary.seletConfirmColor(color);
   }
+
 
   /**
    * render
@@ -574,6 +585,43 @@ export default
               <Grid item xs={7}>
                 <Box>
                   <TextFieldOfSubordinateTerm
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    fileId={fileId}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2}>
+              <Grid item xs={3}>
+                <Box mt={1}>
+                  用語の説明
+                </Box>
+              </Grid>
+              <Grid item xs={7}>
+                <Box>
+                <TextFieldOfTermDescription
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    disabled={disabledTextField}
+                    change={
+                      (target, value) => this.changeFocus(target, value)
+                    }
+                />
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2}>
+              <Grid item xs={3}>
+                <Box mt={1}>
+                  他語彙体系の同義語のURI
+                </Box>
+              </Grid>
+              <Grid item xs={7}>
+                <Box>
+                  <TextFieldOfOtherVocSynUri
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
                     fileId={fileId}

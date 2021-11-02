@@ -127,7 +127,7 @@ def upload_file(editing_vocabulary=None, reference_vocabulary1=None, reference_v
                   location())
             return exec_res, status_code
 
-        _repair_broader_term(df)
+#        _repair_broader_term(df)
 
         exec_res, status_code = _check_synonymous_relationship(df)
         if not status_code == 200:
@@ -463,15 +463,27 @@ def _make_bulk_data_reference_vocabulary(excel_data, r_extension):
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
+        if '言語' in item:
+            insert_data['language'] =\
+                item['言語'] if pd.notnull(item['言語']) else None
         if '代表語のURI' in item:
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
-        if '上位語' in item:
+        if '上位語のURI' in item:
             insert_data['broader_term'] =\
-                item['上位語'] if pd.notnull(item['上位語']) else None
-        if '品詞' in item:
-            insert_data['part_of_speech'] =\
-                item['品詞'] if pd.notnull(item['品詞']) else None
+                item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+        if '他語彙体系の同義語のURI' in item:
+            insert_data['other_voc_syn_uri'] =\
+                item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+        if '用語の説明' in item:
+            insert_data['term_description'] =\
+                item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+        if '作成日' in item:
+            insert_data['created_time'] =\
+                item['作成日'] if pd.notnull(item['作成日']) else None
+        if '最終更新日' in item:
+            insert_data['modified_time'] =\
+                item['最終更新日'] if pd.notnull(item['最終更新日']) else None
         if 'x座標値' in item:
             insert_data['position_x'] =\
                 item['x座標値'] if pd.notnull(item['x座標値']) else None
@@ -493,12 +505,27 @@ def _make_bulk_data_editing_vocabulary(data_frame):
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
+        if '言語' in item:
+            insert_data['language'] =\
+                item['言語'] if pd.notnull(item['言語']) else None
         if '代表語のURI' in item:
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
-        if '上位語' in item:
+        if '上位語のURI' in item:
             insert_data['broader_term'] =\
-                item['上位語'] if pd.notnull(item['上位語']) else None
+                item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+        if '他語彙体系の同義語のURI' in item:
+            insert_data['other_voc_syn_uri'] =\
+                item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+        if '用語の説明' in item:
+            insert_data['term_description'] =\
+                item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+        if '作成日' in item:
+            insert_data['created_time'] =\
+                item['作成日'] if pd.notnull(item['作成日']) else None
+        if '最終更新日' in item:
+            insert_data['modified_time'] =\
+                item['最終更新日'] if pd.notnull(item['最終更新日']) else None
         if '同義語候補' in item:
             insert_data['synonym_candidate'] =\
                 [x.strip() for x in item['同義語候補'].split(',')]\
@@ -507,9 +534,6 @@ def _make_bulk_data_editing_vocabulary(data_frame):
             insert_data['broader_term_candidate'] =\
                 [x.strip() for x in item['上位語候補'].split(',')]\
                 if pd.notnull(item['上位語候補']) else []
-        if '品詞' in item:
-            insert_data['part_of_speech'] =\
-                item['品詞'] if pd.notnull(item['品詞']) else None
         if 'x座標値' in item:
             insert_data['position_x'] =\
                 item['x座標値'] if pd.notnull(item['x座標値']) else None
@@ -660,17 +684,21 @@ def _read_file_strage(file_strage, r_extension):
 
 # check column
 def _check_columns(data_frame):
-    # columns = '用語名 代表語 代表語のURI 上位語 同義語候補 上位語候補 品詞 x座標値 y座標値 色1 色2'
+    # columns = '用語名 代表語 言語 代表語のURI 上位語のURI 他語彙体系の同義語のURI 用語の説明 作成日 最終更新日 同義語候補 上位語候補 x座標値 y座標値 色1 色2'
     # ins_f = lambda x:columns not in x
     for index, item in data_frame.iterrows():
         # if any(map(ins_f, item)):
         if ('用語名' not in item
          or '代表語' not in item
+         or '言語' not in item
          or '代表語のURI' not in item
-         or '上位語' not in item
+         or '上位語のURI' not in item
+         or '他語彙体系の同義語のURI' not in item
+         or '用語の説明' not in item
+         or '作成日' not in item
+         or '最終更新日' not in item
          or '同義語候補' not in item
          or '上位語候補' not in item
-         or '品詞' not in item
          or 'x座標値' not in item
          or 'y座標値' not in item
          or '色1' not in item
@@ -722,6 +750,25 @@ def _make_row_data_frame(term, col):
             0,
         ]
         return row
+    elif col == 15:
+        row = [
+            term,
+            term,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            'black',
+            'black',
+            0,
+        ]
+        return row
     else:
         return None
 
@@ -736,7 +783,7 @@ def _repair_broader_term(df):
 
     """
     for index, item in df.iterrows():
-        broader_term = item['上位語'] if pd.notnull(item['上位語']) else None
+        broader_term = item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
         if broader_term is not None:
             resdf = df.query('用語名 == @broader_term')
             if len(resdf) == 0:
@@ -997,7 +1044,7 @@ def _chk_broader_term(payload_s, looplist, key_preferred):
     ret_flg = 1
     for index2, item2 in name_p2.iterrows():
         wk_broader_term =\
-            str(item2['上位語']) if pd.notnull(item2['上位語']) else None
+            str(item2['上位語のURI']) if pd.notnull(item2['上位語のURI']) else None
         if wk_broader_term is None:
             return 0
         else:
@@ -1088,10 +1135,20 @@ def _add_list(paylist, item, preferred_group, group_uri):
         item['用語名'] if pd.notnull(item['用語名']) else None
     insert_data['preferred_label'] =\
         item['代表語'] if pd.notnull(item['代表語']) else None
+    insert_data['language'] =\
+        item['言語'] if pd.notnull(item['言語']) else None
     insert_data['uri'] =\
         item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
     insert_data['broader_term'] =\
-        item['上位語'] if pd.notnull(item['上位語']) else None
+        item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+    insert_data['other_voc_syn_uri'] =\
+        item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+    insert_data['term_description'] =\
+        item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+    insert_data['created_time'] =\
+        item['作成日'] if pd.notnull(item['作成日']) else None
+    insert_data['modified_time'] =\
+        item['最終更新日'] if pd.notnull(item['最終更新日']) else None
 
     insert_data['preferred_group'] = preferred_group
     insert_data['group_uri'] = group_uri
@@ -1113,10 +1170,21 @@ def _add_preferred_list(paylist, item):
         item['用語名'] if pd.notnull(item['用語名']) else None
     insert_data['preferred_label'] =\
         item['代表語'] if pd.notnull(item['代表語']) else None
+    insert_data['language'] =\
+        item['言語'] if pd.notnull(item['言語']) else None
     insert_data['uri'] =\
         item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
     insert_data['broader_term'] =\
-        item['上位語'] if pd.notnull(item['上位語']) else None
+        item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+    insert_data['other_voc_syn_uri'] =\
+        item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+    insert_data['term_description'] =\
+        item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+    insert_data['created_time'] =\
+        item['作成日'] if pd.notnull(item['作成日']) else None
+    insert_data['modified_time'] =\
+        item['最終更新日'] if pd.notnull(item['最終更新日']) else None
+
     paylist.append(insert_data)
 
     return True
@@ -1277,10 +1345,9 @@ def _download_file_ev_serialize(pl_simple, p_format):
     df_org = df_org.rename(columns={'term': '用語名',
                                     'preferred_label': '代表語',
                                     'uri': '代表語のURI',
-                                    'broader_term': '上位語',
+                                    'broader_term': '上位語のURI',
                                     'broader_term_candidate': '上位語候補',
                                     'synonym_candidate': '同義語候補',
-                                    'part_of_speech': '品詞',
                                     'position_x': 'x座標値',
                                     'position_y': 'y座標値',
                                     'color1': '色1',
