@@ -70,6 +70,7 @@ class EditingVocabulary {
         .then((response) => {
           // console.log("getEditingVocabularyDataFromDB response.");
           this.setUpdate();
+          this.broaderUriToBroaderTerm = true;
           this.setEditingVocabularyData(response.data.EditingVocabulary);
           if (0 == this.selectedFile.id) {
             this.currentNodeClear();
@@ -113,12 +114,16 @@ class EditingVocabulary {
     const dbData = {
       term: this.currentNode.term,
       preferred_label: '',
+      language: '',
       uri: '',
       broader_term: '',
       // synonym : [],
+      other_voc_syn_uri: '',
+      term_description: '',
+      created_time: '',
+      modified_time: '',
       synonym_candidate: [],
       broader_term_candidate: [],
-      part_of_speech: this.currentNode.part_of_speech,
       position_x: String(this.currentNode.position_x),
       position_y: String(this.currentNode.position_y),
       color1: this.currentNode.color1,
@@ -164,6 +169,26 @@ class EditingVocabulary {
       });
     }
 
+    if (this.tmpTermDescription.list && this.tmpTermDescription.list.length > 0) {
+      dbData.term_description = this.tmpTermDescription.list[0];
+    }
+
+    if (this.tmpLanguage.list && this.tmpLanguage.list.length > 0) {
+      dbData.language = this.tmpLanguage.list[0];
+    }
+
+    if (this.tmpCreatedTime.list && this.tmpCreatedTime.list.length > 0) {
+      dbData.created_time = this.tmpCreatedTime.list[0];
+    }
+
+    if (this.tmpModifiedTime.list && this.tmpModifiedTime.list.length > 0) {
+      dbData.modified_time = this.tmpModifiedTime.list[0];
+    }
+
+    if (this.tmpOtherVocSynUri.list && this.tmpOtherVocSynUri.list.length > 0) {
+      dbData.other_voc_syn_uri = this.tmpOtherVocSynUri.list[0];
+    }
+
     return dbData;
   }
 
@@ -179,12 +204,22 @@ class EditingVocabulary {
       preferred_label: '',
       uri: '',
       broader_term: '',
+      other_voc_syn_uri: '',
+      term_description: '',
+      language: '',
+      created_time: '',
+      modified_time: '',
     };
     obj.id = data.id;
     obj.term = data.term;
     obj.preferred_label = data.preferred_label;
     obj.uri = data.uri;
     obj.broader_term = data.broader_term;
+    obj.other_voc_syn_uri = data.other_voc_syn_uri;
+    obj.term_description = data.term_description;
+    obj.language = data.language;
+    obj.created_time = data.created_time;
+    obj.modified_time = data.modified_time;
     obj.confirm = data.confirm;
 
     return obj;
@@ -196,12 +231,36 @@ class EditingVocabulary {
    */
   setEditingVocabularyData(dbData) {
     const editingVocabulary = [];
+
+    const uri_preferred_label = {};
     dbData.forEach( (data) => {
+      // Make dictionary {uri: preferred_label}
+      if (data.preferred_label && data.uri) {
+          uri_preferred_label[data.uri] = data.preferred_label;
+        }
+    });
+
+    dbData.forEach( (data) => {
+      // Convert broader_uri into broader_term
+      if (uri_preferred_label[data.broader_term] != undefined) {
+        if((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
+          data.broader_term = uri_preferred_label[data.broader_term];
+        }
+      } else if (data.broader_term != null) {
+        if ((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
+          data.broader_term = '';
+        }
+      }
+
       // If the parameter is string (Set the empty string character)
       if (!data.preferred_label) data.preferred_label = '';
+      if (!data.language) data.language = '';
       if (!data.uri) data.uri = '';
       if (!data.broader_term) data.broader_term = '';
-      if (!data.part_of_speech) data.part_of_speech = '';
+      if (!data.other_voc_syn_uri) data.other_voc_syn_uri = '';
+      if (!data.term_description) data.term_description = '';
+      if (!data.created_time) data.created_time = '';
+      if (!data.modified_time) data.modified_time = '';
       if (!data.position_x) data.position_x = '';
       if (!data.position_y) data.position_y = '';
       if (!data.color1) data.color1 = '';
@@ -760,10 +819,14 @@ class EditingVocabulary {
     id: null,
     uri: '',
     term: '',
+    language: '',
     preferred_label: '',
-    part_of_speech: '',
     hidden: false,
     broader_term: '',
+    other_voc_syn_uri: '',
+    term_description: '',
+    created_time: '',
+    modified_time: '',
     position_x: '',
     position_y: '',
     locked: null,
@@ -780,10 +843,14 @@ class EditingVocabulary {
       id: null,
       uri: '',
       term: '',
+      language: '',
       preferred_label: '',
-      part_of_speech: '',
       hidden: false,
       broader_term: '',
+      other_voc_syn_uri: '',
+      term_description: '',
+      created_time: '',
+      modified_time: '',
       position_x: '',
       position_y: '',
       locked: null,
@@ -803,12 +870,16 @@ class EditingVocabulary {
       id: null,
       uri: '',
       term: newTerm,
+      language: '',
       preferred_label: '',
-      part_of_speech: '',
       relationTermColor: '',
       vocabularyColor: '',
       hidden: false,
       broader_term: '',
+      other_voc_syn_uri: '',
+      term_description: '',
+      created_time: '',
+      modified_time: '',
       position_x: '',
       position_y: '',
       locked: null,
@@ -824,6 +895,8 @@ class EditingVocabulary {
   tmpDataClear() {
     this.tmpUri = {id: '', list: []};
     this.tmpUriInit = true;
+    this.tmpLanguage = {id: '', list: []};
+    this.tmpLanguageInit = true;
     this.tmpBroaderTerm = {id: '', list: []};
     this.tmpBroaderTermInit = true;
     this.tmpSynonym = {id: '', list: []};
@@ -831,6 +904,14 @@ class EditingVocabulary {
     this.tmpSynonymInit = true;
     this.tmpPreferredLabel = {id: '', list: []};
     this.tmpPreferredLabelInit = true;
+    this.tmpOtherVocSynUri = {id: '', list: []};
+    this.tmpOtherVocSynUriInit = true;
+    this.tmpTermDescription = {id: '', list: []};
+    this.tmpTermDescriptionInit = true;
+    this.tmpCreatedTime = {id: '', list: []};
+    this.tmpCreatedTimeInit = true;
+    this.tmpModifiedTime = {id: '', list: []};
+    this.tmpModifiedTimeInit = true;
     this.tmpBorderColor =
         {id: this.currentNode.id, color: this.currentNode.color1};
     this.tmpVocabularycolor =
@@ -859,6 +940,31 @@ class EditingVocabulary {
 
     // Broader term
     if (this.isSynonymChanged()) {
+      return true;
+    }
+
+    // Term description
+    if (this.isTermDescriptionChanged()) {
+      return true;
+    }
+
+    // Language
+    if (this.isLanguageChanged()) {
+      return true;
+    }
+
+    // Created time
+    if (this.isCreatedTimeChanged()) {
+      return true;
+    }
+
+    // Modified time
+    if (this.isModifiedTimeChanged()) {
+      return true;
+    }
+
+    // Other Voc Syn Uri
+    if (this.isOtherVocSynUriChanged()) {
       return true;
     }
 
@@ -984,6 +1090,142 @@ class EditingVocabulary {
   }
 
   /**
+   * Determine if the term description has been changed
+   * @return {boolean} - true: contain changes, false; not contain changes
+   */
+
+  isTermDescriptionChanged() {
+      if (this.currentNode.term_description) {
+        if (this.tmpTermDescription.list.length == 1) {
+          const tmpTermDescription = this.tmpTermDescription.list[0];
+          if (this.currentNode.term_description === tmpTermDescription) {
+            return false;
+          } else {
+            return true;
+          }
+        } else {
+          // Modified if not one is being edited
+          return true;
+        }
+      } else {
+        if (this.tmpTermDescription.list.length == 0) {
+          return false;
+        } else {
+          // If it is not set, even one is changed if it is being edited
+          return true;
+        }
+      }
+    }
+
+  /**
+   * Determine if the language has been changed
+   * @return {boolean} - true: contain changes, false; not contain changes
+   */
+   isLanguageChanged() {
+    if (this.currentNode.language) {
+      if (this.tmpLanguage.list.length == 1) {
+        const tmpLanguage = this.tmpLanguage.list[0];
+        if (this.currentNode.language === tmpLanguage) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        // Modified if not one is being edited
+        return true;
+      }
+    } else {
+      if (this.tmpLanguage.list.length == 0) {
+        return false;
+      } else {
+        // If it is not set, even one is changed if it is being edited
+        return true;
+      }
+    }
+  }
+
+  /**
+   * Determine if the created time has been changed
+   * @return {boolean} - true: contain changes, false; not contain changes
+   */
+   isCreatedTimeChanged() {
+    if (this.currentNode.language) {
+      if (this.tmpCreatedTime.list.length == 1) {
+        const tmpCreatedTime = this.tmpCreatedTime.list[0];
+        if (this.currentNode.created_time === tmpCreatedTime) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        // Modified if not one is being edited
+        return true;
+      }
+    } else {
+      if (this.tmpCreatedTime.list.length == 0) {
+        return false;
+      } else {
+        // If it is not set, even one is changed if it is being edited
+        return true;
+      }
+    }
+  }
+
+  /**
+   * Determine if the modified time has been changed
+   * @return {boolean} - true: contain changes, false; not contain changes
+   */
+   isModifiedTimeChanged() {
+    if (this.currentNode.language) {
+      if (this.tmpModifiedTime.list.length == 1) {
+        const tmpModifiedTime = this.tmpModifiedTime.list[0];
+        if (this.currentNode.modified_time === tmpModifiedTime) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        // Modified if not one is being edited
+        return true;
+      }
+    } else {
+      if (this.tmpModifiedTime.list.length == 0) {
+        return false;
+      } else {
+        // If it is not set, even one is changed if it is being edited
+        return true;
+      }
+    }
+  }
+
+  /**
+   * Determine if the other voc syn uri has been changed
+   * @return {boolean} - true: contain changes, false; not contain changes
+   */
+  isOtherVocSynUriChanged() {
+    if (this.currentNode.other_voc_syn_uri) {
+      if (this.tmpOtherVocSynUri.list.length == 1) {
+        const tmpOtherVocSynUri = this.tmpOtherVocSynUri.list[0];
+        if (this.currentNode.other_voc_syn_uri === tmpOtherVocSynUri) {
+          return false;
+        } else {
+          return true;
+        }
+      } else {
+        // Modified if not one is being edited
+        return true;
+      }
+    } else {
+      if (this.tmpOtherVocSynUri.list.length == 0) {
+        return false;
+      } else {
+        // If it is not set, even one is changed if it is being edited
+        return true;
+      }
+    }
+  }
+
+  /**
    * Select vocabulary
    * @param {String} term - vocbulary
    * @param {number} [id=null] id
@@ -1086,6 +1328,26 @@ class EditingVocabulary {
     }
     this.tmpSynonym.list = this.currentSynonym.list;
 
+    if (this.currentNode.term_description) {
+      this.tmpTermDescription = {id: this.currentNode.id, list: [this.currentNode.term_description]};
+    }
+
+    if (this.currentNode.language) {
+      this.tmpLanguage = {id: this.currentNode.id, list: [this.currentNode.language]};
+    }
+
+    if (this.currentNode.created_time) {
+      this.tmpCreatedTime = {id: this.currentNode.id, list: [this.currentNode.created_time]};
+    }
+
+    if (this.currentNode.modified_time) {
+      this.tmpModifiedTime = {id: this.currentNode.id, list: [this.currentNode.modified_time]};
+    }
+
+    if (this.currentNode.other_voc_syn_uri) {
+      this.tmpOtherVocSynUri = {id: this.currentNode.id, list: [this.currentNode.other_voc_syn_uri]};
+    }
+
     // Center the selected vocabulary in the visualization screen vocabulary tab and update each NodeStyle
     this.fitToCurrent();
   }
@@ -1187,6 +1449,7 @@ class EditingVocabulary {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
+          this.broaderUriToBroaderTerm = false;
           this.setEditingVocabularyData(response.data);
           // Reselect to reset tmp information
           this.setCurrentNodeByTerm(updateCurrent.term,
@@ -1615,7 +1878,6 @@ class EditingVocabulary {
         id: idCounter,
         term: data.term,
         hidden: (data.hidden)?data.hidden:false,
-        part_of_speech: (data.part_of_speech)?data.part_of_speech:'',
         relationTermColor: (data.color1)?data.color1:'black',
         confirm: data.confirm,
         // has_position: (!data.position_x || data.position_y !== null),
@@ -1709,9 +1971,14 @@ class EditingVocabulary {
           data: {
             id: data.id,
             term: data.term,
+            language: data.language,
             preferred_label: data.preferred_label,
             uri: data.uri,
             vocabularyColor: data.color1,
+            other_voc_syn_uri: data.other_voc_syn_uri,
+            term_description: data.term_description,
+            created_time: data.created_time,
+            modified_time: data.modified_time,
             confirm: data.confirm,
           },
           broader_term: data.broader_term,
@@ -1725,8 +1992,11 @@ class EditingVocabulary {
           data: {
             id: data.id,
             term: data.term,
+            language: data.language,
             preferred_label: data.preferred_label,
             uri: data.uri,
+            other_voc_syn_uri: data.other_voc_syn_uri,
+            term_description: data.term_description,
           },
           broader_term: data.broader_term,
           // Random number for filter
@@ -1806,6 +2076,7 @@ class EditingVocabulary {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
+          this.broaderUriToBroaderTerm = false;
           this.setEditingVocabularyData(response.data);
           // Reselect to reset tmp information
           this.setCurrentNodeByTerm(updateCurrent.term,
@@ -2147,6 +2418,12 @@ class EditingVocabulary {
             synonym +
             ' to editing_vocabulary by synonym.',
         );
+
+        console.log(`synonym = ${synonym}`);
+        console.log(`updateCurrent.preferred_label = ${updateCurrent.preferred_label}`);
+        console.log(`updateCurrent.uri = ${updateCurrent.uri}`);
+        console.log(`updateCurrent.broader_term = ${updateCurrent.broader_term}`);
+
         const addData = this.createFromReferenceVocabulary(
             synonym,
             updateCurrent.preferred_label,
@@ -2372,6 +2649,7 @@ class EditingVocabulary {
           if (deleteList.length > 0) {
             // Manual update requests
             if (history) {
+              this.broaderUriToBroaderTerm = false;
               this.setEditingVocabularyData(response.data);
 
               deleteList.forEach((id) => {
@@ -2407,6 +2685,7 @@ class EditingVocabulary {
                     },
                 )
                 .then((response) => {
+                  this.broaderUriToBroaderTerm = false;
                   this.setEditingVocabularyData(response.data);
                   // Reselect to reset tmp information
                   this.setCurrentNodeByTerm(
@@ -2450,6 +2729,7 @@ class EditingVocabulary {
                   this.openApiErrorDialog('語彙データ削除エラー', errCode, errMsg);
                 });
           } else {
+            this.broaderUriToBroaderTerm = false;
             this.setEditingVocabularyData(response.data);
 
             // Reselect to reset tmp information
@@ -2783,6 +3063,7 @@ class EditingVocabulary {
     list: [],
   };
   tmpBroaderTermInit = true;
+  broaderUriToBroaderTerm = true;
 
   /**
    * Create a screen display broader term list
@@ -3332,6 +3613,247 @@ class EditingVocabulary {
     return subordinateTerm;
   }
 
+  // Term Description //////////////////////
+  @observable tmpTermDescription = {
+    id: '',
+    list: [],
+  };
+  tmpTermDescriptionInit = true;
+
+  /**
+   * Create Term Description list for screen display
+   * @return {Array} - Term Description list
+   */
+  @computed get currentTermDescription() {
+    if (!(this.currentNode.id)) {
+      return [];
+    }
+    let filterList = [];
+    if (this.tmpTermDescription.id == this.currentNode.id) {
+      if ( this.tmpTermDescription.list.length > 0 ) {
+        filterList = this.tmpTermDescription.list;
+      }
+    } else {
+      if ( this.currentNode.term_description != '' ) {
+        filterList = [this.currentNode.term_description];
+      }
+    }
+    this.tmpTermDescription = false;
+    return filterList;
+  }
+
+  /**
+   * Term Description update event
+   * @param  {string} newValue Term Description
+   */
+  @action updataTermDescription(newValue) {
+    const array = [];
+
+    // Add term description received from component to list
+//    if (newValue !== '') {
+//      array.push(newValue);
+//    }
+
+  if (this.currentNode.term) {
+    newValue.forEach((term) => {
+      array.push(term);
+    });
+  }
+
+    this.tmpTermDescription.id = this.currentNode.id;
+    this.tmpTermDescription.list = array;
+  }
+
+  /**
+   * Delete and update the end of the term description list you are editing
+   */
+   @action popTermDescription() {
+    const newArray = [];
+    this.tmpTermDescription.list.forEach((data) => {
+      newArray.push(data);
+    });
+    newArray.pop();
+    this.updataTermDescription(newArray);
+  }
+
+  // Language //////////////////////
+  @observable tmpLanguage = {
+    id: '',
+    list: [],
+  };
+  tmpLanguageInit = true;
+
+  /**
+   * Create Language list for screen display
+   * @return {Array} - Language list
+   */
+  @computed get currentLanguage() {
+    if (!(this.currentNode.id)) {
+      return [];
+    }
+    let filterList = [];
+    if (this.tmpLanguage.id == this.currentNode.id) {
+      if ( this.tmpLanguage.list.length > 0 ) {
+        filterList = this.tmpLanguage.list;
+      }
+    } else {
+      if ( this.currentNode.language != '' ) {
+        filterList = [this.currentNode.language];
+      }
+    }
+    this.tmpLanguage = false;
+    return filterList;
+  }
+
+  /**
+   * Language update event
+   * @param  {string} newValue Language
+   */
+  @action updataLanguage(newValue) {
+    const array = [];
+
+    // Add URI received from component to list
+    if (newValue !== '') {
+      array.push(newValue);
+    }
+
+    this.tmpLanguage.id = this.currentNode.id;
+    this.tmpLanguage.list = array;
+  }
+
+  /**
+   * Delete and update the end of the language list you are editing
+   */
+   @action popTermDescription() {
+    const newArray = [];
+    this.tmpLanguage.list.forEach((data) => {
+      newArray.push(data);
+    });
+    newArray.pop();
+    this.updataLanguage(newArray);
+  }
+
+  // Created Time //////////////////////
+  @observable tmpCreatedTime = {
+    id: '',
+    list: [],
+  };
+  tmpCreatedTimeInit = true;
+
+  /**
+   * Create Created Time list for screen display
+   * @return {Array} - Created Time list
+   */
+  @computed get currentCreatedTime() {
+    if (!(this.currentNode.id)) {
+      return [];
+    }
+    let filterList = [];
+    if (this.tmpCreatedTime.id == this.currentNode.id) {
+      if ( this.tmpCreatedTime.list.length > 0 ) {
+        filterList = this.tmpCreatedTime.list;
+      }
+    } else {
+      if ( this.currentNode.created_time != '' ) {
+        filterList = [this.currentNode.created_time];
+      }
+    }
+    this.tmpCreatedTime = false;
+    return filterList;
+  }
+
+  /**
+   * Created Time update event
+   * @param  {string} newValue Created Time
+   */
+  @action updataCreatedTime(newValue) {
+    const array = [];
+
+    // Add URI received from component to list
+    if (newValue !== '') {
+      array.push(newValue);
+    }
+
+    this.tmpCreatedTime.id = this.currentNode.id;
+    this.tmpCreatedTime.list = array;
+  }
+
+  /**
+   * Delete and update the end of the created time list you are editing
+   */
+   @action popCreatedTime() {
+    const newArray = [];
+    this.tmpCreatedTime.list.forEach((data) => {
+      newArray.push(data);
+    });
+    newArray.pop();
+    this.updataCreatedTime(newArray);
+  }
+
+  // Modified Time //////////////////////
+  @observable tmpModifiedTime = {
+    id: '',
+    list: [],
+  };
+  tmpModifiedTimeInit = true;
+
+  /**
+   * Create Modified Time list for screen display
+   * @return {Array} - Modified Time list
+   */
+  @computed get currentModifiedTime() {
+    if (!(this.currentNode.id)) {
+      return [];
+    }
+    let filterList = [];
+    if (this.tmpModifiedTime.id == this.currentNode.id) {
+      if ( this.tmpModifiedTime.list.length > 0 ) {
+        filterList = this.tmpModifiedTime.list;
+      }
+    } else {
+      if ( this.currentNode.modified_time != '' ) {
+        filterList = [this.currentNode.modified_time];
+      }
+    }
+    this.tmpModifiedTime = false;
+    return filterList;
+  }
+
+  /**
+   * Modified Time update event
+   * @param  {string} newValue Modified Time
+   */
+  @action updataModifiedTime(newValue) {
+    const array = [];
+
+    // Add URI received from component to list
+    if (newValue !== '') {
+      array.push(newValue);
+    }
+
+    this.tmpModifiedTime.id = this.currentNode.id;
+    this.tmpModifiedTime.list = array;
+  }
+
+  /**
+   * Delete and update the end of the modified time list you are editing
+   */
+   @action popModifiedTime() {
+    const newArray = [];
+    this.tmpModifiedTime.list.forEach((data) => {
+      newArray.push(data);
+    });
+    newArray.pop();
+    this.updataModifiedTime(newArray);
+  }
+
+  // Other Voc Syn Uri //////////////////////
+  @observable tmpOtherVocSynUri = {
+    id: '',
+    list: [],
+  };
+  tmpOtherVocSynUriInit = true;
+
   // confirm //////////////////////
   // Confirmed color information
   // The confirmed color information is stored in color2 in each term data of the editing vocabulary data, but since it becomes the same information, it is managed by confirmColor in app
@@ -3401,6 +3923,7 @@ class EditingVocabulary {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
+          this.broaderUriToBroaderTerm = false;
           this.setEditingVocabularyData(response.data);
 
           // Reselect to reset tmp information
