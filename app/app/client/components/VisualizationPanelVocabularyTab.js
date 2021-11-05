@@ -65,22 +65,34 @@ export default
     // this.initStyleForAllNodes();
     // this.layoutRun();
 
-    const cy = this.cy;
-
-    cy.minZoom(0.0025);
-    cy.maxZoom(1.2);
     // console.log('didmount end');
+    this.setCyMinMaxZoom();
   }
 
   /**
    * Update post-processing
    * Graph redraw process after update
    */
-  componentDidUpdate() {
-    this.updateElesClass();
+  componentDidUpdate(prevProps, prevState) {
+    
+    if (prevProps.editingVocabulary.editingVocabulary !== this.props.editingVocabulary.editingVocabulary) {
+      this.updateElesClass();
+    }else{     
+      this.onPanZoom();
+    }
     // console.log('didupdate');
   }
-
+  /**
+   * Max min scale
+   */
+   setCyMinMaxZoom() {
+    const cy = this.cy;
+    cy.minZoom(0.0025);
+    cy.maxZoom(1.2);
+    const cyw = cy.width();
+    const cyh = cy.height();
+    cy.viewport({zoom: 0.005, pan: {x: cyw/2, y: cyh/2}});
+  }
   /**
    * Update graph data
    */
@@ -258,8 +270,7 @@ export default
       });
       const selectTermList = this.props.editingVocabulary.selectedTermList;
       selectTermList.forEach((item, index)=>{
-        this.changeSelectedTermColor(item.id);     
-        const eles = cy.$id(item.id);
+        this.changeSelectedTermColor(item.id);
       });
       const currentNode = this.props.editingVocabulary.currentNode;
       if (currentNode.id) {
@@ -632,15 +643,17 @@ export default
   setUpListeners() {
     this.cy.on('click', 'node', (event) => {
       const target = event.target.data();
-      
       if (!this.props.editingVocabulary.currentNode.id 
         || (target.term == this.props.editingVocabulary.currentNode.term)) {
         this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
-      }      
-      const isAddTerm = this.props.editingVocabulary.setSelectedTermList(  target.term);
-      //this.onPanZoom();
-      this.changeSelectedTermColor( target.id, isAddTerm);
-      
+      }
+
+      const isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+      if(!isAddTerm && !this.props.editingVocabulary.currentNode.id && this.props.editingVocabulary.selectedTermList.length > 0){
+        const firstSelectedTerm = this.props.editingVocabulary.selectedTermList[0];
+        this.props.editingVocabulary.setCurrentNodeByTerm(firstSelectedTerm.term, firstSelectedTerm.id);
+      }
+      this.changeSelectedTermColor(target.id, isAddTerm);
     });
 
     this.cy.on('pan', (event) => {
@@ -842,7 +855,7 @@ export default
     // const disabledConfirm = this.props.editingVocabulary.currentNode.id;
     const nodeList = this.props.editingVocabulary.termListForVocabulary;
     const edgesList = this.props.editingVocabulary.edgesList;
-
+    const disabledConfirm = this.props.editingVocabulary.selectedTermList.length;
     return (
       <div>
         <Grid
@@ -866,7 +879,7 @@ export default
                 variant="contained"
                 color="primary"
                 size={'small'}
-                // disabled={!disabledConfirm}
+                disabled={!disabledConfirm}
                 onClick={()=>this.deselectionConfirm()}
               >
                 選択全解除
