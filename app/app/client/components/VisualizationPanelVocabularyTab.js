@@ -26,6 +26,7 @@ import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
 
 import {observer} from 'mobx-react';
 
@@ -99,9 +100,11 @@ export default
 
       // node Initialization
       this.initStyleForAllNodes();
-      this.layoutRun();
-      this.ajustSeparatingNode();
-      this.adjustOverlappingNode();
+      // this.layoutRun();
+      // this.ajustSeparatingNode();
+      // this.adjustOverlappingNode();
+      const layout = cy.layout({name: 'preset'});
+      layout.run();
 
       // Update layout
       const currentZoom = cy.zoom();
@@ -113,7 +116,7 @@ export default
       if (this.isReset) {
         this.isReset = false;
         // At the first display, not the entire display, narrow down to a certain magnification.
-        cy.zoom(0.8);
+        cy.zoom(0.005);
       } else {
         this.fitByPanZoom(currentPan, currentZoom);
       }
@@ -219,15 +222,32 @@ export default
 
       this.initStyleByPanZoom();
 
-      cy.batch(function() {
-        nodesInViewLimit100.forEach((node)=>{
-          node.addClass('showText');
-        });
+      // term point size adjustment
+      nodesInView.style({
+        "width": Math.max(5.0/zoom, 5.0),
+        "height": Math.max(5.0/zoom, 5.0),
       });
 
+      // edges line width adjustment
+      const edges = cy.edges();
+      edges.style({
+        "width": Math.max(3.0/zoom, 3.0),
+      });
+      
+      const nodeInViewStyle = {        
+        'width': 'label',
+        'height': 'label',
+        'font-size': Math.min(4800, Math.max(16/zoom, 0.01)),
+        'border-width': Math.max(2.0/zoom, 0.01),
+        'padding': Math.max(3.0/zoom, 0.01),
+      };
       nodesInViewLimit100.forEach((node, index)=>{
         const eles = cy.$id(node.data().id);
+        
+        // Adjust term size ↓ but Causes of color settings not working 
+        node.style(nodeInViewStyle);
 
+        node.addClass('showText');
         // Setting color information
         if (node.data().vocabularyColor) {
           eles.addClass(node.data().vocabularyColor);
@@ -236,7 +256,11 @@ export default
         // Setting of confirmation information
         this.setConfirmStyle(eles, node.data().confirm);
       });
-
+      const selectTermList = this.props.editingVocabulary.selectedTermList;
+      selectTermList.forEach((item, index)=>{
+        this.changeSelectedTermColor(item.id);     
+        const eles = cy.$id(item.id);
+      });
       const currentNode = this.props.editingVocabulary.currentNode;
       if (currentNode.id) {
         const selectedele = cy.$id(currentNode.id);
@@ -330,8 +354,32 @@ export default
       //   });
       // });
       // console.log('onPanZoom inTimeout end');
-    }, 500);
+    }, 10);
   }
+
+  changeSelectedTermColor(id, isAddTerm=true){
+
+    const cy = this.cy;    
+    const zoom = cy.zoom();
+    const bdrWidth = Math.max((isAddTerm?4.0:2.0)/zoom, 0.01);
+    const nodeSelectedStyle = {        
+      'width': 'label',
+      'height': 'label',
+      'font-size': Math.min(4800, Math.max(16/zoom, 0.01)),
+      'border-width': bdrWidth,
+      'padding': Math.max(3.0/zoom, 0.01),
+    };
+    const eles = cy.$id(id);
+    eles.style(nodeSelectedStyle);
+    eles.addClass('showText');
+    // Setting color information
+    if (eles.data().vocabularyColor) {
+      eles.addClass(eles.data().vocabularyColor);
+    }
+    // Setting of confirmation information
+    this.setConfirmStyle(eles, eles.data().confirm);
+  }
+
 
   /**
    * Correct overlapping nodes
@@ -584,7 +632,15 @@ export default
   setUpListeners() {
     this.cy.on('click', 'node', (event) => {
       const target = event.target.data();
-      this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+      
+      if (!this.props.editingVocabulary.currentNode.id 
+        || (target.term == this.props.editingVocabulary.currentNode.term)) {
+        this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+      }      
+      const isAddTerm = this.props.editingVocabulary.setSelectedTermList(  target.term);
+      //this.onPanZoom();
+      this.changeSelectedTermColor( target.id, isAddTerm);
+      
     });
 
     this.cy.on('pan', (event) => {
@@ -762,12 +818,31 @@ export default
   }
 
   /**
+   * deselection term
+   */
+   async deselectionConfirm(){
+    if( confirm("用語の選択を解除します。　よろしいですか？")){
+      const selectedTermList = this.props.editingVocabulary.selectedTermList;
+
+      for (let num in selectedTermList) {
+        const item = selectedTermList[num];
+        await this.changeSelectedTermColor(item.id, false);
+      }
+      await this.props.editingVocabulary.deselectTermList();
+      // currentNode clear
+      await this.props.editingVocabulary.setCurrentNodeByTerm('');
+    }
+  }
+
+  /**
    * render
    * @return {element}
    */
   render() {
+    // const disabledConfirm = this.props.editingVocabulary.currentNode.id;
     const nodeList = this.props.editingVocabulary.termListForVocabulary;
     const edgesList = this.props.editingVocabulary.edgesList;
+
     return (
       <div>
         <Grid
@@ -775,12 +850,27 @@ export default
           spacing={2}
           className={this.props.classes.visualizationVocabularyHead}
         >
-          <Grid item xs={8}>
+          <Grid item xs={4}>
             <Box>
               <Search
                 classes={this.props.classes}
                 editingVocabulary={this.props.editingVocabulary}
               />
+            </Box>
+          </Grid>
+          <Grid item xs={4}>
+            <Box>
+              <Button
+                style={{marginTop:'15px'}}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                // disabled={!disabledConfirm}
+                onClick={()=>this.deselectionConfirm()}
+              >
+                選択全解除
+              </Button>
             </Box>
           </Grid>
           <Grid item xs={4}>
@@ -805,6 +895,7 @@ export default
         <CytoscapeComponent
           id="relation_term_graph_container"
 
+          layout={{name: 'preset'}}
           cy={(cy) => {
             this.cy = cy;
           }}
@@ -824,72 +915,29 @@ export default
             {
               selector: 'node',
               style: {
-                'width': '6px',
-                'height': '6px',
-                // 'label': 'data(term)',
-                // 'text-valign': 'center',
-                // 'text-halign': 'center',
-                // 'shape': 'rectangle',
-                // 'width': 'label',
-                // 'height': 'label',
-                // 'text-background-opacity': 1,
-                // 'text-background-color': '#E3E3E3',
-                // 'text-background-color': 'white',
-                // 'text-background-padding': '4px',
-                // 'text-border-width': 1,
-                // 'text-border-opacity': 1,
               },
             },
             {
               selector: '.showText',
               style: {
-                'label': 'data(term)',
-                'text-valign': 'center',
-                'text-halign': 'center',
-                'shape': 'rectangle',
                 'width': 'label',
                 'height': 'label',
-                'text-background-opacity': 1,
-                'text-background-color': 'white',
-                'text-background-padding': '4px',
-                'text-border-width': 1,
-                'text-border-opacity': 1,
-              },
-            },
-            {
-              selector: '.hiddenText',
-              style: {
-                // 'color': 'black',
-                // 'background-color': 'blue',
-                // 'width': '6px',
-                // 'height': '6px',
-              },
-            },
-            {
-              selector: '.defaultNodeClass',
-              style: {
-                // 'label': 'data(term)',
-                // 'text-valign': 'center',
-                // 'text-halign': 'center',
-                // Preventing layout deviation by drawing node size equal to label (character) size in advance
-                // Hide node by matching its background color to viewport
-                'background-color': 'red',
-                // 'shape': 'rectangle',
-                // 'width': 'label',
-                // 'height': 'label',
-                // 'background-color': '#E3E3E3',
-                // 'text-background-opacity': 1,
-                // 'text-background-color': 'white',
-                // 'text-background-padding': '4px',
-                // 'text-border-width': 1,
-                // 'text-border-opacity': 1,
+                'color': 'black',
+                'text-background-shape': 'rectangle',
+                'text-max-width': '200000px',
+                'text-valign': 'center',
+                'text-halign': 'center',
+                'text-wrap': 'wrap',
+                'content': 'data(term)',
+                'shape': 'rectangle',
+                'background-opacity': 0.6,
               },
             },
             {
               selector: '.selected',
               style: {
                 'z-index': 100,
-                'text-border-width': 3,
+                'border-width': 3,
               },
             },
             {
@@ -928,133 +976,133 @@ export default
             {
               selector: '.black',
               style: {
-                'text-border-color': 'black',
+                'border-color': 'black',
               },
             },
             {
               selector: '.brown',
               style: {
-                'text-border-color': '#795548',
+                'border-color': '#795548',
               },
             },
             {
               selector: '.red',
               style: {
-                'text-border-color': '#f44336',
+                'border-color': '#f44336',
               },
             },
             {
               selector: '.orange',
               style: {
-                'text-border-color': '#ff9800',
+                'border-color': '#ff9800',
               },
             },
             {
               selector: '.yellow',
               style: {
-                'text-border-color': '#ffeb3b',
+                'border-color': '#ffeb3b',
               },
             },
             {
               selector: '.lightGreen',
               style: {
-                'text-border-color': '#8bc34a',
+                'border-color': '#8bc34a',
               },
             },
             {
               selector: '.green',
               style: {
-                'text-border-color': '#4caf50',
+                'border-color': '#4caf50',
               },
             },
             {
               selector: '.lightBlue',
               style: {
-                'text-border-color': '#03a9f4',
+                'border-color': '#03a9f4',
               },
             },
             {
               selector: '.blue',
               style: {
-                'text-border-color': '#2196f3',
+                'border-color': '#2196f3',
               },
             },
             {
               selector: '.deepPurple',
               style: {
-                'text-border-color': '#673ab7',
+                'border-color': '#673ab7',
               },
             },
             {
               selector: '.purple',
               style: {
-                'text-border-color': '#9c27b0',
+                'border-color': '#9c27b0',
               },
             },
             {
               selector: '.bgBlack',
               style: {
-                'text-background-color': 'white',
+                'background-color': 'white',
               },
             },
             {
               selector: '.bgBrown',
               style: {
-                'text-background-color': brown[200],
+                'background-color': brown[200],
               },
             },
             {
               selector: '.bgRed',
               style: {
-                'text-background-color': red[200],
+                'background-color': red[200],
               },
             },
             {
               selector: '.bgOrange',
               style: {
-                'text-background-color': orange[200],
+                'background-color': orange[200],
               },
             },
             {
               selector: '.bgYellow',
               style: {
-                'text-background-color': yellow[200],
+                'background-color': yellow[200],
               },
             },
             {
               selector: '.bgLightGreen',
               style: {
-                'text-background-color': lightGreen[200],
+                'background-color': lightGreen[200],
               },
             },
             {
               selector: '.bgGreen',
               style: {
-                'text-background-color': green[200],
+                'background-color': green[200],
               },
             },
             {
               selector: '.bgLightBlue',
               style: {
-                'text-background-color': lightBlue[200],
+                'background-color': lightBlue[200],
               },
             },
             {
               selector: '.bgBlue',
               style: {
-                'text-background-color': blue[200],
+                'background-color': blue[200],
               },
             },
             {
               selector: '.bgDeepPurple',
               style: {
-                'text-background-color': deepPurple[200],
+                'background-color': deepPurple[200],
               },
             },
             {
               selector: '.bgPurple',
               style: {
-                'text-background-color': purple[200],
+                'background-color': purple[200],
               },
             },
           ]}
