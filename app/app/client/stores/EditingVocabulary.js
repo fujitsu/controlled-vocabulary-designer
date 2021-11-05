@@ -78,7 +78,7 @@ class EditingVocabulary {
 
     if(tmpSelectedTermList.length == selectedTermList.length){
       selectedTermList=[ ...selectedTermList, {
-        'id': selectedID, 
+        'id': Number(selectedID), 
         'term': term,
       }];
       ret = true;
@@ -1191,10 +1191,13 @@ class EditingVocabulary {
 
     const selectedTermList = this.selectedTermList;
     let responseData=null;
-    selectedTermList.forEach((item)=>{
-      
-      responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
-    });
+    if(isHistory){
+      responseData = this.tmpUpdateColor(currentId, colorId, tmpColor, isHistory);
+    }else{
+      selectedTermList.forEach((item)=>{      
+        responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
+      });
+    }  
     //if( responseData)this.setEditingVocabularyData(responseData);
   }
 
