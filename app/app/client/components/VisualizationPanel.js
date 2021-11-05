@@ -92,19 +92,19 @@ export default class VisualizationPanel extends React.Component {
             variant="scrollable"
             scrollButtons="auto"
           >
-            <Tab
+            {/* <Tab
               label="関連用語"
               {...this.a11yProps(0)}
               classes={{root: this.props.classes.tabs}}
-            />
+            /> */}
             <Tab
               label="語彙"
-              {...this.a11yProps(1)}
+              {...this.a11yProps(0)}
               classes={{root: this.props.classes.tabs}}
             />
           </Tabs>
         </AppBar>
-        <VisualizationTabPanel
+        {/* <VisualizationTabPanel
           value={this.state.value}
           editingVocabulary={editingVocabularyStore}
           index={0}
@@ -113,11 +113,11 @@ export default class VisualizationPanel extends React.Component {
             classes={this.props.classes}
             editingVocabulary={editingVocabularyStore}
           />
-        </VisualizationTabPanel>
+        </VisualizationTabPanel> */}
         <VisualizationTabPanel
           value={this.state.value}
           editingVocabulary={editingVocabularyStore}
-          index={1}
+          index={0}
         >
           <VisualizationPanelVocabularyTab
             ref={editingVocabularyStore.visualVocRef}
