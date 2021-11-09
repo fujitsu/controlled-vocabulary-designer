@@ -56,7 +56,6 @@
          break;
        }
      }
-     this.props.editingVocabulary.deselectTermList();
      this.props.editingVocabulary.setSelectedTermList(
           currentTerm,
      );
