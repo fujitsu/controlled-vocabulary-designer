@@ -239,7 +239,6 @@ def _create_update_payload(target_data):
     update_data['broader_term_candidate'] = \
         target_data['broader_term_candidate'] \
         if len(target_data['broader_term_candidate']) != 0 else []
-    update_data['part_of_speech'] = target_data['part_of_speech']
     update_data['position_x'] = target_data['position_x']
     update_data['position_y'] = target_data['position_y']
     update_data['color1'] = target_data['color1']
