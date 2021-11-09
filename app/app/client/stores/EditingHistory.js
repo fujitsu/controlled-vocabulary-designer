@@ -288,6 +288,7 @@ class EditingHistory {
                 data.preferred_label,
                 data.uri,
                 data.broader_term,
+                data.term_description,
             );
         updateList.push(addData);
       });
@@ -298,6 +299,7 @@ class EditingHistory {
           target.preferred_label = data.preferred_label;
           target.uri = data.uri;
           target.broader_term = data.broader_term;
+          target.term_description = data.term_description;
           updateList.push(target);
         }
       });
@@ -328,6 +330,7 @@ class EditingHistory {
             data.preferred_label,
             data.uri,
             data.broader_term,
+            data.term_description,
         );
         updateList.push(addData);
       });
@@ -338,6 +341,7 @@ class EditingHistory {
           target.preferred_label = data.preferred_label;
           target.uri = data.uri;
           target.broader_term = data.broader_term;
+          target.term_description = data.term_description;
           updateList.push(target);
         }
       });
@@ -614,6 +618,8 @@ class EditingHistory {
             previousTarget.broader_term,
             followingTarget.broader_term,
         );
+    message +=
+        this.makeTermDescriptionMessage(type, previousTarget.term_description, followingTarget.term_description);
 
     return message;
   }
@@ -921,6 +927,45 @@ class EditingHistory {
     }
 
     message += '\n　上位語 : ';
+    if ( (addWord) && (delWord) ) {
+      message += '"' + delWord + '"から';
+      message += '"' + addWord + '"に変更しました。';
+    } else if (!(delWord)) {
+      message += '"' + addWord + '"を追加しました。';
+    } else if (!(addWord)) {
+      message += '"' + delWord + '"を削除しました。';
+    } else {
+      // do nothing.
+    }
+
+    return message;
+  }
+
+  /**
+   * Create term description undo/redo message
+   * @param  {string} type 'undo' or 'redo' string.
+   * @param  {string} preTermDescription previous term description
+   * @param  {string} flwTermDescription following term description
+   * @return {string} - message
+   */
+   makeTermDescriptionMessage(type, preTermDescription, flwTermDescription) {
+    console.log('[makeUriMessage] pre:' + preTermDescription + ', flw:' + flwTermDescription);
+    let message = '';
+    if ( preTermDescription === flwTermDescription ) {
+      return message;
+    }
+
+    let addWord = '';
+    let delWord = '';
+    if (this.STR_UNDO === type) {
+      addWord = preTermDescription;
+      delWord = flwTermDescription;
+    } else { // redo
+      addWord = flwTermDescription;
+      delWord = preTermDescription;
+    }
+
+    message += '\n　用語の説明 : ';
     if ( (addWord) && (delWord) ) {
       message += '"' + delWord + '"から';
       message += '"' + addWord + '"に変更しました。';

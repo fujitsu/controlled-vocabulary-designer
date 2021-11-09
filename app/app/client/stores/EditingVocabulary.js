@@ -314,6 +314,7 @@ class EditingVocabulary {
       preferredLabel,
       uri = null,
       broaderTerm = null,
+      term_description = null,
   ) {
     const findData = this.editingVocabulary.find((data) => data.term == term);
     if (findData != undefined) {
@@ -343,6 +344,7 @@ class EditingVocabulary {
     };
     if (uri) createData.uri = uri;
     if (broaderTerm) createData.broader_term = broaderTerm;
+    if (term_description) createData.term_description = term_description;
     return createData;
   }
 
