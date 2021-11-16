@@ -53,22 +53,33 @@ export default class Search extends React.Component {
       let result;
       switch (editingVocabulary.currentVisualTab.id) {
         case 0:
-          result = editingVocabulary.termListForRelationWord
-              .find((node) => // Case-insensitive comparison
-                node.data.term.toUpperCase() === convStr.toUpperCase());
-          if (result) {
-            editingVocabulary.setCurrentNodeByTerm(
-                result.data.term, '', null, true);
-          } else {
-            this.handleClickOpen(this.state.value);
-          }
-          break;
-        case 1:
+        // Temporarily commented out, scheduled to be deleted 
+        //     when organizing the Visualization Panel 
+        // ------------------------------------------------------------
+        //   result = editingVocabulary.termListForRelationWord
+        //       .find((node) => // Case-insensitive comparison
+        //         node.data.term.toUpperCase() === convStr.toUpperCase());
+        //   if (result) {
+        //     editingVocabulary.deselectTermList();
+        //     editingVocabulary.setSelectedTermList(
+        //       result.term,
+        //     );
+        //     editingVocabulary.setCurrentNodeByTerm(
+        //         result.data.term, '', null, true);
+        //   } else {
+        //     this.handleClickOpen(this.state.value);
+        //   }
+        //   break;
+        // case 1:
           const targetFileData = editingVocabulary.getTargetFileData(
               editingVocabulary.selectedFile.id);
           result = targetFileData.find((node) => // Case-insensitive comparison
             node.term.toUpperCase() === convStr.toUpperCase());
           if (result) {
+            editingVocabulary.deselectTermList();
+            editingVocabulary.setSelectedTermList(
+              result.term,
+            );
             editingVocabulary.setCurrentNodeByTerm(
                 result.term, '', null, true);
           } else {
