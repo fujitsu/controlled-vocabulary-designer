@@ -5,6 +5,7 @@ file_controller.py COPYRIGHT FUJITSU LIMITED 2021
 
 import json
 import pandas as pd
+import numpy as np
 import pathlib
 import requests
 import rdflib
@@ -1341,11 +1342,28 @@ def _download_file_ev_serialize(pl_simple, p_format):
         df_org['broader_term_candidate'].str.replace('\'', '')
     # delete columns id hidden
     df_org.drop(columns=['id', 'hidden'], inplace=True)
+    # make dictionary {preferred_label: uri}
+    dic_preflabel_uri = dict(zip(df_org['preferred_label'], df_org['uri']))
+    # if broader_term is label, convert label into uri
+    col_broader_uri = []
+    for broader_term in list(df_org['broader_term']):
+        if broader_term in list(df_org['uri']):
+            col_broader_uri.append(broader_term)
+        elif broader_term in list(df_org['preferred_label']):
+            col_broader_uri.append(dic_preflabel_uri[broader_term])
+        else:
+            col_broader_uri.append(np.nan)
+    df_org.loc[:, 'broader_term'] = col_broader_uri
     # header change
     df_org = df_org.rename(columns={'term': '用語名',
                                     'preferred_label': '代表語',
+                                    'language': '言語',
                                     'uri': '代表語のURI',
                                     'broader_term': '上位語のURI',
+                                    'other_voc_syn_uri': '他語彙体系の同義語のURI',
+                                    'term_description': '用語の説明',
+                                    'created_time': '作成日',
+                                    'modified_time': '最終更新日',
                                     'broader_term_candidate': '上位語候補',
                                     'synonym_candidate': '同義語候補',
                                     'position_x': 'x座標値',
