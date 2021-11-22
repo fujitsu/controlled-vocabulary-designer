@@ -24,9 +24,13 @@ CREATE TABLE IF NOT EXISTS reference_vocabulary_1 (
   "id" serial PRIMARY KEY,
   "term" text NOT NULL,
   "preferred_label" text,
+  "language" text,
   "uri" text,
   "broader_term" text,
-  "part_of_speech" text,
+  "other_voc_syn_uri" text,
+  "term_description" text,
+  "created_time" text,
+  "modified_time" text,
   "position_x" text,
   "position_y" text
 );
@@ -35,9 +39,13 @@ CREATE TABLE IF NOT EXISTS reference_vocabulary_2 (
   "id" serial PRIMARY KEY,
   "term" text NOT NULL,
   "preferred_label" text,
+  "language" text,
   "uri" text,
   "broader_term" text,
-  "part_of_speech" text,
+  "other_voc_syn_uri" text,
+  "term_description" text,
+  "created_time" text,
+  "modified_time" text,
   "position_x" text,
   "position_y" text
 );
@@ -46,9 +54,13 @@ CREATE TABLE IF NOT EXISTS reference_vocabulary_3 (
   "id" serial PRIMARY KEY,
   "term" text NOT NULL,
   "preferred_label" text,
+  "language" text,
   "uri" text,
   "broader_term" text,
-  "part_of_speech" text,
+  "other_voc_syn_uri" text,
+  "term_description" text,
+  "created_time" text,
+  "modified_time" text,
   "position_x" text,
   "position_y" text
 );

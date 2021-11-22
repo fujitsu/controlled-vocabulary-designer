@@ -476,3 +476,4 @@ class EditingVocabulary(Model):
         """
 
         self._color2 = color2
+
