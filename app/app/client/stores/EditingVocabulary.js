@@ -288,12 +288,34 @@ class EditingVocabulary {
    */
   setReferenceVocabularyData(dbData) {
     const referenceVocabulary = [];
+    const uri_preferred_label = {};
     dbData.forEach( (data) => {
+      // Make dictionary {uri: preferred_label}
+      if (data.preferred_label && data.uri) {
+          uri_preferred_label[data.uri] = data.preferred_label;
+        }
+    });
+
+    dbData.forEach( (data) => {
+      // Convert broader_uri into broader_term
+      if (uri_preferred_label[data.broader_term] != undefined) {
+        if((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
+          data.broader_term = uri_preferred_label[data.broader_term];
+        }
+      } else if (data.broader_term != null) {
+        if ((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
+          data.broader_term = '';
+        }
+      }
       // If the parameter is string (Sets the empty string character)
       if (!data.preferred_label) data.preferred_label = '';
+      if (!data.language) data.language = '';
       if (!data.uri) data.uri = '';
       if (!data.broader_term) data.broader_term = '';
-      if (!data.part_of_speech) data.part_of_speech = '';
+      if (!data.other_voc_syn_uri) data.other_voc_syn_uri = '';
+      if (!data.term_description) data.term_description = '';
+      if (!data.created_time) data.created_time = '';
+      if (!data.modified_time) data.modified_time = '';
 
       referenceVocabulary.push(data);
     });
@@ -305,16 +327,25 @@ class EditingVocabulary {
    * Create editing vocabulary data from reference vocabulary
    * @param  {string} term - vocabulary
    * @param  {string} preferredLabel - preferred label
+   * @param  {string} [language=null] - language
    * @param  {string} [uri=null] - URI
    * @param  {string} [broaderTerm=null] - broader term
+   * @param  {string} [other_voc_syn_uri=null] - other voc syn uri
+   * @param  {string} [term_description=null] - term description
+   * @param  {string} [created_time=null] - created time
+   * @param  {string} [modified_time=null] - modified time
    * @return {object} - editing vocbulary data
    */
   createFromReferenceVocabulary(
       term,
       preferredLabel,
+      language = null,
       uri = null,
       broaderTerm = null,
+      other_voc_syn_uri = null,
       term_description = null,
+      created_time = null,
+      modified_time = null,
   ) {
     const findData = this.editingVocabulary.find((data) => data.term == term);
     if (findData != undefined) {
@@ -330,11 +361,15 @@ class EditingVocabulary {
     const createData = {
       term: term,
       preferred_label: preferredLabel,
+      language: '',
       uri: '',
       broader_term: '',
+      other_voc_syn_uri: '',
+      term_description: '',
+      created_time: '',
+      modified_time: '',
       synonym_candidate: [],
       broader_term_candidate: [],
-      part_of_speech: '',
       position_x: '',
       position_y: '',
       hidden: false,
@@ -343,8 +378,12 @@ class EditingVocabulary {
       confirm: 0,
     };
     if (uri) createData.uri = uri;
+    if (language) createData.language = language;
     if (broaderTerm) createData.broader_term = broaderTerm;
+    if (other_voc_syn_uri) createData.other_voc_syn_uri = other_voc_syn_uri;
     if (term_description) createData.term_description = term_description;
+    if (created_time) createData.created_time = created_time;
+    if (modified_time) createData.modified_time = modified_time;
     return createData;
   }
 
@@ -1999,6 +2038,8 @@ class EditingVocabulary {
             uri: data.uri,
             other_voc_syn_uri: data.other_voc_syn_uri,
             term_description: data.term_description,
+            created_time: data.created_time,
+            modified_time: data.modified_time,
           },
           broader_term: data.broader_term,
           // Random number for filter
