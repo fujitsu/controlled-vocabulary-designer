@@ -243,7 +243,7 @@ export default
       currentTerm = editingVocabulary.currentNode.term;
     } else {
       // Display the preferred label as the term name if the term is not selected
-      currentTerm = editingVocabulary.tmpPreferredLabel.list[0];
+      currentTerm = editingVocabulary.tmpPreferredLabel.list.length>0 ? editingVocabulary.tmpPreferredLabel.list[0] : '';
     }
     switch (reason) {
       // Preferred label error /////////////////////////////

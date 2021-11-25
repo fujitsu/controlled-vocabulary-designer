@@ -24,7 +24,7 @@
    constructor(props) {
      super(props);
      this.state = {
-       tabIndex: this.props.editingVocabulary.currentNode.id, 
+       tabIndex: this.props.editingVocabulary.currentNode.id ? this.props.editingVocabulary.currentNode.id : '', 
        open: false,
      };
    }
@@ -63,6 +63,7 @@
  
    render() {
      const sortedNodeList = this.props.editingVocabulary.sortedNodeList;
+     const currentId = this.props.editingVocabulary.currentNode.id ? this.props.editingVocabulary.currentNode.id : '';
      return (
        <form noValidate autoComplete="off">
          <Grid item xs={12}>
@@ -71,7 +72,7 @@
                open={this.state.open}
                onClose={this.handleClose}
                onOpen={this.handleOpen}
-               value={this.props.editingVocabulary.currentNode.id}
+               value={currentId}
                onChange={this.handleChange}
                className={this.props.classes.selectTerm}
              >
