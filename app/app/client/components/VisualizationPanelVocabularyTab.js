@@ -35,6 +35,7 @@ import Search from './Search';
 Cytoscape.use(dagre);
 Cytoscape.use(klay);
 
+
 /**
  * Visualization screen panels vocabulary tab components
  * @extends React
@@ -48,8 +49,8 @@ export default
     super();
     this.zoomTimeoutId = -1;
     this.updateElesTimeoutId = -1;
-    // this.isUpdate = false;
     this.isReset = true;
+    this.state = { transformTogle: false };
   }
 
   /**
@@ -57,15 +58,8 @@ export default
    * Graph information initialization
    */
   componentDidMount() {
-    // console.log('didmount start');
     this.setUpListeners();
     this.updateElesClass();
-
-    // Since the layout drawing of plug-in default is displayed momentarily, the layout drawing with the setting value is executed as the starting process.
-    // this.initStyleForAllNodes();
-    // this.layoutRun();
-
-    // console.log('didmount end');
     this.setCyMinMaxZoom();
   }
 
@@ -80,7 +74,6 @@ export default
     }else{     
       this.onPanZoom();
     }
-    // console.log('didupdate');
   }
   /**
    * Max min scale
@@ -97,7 +90,6 @@ export default
    * Update graph data
    */
   updateElesClass() {
-    // console.log('updateElesClass start');
     if (this.updateElesTimeoutId > 0) {
       clearTimeout(this.updateElesTimeoutId);
       this.updateElesTimeoutId = -1;
@@ -105,25 +97,17 @@ export default
 
     // Suppress redundant update processing by consecutive occurrence of events.
     this.updateElesTimeoutId = setTimeout( () => {
-      // console.log('updateElesClass inTimeout start');
-      // console.log('[updateElesClass]');
 
       const cy = this.cy;
 
       // node Initialization
       this.initStyleForAllNodes();
-      // this.layoutRun();
-      // this.ajustSeparatingNode();
-      // this.adjustOverlappingNode();
       const layout = cy.layout({name: 'preset'});
       layout.run();
 
       // Update layout
       const currentZoom = cy.zoom();
       const currentPan = cy.pan();
-      // console.log('[currentZoom: ' + currentZoom +
-      // '] [currentPan x: ' + currentPan.x + ', y: '+ currentPan.y + ']');
-
 
       if (this.isReset) {
         this.isReset = false;
@@ -135,8 +119,6 @@ export default
 
       this.onPanZoom();
 
-      // this.isUpdate = true;
-      // console.log('updateElesClass inTimeout end');
     }, 300);
   }
 
@@ -190,8 +172,6 @@ export default
     }
 
     this.zoomTimeoutId = setTimeout( () => {
-      // console.log('onPanZoom inTimeout start');
-      // console.log('[onPanZoom]');
       const cy = this.cy;
 
       // List of nodes in view
@@ -276,9 +256,6 @@ export default
       if (currentNode.id) {
         const selectedele = cy.$id(currentNode.id);
         selectedele.addClass('selected');
-        // cy.batch(function() {
-        //   selectedele.addClass('showText').style('text-opacity', 1);
-        // });
         selectedele.addClass('showText');
         // Setting of color information
         if (selectedele.data().vocabularyColor) {
@@ -296,10 +273,6 @@ export default
           });
           if (brdrTrmNode.length > 0) {
             if (!brdrTrmNode.hasClass('showText')) {
-              // console.log('addClass to ' + brdrTrmNode.data().term);
-              // cy.batch(function() {
-              //   brdrTrmNode.addClass('showText').style('text-opacity', 1);
-              // });
               brdrTrmNode.addClass('showText');
               const eles = cy.$id(brdrTrmNode.data().id);
               // Setting of color information
@@ -320,10 +293,6 @@ export default
           if (synonymNode.length > 0) {
             synonymNode.forEach((node) => {
               if (!node.hasClass('showText')) {
-                // console.log('addClass to ' + node.data().term);
-                // cy.batch(function() {
-                //   node.addClass('showText').style('text-opacity', 1);
-                // });
                 node.addClass('showText');
 
                 const eles = cy.$id(node.data().id);
@@ -339,32 +308,6 @@ export default
           }
         }
       }
-
-      // updateElesClass update the layout again immediately after, as it is often unstable
-      // if (this.isUpdate) {
-      //   const currentZoom = cy.zoom();
-      //   const currentPan = cy.pan();
-      //
-      //   this.layoutRun();
-      //
-      //   cy.zoom(currentZoom);
-      //   cy.pan(currentPan);
-      //
-      //   this.ajustSeparatingNode();
-      //   this.adjustOverlappingNode();
-      //
-      //   this.isUpdate = false;
-      // }
-
-      // cy.batch(function() {
-      //   nodesInView.forEach((node) => {
-      //     if (!node.hasClass('showText')) {
-      //       // node.addClass('hiddenText');
-      //       // node.removeClass('defaultNodeClass');
-      //     }
-      //   });
-      // });
-      // console.log('onPanZoom inTimeout end');
     }, 10);
   }
 
@@ -389,227 +332,6 @@ export default
     }
     // Setting of confirmation information
     this.setConfirmStyle(eles, eles.data().confirm);
-  }
-
-
-  /**
-   * Correct overlapping nodes
-   */
-  adjustOverlappingNode() {
-    // Position correction
-    // Adjust node overlaps individually
-    const nodes = this.cy.nodes();
-
-    // Collects nodeLists located in the same row
-    const sameLineList = [];
-    nodes.forEach((node) => {
-      // Extract the node that is co-located with the node
-      const sameLine = nodes.filter((data) =>
-        Math.trunc(data.position().y) == Math.trunc(node.position().y));
-
-      let isNotFind = true;
-      // The NodeList already added to sameLineList is duplicated, so do not add it
-      sameLineList.forEach((list) => {
-        const find = list.filter((data) =>
-          data.data().term == node.data().term);
-        if (find.length > 0) {
-          isNotFind = false;
-        }
-      });
-      if (isNotFind) {
-        sameLineList.push(sameLine);
-      }
-    });
-
-    // Correcting overlapping nodes
-    sameLineList.forEach((list) => {
-      let adjustFlg = false;
-      do {
-        adjustFlg = false;
-        list.forEach((a) => {
-          list.forEach((b) => {
-            if (a.data().term != b.data().term) {
-              const ax1 = a.boundingBox().x1;
-              const ax2 = a.boundingBox().x2;
-              const bx1 = b.boundingBox().x1;
-              const bx2 = b.boundingBox().x2;
-
-              // Adjusting b for nodes that have the following relationship
-              // Adjusting pattern1
-              //   | b |
-              // | a |
-              // ///////////
-              // Adjusting pattern 2
-              // |   b   |
-              //   | a |
-              if ((ax1 < bx1 && ax2 < bx2 && ax2 > (bx1 - 6)) ||
-                  (ax1 > bx1 && ax2 < bx2)) {
-                const adjust = ax2 - bx1;
-                const newXpos = b.position().x + adjust + 12;
-                // console.log('[adjustOverlappingNode] ' + b.data().term +
-                //   '. x: ' + Math.trunc(b.position().x) +
-                //   ' => ' + Math.trunc(newXpos));
-                b.position('x', newXpos);
-                adjustFlg = true;
-              }
-            }
-          });
-        });
-      } while (adjustFlg);
-    });
-  }
-
-  /**
-   * Adjusting the distant nodes of narrower terms
-   */
-  ajustSeparatingNode() {
-    // Correcting nodes too far
-    const cy = this.cy;
-    const nodes = cy.nodes();
-    const edges = cy.edges();
-
-    // Collected for each node with the same broader node
-    const relatedList = [];
-    nodes.forEach((node) => {
-      // Get the narrower edge information
-      const targetEdge = edges.filter((edge) =>
-        edge.data().target == node.data().id);
-
-      if (targetEdge.length > 0) {
-        // Fetch edge with common broader Node
-        const relatedEdges = edges.filter((edge) =>
-          edge.data().source == targetEdge.data().source);
-
-        // More than two edges with a common broader Node
-        // Check nodes that need correction
-        if (relatedEdges.length > 2) {
-          const related = [];
-          let isBottomLayer = true;
-          // Adjust the narrowest node group
-          relatedEdges.forEach((edge) => {
-            const node = cy.$id(edge.data().target);
-            related.push(node);
-            if (node.connectedEdges().length > 1) {
-              isBottomLayer = false;
-            }
-          });
-          if (isBottomLayer) {
-            relatedList.push(related);
-          }
-        }
-      }
-    });
-
-    relatedList.forEach((list) => {
-      list.sort((a, b) => {
-        if (a.position().x < b.position().x) return -1;
-        if (a.position().x > b.position().x) return 1;
-        return 0;
-      });
-
-      list.forEach((a, index) => {
-        if (index < (list.length - 1)) {
-          const b = list[index + 1];
-          if (Math.trunc(a.position().y) == Math.trunc(b.position().y)) {
-            const ax2 = a.boundingBox().x2;
-            const bx1 = b.boundingBox().x1;
-            if ((bx1 - ax2) > 500) {
-              const newXpos = a.position().x + (bx1 - ax2) - 30;
-              // console.log('[ajustSeparatingNode] ' + a.data().term +
-              //   '. x: ' + Math.trunc(a.position().x) +
-              //   ' => ' + Math.trunc(newXpos));
-              a.position('x', newXpos);
-            }
-          }
-        }
-      });
-    });
-  }
-
-  /**
-   * Execute layout update
-   */
-  layoutRun() {
-    // console.log('[layoutRun]');
-
-    /**
-    // cytoscape-dagre
-    const layout = this.cy.elements().layout({name: 'dagre'});
-    // number of ranks to keep between the source and target of the edge
-    layout.options.minLen = ( edge )=> {
-      if (edge.data().type == 'broader_term') {
-        return 1;
-      } else {
-        return 0;
-      }
-    };
-    **/
-
-    // /**
-    // cytoscape-klay
-    const layout = this.cy.elements().layout({name: 'klay'});
-    // // A function that applies a transform to the final node position
-    // layout.options.transform = ( node, pos ) => {
-    //   let result = 0;
-    //   for (let i=0; i< node.data().term.length; i++) {
-    //     const chr = node.data().term.charCodeAt(i);
-    //     if ((chr >= 0x00 && chr < 0x81) ||
-    //         (chr === 0xf8f0) ||
-    //         (chr >= 0xff61 && chr < 0xffa0) ||
-    //         (chr >= 0xf8f1 && chr < 0xf8f4)) {
-    //       // Add 1 for half-pitch characters
-    //       result += 1;
-    //     } else {
-    //       // Add 2 for all other characters
-    //       result += 2;
-    //     }
-    //   }
-    //   if (result > 16) {
-    //     // As klay's existing bug, the layout of a Node with a long string may overlap with an adjacent Node, so correct it
-    //     pos.x = pos.x + (result * Math.pow((result - 20), 1/2));
-    //   }
-    //   return pos;
-    // };
-    // Overall direction of edges:
-    // horizontal (right / left) or vertical (down / up)
-    layout.options.klay.direction = 'DOWN';
-    // The aimed aspect ratio of the drawing,
-    // that is the quotient of width by height
-    // default:1.6
-    layout.options.klay.aspectRatio = 3.2;
-    // Factor by which the usual spacing is
-    // multiplied to determine the in-layer spacing between objects.
-    // default: 1.0
-    layout.options.klay.inLayerSpacingFactor = 3.0;
-    // Whether the selected layouter should consider the full hierarchy
-    layout.options.klay.layoutHierarchy = false;
-    // Strategy for node layering.
-    // default:NETWORK_SIMPLEX
-    // param:NETWORK_SIMPLEX LONGEST_PATH INTERACTIVE
-    layout.options.klay.nodeLayering = 'NETWORK_SIMPLEX';
-    // Strategy for Node Placement
-    // default:BRANDES_KOEPF
-    // param:BRANDES_KOEPF LINEAR_SEGMENTS INTERACTIVE SIMPLE
-    layout.options.klay.nodePlacement = 'BRANDES_KOEPF';
-    // Seed used for pseudo-random number generators to control
-    // the layout algorithm; 0 means a new seed is generated
-    // default:1
-    layout.options.klay.randomizationSeed = 1;
-    // Whether each connected component should be processed separately
-    // Whether to place nodes by complexity
-    // default:true
-    layout.options.klay.separateConnectedComponents = true;
-    // Overall setting for the minimal
-    // amount of space to be left between objects
-    // default:20
-    layout.options.klay.spacing = 20;
-    // How much effort should be spent to produce a nice layout..
-    // default:7
-    layout.options.klay.thoroughness = 700;
-    // **/
-
-    // console.log('layout.run()');
-    layout.run();
   }
 
   /**
@@ -740,15 +462,8 @@ export default
             'hiddenText',
             'defaultNodeClass',
           ],
-      // ).addClass('defaultNodeClass')
       ).addClass('showText')
-          // .style('text-opacity', 0)
           .unselect();
-
-      // cy.nodes().addClass('defaultNodeClass');
-      // cy.nodes().style('text-opacity', 0);
-
-    // cy.nodes().unselect();
     });
   }
 
@@ -758,7 +473,6 @@ export default
   initStyleByPanZoom() {
     const cy = this.cy;
 
-    // cy.startBatch();
     cy.batch(function() {
       cy.nodes().removeClass(
           [
@@ -790,44 +504,7 @@ export default
             'bgPurple',
           ],
       ).removeStyle();
-      // .addClass('defaultNodeClass');
-      // .style('text-opacity', 0);
     });
-    // cy.endBatch();
-    // node initialization
-    // cy.nodes().removeClass(
-    //     [
-    //       'defaultNodeClass',
-    //       'selected',
-    //       'showText',
-    //       'hiddenText',
-    //       'black',
-    //       'brown',
-    //       'red',
-    //       'orange',
-    //       'yellow',
-    //       'lightGreen',
-    //       'green',
-    //       'lightBlue',
-    //       'blue',
-    //       'deepPurple',
-    //       'purple',
-    //       'bgBlack',
-    //       'bgBrown',
-    //       'bgRed',
-    //       'bgOrange',
-    //       'bgYellow',
-    //       'bgLightGreen',
-    //       'bgGreen',
-    //       'bgLightBlue',
-    //       'bgBlue',
-    //       'bgDeepPurple',
-    //       'bgPurple',
-    //     ],
-    // );
-    // cy.nodes().removeStyle();
-    // cy.nodes().addClass('defaultNodeClass');
-    // cy.nodes().style('text-opacity', 0);
   }
 
   /**
@@ -841,11 +518,95 @@ export default
         const item = selectedTermList[num];
         await this.changeSelectedTermColor(item.id, false);
       }
-      await this.props.editingVocabulary.deselectTermList();
       // currentNode clear
+      await this.props.editingVocabulary.deselectTermList();       
       await this.props.editingVocabulary.setCurrentNodeByTerm('');
     }
   }
+
+  /**
+   * coordinate transform
+   */
+  coordinateTransform(){
+    this.edgesTracsform(this.cy);
+  }
+
+  edgesTracsform(cy){
+  
+    const nodes = cy.nodes();
+    const edges = cy.edges();
+
+    nodes.lock();
+
+    edges.forEach((edge) => {
+
+      const snd = cy.$id(edge.data().source);
+      const tnd = cy.$id(edge.data().target);
+
+      snd.unlock();
+      tnd.unlock();      
+    });
+
+    // get roots
+    const sources = edges.sources();
+    const targets = edges.targets();
+
+    const roots = sources.filter((source,i)=>{
+      const hits = targets.filter((target) =>{
+        return source.data().term == target.data().term;
+      });
+      return hits.length?false:true;
+    });
+
+    // save roots data [ id & all connected elements & position ]
+    let saveRoots = [];
+    roots.forEach((node,i) => {
+      const id =node.data().id;
+      const suc =node.successors();
+      const posi = node.position();
+      
+      saveRoots = [...saveRoots, {id:id,successors :suc ,pos:{x:posi.x, y:posi.y}} ];
+    });
+    
+    // [ dagre ] layout options
+    const defaults={      
+      name: "dagre",
+      fit:false,
+      nodeDimensionsIncludeLabels:true,
+      rankDir: "TB",
+      ranker: "longest-path", 
+
+      stop: function (e) {
+
+        const cy = e.cy;
+        saveRoots.forEach((nd,i) => {
+          
+          const fromPosi = nd.pos;
+
+          const toNode = cy.$id(nd.id)
+          const toPosi = toNode.position();
+          
+          const diffX = fromPosi.x-toPosi.x;
+          const diffY = fromPosi.y-toPosi.y;
+
+          toNode.position({x:toPosi.x + diffX, y:toPosi.y - diffY});
+
+          nd.successors.forEach((suc,j) => {
+            
+            if(suc.group() =="nodes"){
+              const posi = suc.position();
+              suc.position({x:posi.x + diffX, y:posi.y - diffY});
+            }
+          });
+        });
+      }
+    }
+    
+    cy.elements().layout( defaults).run();
+    
+    nodes.unlock();
+  }
+
 
   /**
    * render
@@ -856,6 +617,7 @@ export default
     const nodeList = this.props.editingVocabulary.termListForVocabulary;
     const edgesList = this.props.editingVocabulary.edgesList;
     const disabledConfirm = this.props.editingVocabulary.selectedTermList.length;
+    const transformTogle = this.state.transformTogle;
     return (
       <div>
         <Grid
@@ -863,7 +625,7 @@ export default
           spacing={2}
           className={this.props.classes.visualizationVocabularyHead}
         >
-          <Grid item xs={4}>
+          <Grid item xs={5}>
             <Box>
               <Search
                 classes={this.props.classes}
@@ -871,10 +633,10 @@ export default
               />
             </Box>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={5}>
             <Box>
               <Button
-                style={{marginTop:'15px'}}
+                style={{marginTop:'15px', marginRight:'8px'}}
                 ml={3}
                 variant="contained"
                 color="primary"
@@ -884,9 +646,20 @@ export default
               >
                 選択全解除
               </Button>
+              <Button
+                style={{marginTop:'15px', marginRight:'8px'}}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                disabled={transformTogle}
+                onClick={()=>this.coordinateTransform()}
+              >
+              {transformTogle ? "座標変換済み" : "座標変換"}
+              </Button>
             </Box>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={2}>
             <Box>
               <FormControl className={this.props.classes.fileSelecter}>
                 <Select
