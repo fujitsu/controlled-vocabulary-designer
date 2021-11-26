@@ -836,6 +836,8 @@ class EditingVocabulary {
             });
           });
           break;
+        case '':
+          break;
         default:
           referenceVocabularyList.forEach((referenceVocabulary) => {
             referenceVocabulary.forEach((node) => {

@@ -69,37 +69,8 @@ return (
                 }
               }
               id="text-field-of-term_description-input"
-              options={
-                this.props.editingVocabulary.getCandidateTermList(
-                    'term_description',
-                )
-              }
+              options={this.props.editingVocabulary.getCandidateTermList('')}
               getOptionLabel={(option) => option}
-              renderOption={(option, {selected}) => (
-                <React.Fragment>
-                  <div style={{width: '100%'}}>
-                    <Box
-                      component="span"
-                      display="block"
-                      style={{fontSize: '16px'}}
-                    >
-                      {option}
-                    </Box>
-                    <Box
-                      component="span"
-                      display="block"
-                      style={{fontSize: '10px'}}
-                    >
-                      {
-                        this.props.editingVocabulary.getReferenceFromData(
-                            option,
-                            '',
-                        )
-                      }
-                    </Box>
-                  </div>
-                </React.Fragment>
-              )}
               renderTags={(tagValue, getTagProps) => {
                 return tagValue.map((option, index) => (
                   <EditPanelChipForOneChip
