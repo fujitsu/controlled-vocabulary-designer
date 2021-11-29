@@ -1274,21 +1274,23 @@ class EditingVocabulary {
    */
   @computed get sortedNodeList() {
     let targetData;
-    if (this.currentVisualTab.id === 0) {
-      const editingVocabulary = this.editingVocabulary;
-      let referenceVocabulary = [];
-      switch (this.homotopicFile.id) {
-        case 1: referenceVocabulary = this.referenceVocabulary1; break;
-        case 2: referenceVocabulary = this.referenceVocabulary2; break;
-        case 3: referenceVocabulary = this.referenceVocabulary3; break;
-        default: break;
-      }
+    // Temporary processing. Needs correction when repairing homotopic 
+    // -------------------------- 
+    // if (this.currentVisualTab.id === 0) {
+    //   const editingVocabulary = this.editingVocabulary;
+    //   let referenceVocabulary = [];
+    //   switch (this.homotopicFile.id) {
+    //     case 1: referenceVocabulary = this.referenceVocabulary1; break;
+    //     case 2: referenceVocabulary = this.referenceVocabulary2; break;
+    //     case 3: referenceVocabulary = this.referenceVocabulary3; break;
+    //     default: break;
+    //   }
 
-      // only the editing vocabulary is displayed. 
-      targetData = editingVocabulary
-    } else {
+    //   // only the editing vocabulary is displayed. 
+    //   targetData = editingVocabulary
+    // } else {
       targetData = this.getTargetFileData(this.selectedFile.id);
-    }
+    // }
 
     if (this.currentSort.key == 'ascend') {
       return targetData.slice().sort((a, b) => {
