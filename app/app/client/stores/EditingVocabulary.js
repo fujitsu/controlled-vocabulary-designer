@@ -1192,7 +1192,7 @@ class EditingVocabulary {
    * @return {boolean} - true: contain changes, false; not contain changes
    */
    isCreatedTimeChanged() {
-    if (this.currentNode.language) {
+    if (this.currentNode.created_time) {
       if (this.tmpCreatedTime.list.length == 1) {
         const tmpCreatedTime = this.tmpCreatedTime.list[0];
         if (this.currentNode.created_time === tmpCreatedTime) {
@@ -1219,7 +1219,7 @@ class EditingVocabulary {
    * @return {boolean} - true: contain changes, false; not contain changes
    */
    isModifiedTimeChanged() {
-    if (this.currentNode.language) {
+    if (this.currentNode.modified_time) {
       if (this.tmpModifiedTime.list.length == 1) {
         const tmpModifiedTime = this.tmpModifiedTime.list[0];
         if (this.currentNode.modified_time === tmpModifiedTime) {
