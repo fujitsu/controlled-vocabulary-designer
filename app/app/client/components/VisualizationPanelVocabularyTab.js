@@ -714,7 +714,7 @@ export default
 
           style={{
             width: '100%',
-            height: '630px',
+            height: '680px',
             backgroundColor: '#E3E3E3',
           }}
           stylesheet={[
