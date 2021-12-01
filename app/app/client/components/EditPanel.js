@@ -46,7 +46,7 @@ export default class EditPanel extends React.Component {
   render() {
     return (
       <div className={this.props.classes.root}>
-        <AppBar position="static" color="default">
+        {/* <AppBar position="static" color="default">
           <Tabs
             value={this.state.value}
             // onChange={(event, newValue) => this.setState({value: newValue})}
@@ -62,7 +62,7 @@ export default class EditPanel extends React.Component {
               classes={{root: this.props.classes.tabs}}
             />
           </Tabs>
-        </AppBar>
+        </AppBar> */}
         <EditTabPanel value={this.state.value} index={0}>
           <EditPanelVocabularyTab
             classes={this.props.classes}
