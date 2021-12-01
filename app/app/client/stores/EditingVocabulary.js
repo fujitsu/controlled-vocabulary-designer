@@ -71,14 +71,14 @@ class EditingVocabulary {
     let ret = false;
     let selectedTermList = this.selectedTermList;      
     const termListForVocabulary = this.termListForVocabulary;
-    const selectedID = this.getNodeIdByTerm( termListForVocabulary , term);
+    const selectedID = Number(this.getNodeIdByTerm( termListForVocabulary , term));
     const tmpSelectedTermList = selectedTermList.filter((item)=>{
       return item.id != selectedID;
     })
 
     if(tmpSelectedTermList.length == selectedTermList.length){
       selectedTermList=[ ...selectedTermList, {
-        'id': Number(selectedID), 
+        'id': selectedID, 
         'term': term,
       }];
       ret = true;
