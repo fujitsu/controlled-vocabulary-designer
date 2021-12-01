@@ -364,16 +364,36 @@ export default
    */
   setUpListeners() {
     this.cy.on('click', 'node', (event) => {
-      const target = event.target.data();
-      if (!this.props.editingVocabulary.currentNode.id 
-        || (target.term == this.props.editingVocabulary.currentNode.term)) {
-        this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
-      }
 
-      const isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
-      if(!isAddTerm && !this.props.editingVocabulary.currentNode.id && this.props.editingVocabulary.selectedTermList.length > 0){
-        const firstSelectedTerm = this.props.editingVocabulary.selectedTermList[0];
-        this.props.editingVocabulary.setCurrentNodeByTerm(firstSelectedTerm.term, firstSelectedTerm.id);
+      const target = event.target.data();
+      let isAddTerm=false;
+      const withKey = event.originalEvent.ctrlKey|| event.originalEvent.shiftKey;
+      if( !withKey){
+        if( this.props.editingVocabulary.selectedTermList.length > 1){
+          this.props.editingVocabulary.deselectTermList();
+          isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+          if(this.props.editingVocabulary.currentNode.id !=  target.id){
+            this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+          }
+        }else{
+          this.props.editingVocabulary.deselectTermList();
+          if(this.props.editingVocabulary.currentNode.id !=  target.id){
+            isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+          }
+          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+        }
+      }else{
+        isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+        if(isAddTerm && this.props.editingVocabulary.selectedTermList.length == 1){
+          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+        }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length > 0){
+          const firstSelectedTerm = this.props.editingVocabulary.selectedTermList.slice(0,1)[0];
+          if(this.props.editingVocabulary.currentNode.id != firstSelectedTerm.id){
+            this.props.editingVocabulary.setCurrentNodeByTerm(firstSelectedTerm.term, firstSelectedTerm.id);
+          }
+        }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length == 0){
+          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+        }
       }
       this.changeSelectedTermColor(target.id, isAddTerm);
     });
