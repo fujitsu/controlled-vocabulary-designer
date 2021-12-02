@@ -1196,7 +1196,7 @@ def _download_file_make(pl_simple):
             nameb = [
                 rdflib.URIRef(str(namebt[2])),
                 broader,
-                rdflib.Literal(str(name[1]))
+                rdflib.URIRef(str(name[1]))
             ]
             namel.append(nameb)
             # print('add broader:'+str(name[0])+' '+str(name[1]))
@@ -1216,7 +1216,7 @@ def _download_file_make(pl_simple):
             nameb = [
                 rdflib.URIRef(str(namenw[2])),
                 narrower,
-                rdflib.Literal(str(name[1]))
+                rdflib.URIRef(str(name[1]))
             ]
             namel.append(nameb)
             # print('add narrower:'+str(name[0])+' '+str(name[1]))
