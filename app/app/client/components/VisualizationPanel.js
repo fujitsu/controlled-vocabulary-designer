@@ -82,7 +82,7 @@ export default class VisualizationPanel extends React.Component {
   render() {
     return (
       <div className={this.props.classes.root}>
-        <AppBar position="static" color="default">
+        {/* <AppBar position="static" color="default">
           <Tabs
             value={this.state.value}
             onChange={(event, newValue) => this.selectTab(event, newValue)}
@@ -91,20 +91,20 @@ export default class VisualizationPanel extends React.Component {
             textColor="inherit"
             variant="scrollable"
             scrollButtons="auto"
-          >
-            <Tab
+          > */}
+            {/* <Tab
               label="関連用語"
               {...this.a11yProps(0)}
               classes={{root: this.props.classes.tabs}}
-            />
-            <Tab
+            /> */}
+            {/* <Tab
               label="語彙"
-              {...this.a11yProps(1)}
+              {...this.a11yProps(0)}
               classes={{root: this.props.classes.tabs}}
             />
           </Tabs>
-        </AppBar>
-        <VisualizationTabPanel
+        </AppBar> */}
+        {/* <VisualizationTabPanel
           value={this.state.value}
           editingVocabulary={editingVocabularyStore}
           index={0}
@@ -113,18 +113,18 @@ export default class VisualizationPanel extends React.Component {
             classes={this.props.classes}
             editingVocabulary={editingVocabularyStore}
           />
-        </VisualizationTabPanel>
-        <VisualizationTabPanel
+        </VisualizationTabPanel> */}
+        {/* <VisualizationTabPanel
           value={this.state.value}
           editingVocabulary={editingVocabularyStore}
-          index={1}
-        >
+          index={0}
+        > */}
           <VisualizationPanelVocabularyTab
             ref={editingVocabularyStore.visualVocRef}
             classes={this.props.classes}
             editingVocabulary={editingVocabularyStore}
           />
-        </VisualizationTabPanel>
+        {/* </VisualizationTabPanel> */}
       </div>
     );
   }
