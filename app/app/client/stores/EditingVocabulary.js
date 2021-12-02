@@ -556,6 +556,7 @@ class EditingVocabulary {
     this.currentNodeClear();
     this.tmpDataClear();
     this.resetLayoutForVocTab();
+    this.deselectTermList();
   }
 
   /**
