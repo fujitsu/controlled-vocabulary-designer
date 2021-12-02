@@ -56,8 +56,11 @@
          break;
        }
      }
+     this.props.editingVocabulary.setSelectedTermList(
+          currentTerm,
+     );
      this.props.editingVocabulary.setCurrentNodeByTerm(
-         currentTerm,
+          currentTerm,
      );
    }
  

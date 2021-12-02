@@ -41,6 +41,9 @@ class EditingVocabulary {
   // Example sentence index
   @observable dispNowIndex = 0;
 
+  // Array for selected term on Visual vocabulary Tab
+  @observable selectedTermList = [];
+
   updated = false;
   /**
    * Set vocabulary update flags for editing
@@ -54,6 +57,38 @@ class EditingVocabulary {
   clearUpdate() {
     this.updated = false;
   }
+
+  /**
+   * Set deselected term array
+   */
+  @action deselectTermList(){
+    this.selectedTermList = [];
+  }
+  /**
+   * Set selected term array
+   */
+  @action setSelectedTermList( term){
+    let ret = false;
+    let selectedTermList = this.selectedTermList;      
+    const termListForVocabulary = this.termListForVocabulary;
+    const selectedID = Number(this.getNodeIdByTerm( termListForVocabulary , term));
+    const tmpSelectedTermList = selectedTermList.filter((item)=>{
+      return item.id != selectedID;
+    })
+
+    if(tmpSelectedTermList.length == selectedTermList.length){
+      selectedTermList=[ ...selectedTermList, {
+        'id': selectedID, 
+        'term': term,
+      }];
+      ret = true;
+    }else{
+      selectedTermList=tmpSelectedTermList;
+    }    
+    this.selectedTermList = selectedTermList;
+    return ret;
+  }
+
   /**
    * Get editing vocabulary data
    */
@@ -1153,6 +1188,20 @@ class EditingVocabulary {
    * @param  {Boolean} [isHistory=false] - undo/redo
    */
   @action updateColor(currentId, colorId, tmpColor, isHistory = false) {
+
+    const selectedTermList = this.selectedTermList;
+    let responseData=null;
+    if(isHistory){
+      responseData = this.tmpUpdateColor(currentId, colorId, tmpColor, isHistory);
+    }else{
+      selectedTermList.forEach((item)=>{      
+        responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
+      });
+    }  
+    //if( responseData)this.setEditingVocabularyData(responseData);
+  }
+
+  tmpUpdateColor(currentId, colorId, tmpColor, isHistory = false) {
     const requestBody = [];
 
     const updateCurrent = this.editingVocabulary.find((data) =>
@@ -1187,10 +1236,10 @@ class EditingVocabulary {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
-          this.setEditingVocabularyData(response.data);
-          // Reselect to reset tmp information
-          this.setCurrentNodeByTerm(updateCurrent.term,
-              '', null, true);
+          // this.setEditingVocabularyData(response.data);
+          // // Reselect to reset tmp information
+          // this.setCurrentNodeByTerm(updateCurrent.term,
+          //     '', null, true);
 
           if (!(isHistory)) {
             editingHistoryStore.addHistory(history);
@@ -1701,8 +1750,19 @@ class EditingVocabulary {
   @computed get termListForVocabulary() {
     const targetData = this.getTargetFileData(this.selectedFile.id);
 
+    let referenceVocabulary = [];
+    switch (this.homotopicFile.id) {
+      case 1: referenceVocabulary = this.referenceVocabulary1; break;
+      case 2: referenceVocabulary = this.referenceVocabulary2; break;
+      case 3: referenceVocabulary = this.referenceVocabulary3; break;
+      default: break;
+    }
     const termListForVocabulary = [];
     targetData.forEach((data) => {
+
+      const find = referenceVocabulary.find((refere) => data.term === refere.term);
+      const position = this.calcPositionValueForHomotopic(data, find);
+
       // const randomId =
       // Math.floor(Math.random() * Math.floor(1000000000000000));
       if (0 == this.selectedFile.id) {
@@ -1715,6 +1775,10 @@ class EditingVocabulary {
             uri: data.uri,
             vocabularyColor: data.color1,
             confirm: data.confirm,
+          },
+          position: {
+            x: position.x,
+            y: position.y,
           },
           broader_term: data.broader_term,
           // Random number for filter
@@ -1729,6 +1793,10 @@ class EditingVocabulary {
             term: data.term,
             preferred_label: data.preferred_label,
             uri: data.uri,
+          },
+          position: {
+            x: position.x,
+            y: position.y,
           },
           broader_term: data.broader_term,
           // Random number for filter
