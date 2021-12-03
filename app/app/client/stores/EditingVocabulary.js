@@ -109,6 +109,7 @@ class EditingVocabulary {
           if (0 == this.selectedFile.id) {
             this.currentNodeClear();
             this.tmpDataClear();
+            this.deselectTermList();
             editingHistoryStore.initUndoStack();
           }
           this.resetLayoutForVocTab();
@@ -346,6 +347,7 @@ class EditingVocabulary {
               if (1 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
+                this.deselectTermList();
               }
 
               break;
@@ -357,6 +359,7 @@ class EditingVocabulary {
               if (2 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
+                this.deselectTermList();
               }
               break;
             case '3':
@@ -367,6 +370,7 @@ class EditingVocabulary {
               if (3 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
+                this.deselectTermList();
               }
               break;
             default:
