@@ -1029,31 +1029,14 @@ class EditingVocabulary {
   @action setCurrentNodeByTerm(
       term, id = '', synonymList = null, isForce = false) {
     let target = {};
-    if (this.currentVisualTab.id === 0) {
-      let referenceVocabulary = [];
-      switch (this.homotopicFile.id) {
-        case 1: referenceVocabulary = this.referenceVocabulary1; break;
-        case 2: referenceVocabulary = this.referenceVocabulary2; break;
-        case 3: referenceVocabulary = this.referenceVocabulary3; break;
-        default: break;
-      }
-      const targetData = [
-        ...this.editingVocabulary,
-        ...referenceVocabulary,
-      ];
-      target = targetData.find((obj) => {
+    if (!id) {
+      target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
         return (obj.term == term);
       });
     } else {
-      if (!id) {
-        target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
-          return (obj.term == term);
-        });
-      } else {
-        target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
-          return (obj.id == id);
-        });
-      }
+      target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
+        return (obj.id == id);
+      });
     }
 
     if (undefined == target) {
@@ -1751,60 +1734,25 @@ class EditingVocabulary {
   @computed get termListForVocabulary() {
     const targetData = this.getTargetFileData(this.selectedFile.id);
 
-    let referenceVocabulary = [];
-    switch (this.homotopicFile.id) {
-      case 1: referenceVocabulary = this.referenceVocabulary1; break;
-      case 2: referenceVocabulary = this.referenceVocabulary2; break;
-      case 3: referenceVocabulary = this.referenceVocabulary3; break;
-      default: break;
-    }
     const termListForVocabulary = [];
     targetData.forEach((data) => {
 
-      const find = referenceVocabulary.find((refere) => data.term === refere.term);
-      const position = this.calcPositionValueForHomotopic(data, find);
-
-      // const randomId =
-      // Math.floor(Math.random() * Math.floor(1000000000000000));
-      if (0 == this.selectedFile.id) {
-        // Editing vocabulary
-        termListForVocabulary.push({
-          data: {
-            id: data.id,
-            term: data.term,
-            preferred_label: data.preferred_label,
-            uri: data.uri,
-            vocabularyColor: data.color1,
-            confirm: data.confirm,
-          },
-          position: {
-            x: position.x,
-            y: position.y,
-          },
-          broader_term: data.broader_term,
-          // Random number for filter
-          // randomId: randomId,
+      // Editing vocabulary
+      termListForVocabulary.push({
+        data: {
+          id: data.id,
+          term: data.term,
+          preferred_label: data.preferred_label,
+          uri: data.uri,
+          vocabularyColor: data.color1?data.color1:'',
+          confirm: data.confirm?data.confirm:'',
         },
-        );
-      } else {
-        // Reference vocabulary
-        termListForVocabulary.push({
-          data: {
-            id: data.id,
-            term: data.term,
-            preferred_label: data.preferred_label,
-            uri: data.uri,
-          },
-          position: {
-            x: position.x,
-            y: position.y,
-          },
-          broader_term: data.broader_term,
-          // Random number for filter
-          // randomId: randomId,
+        position: {
+          x: data.position_x?this.calcPosition(data.position_x):null,
+          y: data.position_y?this.calcPosition(data.position_y):0,
         },
-        );
-      }
+        broader_term: data.broader_term,
+      });
     });
 
     return termListForVocabulary;
