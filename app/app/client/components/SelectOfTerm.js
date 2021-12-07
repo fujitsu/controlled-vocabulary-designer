@@ -56,12 +56,12 @@
          break;
        }
      }
-     this.props.editingVocabulary.setSelectedTermList(
-          currentTerm,
-     );
-     this.props.editingVocabulary.setCurrentNodeByTerm(
-          currentTerm,
-     );
+
+     this.props.editingVocabulary.setCurrentNodeByTerm( currentTerm);     
+     this.props.editingVocabulary.deselectTermList();
+     if( this.props.editingVocabulary.currentNode.id){
+      this.props.editingVocabulary.setSelectedTermList( currentTerm);
+     }
    }
  
    render() {
