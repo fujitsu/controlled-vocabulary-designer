@@ -1027,7 +1027,7 @@ def _chk_preferred_group(payload_s, preferredlist, looplist, key_preferred):
             return 0
         else:
             wk_preferred = item2['代表語'] if pd.notnull(item2['代表語']) else None
-            # 循環チェック
+            # Loop check
             for loopitem in looplist:
                 if loopitem == wk_preferred:
                     return 2
