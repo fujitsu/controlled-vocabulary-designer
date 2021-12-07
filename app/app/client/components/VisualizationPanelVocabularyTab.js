@@ -344,7 +344,6 @@ export default
     cy.zoom(zoom);
     if (this.props.editingVocabulary.currentNode.id) {
       const selectedele = cy.$id(this.props.editingVocabulary.currentNode.id);
-      selectedele.select();
 
       // Center selected eles
       cy.animate({

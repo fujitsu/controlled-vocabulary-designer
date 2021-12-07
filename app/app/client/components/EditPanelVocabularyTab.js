@@ -390,22 +390,9 @@ export default
   render() {
     const editingVocabulary = this.props.editingVocabulary;
     let fileId = editingVocabulary.selectedFile.id;
-    const currentRefFile =
-     editingVocabulary.getTargetFileData(editingVocabulary.homotopicFile.id);
-
-    const edit = editingVocabulary.editingVocabulary.find(
-        (edit) => editingVocabulary.currentNode.term === edit.term);
-
-    const refere = currentRefFile.find(
-        (ref) => editingVocabulary.currentNode.term === ref.term);
-
-    if (!edit && refere) {
-      fileId = editingVocabulary.homotopicFile.id;
-    }
-
     // Change border color disabled
     let disabledColor = true;
-    if (fileId == 0 && this.props.editingVocabulary.currentNode.id) {
+    if ( this.props.editingVocabulary.currentNode.id) {
       // Allow each component to operate during editing vocabulary selection and term selection
       disabledColor = false;
     }
@@ -426,13 +413,8 @@ export default
     // Undetermined while selecting a term when editing vocabulary pulldown is selected:enabled
     // No term selected when selecting vocabulary pull-down for editing:enabled
     const disabledTextField =
-     ( fileId == 0 &&
-       !isConfirm &&
-       this.props.editingVocabulary.currentNode.id) ||
-     (fileId == 0 &&
-       !this.props.editingVocabulary.currentNode.id) ?
-      false : true;
-
+     ( !isConfirm && this.props.editingVocabulary.currentNode.id) ||
+       ( !this.props.editingVocabulary.currentNode.id) ? false : true;
 
     // Fix button text
     let confirmButtonText = '確定';
