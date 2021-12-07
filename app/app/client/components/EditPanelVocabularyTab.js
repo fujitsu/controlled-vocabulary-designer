@@ -392,7 +392,7 @@ export default
     let fileId = editingVocabulary.selectedFile.id;
     // Change border color disabled
     let disabledColor = true;
-    if ( this.props.editingVocabulary.currentNode.id) {
+    if ( fileId == 0 && this.props.editingVocabulary.currentNode.id) {
       // Allow each component to operate during editing vocabulary selection and term selection
       disabledColor = false;
     }
