@@ -1752,7 +1752,7 @@ class EditingVocabulary {
           confirm: data.confirm?data.confirm:'',
         },
         position: {
-          x: data.position_x?this.calcPosition(data.position_x):null,
+          x: data.position_x?this.calcPosition(data.position_x):0,
           y: data.position_y?this.calcPosition(data.position_y):0,
         },
         broader_term: data.broader_term,
