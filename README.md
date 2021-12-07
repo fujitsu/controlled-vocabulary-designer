@@ -2,7 +2,7 @@
 
 CVD is a GUI support tool for creating controlled vocabulary.
 You can efficiently define synonymous and hierarchical relationships referring to
-outputs of natural language processing and existing controlled vocaburaly.
+outputs of natural language processing and existing controlled vocabulary.
 Moreover, you can see whole vocabulary on the application window and edit them interactively.
 The created controlled vocabulary can be exported as RDF file.
 
