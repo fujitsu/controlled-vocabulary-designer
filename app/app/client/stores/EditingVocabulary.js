@@ -105,6 +105,9 @@ class EditingVocabulary {
         )
         .then((response) => {
           // console.log("getEditingVocabularyDataFromDB response.");
+          if (this.visualVocRef.current) {
+            this.visualVocRef.current.situationArrReset(0);
+          }
           this.setUpdate();
           this.setEditingVocabularyData(response.data.EditingVocabulary);
           if (0 == this.selectedFile.id) {
@@ -339,6 +342,10 @@ class EditingVocabulary {
             },
         )
         .then((response) => {
+          
+          if (this.visualVocRef.current) {
+            this.visualVocRef.current.situationArrReset( param);
+          }
           switch (param) {
             case '1':
               this.referenceVocabulary1 =
