@@ -50,6 +50,7 @@ export default
     this.zoomTimeoutId = -1;
     this.updateElesTimeoutId = -1;
     this.isReset = true;
+    this.situationArr = [];
     this.state = { transformTogle: false };
   }
 
@@ -69,6 +70,7 @@ export default
    */
   componentDidUpdate(prevProps, prevState) {
     
+    this.setPanZoom();
     if (prevProps.editingVocabulary.editingVocabulary !== this.props.editingVocabulary.editingVocabulary) {
       this.updateElesClass();
     }else{     
@@ -162,6 +164,22 @@ export default
     }
   }
 
+  /**
+   * pan & zoom setting
+   * 
+   */
+  setPanZoom() {
+    const cy = this.cy;
+    
+    const initPan = {x: cy.width()/2, y: cy.height()/2};
+    if( undefined == this.situationArr[ this.props.editingVocabulary.selectedFile.id]){
+      cy.pan( initPan);
+      cy.zoom( 0.005);
+    }else{
+      cy.pan( this.situationArr[ this.props.editingVocabulary.selectedFile.id].pan || initPan);
+      cy.zoom( this.situationArr[ this.props.editingVocabulary.selectedFile.id].zoom || 0.005);
+    }
+  }
   /**
    * [onPanZoom description]
    */
@@ -360,6 +378,8 @@ export default
 
   /**
    * Deselect all nodes in cytoscape
+   *
+   * Called from EdithingVocablary.js 
    */
   cyDeselect(){
     this.cy.nodes().unselect();
@@ -405,13 +425,47 @@ export default
     });
 
     this.cy.on('pan', (event) => {
+      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
+        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
+          pan:undefined, 
+          zoom:undefined
+        }
+      }
+      const pan = this.cy.pan();
+      const p ={
+        x: pan.x, 
+        y: pan.y
+      };
+      this.situationArr[this.props.editingVocabulary.selectedFile.id].pan= p;
       this.onPanZoom();
     });
 
     this.cy.on('zoom', (event) => {
+      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
+        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
+          pan:undefined, 
+          zoom:undefined
+        }
+      }
+      const z = Number( this.cy.zoom());
+      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = z;
       this.onPanZoom();
     });
   }
+
+  /**
+  * Initialization of array storing zoom and pan for each file 
+  *
+  * Called from EdithingVocablary.js 
+  */
+  situationArrReset( num=-1){
+    if( num === -1){
+      this.situationArr = [];
+    }else{
+      this.situationArr[ num] = undefined;
+    }
+  }
+
 
   /**
    * Layout update process for vocabulary selection
