@@ -359,6 +359,13 @@ export default
   }
 
   /**
+   * Deselect all nodes in cytoscape
+   */
+  cyDeselect(){
+    this.cy.nodes().unselect();
+  }
+
+  /**
    * Event registration
    */
   setUpListeners() {

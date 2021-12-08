@@ -212,7 +212,7 @@ class EditingHistory {
     }
 
     const EditingVocabulary = editingVocabularyStore;
-    EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
+    // EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
     switch (history.action) {
       case 'color1':
         EditingVocabulary.updateColor(history.targetId, 'color1', color, true);

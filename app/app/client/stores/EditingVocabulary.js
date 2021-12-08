@@ -63,6 +63,7 @@ class EditingVocabulary {
    */
   @action deselectTermList(){
     this.selectedTermList = [];
+    this.cyDeselect();
   }
   /**
    * Set selected term array
@@ -1127,6 +1128,16 @@ class EditingVocabulary {
       this.visualVocRef.current.fitToCurrent();
     }
   }
+
+
+  /**
+   * Deselect all nodes in cytoscape in the visualization screen
+   */
+   cyDeselect() {
+    if (this.visualVocRef.current) {
+      this.visualVocRef.current.cyDeselect();
+    }
+  }  
   /**
    * Reset the layout of the visualization screen vocabulary tabs
    * (Update layout without taking over current pan, zoom)
