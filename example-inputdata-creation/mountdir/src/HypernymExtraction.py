@@ -46,13 +46,15 @@ def hypernym(txt_preprocessed_file, domain_word_file):
     ########## Extract broader term ##########
     hyper = {} # broader term dictionary ({keys: value} = {term name: broader termx multiple}) for return values
     for word in words:
-        synsets = wn.synsets(word,lang='jpn') # Don't forget lang = "jpn" for Japanese
-        hypers_a_word = [] # list containing all the broader term for word
-        for synset in synsets:
-            for hypernym in synset.hypernyms():
-                hypers_a_word.append(hypernym.lemma_names("jpn"))
-        hyper[word] = list(itertools.chain.from_iterable(hypers_a_word)) # convert a two-dimensional array to a one-dimensional array
-
+        try:
+            synsets = wn.synsets(word,lang='jpn') # Don't forget lang = "jpn" for Japanese
+            hypers_a_word = [] # list containing all the broader term for word
+            for synset in synsets:
+                for hypernym in synset.hypernyms():
+                    hypers_a_word.append(hypernym.lemma_names("jpn"))
+            hyper[word] = list(itertools.chain.from_iterable(hypers_a_word)) # convert a two-dimensional array to a one-dimensional array
+        except ValueError:
+            hyper[word] = []
     return hyper
 
 def check_arg(args, config):
