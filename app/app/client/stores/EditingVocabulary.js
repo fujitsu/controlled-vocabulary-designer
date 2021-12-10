@@ -3533,8 +3533,8 @@ class EditingVocabulary {
     const history = new History(
         'confirmChanged',
         currentNode.id,
-        !this.isConfirm,
-        this.isConfirm,
+        !isConfirm,
+        isConfirm,
     );
 
     const url = '/api/v1/vocabulary/editing_vocabulary/' + currentNode.term;
