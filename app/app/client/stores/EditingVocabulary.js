@@ -2390,9 +2390,11 @@ class EditingVocabulary {
    * @param  {array} updateList - updated vocabulary list
    * @param  {array} deleteList - deleted vocabulary list
    * @param  {object} current - vocabulary data to be updated
+   * @param  {object} history - history data 
+   * @param  {object} oldNode - vocabulary data to be updated
    * @param  {object} [history=null] - history information (null: undo/redo requests)
    */
-  updateRequest(updateList, deleteList, current, history = null) {
+  updateRequest(updateList, deleteList, current, history = null, oldNode = null) {
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
 
@@ -2451,7 +2453,7 @@ class EditingVocabulary {
                   this.setEditingVocabularyData(response.data);
                   // Reselect to reset tmp information
                   this.setCurrentNodeByTerm(
-                      current.term, current.id, null, true);
+                      current.term, current.id, null, oldNode?false:true);
 
                   if (history) {
                     if (!history.targetId) {
@@ -2463,6 +2465,10 @@ class EditingVocabulary {
                       }
                     }
                     editingHistoryStore.addHistory(history);
+
+                  }
+                  if( oldNode){
+                    this.setCurrentNodeByTerm( oldNode.term, oldNode.id, null, true);
                   }
                 }).catch((err) => {
                   console.log('[Error] message : ' + err.message);
@@ -2494,7 +2500,7 @@ class EditingVocabulary {
             this.setEditingVocabularyData(response.data);
 
             // Reselect to reset tmp information
-            this.setCurrentNodeByTerm(current.term, current.id, null, true);
+            this.setCurrentNodeByTerm(current.term, current.id, null, oldNode?false:true);
 
             if (history) {
               if (!history.targetId) {
@@ -2506,6 +2512,9 @@ class EditingVocabulary {
                 }
               }
               editingHistoryStore.addHistory(history);
+            }
+            if( oldNode){
+              this.setCurrentNodeByTerm( oldNode.term, oldNode.id, null, true);
             }
           }
         }).catch((err) => {
@@ -3524,8 +3533,8 @@ class EditingVocabulary {
     const history = new History(
         'confirmChanged',
         currentNode.id,
-        !this.isConfirm,
-        this.isConfirm,
+        !isConfirm,
+        isConfirm,
     );
 
     const url = '/api/v1/vocabulary/editing_vocabulary/' + currentNode.term;
