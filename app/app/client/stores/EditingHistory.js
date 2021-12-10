@@ -259,6 +259,7 @@ class EditingHistory {
    */
   execVocabulary(type, history) {
     const EditingVocabulary = editingVocabularyStore;
+    const oldNode = EditingVocabulary.currentNode;
     let currentData = history.following[0];
     if (!currentData) {
       currentData = history.previous[0];
@@ -356,7 +357,7 @@ class EditingHistory {
     console.log(
         '[makeSynonymMessage] deleteList :' + JSON.stringify(deleteList),
     );
-    EditingVocabulary.updateRequest(updateList, deleteList, currentData);
+    EditingVocabulary.updateRequest(updateList, deleteList, currentData, null, oldNode);
   }
 
   /**
