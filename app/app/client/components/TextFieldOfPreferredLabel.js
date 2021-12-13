@@ -66,15 +66,15 @@ export default
   onChange(event, newValue) {
     if (newValue.length > 1) {
       // When more than one preferred label is entered
-      const errorMsg = '標目テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+      const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
       // When a selected term or a term that is not a synonym is entered in the preferred label
       if (this.props.editingVocabulary.isInvalidPreferredLabel(newValue[0])) {
         const currentTerm = this.props.editingVocabulary.currentNode.term;
-        const errorMsg = '標目テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
+        const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
                          '\"' +currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
-                         '標目テキストボックスには、¥n' +
+                         '代表語テキストボックスには、¥n' +
                          '\"' + currentTerm + '\" または同義語の中から選んで記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
@@ -86,7 +86,7 @@ export default
         const currentTerm = this.props.editingVocabulary.currentNode.term;
         if (currentTerm) {
           // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
-          const errorMsg = '標目テキストボックスには \"' + currentTerm +
+          const errorMsg = '代表語テキストボックスには \"' + currentTerm +
                            '\" または同義語の中から選んで記入してください。';
           this.openSnackbar(errorMsg);
         }

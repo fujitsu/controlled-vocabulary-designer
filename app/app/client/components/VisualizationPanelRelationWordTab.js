@@ -5,8 +5,6 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import {withStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
-import Typography from '@material-ui/core/Typography';
-import Slider from '@material-ui/core/Slider';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -42,8 +40,6 @@ export default
     // this.state = {nodeNum: 0};
     this.setInitialPanZoom = false;
     this.zoomTimeoutId = -1;
-    this.opacityValue = 0;
-    this.homotopicValue = 0;
   }
 
   /**
@@ -121,23 +117,9 @@ export default
       'border-width': 0});
     cy.nodes().unselect();
 
-    const opacityValue = this.opacityValue;
-    const backgroundOpacity = opacityValue*(-0.006)+0.6;
-    const opacity = opacityValue*(-0.01)+1;
-
     termListForRelationWord.forEach((node, index) => {
       const eles = cy.$id(node.data.id);
       eles.addClass(node.data.relationTermColor);
-
-      // Hidden filter
-      if (node.data.hidden) {
-        eles.addClass('displayNone');
-      }
-
-      // Part of speech filter
-      if (this.props.editingVocabulary.isFilterNode(node.data.part_of_speech)) {
-        eles.addClass('displayNone');
-      }
 
       if (node.data.term === this.props.editingVocabulary.currentNode.term) {
         eles.addClass('selected');
@@ -173,16 +155,6 @@ export default
       const foundEdit = this.props.editingVocabulary.editingVocabulary.find(
           (data) => data.term === node.data.term);
 
-      if (!foundEdit) {
-        eles.style({
-          'background-opacity': backgroundOpacity,
-          'opacity': opacity,
-        });
-      }
-
-      // Value of the homotopic slider
-      const homotopicValue = this.props.editingVocabulary.homotopicValue;
-
       let selectedPosX;
       let selectedPosY;
       let visible = true;
@@ -196,35 +168,20 @@ export default
           selectedPosY = foundRef.position_y;
         }
 
-        if (homotopicValue === 0 &&
-        !(selectedPosX == 0 &&
-        selectedPosY == 0) &&
+        if (!(selectedPosX == 0 && selectedPosY == 0) &&
           (node.position.x === 0 && node.position.y === 0)) {
           selectedPosX = foundEdit.position_x;
           selectedPosY = foundEdit.position_y;
-          visible = false;
-        } else if (homotopicValue === 100 &&
-        !(foundRef.position_x == 0 &&
-        foundRef.position_y == 0) &&
-          (node.position.x === 0 && node.position.y === 0)) {
-          selectedPosX = foundRef.position_x;
-          selectedPosY = foundRef.position_y;
           visible = false;
         }
       } else if (foundEdit) {
         selectedPosX = foundEdit.position_x;
         selectedPosY = foundEdit.position_y;
-
-        if (homotopicValue === 100) {
-          visible = false;
-        }
       } else if (foundRef) {
         selectedPosX = foundRef.position_x;
         selectedPosY = foundRef.position_y;
 
-        if (homotopicValue === 0) {
-          visible = false;
-        }
+        visible = false;
       }
 
       if (!selectedPosX && !selectedPosY) {
@@ -340,28 +297,33 @@ export default
                 bb.y2 < ext.y2;
       });
 
-      // Homotopic hide and filter node (s) not visible
+      // get visible node
       const visibleNodesInView = nodesInView.filter((n) => {
         return n.style('visibility') === 'visible' &&
                !(n.hasClass('displayNone'));
       });
 
-      // 100 random visibleNodesInView
+      // get element near center
+      const cpX = ( ext.x1 + ext.w / 2 ) / zoom;
+      const cpY = ( ext.y1 + ext.h / 2 ) / zoom;
+      let sortArr=[];
+      visibleNodesInView.map((n, index)=>{
+        const bb = n.boundingBox();
+        sortArr = [...sortArr, {
+          'index': index,
+          'distance': Math.abs( bb.x1 / zoom - cpX ) + Math.abs( bb.y1 / zoom - cpY )
+        }]
+      })
+
+      sortArr.sort((a, b)=> { return a.distance - b.distance; });
+      if( sortArr.length > 100 ) sortArr.splice( 100);
+
+      // 100 visibleNodesInView
       let nodesInViewLimit100 = [];
-      if (visibleNodesInView.length > 100) {
-        let last = -1;
-        while (nodesInViewLimit100.length < 100) {
-          let ran;
-          do {
-            ran = Math.floor(Math.random() * visibleNodesInView.length);
-          } while (ran === last);
-          last = ran;
-          nodesInViewLimit100 =
-            [...nodesInViewLimit100, visibleNodesInView[ran]];
-        }
-      } else {
-        nodesInViewLimit100 = visibleNodesInView;
-      }
+      sortArr.forEach((data)=>{
+        nodesInViewLimit100 =
+          [...nodesInViewLimit100, visibleNodesInView[data.index]];
+      })
 
       const nodeInViewStyle = {
         'width': 'label',
@@ -441,7 +403,6 @@ export default
     this.cy.on('click', 'node', (event) => {
       const target = event.target.data();
       this.props.editingVocabulary.setCurrentNodeByTerm(target.term);
-      this.props.editingVocabulary.scrollToCurrent();
     });
 
     this.cy.on('pan', (event) => {
@@ -451,347 +412,6 @@ export default
     this.cy.on('zoom', (event) => {
       this.onPanZoom();
     });
-  }
-
-  /**
-   * Homotopic display slider action event
-   * @param  {object} event - information of event
-   * @param  {num} newValue - slider change value
-   */
-  homotopicSliderChange(event, newValue) {
-    const cy = this.cy;
-    const editingVocabulary = this.props.editingVocabulary;
-    this.homotopicValue = newValue;
-    editingVocabulary.homotopicValue = newValue;
-    // Triggers that change the coordinate values of the edit operations panel
-    editingVocabulary.editPanelPosTrigger = newValue;
-
-    const editingVocabFile = editingVocabulary.editingVocabulary;
-
-    const referenceVocabFile =
-       editingVocabulary.getTargetFileData(editingVocabulary.homotopicFile.id);
-
-    // Add reference vocabulary to avoid overlapping with editorial vocabulary
-    const refereList = [];
-    referenceVocabFile.forEach((ref) => {
-      const foundData =
-         editingVocabFile.find((edit) => edit.term === ref.term);
-      if (!foundData) {
-        refereList.push(ref);
-      }
-    });
-
-    // Related terms all terms displayed on the screen
-    const mergedData = [
-      ...editingVocabFile,
-      ...refereList,
-    ];
-
-    mergedData.forEach((termData, index) => {
-      // Extracts reference vocabulary data for homotopic display
-      const foundRef = referenceVocabFile.find(
-          (ref) => termData.term === ref.term);
-
-      const position =
-        editingVocabulary.calcPositionValueForHomotopic(
-            termData, foundRef, newValue);
-
-      const foundNode =
-         editingVocabulary.termListForRelationWord.find((node) =>
-           node.data.term === termData.term);
-
-      if (foundNode) {
-        const ele = cy.$id(foundNode.data.id);
-
-        const foundEdit = editingVocabFile.find(
-            (edit) => termData.term === edit.term);
-
-        let selectedPosX;
-        let selectedPosY;
-        let visible = true;
-
-        if (foundEdit && foundRef) {
-          selectedPosX = foundEdit.position_x;
-          selectedPosY = foundEdit.position_y;
-
-          if (!selectedPosX && !selectedPosY) {
-            selectedPosX = foundRef.position_x;
-            selectedPosY = foundRef.position_y;
-          }
-
-          if (newValue === 0 &&
-          !(selectedPosX == 0 &&
-          selectedPosY == 0) &&
-            (position.x === 0 && position.y === 0)) {
-            selectedPosX = foundEdit.position_x;
-            selectedPosY = foundEdit.position_y;
-            visible = false;
-          } else if (newValue === 100 &&
-          !(foundRef.position_x == 0 &&
-          foundRef.position_y == 0) &&
-            (position.x === 0 && position.y === 0)) {
-            selectedPosX = foundRef.position_x;
-            selectedPosY = foundRef.position_y;
-            visible = false;
-          }
-        } else if (foundEdit) {
-          selectedPosX = foundEdit.position_x;
-          selectedPosY = foundEdit.position_y;
-
-          if (newValue === 100) {
-            visible = false;
-          }
-        } else if (foundRef) {
-          selectedPosX = foundRef.position_x;
-          selectedPosY = foundRef.position_y;
-
-          if (newValue === 0) {
-            visible = false;
-          }
-        }
-
-        if (!selectedPosX && !selectedPosY) {
-          visible = false;
-        }
-
-        if (visible) {
-          ele.style({
-            visibility: 'visible',
-          });
-        } else {
-          ele.style({
-            visibility: 'hidden',
-          });
-        }
-
-        // Hides if the value of the homotopic slider is 0 and the target term is only in the reference vocabulary or if the value of the homotopic slider is 100 and the target term is only in the edited vocabulary.
-        // if ((foundEdit && foundRef) &&
-        //   (position.x === 0 && position.y === 0)) {
-        //   console.log('x');
-        //   if ((newValue === 100 &&
-        //     !(foundRef.position_x == 0 && foundRef.position_y == 0)) ||
-        //     (newValue === 0 &&
-        //       !(foundEdit.position_x == 0 && foundEdit.position_y == 0)) ||
-        //        !(foundRef.position_x == 0 && foundRef.position_y == 0) &&
-        //         !node.data.has_position) {
-        //     console.log('hidden');
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   } else {
-        //     console.log('visible');
-        //     ele.style({
-        //       visibility: 'visible',
-        //     });
-        //   }
-        // } else if ((position.x === 0 && position.y === 0) &&
-        //  (newValue === 100 && foundEdit)) {
-        //
-        //   ele.style({
-        //     visibility: 'hidden',
-        //   });
-        // } else if ((position.x === 0 && position.y === 0) &&
-        //  (newValue === 0 && foundRef)) {
-        //   ele.style({
-        //     visibility: 'hidden',
-        //   });
-        // } else {
-        //   ele.style({
-        //     visibility: 'visible',
-        //   });
-        // }
-
-
-        // if (foundEdit && foundRef) {
-        //   if (!node.data.has_position &&
-        //     (!(foundEdit.position_x == 0 && foundEdit.position_y == 0) &&
-        //       !(foundRef.position_x == 0 && foundRef.position_y == 0))) {
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   }
-        // } else if (foundEdit) {
-        //
-        //   if (
-        //     (foundEdit.position_x == 0 && foundEdit.position_y == 0)) {
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   } else if (newValue === 100) {
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   } else {
-        //     ele.style({
-        //       visibility: 'visible',
-        //     });
-        //   }
-        // } else if (foundRef) {
-        //   if (newValue === 0) {
-        //     ele.style({
-        //       visibility: 'hidden',
-        //     });
-        //   } else {
-        //     ele.style({
-        //       visibility: 'visible',
-        //     });
-        //   }
-        // }
-
-        ele.unlock();
-        ele.position(position);
-        ele.lock();
-      }
-    });
-    this.showRandomNode();
-  }
-
-  /**
-   * Transparency slider action event
-   * @param  {num} newValue - slider change value
-   */
-  opacitySliderChange(newValue) {
-    this.opacityValue = newValue;
-    const backgroundOpacity = this.opacityValue*(-0.006)+0.6;
-    const opacity = this.opacityValue*(-0.01)+1;
-
-    const cy = this.cy;
-    const editingVocabulary = this.props.editingVocabulary;
-    const editingVocabFile = editingVocabulary.editingVocabulary;
-
-    editingVocabulary.termListForRelationWord.forEach((node) => {
-      // Change the transparency of terms that exist only in reference terms from within related terms
-      const foundTermData =
-        editingVocabFile.find((editData) =>
-          node.data.term === editData.term);
-
-      if (!foundTermData) {
-        const ele = cy.$id(node.data.id);
-        ele.style({
-          'background-opacity': backgroundOpacity,
-          'opacity': opacity,
-        });
-      }
-    });
-  }
-
-  /**
-   * Random display of up to 100 nodes other than those shown in the visualization screen
-   */
-  showRandomNode() {
-    const cy = this.cy;
-
-    cy.nodes().removeStyle('width height border-width font-size padding');
-    cy.nodes().removeClass('bgBlack');
-
-    // List of nodes in view
-    const ext = cy.extent();
-    const nodesInView = cy.nodes().filter((n) => {
-      const bb = n.boundingBox();
-      return bb.x1 > ext.x1 &&
-              bb.x2 < ext.x2 &&
-              bb.y1 > ext.y1 &&
-              bb.y2 < ext.y2 &&
-              n.style('visibility') === 'visible' &&
-              !(n.hasClass('displayNone'));
-    });
-
-    // List of labeled nodes
-    let visibleNodesInView = nodesInView.filter((n) => {
-      return n.hasClass('showText');
-    });
-
-    // List of unlabeled nodes
-    let invisibleNodesInView = nodesInView.filter((n) => {
-      return !n.hasClass('showText');
-    });
-
-    const termListForRelationWord =
-       this.props.editingVocabulary.termListForRelationWord;
-    const zoom = this.cy.zoom();
-    termListForRelationWord.forEach((node, index) => {
-      const ele = cy.$id(node.data.id);
-      ele.removeClass('showText');
-      ele.removeClass('bgBlack');
-      ele.addClass(node.data.relationTermColor);
-      ele.style({'width': Math.max(6/zoom, 0.01),
-        'height': Math.max(6/zoom, 0.01),
-        'border-width': 0});
-    });
-
-    visibleNodesInView.forEach((node) => {
-      node.addClass('showText');
-    });
-
-    const nodeInViewStyle = {
-      'width': 'label',
-      'height': 'label',
-      'font-size': Math.min(4800, Math.max(16/zoom, 0.01)),
-      'border-width': Math.max(2.0/zoom, 0.01),
-      'padding': Math.max(3.0/zoom, 0.01),
-    };
-
-    if (nodesInView.length > 100) {
-      const shuffle = ([...array]) => {
-        for (let i = array.length - 1; i >= 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-      };
-
-      invisibleNodesInView = shuffle(invisibleNodesInView);
-
-      let visibleCnt = visibleNodesInView.length;
-      let invisibleCnt = 0;
-      nodesInView.forEach((node) => {
-        if (visibleCnt >= 100) return;
-        if (!node.hasClass('showText')) {
-          invisibleNodesInView[invisibleCnt].addClass('showText');
-          invisibleNodesInView[invisibleCnt].style(nodeInViewStyle);
-
-          visibleCnt++;
-          invisibleCnt++;
-        }
-      });
-    } else {
-      nodesInView.forEach((node) => {
-        node.addClass('showText');
-        node.style(nodeInViewStyle);
-      });
-    }
-
-
-    // Updating the list of labeled nodes
-    visibleNodesInView = nodesInView.filter((n) => {
-      return n.hasClass('showText');
-    });
-
-    visibleNodesInView.forEach((node, index)=>{
-      // node.addClass('showText');
-      node.style(nodeInViewStyle);
-      this.setConfirmStyle(node, node.data().confirm);
-    });
-
-    // Special precessing for selected
-    const currentTerm = this.props.editingVocabulary.currentNode.term;
-    const currentNode = termListForRelationWord.find((node) => {
-      return currentTerm === node.data.term;
-    });
-
-    if (currentNode) {
-      const selectedele = cy.$id(currentNode.data.id);
-      selectedele.addClass('showText');
-      this.setConfirmStyle(selectedele, selectedele.data().confirm);
-      selectedele.addClass('selected');
-      selectedele.style({
-        'width': 'label',
-        'height': 'label',
-        'font-size': Math.min(4800, Math.max(16/zoom, 0.01)),
-        'border-width': Math.max(4.0/zoom, 0.01),
-        'padding': Math.max(3.0/zoom, 0.01),
-      });
-    }
   }
 
   /**
@@ -810,130 +430,11 @@ export default
   render() {
     const currentNode = this.props.editingVocabulary.currentNode;
     /* eslint-disable no-unused-vars */
-    // For part of speech filter update monitoring
-    const Noun = this.props.editingVocabulary.partOfSpeechCheckList.Noun.value;
-    const Verb = this.props.editingVocabulary.partOfSpeechCheckList.Verb.value;
-    const Adjective =
-        this.props.editingVocabulary.partOfSpeechCheckList.Adjective.value;
-    const Adverb =
-        this.props.editingVocabulary.partOfSpeechCheckList.Adverb.value;
-    const Adnominal =
-        this.props.editingVocabulary.partOfSpeechCheckList.Adnominal.value;
-    const Interjection =
-        this.props.editingVocabulary.partOfSpeechCheckList.Interjection.value;
-    const Other =
-        this.props.editingVocabulary.partOfSpeechCheckList.Other.value;
     const color = currentNode.color1;
     /* eslint-enable no-unused-vars */
 
     const termListForRelationWord =
         this.props.editingVocabulary.termListForRelationWord;
-
-    const homotopicMarks = [
-      {
-        value: 0,
-        label: '編集用語彙',
-      },
-      {
-        value: 10,
-      },
-      {
-        value: 20,
-      },
-      {
-        value: 30,
-      },
-      {
-        value: 40,
-      },
-      {
-        value: 50,
-      },
-      {
-        value: 60,
-      },
-      {
-        value: 70,
-      },
-      {
-        value: 80,
-      },
-      {
-        value: 90,
-      },
-      {
-        value: 100,
-        label: '参照用語彙',
-      },
-    ];
-
-    const opacityMarks = [
-      {
-        value: 0,
-        label: '0%',
-      },
-      {
-        value: 10,
-      },
-      {
-        value: 20,
-      },
-      {
-        value: 30,
-      },
-      {
-        value: 40,
-      },
-      {
-        value: 50,
-      },
-      {
-        value: 60,
-      },
-      {
-        value: 70,
-      },
-      {
-        value: 80,
-      },
-      {
-        value: 90,
-      },
-      {
-        value: 100,
-        label: '100%',
-      },
-    ];
-
-    const VisualizationSlider = withStyles({
-      root: {
-        color: '#3f51b5',
-        height: 2,
-        padding: '15px 0',
-      },
-      valueLabel: {
-        'top': -15,
-        '& *': {
-          background: 'transparent',
-          color: '#000',
-        },
-      },
-      track: {
-        height: 2,
-      },
-      rail: {
-        height: 2,
-        opacity: 0.5,
-        backgroundColor: '#3f51b5',
-      },
-      mark: {
-        backgroundColor: '#3f51b5',
-        height: 8,
-        width: 1,
-        marginTop: -3,
-      },
-    })(Slider);
-
 
     return (
       <div>
@@ -950,7 +451,7 @@ export default
               />
             </Box>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={4} >
             <Box>
               <FormControl className={this.props.classes.fileSelecter}>
                 <Select
@@ -965,55 +466,6 @@ export default
                 </Select>
               </FormControl>
             </Box>
-          </Grid>
-        </Grid>
-
-        <Grid
-          container
-          spacing={3}
-          className={this.props.classes.sliderGridRoot}
-        >
-          <Grid item xs={6} className={this.props.classes.homotopicSlider}>
-            <Typography id="homotopic-slider" gutterBottom>
-              homotopic
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs>
-                <VisualizationSlider
-                  defaultValue={this.homotopicValue}
-                  track={false}
-                  aria-labelledby="discrete-slider-restrict"
-                  step={null}
-                  onChange={
-                    (event, newValue) =>
-                      this.homotopicSliderChange(event, newValue)
-                  }
-                  marks={homotopicMarks}
-                  valueLabelDisplay="on"
-                />
-              </Grid>
-            </Grid>
-          </Grid>
-
-          <Grid item xs={4} className={this.props.classes.opacitySlider}>
-            <Typography id="opacity-slider" gutterBottom>
-              opacity
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs>
-                <VisualizationSlider
-                  defaultValue={this.opacityValue}
-                  track={false}
-                  aria-labelledby="discrete-slider-restrict"
-                  step={null}
-                  onChange={
-                    (event, newValue) => this.opacitySliderChange(newValue)
-                  }
-                  marks={opacityMarks}
-                  valueLabelDisplay="on"
-                />
-              </Grid>
-            </Grid>
           </Grid>
         </Grid>
 

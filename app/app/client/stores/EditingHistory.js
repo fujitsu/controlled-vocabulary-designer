@@ -160,9 +160,6 @@ class EditingHistory {
       case 'hidden':
         this.execHidden(type, history);
         break;
-      case 'part_of_speech':
-        this.execPosFilter(type, history);
-        break;
       case 'vocabulary':
         this.execVocabulary(type, history);
         break;
@@ -215,7 +212,7 @@ class EditingHistory {
     }
 
     const EditingVocabulary = editingVocabularyStore;
-    EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
+    // EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
     switch (history.action) {
       case 'color1':
         EditingVocabulary.updateColor(history.targetId, 'color1', color, true);
@@ -256,33 +253,13 @@ class EditingHistory {
   }
 
   /**
-   * Part of speech filter undo/redo execution
-   * @param  {string} type 'undo' or 'redo' string.
-   * @param  {object} history - information of history
-   */
-  execPosFilter(type, history) {
-    const EditingVocabulary = editingVocabularyStore;
-
-    let req;
-    if (this.STR_UNDO === type) {
-      req = history.previous;
-    } else { // redo
-      req = history.following;
-    }
-
-    EditingVocabulary.deepCopyPosObj(
-        EditingVocabulary.tmpPartOfSpeechCheckList, req,
-    );
-    EditingVocabulary.upPartOfSpeech(true);
-  }
-
-  /**
    * Vocabulary information change undo/redo execution
    * @param  {string} type 'undo' or 'redo' string.
    * @param  {object} history - information of history
    */
   execVocabulary(type, history) {
     const EditingVocabulary = editingVocabularyStore;
+    const oldNode = EditingVocabulary.currentNode;
     let currentData = history.following[0];
     if (!currentData) {
       currentData = history.previous[0];
@@ -380,7 +357,7 @@ class EditingHistory {
     console.log(
         '[makeSynonymMessage] deleteList :' + JSON.stringify(deleteList),
     );
-    EditingVocabulary.updateRequest(updateList, deleteList, currentData);
+    EditingVocabulary.updateRequest(updateList, deleteList, currentData, null, oldNode);
   }
 
   /**
@@ -461,6 +438,7 @@ class EditingHistory {
   setMessage(type) {
     if (null == this.undoPointer) {
       this._undoMessage = this.STR_HISTORY_NONE;
+      this._redoMessage = this.STR_HISTORY_NONE;
       return;
     }
 
@@ -511,9 +489,6 @@ class EditingHistory {
         break;
       case 'hidden':
         result = this.makeHiddenMessage(type, history);
-        break;
-      case 'part_of_speech':
-        result = this.makePosMessage(type, history);
         break;
       case 'vocabulary':
         result = this.makeVocabularyMessage(type, history);
@@ -596,42 +571,6 @@ class EditingHistory {
   }
 
   /**
-   * Create part of speech undo/redo message
-   * @param  {string} type 'undo' or 'redo' string.
-   * @param  {object} history - information of history
-   * @return {string} - message
-   */
-  makePosMessage(type, history) {
-    let message = '「品詞フィルター」の情報を変更しました。';
-
-    Object.keys(history.previous).forEach( (key) => {
-      if (history.previous[key].value !== history.following[key].value) {
-        if (this.STR_UNDO === type) {
-          message +=
-            '\n　' +
-            history.previous[key].name +
-            ' : "' +
-            this.convPosStr(history.following[key].value) +
-            '"から"' +
-            this.convPosStr(history.previous[key].value) +
-            '"';
-        } else { // redo
-          message +=
-            '\n　' +
-            history.previous[key].name +
-            ' : "' +
-            this.convPosStr(history.previous[key].value) +
-            '"から"' +
-            this.convPosStr(history.following[key].value) +
-            '"';
-        }
-      }
-    });
-
-    return message;
-  }
-
-  /**
    * Create vocabulary change undo/redo message
    * @param  {string} type 'undo' or 'redo' string.
    * @param  {object} history - information of history
@@ -698,7 +637,7 @@ class EditingHistory {
     let message = '';
     if (target.preferred_label) {
       message =
-          '「標目：' + target.preferred_label + '」の情報を変更しました。\n';
+          '「代表語：' + target.preferred_label + '」の情報を変更しました。\n';
     } else {
       message =
           '「用語：' + target.term + '」の情報を変更しました。\n';
@@ -903,7 +842,7 @@ class EditingHistory {
       delWord = prePrfdLbl;
     }
 
-    message += '\n　標目 : ';
+    message += '\n　代表語 : ';
     if ( (addWord) && (delWord) ) {
       message += '"' + delWord + '"から';
       message += '"' + addWord + '"に変更しました。';

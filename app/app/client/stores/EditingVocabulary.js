@@ -41,6 +41,9 @@ class EditingVocabulary {
   // Example sentence index
   @observable dispNowIndex = 0;
 
+  // Array for selected term on Visual vocabulary Tab
+  @observable selectedTermList = [];
+
   updated = false;
   /**
    * Set vocabulary update flags for editing
@@ -54,6 +57,39 @@ class EditingVocabulary {
   clearUpdate() {
     this.updated = false;
   }
+
+  /**
+   * Set deselected term array
+   */
+  @action deselectTermList(){
+    this.selectedTermList = [];
+    this.cyDeselect();
+  }
+  /**
+   * Set selected term array
+   */
+  @action setSelectedTermList( term){
+    let ret = false;
+    let selectedTermList = this.selectedTermList;      
+    const termListForVocabulary = this.termListForVocabulary;
+    const selectedID = Number(this.getNodeIdByTerm( termListForVocabulary , term));
+    const tmpSelectedTermList = selectedTermList.filter((item)=>{
+      return item.id != selectedID;
+    })
+
+    if(tmpSelectedTermList.length == selectedTermList.length){
+      selectedTermList=[ ...selectedTermList, {
+        'id': selectedID, 
+        'term': term,
+      }];
+      ret = true;
+    }else{
+      selectedTermList=tmpSelectedTermList;
+    }    
+    this.selectedTermList = selectedTermList;
+    return ret;
+  }
+
   /**
    * Get editing vocabulary data
    */
@@ -69,11 +105,15 @@ class EditingVocabulary {
         )
         .then((response) => {
           // console.log("getEditingVocabularyDataFromDB response.");
+          if (this.visualVocRef.current) {
+            this.visualVocRef.current.situationArrReset(0);
+          }
           this.setUpdate();
           this.setEditingVocabularyData(response.data.EditingVocabulary);
           if (0 == this.selectedFile.id) {
             this.currentNodeClear();
             this.tmpDataClear();
+            this.deselectTermList();
             editingHistoryStore.initUndoStack();
           }
           this.resetLayoutForVocTab();
@@ -302,6 +342,10 @@ class EditingVocabulary {
             },
         )
         .then((response) => {
+          
+          if (this.visualVocRef.current) {
+            this.visualVocRef.current.situationArrReset( param);
+          }
           switch (param) {
             case '1':
               this.referenceVocabulary1 =
@@ -311,6 +355,7 @@ class EditingVocabulary {
               if (1 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
+                this.deselectTermList();
               }
 
               break;
@@ -322,6 +367,7 @@ class EditingVocabulary {
               if (2 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
+                this.deselectTermList();
               }
               break;
             case '3':
@@ -332,6 +378,7 @@ class EditingVocabulary {
               if (3 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
+                this.deselectTermList();
               }
               break;
             default:
@@ -368,76 +415,6 @@ class EditingVocabulary {
             errMsg = err.message;
           }
           this.openApiErrorDialog('参照用語彙データ取得エラー', errCode, errMsg);
-        });
-  }
-
-  /**
-   * Execute example sentence search
-   * @param {string} currentTerm - changed vocabulary
-   * @param {number} requestIndex index
-   */
-  @action getExampleMsg(currentTerm, requestIndex) {
-    const url = '/api/v1/example/' + currentTerm + '?index=' + requestIndex;
-    axios
-        .get(url,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-        )
-        .then((response) => {
-          console.log(
-              '[expample] term: ' +
-              currentTerm +
-              ', All: ' +
-              response.data.AllResultCount +
-              ', list: ' +
-              response.data.ExamplePhrases.length,
-          );
-          this.exampleResult.data.AllResultCount = response.data.AllResultCount;
-          this.exampleResult.data.ExamplePhrases = response.data.ExamplePhrases;
-          // Extract sample sentence data
-          this.examplePhrases = [];
-          if (this.searchTerm == this.currentNode.term) {
-            // In the case of re-searching the searched term, the retrieved example sentence data is taken over
-            this.examplePhrases =
-                this.examplePhrases.concat(this.examplePhrasesCopy);
-          }
-          this.exampleResult.data.ExamplePhrases.forEach((obj) => {
-            this.examplePhrases.push(obj.phrase);
-          });
-          this.examplePhrasesCopy = this.examplePhrases;
-          this.searchTerm = this.currentNode.term;
-          if (response.data.ExamplePhrases.length == 0) {
-            this.dispNowIndex = requestIndex;
-          } else {
-            this.dispNowIndex = requestIndex + 1;
-          }
-        }).catch((err) => {
-          console.log('[Error] message : ' + err.message);
-          let errMsg = '';
-          let errCode = -1;
-          // If there is a response
-          if (err.response) {
-            errCode = err.response.status;
-            switch (errCode) {
-              case 404:
-                // For errors defined in the API
-                if (err.response.data.message) {
-                  errMsg = err.response.data.message;
-                } else {
-                  errMsg = '不明なエラー発生';
-                }
-                break;
-              default:
-                errMsg = '不明なエラー発生';
-                break;
-            }
-          } else {
-            errMsg = err.message;
-          }
-          this.openApiErrorDialog('例文データ取得エラー', errCode, errMsg);
         });
   }
 
@@ -591,6 +568,7 @@ class EditingVocabulary {
     this.currentNodeClear();
     this.tmpDataClear();
     this.resetLayoutForVocTab();
+    this.deselectTermList();
   }
 
   /**
@@ -1063,31 +1041,14 @@ class EditingVocabulary {
   @action setCurrentNodeByTerm(
       term, id = '', synonymList = null, isForce = false) {
     let target = {};
-    if (this.currentVisualTab.id === 0) {
-      let referenceVocabulary = [];
-      switch (this.homotopicFile.id) {
-        case 1: referenceVocabulary = this.referenceVocabulary1; break;
-        case 2: referenceVocabulary = this.referenceVocabulary2; break;
-        case 3: referenceVocabulary = this.referenceVocabulary3; break;
-        default: break;
-      }
-      const targetData = [
-        ...this.editingVocabulary,
-        ...referenceVocabulary,
-      ];
-      target = targetData.find((obj) => {
+    if (!id) {
+      target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
         return (obj.term == term);
       });
     } else {
-      if (!id) {
-        target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
-          return (obj.term == term);
-        });
-      } else {
-        target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
-          return (obj.id == id);
-        });
-      }
+      target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
+        return (obj.id == id);
+      });
     }
 
     if (undefined == target) {
@@ -1158,7 +1119,6 @@ class EditingVocabulary {
 
     // Center the selected vocabulary in the visualization screen vocabulary tab and update each NodeStyle
     this.fitToCurrent();
-    this.scrollToCurrent();
   }
 
   /**
@@ -1175,6 +1135,16 @@ class EditingVocabulary {
       this.visualVocRef.current.fitToCurrent();
     }
   }
+
+
+  /**
+   * Deselect all nodes in cytoscape in the visualization screen
+   */
+   cyDeselect() {
+    if (this.visualVocRef.current) {
+      this.visualVocRef.current.cyDeselect();
+    }
+  }  
   /**
    * Reset the layout of the visualization screen vocabulary tabs
    * (Update layout without taking over current pan, zoom)
@@ -1224,6 +1194,20 @@ class EditingVocabulary {
    * @param  {Boolean} [isHistory=false] - undo/redo
    */
   @action updateColor(currentId, colorId, tmpColor, isHistory = false) {
+
+    const selectedTermList = this.selectedTermList;
+    let responseData=null;
+    if(isHistory){
+      responseData = this.tmpUpdateColor(currentId, colorId, tmpColor, isHistory);
+    }else{
+      selectedTermList.forEach((item)=>{      
+        responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
+      });
+    }  
+    //if( responseData)this.setEditingVocabularyData(responseData);
+  }
+
+  tmpUpdateColor(currentId, colorId, tmpColor, isHistory = false) {
     const requestBody = [];
 
     const updateCurrent = this.editingVocabulary.find((data) =>
@@ -1258,10 +1242,10 @@ class EditingVocabulary {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
-          this.setEditingVocabularyData(response.data);
-          // Reselect to reset tmp information
-          this.setCurrentNodeByTerm(updateCurrent.term,
-              '', null, true);
+          // this.setEditingVocabularyData(response.data);
+          // // Reselect to reset tmp information
+          // this.setCurrentNodeByTerm(updateCurrent.term,
+          //     '', null, true);
 
           if (!(isHistory)) {
             editingHistoryStore.addHistory(history);
@@ -1345,39 +1329,23 @@ class EditingVocabulary {
    */
   @computed get sortedNodeList() {
     let targetData;
-    if (this.currentVisualTab.id === 0) {
-      const editingVocabulary = this.editingVocabulary;
-      let referenceVocabulary = [];
-      switch (this.homotopicFile.id) {
-        case 1: referenceVocabulary = this.referenceVocabulary1; break;
-        case 2: referenceVocabulary = this.referenceVocabulary2; break;
-        case 3: referenceVocabulary = this.referenceVocabulary3; break;
-        default: break;
-      }
+    // Temporary processing. Needs correction when repairing homotopic 
+    // -------------------------- 
+    // if (this.currentVisualTab.id === 0) {
+    //   const editingVocabulary = this.editingVocabulary;
+    //   let referenceVocabulary = [];
+    //   switch (this.homotopicFile.id) {
+    //     case 1: referenceVocabulary = this.referenceVocabulary1; break;
+    //     case 2: referenceVocabulary = this.referenceVocabulary2; break;
+    //     case 3: referenceVocabulary = this.referenceVocabulary3; break;
+    //     default: break;
+    //   }
 
-      // When the homotopic ratio is 0, only the editing vocabulary is displayed. When the homotopic ratio is 100, only the reference vocabulary is displayed. The middle is a composite display.
-      if (this.editPanelPosTrigger == 0) {
-        targetData = editingVocabulary
-      } else if(this.editPanelPosTrigger >= 100) {
-        targetData = referenceVocabulary
-      } else {
-        // Add only terms that are not in the editing vocabulary
-        const margeData = [];
-        referenceVocabulary.forEach((merge) => {
-          const find = editingVocabulary.find((data) => data.term === merge.term);
-          if (!find) {
-            margeData.push(merge);
-          }
-        });
-
-        targetData = [
-          ...editingVocabulary,
-          ...margeData,
-        ];
-      }
-    } else {
+    //   // only the editing vocabulary is displayed. 
+    //   targetData = editingVocabulary
+    // } else {
       targetData = this.getTargetFileData(this.selectedFile.id);
-    }
+    // }
 
     if (this.currentSort.key == 'ascend') {
       return targetData.slice().sort((a, b) => {
@@ -1449,17 +1417,11 @@ class EditingVocabulary {
     this.tmpDataClear();
   }
 
-  // Slider value of homotopic in the visualization screen
-  // (edit operation tab render panel re-render trigger)
-  @observable editPanelPosTrigger = 0;
-
   /**
    * Edit operation tab map panel get coordinates for display
    * @return {object} - edit operation tab coordinates panel display coordinates
    */
   getCurrentNodePosition() {
-    // t (0 <= t <= 1)
-    const t = this.editPanelPosTrigger / 100;
     const editingVocabFile = this.editingVocabulary;
     const currentRefFile = this.getTargetFileData(this.homotopicFile.id);
     let currentPos = {
@@ -1494,13 +1456,9 @@ class EditingVocabulary {
       }
     }
 
-    // ((1 - t) * vec0) + (t * vec1)
-    if (edit && refere) {
-      // Calculates line coordinates for common editing and reference vocabulary
-      currentPos.position_x =
-         ((1 - t) * edit.position_x) + (t * posXMultipliedByMag);
-      currentPos.position_y =
-        ((1 - t) * edit.position_y) + (t * posYMultipliedByMag);
+    if (edit && refere) {;
+      currentPos.position_x = edit.position_x;
+      currentPos.position_y = edit.position_y;
 
       selectedPosX = edit.position_x;
       selectedPosY = edit.position_y;
@@ -1509,58 +1467,29 @@ class EditingVocabulary {
         selectedPosY = refere.position_y;
       }
 
-      // Hides the coordinate values in the edit operations panel when the slider value is 0 or 100 for the coordinate values (0, 0)
-      if (this.editPanelPosTrigger === 0 &&
-      !(selectedPosX == 0 &&
-      selectedPosY == 0) &&
+      // Hides the coordinate values in the edit operations panel when for the coordinate values (0, 0)
+      if (!(selectedPosX == 0 && selectedPosY == 0) &&
         (currentPos.position_x === 0 && currentPos.position_y === 0)) {
         selectedPosX = edit.position_x;
         selectedPosY = edit.position_y;
         currentPos = null;
-      } else if (this.editPanelPosTrigger === 100 &&
-      !(refere.position_x == 0 &&
-      refere.position_y == 0) &&
-        (currentPos.position_x === 0 && currentPos.position_y === 0)) {
-        selectedPosX = refere.position_x;
-        selectedPosY = refere.position_y;
-        currentPos = null;
       }
     } else if (edit) {
-      // For terms in editing vocabulary only 
-      currentPos.position_x =
-         ((1 - t) * edit.position_x) + (t * 0);
-      currentPos.position_y =
-        ((1 - t) * edit.position_y) + (t * 0);
+      currentPos.position_x = edit.position_x;
+      currentPos.position_y = edit.position_y;
 
       selectedPosX = edit.position_x;
       selectedPosY = edit.position_y;
 
-      // Hides the coordinate value of the edit operation panel when the slider value is 100 in the coordinate value (0, 0).
-      if (this.editPanelPosTrigger === 100 ||
-        !(edit.position_x == 0 &&
-         edit.position_y == 0) &&
-        (currentPos.position_x === 0 && currentPos.position_y === 0) &&
-        this.editPanelPosTrigger === 100) {
-        currentPos = null;
-      }
     } else if (refere) {
       // For terms in reference vocabulary only
-      currentPos.position_x =
-         ((1 - t) * 0) + (t * posXMultipliedByMag);
-      currentPos.position_y =
-        ((1 - t) * 0) + (t * posYMultipliedByMag);
+      currentPos.position_x = 0;
+      currentPos.position_y = 0;
 
       selectedPosX = refere.position_x;
       selectedPosY = refere.position_y;
 
-      // Hide the coordinate values in the Edit Operation panel when the slider value is 0 at the coordinate values (0, 0)
-      if (this.editPanelPosTrigger === 0 ||
-         !(refere.position_x == 0 &&
-         refere.position_y == 0) &&
-        (currentPos.position_x === 0 && currentPos.position_y === 0) &&
-        this.editPanelPosTrigger === 0) {
-        currentPos = null;
-      }
+      currentPos = null;
     }
 
     if (currentPos) {
@@ -1588,27 +1517,6 @@ class EditingVocabulary {
   }
 
   // //////////////////////////////////////////////////////
-
-  /**
-   * Ref for term list
-   * @type {Object}
-   */
-  sortedNodeListRef = React.createRef();
-
-  /**
-   * Scroll to the selected term in the term list
-   * @type {Number}
-   */
-  @action scrollToCurrent() {
-    const index = this.sortedNodeList.findIndex(
-        (node) => node.term === this.currentNode.term,
-    );
-    if (index != -1) {
-      // console.log('[scrollToCurrent] term: ' +
-      //   this.currentNode.term + ', index: ' + index);
-      this.sortedNodeListRef.current.scrollToItem(index, 'center');
-    }
-  }
 
   // node display MAX number
   DISP_NODE_MAX = 100;
@@ -1743,12 +1651,6 @@ class EditingVocabulary {
   }
 
   /**
-   * Homotopic slider adjustment value on the visualization screen related terms tab
-   * @type {Number}
-   */
-  homotopicValue = 0;
-
-  /**
    * Create nodedata for related terms tab
    * @param {object} data editing or reference vocabulary
    * @param {object} refer reference vocabulary
@@ -1763,7 +1665,7 @@ class EditingVocabulary {
     const randomId =
       Math.floor(Math.random() * Math.floor(1000000000000000));
     const position =
-      this.calcPositionValueForHomotopic(data, refer, this.homotopicValue);
+      this.calcPositionValueForHomotopic(data, refer);
 
     return {
       data: {
@@ -1793,32 +1695,12 @@ class EditingVocabulary {
    * Related terms tab coordinate value calculation
    * @param  {object} relationTerm - editing vocabulary data or reference vocabulary data
    * @param  {object} refer - reference vocabulary data with the same term as relationTerm
-   * @param  {number} homotopic - homotopic slide bar adjustment value
    * @return {object} - related term coordinate value
    */
-  calcPositionValueForHomotopic(relationTerm, refer, homotopic) {
-    // (0 <= t <= 1)
-    const t = homotopic / 100;
+  calcPositionValueForHomotopic(relationTerm, refer) {
     const position = {x: null, y: null};
     const editingVocabFile = this.editingVocabulary;
     const magForRef = config.magnification[0].reference;
-
-    let posXMultipliedByMag;
-    let posYMultipliedByMag;
-
-    if (refer) {
-      posXMultipliedByMag = refer.position_x;
-      posYMultipliedByMag = refer.position_y;
-
-      // Set the magnification of the reference vocabulary
-      if (magForRef > 0) {
-        posXMultipliedByMag *= magForRef;
-        posYMultipliedByMag *= magForRef;
-      } else if (magForRef < 0) {
-        posXMultipliedByMag /= magForRef * -1;
-        posYMultipliedByMag /= magForRef * -1;
-      }
-    }
 
     const edit = editingVocabFile.find(
         (edit) => relationTerm.term === edit.term);
@@ -1826,21 +1708,21 @@ class EditingVocabulary {
     if (edit && refer) {
       // Calculates line coordinates for common editing and reference terms
       position.x =
-      this.calcPositionByHomotopic(edit.position_x, posXMultipliedByMag, t);
+      this.calcPositionByHomotopic(edit.position_x);
       position.y =
-      this.calcPositionByHomotopic(edit.position_y, posYMultipliedByMag, t);
+      this.calcPositionByHomotopic(edit.position_y);
     } else if (edit) {
       // For terms in editing vocabulary only
       position.x =
-        this.calcPositionByHomotopic(edit.position_x, 0, t);
+        this.calcPositionByHomotopic(edit.position_x);
       position.y =
-        this.calcPositionByHomotopic(edit.position_y, 0, t);
+        this.calcPositionByHomotopic(edit.position_y);
     } else if (refer) {
       // For reference terms only
       position.x =
-      this.calcPositionByHomotopic(0, posXMultipliedByMag, t);
+      this.calcPositionByHomotopic(0);
       position.y =
-      this.calcPositionByHomotopic(0, posYMultipliedByMag, t);
+      this.calcPositionByHomotopic(0);
     }
     position.y *= -1;
     return position;
@@ -1860,12 +1742,10 @@ class EditingVocabulary {
   /**
    * [calcPositionByHomotopic description]
    * @param  {Number} a vec0 - coordinate value
-   * @param  {Number} b vec1 - coordinate value
-   * @param  {Number} t (0 <= t <= 1)
    * @return {Number} - coordinate value
    */
-  calcPositionByHomotopic(a, b, t) {
-    const value = ((1 - t) * a) + (t * b);
+  calcPositionByHomotopic(a) {
+    const value = a;
     return this.calcPosition(value);
   }
 
@@ -1878,39 +1758,23 @@ class EditingVocabulary {
 
     const termListForVocabulary = [];
     targetData.forEach((data) => {
-      // const randomId =
-      // Math.floor(Math.random() * Math.floor(1000000000000000));
-      if (0 == this.selectedFile.id) {
-        // Editing vocabulary
-        termListForVocabulary.push({
-          data: {
-            id: data.id,
-            term: data.term,
-            preferred_label: data.preferred_label,
-            uri: data.uri,
-            vocabularyColor: data.color1,
-            confirm: data.confirm,
-          },
-          broader_term: data.broader_term,
-          // Random number for filter
-          // randomId: randomId,
+
+      // Editing vocabulary
+      termListForVocabulary.push({
+        data: {
+          id: data.id,
+          term: data.term,
+          preferred_label: data.preferred_label,
+          uri: data.uri,
+          vocabularyColor: data.color1?data.color1:'',
+          confirm: data.confirm?data.confirm:'',
         },
-        );
-      } else {
-        // Reference vocabulary
-        termListForVocabulary.push({
-          data: {
-            id: data.id,
-            term: data.term,
-            preferred_label: data.preferred_label,
-            uri: data.uri,
-          },
-          broader_term: data.broader_term,
-          // Random number for filter
-          // randomId: randomId,
+        position: {
+          x: data.position_x?this.calcPosition(data.position_x):0,
+          y: data.position_y?this.calcPosition(data.position_y):0,
         },
-        );
-      }
+        broader_term: data.broader_term,
+      });
     });
 
     return termListForVocabulary;
@@ -2017,262 +1881,6 @@ class EditingVocabulary {
           this.openApiErrorDialog('表示/非表示情報変更エラー', errCode, errMsg);
         });
   };
-
-  // Part of speech filter //////////////////////////////////////////////////
-
-  // Part of speech filter list
-  @observable partOfSpeechCheckList = {
-    Noun: {value: true, name: '名詞'},
-    Verb: {value: true, name: '動詞'},
-    Adjective: {value: true, name: '形容詞'},
-    Adverb: {value: true, name: '副詞'},
-    Adnominal: {value: true, name: '連体詞'},
-    Interjection: {value: true, name: '感動詞'},
-    Other: {value: true, name: 'その他'},
-  };
-
-  // Editing part of speech filter list
-  @observable tmpPartOfSpeechCheckList = {
-    Noun: {value: true, name: '名詞'},
-    Verb: {value: true, name: '動詞'},
-    Adjective: {value: true, name: '形容詞'},
-    Adverb: {value: true, name: '副詞'},
-    Adnominal: {value: true, name: '連体詞'},
-    Interjection: {value: true, name: '感動詞'},
-    Other: {value: true, name: 'その他'},
-  };
-
-  /**
-   * Get part of speech filter
-   */
-  @action getPartOfSpeechFilter() {
-    // console.log("getPartOfSpeechFilter start.");
-    axios
-        .get('/api/v1/filter',
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-        )
-        .then((response) => {
-          // console.log("getPartOfSpeechFilter response.");
-          this.setPartOfSpeechCheckListFromDB(response.data);
-
-          Object.keys(this.partOfSpeechCheckList).forEach( (key) => {
-            if (this.partOfSpeechCheckList[key].value) {
-              this.tmpPartOfSpeechCheckList[key].value = true;
-            } else {
-              this.tmpPartOfSpeechCheckList[key].value = false;
-            }
-          });
-        }).catch((err) => {
-          console.log('[Error] message : ' + err.message);
-          let errMsg = '';
-          let errCode = -1;
-          // If there is a response
-          if (err.response) {
-            errCode = err.response.status;
-            switch (errCode) {
-              case 400:
-                // For errors defined in the API
-                if (err.response.data.message) {
-                  errMsg = err.response.data.message;
-                } else {
-                  errMsg = '不明なエラー発生';
-                }
-                break;
-              default:
-                errMsg = '不明なエラー発生';
-                break;
-            }
-          } else {
-            errMsg = err.message;
-          }
-          this.openApiErrorDialog('品詞フィルター情報取得エラー', errCode, errMsg);
-        });
-  }
-
-  /**
-   * Parts of speech filter list setting obtained from DB
-   * @param {object} data - part of speech filter information
-   */
-  setPartOfSpeechCheckListFromDB(data) {
-    if (undefined == data || null == data) return;
-
-    if (undefined != data.noun && null != data.noun) {
-      this.partOfSpeechCheckList.Noun.value = data.noun;
-    }
-    if (undefined != data.verb && null != data.verb) {
-      this.partOfSpeechCheckList.Verb.value = data.verb;
-    }
-    if (undefined != data.adjective && null != data.adjective) {
-      this.partOfSpeechCheckList.Adjective.value = data.adjective;
-    }
-    if (undefined != data.adverb && null != data.adverb) {
-      this.partOfSpeechCheckList.Adverb.value = data.adverb;
-    }
-    if (undefined != data.adnominal && null != data.adnominal) {
-      this.partOfSpeechCheckList.Adnominal.value = data.adnominal;
-    }
-    if (undefined != data.interjection && null != data.interjection) {
-      this.partOfSpeechCheckList.Interjection.value = data.interjection;
-    }
-    if (undefined != data.other && null != data.other) {
-      this.partOfSpeechCheckList.Other.value = data.other;
-    }
-  }
-
-  /**
-   * Convert part of speech filters to DBdata
-   * @param  {object} partOfSpeechCheckList - part of speech filter
-   * @return {object} - parts of speech filter for DB preservation
-   */
-  createDBDataByPartOfSpeechCheck(partOfSpeechCheckList) {
-    const dbData = {
-      noun: partOfSpeechCheckList.Noun.value,
-      verb: partOfSpeechCheckList.Verb.value,
-      adjective: partOfSpeechCheckList.Adjective.value,
-      adverb: partOfSpeechCheckList.Adverb.value,
-      adnominal: partOfSpeechCheckList.Adnominal.value,
-      interjection: partOfSpeechCheckList.Interjection.value,
-      other: partOfSpeechCheckList.Other.value,
-    };
-
-    return dbData;
-  }
-
-  /**
-   * Press the check button for each part of speech filter
-   * @param  {string} key - target part of speech
-   */
-  @action checkPartOfSpeech(key) {
-    this.tmpPartOfSpeechCheckList[key].value =
-        !(this.tmpPartOfSpeechCheckList[key].value);
-  }
-
-  // Press the part of speech filter reflection button
-  /**
-   * Press the check button for each part of speech filter
-   * @param  {Boolean} [isHistory=false] - request by undo/redo?
-   */
-  @action upPartOfSpeech(isHistory = false) {
-    // console.log("upPartOfSpeech");
-    const history = new History(
-        'part_of_speech',
-        null,
-        this.getNewPosObj(this.partOfSpeechCheckList),
-        this.getNewPosObj(this.tmpPartOfSpeechCheckList),
-    );
-    const requestBody =
-        this.createDBDataByPartOfSpeechCheck(this.tmpPartOfSpeechCheckList);
-
-    axios
-        .post('/api/v1/filter',
-            requestBody,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-        )
-        .then((response) => {
-          this.deepCopyPosObj(
-              this.partOfSpeechCheckList,
-              this.tmpPartOfSpeechCheckList,
-          );
-
-          if (!(isHistory)) {
-            editingHistoryStore.addHistory(history);
-          }
-        }).catch((err) => {
-          console.log('[Error] message : ' + err.message);
-          let errMsg = '';
-          let errCode = -1;
-          // If there is a response
-          if (err.response) {
-            errCode = err.response.status;
-            switch (errCode) {
-              case 400:
-                // For errors defined in the API
-                if (err.response.data.message) {
-                  errMsg = err.response.data.message;
-                } else {
-                  errMsg = '不明なエラー発生';
-                }
-                break;
-              default:
-                errMsg = '不明なエラー発生';
-                break;
-            }
-          } else {
-            errMsg = err.message;
-          }
-          this.openApiErrorDialog('品詞フィルター情報変更エラー', errCode, errMsg);
-        });
-  }
-
-  /**
-   * Filter target vocabulary determination
-   * @param  {string}  partOfSpeech - name of part of speech
-   * @return {Boolean} - true: target of filter, false: out of target of filter
-   */
-  @action isFilterNode(partOfSpeech) {
-    const partOfSpeechList = new Set(['名詞', '動詞', '形容詞', '副詞', '連体詞', '感動詞']);
-
-    let pos;
-    if (partOfSpeechList.has(partOfSpeech)) {
-      pos = partOfSpeech;
-    } else {
-      // Parts of speech not included in partOfSpeechList should be grouped into "Other"
-      pos = 'その他';
-    }
-
-    let result = false;
-    Object.keys(this.partOfSpeechCheckList).forEach( (key) => {
-      if (this.partOfSpeechCheckList[key].name == pos) {
-        result = this.partOfSpeechCheckList[key].value;
-      }
-    });
-
-    // result == true  => return false
-    // result == false => return true
-    return !(result);
-  }
-
-  /**
-   * Duplicate part of speech filter information
-   * @param  {object} source - part of speech filter
-   * @return {object} - duplicated part of speech filter
-   */
-  getNewPosObj(source) {
-    const posObj = {
-      Noun: {value: true, name: '名詞'},
-      Verb: {value: true, name: '動詞'},
-      Adjective: {value: true, name: '形容詞'},
-      Adverb: {value: true, name: '副詞'},
-      Adnominal: {value: true, name: '連体詞'},
-      Interjection: {value: true, name: '感動詞'},
-      Other: {value: true, name: 'その他'},
-    };
-    this.deepCopyPosObj(posObj, source);
-    return posObj;
-  }
-
-  /**
-   * Deep copy of the part of speech filter information
-   * @param  {object} target - part of speech filter
-   * @param  {object} source - part of speech filter
-   */
-  @action deepCopyPosObj(target, source) {
-    Object.keys(source).forEach( (key) => {
-      if (source[key].value) {
-        target[key].value = true;
-      } else {
-        target[key].value = false;
-      }
-    });
-  }
 
   // Vocabulary data update //////////////////////////////////////////////////
 
@@ -2782,9 +2390,11 @@ class EditingVocabulary {
    * @param  {array} updateList - updated vocabulary list
    * @param  {array} deleteList - deleted vocabulary list
    * @param  {object} current - vocabulary data to be updated
+   * @param  {object} history - history data 
+   * @param  {object} oldNode - vocabulary data to be updated
    * @param  {object} [history=null] - history information (null: undo/redo requests)
    */
-  updateRequest(updateList, deleteList, current, history = null) {
+  updateRequest(updateList, deleteList, current, history = null, oldNode = null) {
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
 
@@ -2843,7 +2453,7 @@ class EditingVocabulary {
                   this.setEditingVocabularyData(response.data);
                   // Reselect to reset tmp information
                   this.setCurrentNodeByTerm(
-                      current.term, current.id, null, true);
+                      current.term, current.id, null, oldNode?false:true);
 
                   if (history) {
                     if (!history.targetId) {
@@ -2855,6 +2465,10 @@ class EditingVocabulary {
                       }
                     }
                     editingHistoryStore.addHistory(history);
+
+                  }
+                  if( oldNode){
+                    this.setCurrentNodeByTerm( oldNode.term, oldNode.id, null, true);
                   }
                 }).catch((err) => {
                   console.log('[Error] message : ' + err.message);
@@ -2886,7 +2500,7 @@ class EditingVocabulary {
             this.setEditingVocabularyData(response.data);
 
             // Reselect to reset tmp information
-            this.setCurrentNodeByTerm(current.term, current.id, null, true);
+            this.setCurrentNodeByTerm(current.term, current.id, null, oldNode?false:true);
 
             if (history) {
               if (!history.targetId) {
@@ -2898,6 +2512,9 @@ class EditingVocabulary {
                 }
               }
               editingHistoryStore.addHistory(history);
+            }
+            if( oldNode){
+              this.setCurrentNodeByTerm( oldNode.term, oldNode.id, null, true);
             }
           }
         }).catch((err) => {
@@ -3916,8 +3533,8 @@ class EditingVocabulary {
     const history = new History(
         'confirmChanged',
         currentNode.id,
-        !this.isConfirm,
-        this.isConfirm,
+        !isConfirm,
+        isConfirm,
     );
 
     const url = '/api/v1/vocabulary/editing_vocabulary/' + currentNode.term;

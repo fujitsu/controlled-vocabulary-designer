@@ -8,9 +8,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
-import EditPanelRelationWordTab from './EditPanelRelationWordTab';
 import EditPanelVocabularyTab from './EditPanelVocabularyTab';
-import EditPanelExampleTab from './EditPanelExampleTab';
 import EditTabPanel from './EditTabPanel';
 import editingVocabularyStore from '../stores/EditingVocabulary';
 
@@ -48,10 +46,10 @@ export default class EditPanel extends React.Component {
   render() {
     return (
       <div className={this.props.classes.root}>
-        <AppBar position="static" color="default">
+        {/* <AppBar position="static" color="default">
           <Tabs
             value={this.state.value}
-            onChange={(event, newValue) => this.setState({value: newValue})}
+            // onChange={(event, newValue) => this.setState({value: newValue})}
             aria-label="visualization panel tabs"
             indicatorColor="primary"
             textColor="inherit"
@@ -59,36 +57,14 @@ export default class EditPanel extends React.Component {
             scrollButtons="auto"
           >
             <Tab
-              label="関連用語"
+              label="語彙"
               {...this.a11yProps(0)}
               classes={{root: this.props.classes.tabs}}
             />
-            <Tab
-              label="語彙"
-              {...this.a11yProps(1)}
-              classes={{root: this.props.classes.tabs}}
-            />
-            <Tab
-              label="例文"
-              {...this.a11yProps(2)}
-              classes={{root: this.props.classes.tabs}}
-            />
           </Tabs>
-        </AppBar>
+        </AppBar> */}
         <EditTabPanel value={this.state.value} index={0}>
-          <EditPanelRelationWordTab
-            classes={this.props.classes}
-            editingVocabulary={editingVocabularyStore}
-          />
-        </EditTabPanel>
-        <EditTabPanel value={this.state.value} index={1}>
           <EditPanelVocabularyTab
-            classes={this.props.classes}
-            editingVocabulary={editingVocabularyStore}
-          />
-        </EditTabPanel>
-        <EditTabPanel value={this.state.value} index={2}>
-          <EditPanelExampleTab
             classes={this.props.classes}
             editingVocabulary={editingVocabularyStore}
           />

@@ -29,7 +29,7 @@ import {observer} from 'mobx-react';
 
 import ColorChartCheckBoxes from './ColorChartCheckBoxes';
 import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
-import TextFieldOfTerm from './TextFieldOfTerm';
+import SelectOfTerm from './SelectOfTerm';
 import TextFieldOfSynonym from './TextFieldOfSynonym';
 import TextFieldOfPreferredLabel from './TextFieldOfPreferredLabel';
 import TextFieldOfUri from './TextFieldOfUri';
@@ -243,27 +243,27 @@ export default
       currentTerm = editingVocabulary.currentNode.term;
     } else {
       // Display the preferred label as the term name if the term is not selected
-      currentTerm = editingVocabulary.tmpPreferredLabel.list[0];
+      currentTerm = editingVocabulary.tmpPreferredLabel.list.length>0 ? editingVocabulary.tmpPreferredLabel.list[0] : '';
     }
     switch (reason) {
       // Preferred label error /////////////////////////////
       // Preferred label:Multiple Input Error
       case 'multiPreferredLabel':
-        errorMsg = '標目テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+        errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
         break;
       // Preferred label:Invalid input error
       case 'invalidPreferredLabel':
         const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[0];
-        errorMsg = '標目テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
+        errorMsg = '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
                    '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
-                   '標目テキストボックスには、¥n' +
+                   '代表語テキストボックスには、¥n' +
                    '\"' + currentTerm +'\" または同義語の中から選んで記入してください。';
         errorMsg = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
       // Preferred label:Missing error
       case 'needToPreferredLabel':
-        errorMsg = '標目テキストボックスには \"' + currentTerm +
+        errorMsg = '代表語テキストボックスには \"' + currentTerm +
                    '\" または同義語の中から選んで記入してください。';
         break;
 
@@ -271,7 +271,7 @@ export default
       // Synonym:Synonym error registered in the hierarchical relationship
       case 'relationSynonym':
         errorMsg = '下位語テキストボックスに、 \"' + currentTerm +
-                   '\" あるいは \"' + currentTerm + '\" の標目' +
+                   '\" あるいは \"' + currentTerm + '\" の代表語' +
                    'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
                    '同義語テキストボックスには、 \"' + currentTerm +
                    '\" と上下関係を持たないように、¥n' +
@@ -283,11 +283,11 @@ export default
       // URI error /////////////////////////////
       // URI:Duplicate input error
       case 'equalUri':
-        errorMsg = '標目のURIテキストボックスに、¥n' +
-                   '同義関係でない別の標目 \"' + editingVocabulary.equalUriPreferredLabel +
-                   '\" と同じ標目のURIが記入されています。¥n' +
-                   '標目のURIテキストボックスには、¥n' +
-                   '既に登録されている他の標目のURIとは異なる値を記入してください。';
+        errorMsg = '代表語のURIテキストボックスに、¥n' +
+                   '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
+                   '\" と同じ代表語のURIが記入されています。¥n' +
+                   '代表語のURIテキストボックスには、¥n' +
+                   '既に登録されている他の代表語のURIとは異なる値を記入してください。';
         errorMsg = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
@@ -300,9 +300,9 @@ export default
       // Broader term:Invalid input error
       case 'invalidBroaderTerm':
         errorMsg = '上位語テキストボックスに、¥n' +
-                   '\"' + currentTerm + '\" の標目あるいは同義語が記入されています。¥n' +
+                   '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
                    '上位語テキストボックスには、¥n' +
-                   '\"' + currentTerm + '\" の標目と同義語以外の値を記入してください。';
+                   '\"' + currentTerm + '\" の代表語と同義語以外の値を記入してください。';
         errorMsg = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
@@ -311,7 +311,7 @@ export default
         const brdrTrm = editingVocabulary.tmpBroaderTerm.list[0];
         errorMsg = '上位語テキストボックスに \"'+
                    brdrTrm +'\" を記入することで、¥n';
-        errorMsg += '標目 ';
+        errorMsg += '代表語 ';
         editingVocabulary.cycleBroaderTerm.forEach((term) => {
           errorMsg += '\"';
           errorMsg += term;
@@ -326,7 +326,7 @@ export default
           errorMsg += '\", ';
         });
         errorMsg = errorMsg.slice( 0, -2 );
-        errorMsg += ' 以外の標目を持つ用語を記入してください。';
+        errorMsg += ' 以外の代表語を持つ用語を記入してください。';
         errorMsg = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         break;
@@ -390,22 +390,9 @@ export default
   render() {
     const editingVocabulary = this.props.editingVocabulary;
     let fileId = editingVocabulary.selectedFile.id;
-    const currentRefFile =
-     editingVocabulary.getTargetFileData(editingVocabulary.homotopicFile.id);
-
-    const edit = editingVocabulary.editingVocabulary.find(
-        (edit) => editingVocabulary.currentNode.term === edit.term);
-
-    const refere = currentRefFile.find(
-        (ref) => editingVocabulary.currentNode.term === ref.term);
-
-    if (!edit && refere) {
-      fileId = editingVocabulary.homotopicFile.id;
-    }
-
     // Change border color disabled
     let disabledColor = true;
-    if (fileId == 0 && this.props.editingVocabulary.currentNode.id) {
+    if ( fileId == 0 && this.props.editingVocabulary.currentNode.id) {
       // Allow each component to operate during editing vocabulary selection and term selection
       disabledColor = false;
     }
@@ -426,13 +413,8 @@ export default
     // Undetermined while selecting a term when editing vocabulary pulldown is selected:enabled
     // No term selected when selecting vocabulary pull-down for editing:enabled
     const disabledTextField =
-     ( fileId == 0 &&
-       !isConfirm &&
-       this.props.editingVocabulary.currentNode.id) ||
-     (fileId == 0 &&
-       !this.props.editingVocabulary.currentNode.id) ?
-      false : true;
-
+     ( !isConfirm && this.props.editingVocabulary.currentNode.id) ||
+       ( !this.props.editingVocabulary.currentNode.id) ? false : true;
 
     // Fix button text
     let confirmButtonText = '確定';
@@ -450,9 +432,9 @@ export default
           </Grid>
           <Grid item xs={9}>
             <Box>
-              <TextFieldOfTerm
+              <SelectOfTerm
                 classes={this.props.classes}
-                text={this.props.editingVocabulary.currentNode.term}
+                editingVocabulary={this.props.editingVocabulary}
               />
             </Box>
           </Grid>
@@ -510,7 +492,7 @@ export default
             <Grid container spacing={2}>
               <Grid item xs={3}>
                 <Box mt={1}>
-                  標目
+                  代表語
                 </Box>
               </Grid>
               <Grid item xs={7}>
@@ -530,7 +512,7 @@ export default
             <Grid container spacing={2}>
               <Grid item xs={3}>
                 <Box mt={1}>
-                  標目のURI
+                  代表語のURI
                 </Box>
               </Grid>
               <Grid item xs={9}>
