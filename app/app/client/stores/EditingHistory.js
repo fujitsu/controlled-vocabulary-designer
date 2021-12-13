@@ -438,6 +438,7 @@ class EditingHistory {
   setMessage(type) {
     if (null == this.undoPointer) {
       this._undoMessage = this.STR_HISTORY_NONE;
+      this._redoMessage = this.STR_HISTORY_NONE;
       return;
     }
 
