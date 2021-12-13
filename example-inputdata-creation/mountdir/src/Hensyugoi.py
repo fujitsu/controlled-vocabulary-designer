@@ -13,16 +13,18 @@ import json
 import os
 import csv
 import codecs
+import unicodedata
 import pandas as pd
 import numpy as np
 
 def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words):
-    header = ['用語名', '標目', '標目のURI', '上位語', '同義語候補', '上位語候補', '品詞', 'x座標値', 'y座標値', '色1', '色2']
+    header = ['用語名', '代表語', '代表語のURI', '上位語', '同義語候補', '上位語候補', '品詞', 'x座標値', 'y座標値', '色1', '色2']
     with open(hensyugoi_file, 'w', newline="", errors='ignore', encoding='utf-8-sig') as f:
         writer = csv.writer(f)
         writer.writerow(header)
         for word in filter_words:
-            writer.writerow([word, word, "", "", ", ".join(syn.item()[word]), ", ".join(hyper.item().get(word)), pos.item().get(word), vec.item()[word][0]*tuning, vec.item()[word][1]*tuning, "black", "black"])
+            word_normalized = unicodedata.normalize("NFKC", word).lower()
+            writer.writerow([word, word, "", "", ", ".join(syn.item()[word]), ", ".join(hyper.item().get(word_normalized)), pos.item().get(word_normalized), vec.item()[word_normalized][0]*tuning, vec.item()[word_normalized][1]*tuning, "black", "black"])
 
 
 def check_arg(args, config):

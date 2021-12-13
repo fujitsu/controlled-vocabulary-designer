@@ -73,19 +73,19 @@ paths:
             terms : Returns terms in which the error occurred.
             reason : Returns the check error reason code.
             If phase is 2 and reason is 0, the client will display
-            "同義関係と思われる、用語a,b,cの標目を1つに揃えてください".
+            "同義関係と思われる、用語a,b,cの代表語を1つに揃えてください".
             If phase is 3 and reason is 0, the client will display
-            "用語a,b,cの標目のURIの個数を1つに絞ってください".
+            "用語a,b,cの代表語のURIの個数を1つに絞ってください".
             If phase is 3 and reason is 1, the client will display
-            "用語a,b,cの標目のURIを統一してください".
+            "用語a,b,cの代表語のURIを統一してください".
             If phase is 3 and reason is 2, the client will display
-            "標目a,b,cについて、同じ標目のURIが設定されています。標目のURIを修正してください".
+            "代表語a,b,cについて、同じ代表語のURIが設定されています。代表語のURIを修正してください".
             If phase is 3 and reason is 3, the client will display
-            "用語a,b,cの標目のURIを1つに揃えてください".
+            "用語a,b,cの代表語のURIを1つに揃えてください".
             If phase is 4 and reason is 0, the client will display
-            "標目aの上位語の標目が一致するように上位語を修正してください".
+            "代表語aの上位語の代表語が一致するように上位語を修正してください".
             If phase is 4 and reason is 1, the client will display
-            "標目a,b,cは、関係性が循環しています。上位語を修正してください。".
+            "代表語a,b,cは、関係性が循環しています。上位語を修正してください。".
           content:
             application/json:
               schema:
@@ -397,53 +397,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-swagger-router-controller: swagger_server.controllers.example_controller
       x-openapi-router-controller: swagger_server.controllers.example_controller
-  /filter:
-    get:
-      tags:
-      - filter
-      summary: Get part of speech filter data.
-      operationId: get_filter_data
-      responses:
-        "200":
-          description: Filter Data Get Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PosFilter'
-        "400":
-          description: "Filter Data Get Failed. \nex. Database Connection Error.\n"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-swagger-router-controller: swagger_server.controllers.filter_controller
-      x-openapi-router-controller: swagger_server.controllers.filter_controller
-    post:
-      tags:
-      - filter
-      summary: Post part of speech filter data.
-      operationId: post_filter_data
-      requestBody:
-        description: Post part of speech filter data.
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PosFilter'
-      responses:
-        "200":
-          description: Filter Data Get Success.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SuccessResponse'
-        "400":
-          description: "Filter Data Post Failed. \nex. Database Connection Error.\n"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-swagger-router-controller: swagger_server.controllers.filter_controller
-      x-openapi-router-controller: swagger_server.controllers.filter_controller
 components:
   schemas:
     Upload:
@@ -624,28 +577,3 @@ components:
             type: string
         reason:
           type: integer
-    PosFilter:
-      type: object
-      properties:
-        noun:
-          type: boolean
-        verb:
-          type: boolean
-        adjective:
-          type: boolean
-        adverb:
-          type: boolean
-        adnominal:
-          type: boolean
-        interjection:
-          type: boolean
-        other:
-          type: boolean
-      example:
-        adjective: true
-        other: true
-        adnominal: true
-        interjection: true
-        verb: true
-        noun: true
-        adverb: true
