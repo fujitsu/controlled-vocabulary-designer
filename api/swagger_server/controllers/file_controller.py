@@ -1194,15 +1194,27 @@ def _add_preferred_list(paylist, item):
 def _download_file_make(pl_simple):
     g = rdflib.ConjunctiveGraph()
     g.bind("skos", rdflib.namespace.SKOS)
+    g.bind("dct", rdflib.namespace.DCTERMS)
+    g.bind("rdf", rdflib.namespace.RDF)
 
     # make triples
     # Base
     rtype = rdflib.namespace.RDF.type  # Type
     scon = rdflib.namespace.SKOS.Concept  # Concept
+    sinscheme = rdflib.namespace.SKOS.inScheme  # inScheme
+    sconceptscheme = rdflib.namespace.SKOS.ConceptScheme  # ConceptScheme
     plabel = rdflib.namespace.SKOS.prefLabel  # prefLabel
     alabel = rdflib.namespace.SKOS.altLabel  # altLabel
     broader = rdflib.namespace.SKOS.broader  # broader
     narrower = rdflib.namespace.SKOS.narrower  # narrower
+    exactMatch = rdflib.namespace.SKOS.exactMatch  # exactMatch
+    title = rdflib.namespace.DCTERMS.title # title
+    hasVersion = rdflib.namespace.DCTERMS.hasVersion # hasVersion
+    description = rdflib.namespace.DCTERMS.description # description
+    creator = rdflib.namespace.DCTERMS.creator # creator
+    created = rdflib.namespace.DCTERMS.created # created
+    modified = rdflib.namespace.DCTERMS.modified # modified
+
     # add List
     namel = []
     # broader
@@ -1213,10 +1225,16 @@ def _download_file_make(pl_simple):
     # JSON convert to pandas.DataFrame
     nm = pd.json_normalize(pl_simple)
 
+    # replace nan with ""
+    nm["other_voc_syn_uri"] = nm["other_voc_syn_uri"].replace(np.nan, "")
+    nm["term_description"] = nm["term_description"].replace(np.nan, "")
+    nm["created_time"] = nm["created_time"].replace(np.nan, "")
+    nm["modified_time"] = nm["modified_time"].replace(np.nan, "")
+
     # JSON query Get Concept, prefLabel and narrower base
     namelpl = nm.query('term == preferred_label and uri != ""')
     # get uri and term
-    namelx = namelpl.loc[:, ['term', 'uri']].values
+    namelx = namelpl.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
         nameb = [rdflib.URIRef(str(name[1])), rtype, scon]
@@ -1224,7 +1242,7 @@ def _download_file_make(pl_simple):
         nameb = [
             rdflib.URIRef(str(name[1])),
             plabel,
-            rdflib.Literal(str(name[0]))
+            rdflib.Literal(str(name[0]), lang=name[2])
         ]
         namel.append(nameb)
         # narrower
@@ -1233,13 +1251,13 @@ def _download_file_make(pl_simple):
     # query altLabel
     namelal = nm.query('term != preferred_label and uri != ""')
     # get uri and term
-    namelx = namelal.loc[:, ['term', 'uri']].values
+    namelx = namelal.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
         # print('altLabel:' + str(name[0])+' '+str(name[1]))
         nameb = [
             rdflib.URIRef(str(name[1])),
             alabel,
-            rdflib.Literal(str(name[0]))
+            rdflib.Literal(str(name[0]), lang=name[2])
         ]
         namel.append(nameb)
 
@@ -1256,7 +1274,7 @@ def _download_file_make(pl_simple):
         #       str(namebt[1]), str(namebt[2]))
         # query prefLabel
         wkquery =\
-            'term == preferred_label and term == "' + str(namebt[0]) + '"'
+            'term == preferred_label and uri == "' + str(namebt[0]) + '"'
         # print(wkquery)
         namelpl = nm.query(wkquery)
         # get uri and term
@@ -1265,7 +1283,7 @@ def _download_file_make(pl_simple):
             nameb = [
                 rdflib.URIRef(str(namebt[2])),
                 broader,
-                rdflib.Literal(str(name[1]))
+                rdflib.URIRef(str(name[1]))
             ]
             namel.append(nameb)
             # print('add broader:'+str(name[0])+' '+str(name[1]))
@@ -1276,7 +1294,7 @@ def _download_file_make(pl_simple):
         # query prefLabel
         wkquery =\
             'term == preferred_label and uri != "" and broader_term == "' +\
-            str(namenw[0]) + '"'
+            str(namenw[2]) + '"'
         # print(wkquery)
         namelpl = nm.query(wkquery)
         # get uri and term
@@ -1285,10 +1303,29 @@ def _download_file_make(pl_simple):
             nameb = [
                 rdflib.URIRef(str(namenw[2])),
                 narrower,
-                rdflib.Literal(str(name[1]))
+                rdflib.URIRef(str(name[1]))
             ]
             namel.append(nameb)
             # print('add narrower:'+str(name[0])+' '+str(name[1]))
+
+    # create other links
+    namelpl = nm.query('uri != ""')
+    # get language, uri, othervoc_syn_uri, term_description, created and modified
+    namelx = namelpl.loc[:, ['language', 'uri', 'other_voc_syn_uri', 'term_description', 'created_time', 'modified_time']].values
+    for name in namelx:
+        if(str(name[2]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), exactMatch, rdflib.URIRef(str(name[2]))]
+            namel.append(nameb)
+        if(str(name[3]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), description, rdflib.Literal(str(name[3]), lang=name[0])]
+            namel.append(nameb)
+        if(str(name[4]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), created, rdflib.Literal(str(name[4]))]
+            namel.append(nameb)
+        if(str(name[5]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), modified, rdflib.Literal(str(name[5]))]
+            namel.append(nameb)
+
     # Add List to Graph
     for name in namel:
         g.add((name[0], name[1], name[2]))
