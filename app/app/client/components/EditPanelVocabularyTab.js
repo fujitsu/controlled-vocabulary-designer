@@ -35,6 +35,7 @@ import TextFieldOfPreferredLabel from './TextFieldOfPreferredLabel';
 import TextFieldOfUri from './TextFieldOfUri';
 import TextFieldOfBroaderTerm from './TextFieldOfBroaderTerm';
 import TextFieldOfSubordinateTerm from './TextFieldOfSubordinateTerm';
+import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
 
 /**
  * Edit Operation panel Vocabulary tab Component
@@ -222,128 +223,6 @@ export default
    */
   errorDialogClose() {
     this.setState({open: false, reason: ''});
-  }
-
-  /**
-   * [ErrorDialog description]
-   * @param {object} props
-   * @return {element} errordialog
-   */
-  ErrorDialog(props) {
-    const {onClose, open, reason, editingVocabulary} = props;
-    let errorMsg = '';
-
-    const handleClose = () => {
-      onClose();
-    };
-
-    // const currentTerm = editingVocabulary.currentNode.term;
-    let currentTerm;
-    if (editingVocabulary.currentNode.term) {
-      currentTerm = editingVocabulary.currentNode.term;
-    } else {
-      // Display the preferred label as the term name if the term is not selected
-      currentTerm = editingVocabulary.tmpPreferredLabel.list.length>0 ? editingVocabulary.tmpPreferredLabel.list[0] : '';
-    }
-    switch (reason) {
-      // Preferred label error /////////////////////////////
-      // Preferred label:Multiple Input Error
-      case 'multiPreferredLabel':
-        errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
-        break;
-      // Preferred label:Invalid input error
-      case 'invalidPreferredLabel':
-        const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[0];
-        errorMsg = '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
-                   '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
-                   '代表語テキストボックスには、¥n' +
-                   '\"' + currentTerm +'\" または同義語の中から選んで記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        break;
-      // Preferred label:Missing error
-      case 'needToPreferredLabel':
-        errorMsg = '代表語テキストボックスには \"' + currentTerm +
-                   '\" または同義語の中から選んで記入してください。';
-        break;
-
-      // Synonym error /////////////////////////////
-      // Synonym:Synonym error registered in the hierarchical relationship
-      case 'relationSynonym':
-        errorMsg = '下位語テキストボックスに、 \"' + currentTerm +
-                   '\" あるいは \"' + currentTerm + '\" の代表語' +
-                   'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
-                   '同義語テキストボックスには、 \"' + currentTerm +
-                   '\" と上下関係を持たないように、¥n' +
-                   'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        break;
-
-      // URI error /////////////////////////////
-      // URI:Duplicate input error
-      case 'equalUri':
-        errorMsg = '代表語のURIテキストボックスに、¥n' +
-                   '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
-                   '\" と同じ代表語のURIが記入されています。¥n' +
-                   '代表語のURIテキストボックスには、¥n' +
-                   '既に登録されている他の代表語のURIとは異なる値を記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        break;
-
-      // Broader term error /////////////////////////////
-      // Broader term:Multiple input error
-      case 'multiBroaderTerm':
-        errorMsg = '上位語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
-        break;
-      // Broader term:Invalid input error
-      case 'invalidBroaderTerm':
-        errorMsg = '上位語テキストボックスに、¥n' +
-                   '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
-                   '上位語テキストボックスには、¥n' +
-                   '\"' + currentTerm + '\" の代表語と同義語以外の値を記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        break;
-      // Broader term:Loop error
-      case 'cycleBroaderTerm':
-        const brdrTrm = editingVocabulary.tmpBroaderTerm.list[0];
-        errorMsg = '上位語テキストボックスに \"'+
-                   brdrTrm +'\" を記入することで、¥n';
-        errorMsg += '代表語 ';
-        editingVocabulary.cycleBroaderTerm.forEach((term) => {
-          errorMsg += '\"';
-          errorMsg += term;
-          errorMsg += '\", ';
-        });
-        errorMsg = errorMsg.slice( 0, -2 );
-        errorMsg += ' は、¥n上下関係が循環してしまいます。¥n';
-        errorMsg += '上位語テキストボックスには、¥n';
-        editingVocabulary.cycleBroaderTerm.forEach((term) => {
-          errorMsg += '\"';
-          errorMsg += term;
-          errorMsg += '\", ';
-        });
-        errorMsg = errorMsg.slice( 0, -2 );
-        errorMsg += ' 以外の代表語を持つ用語を記入してください。';
-        errorMsg = errorMsg.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        break;
-    }
-
-    return (
-      <Dialog
-        onClose={handleClose}
-        aria-labelledby="dialog-search-term-error" open={open}
-      >
-        <DialogContent>
-          <DialogContentText>
-            {errorMsg}
-          </DialogContentText>
-        </DialogContent>
-      </Dialog>
-    );
   }
 
   /**
@@ -580,11 +459,13 @@ export default
                   >
                     反映
                   </Button>
-                  <this.ErrorDialog
-                    open={this.state.open}
+                  <DialogUpdateVocabularyError
                     onClose={() => this.errorDialogClose()}
-                    reason={this.state.reason}
+                    open={this.state.open}
+                    classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
+                    isFromEditPanel={true}
+                    reason={this.state.reason}
                   />
                 </Box>
               </Grid>
