@@ -31,6 +31,7 @@
     "css-loader": "^4.2.1",
     "cytoscape": "^3.15.2",
     "cytoscape-dagre": "^2.3.0",
+    "cytoscape-edgehandles": "^3.6.0",
     "cytoscape-klay": "^3.1.4",
     "ejs": "^3.1.5",
     "eslint": "^7.11.0",
