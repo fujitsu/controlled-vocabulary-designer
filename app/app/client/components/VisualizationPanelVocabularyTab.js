@@ -55,6 +55,7 @@ export default
     this.zoomTimeoutId = -1;
     this.updateElesTimeoutId = -1;
     this.isReset = true;
+    this.fitCenterPan = true;
     this.situationArr = [];
     this.message = '';
     this.synonymSource = null;
@@ -64,6 +65,7 @@ export default
       transformTogle: false,
       dlgSynonymOpen: false,  // dialog for Synonym term
       dlgBroaderOpen: false,  // dialog for Broader term
+      dlgUpVocOpen: false,    // dialog for save position
       dlgErrOpen: false,      // dialog for Error
       reason: '',             // Reason for Error 
     };
@@ -388,6 +390,11 @@ export default
    * @param  {Object} zoom get cy.zoom()
    */
   fitByPanZoom(pan, zoom) {
+
+    if( !this.fitCenterPan){
+      return;
+    }
+
     const cy = this.cy;
     cy.zoom(zoom);
     if (this.props.editingVocabulary.currentNode.id) {
@@ -881,8 +888,26 @@ export default
     cy.elements().layout( defaults).run();
     
     nodes.unlock();
-  }
 
+    this.setState({transformTogle: true});   
+  }
+  
+  /**
+   * Update coordinate transform
+   */
+  async updateVocabularys() {
+    
+    const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
+    
+    this.fitCenterPan = false;
+    const ret = await this.props.editingVocabulary.updateVocabularys( this.cy.nodes());
+    this.fitCenterPan = true;
+
+    if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
+      await this.props.editingVocabulary.setCurrentNodeByTerm( saveCurrentNodeTerm);
+    }
+  }
+  
   /**
    * When setting a synonym, select a Preferred term and then close the dialog 
    */
@@ -926,6 +951,23 @@ export default
     this.setState({dlgErrOpen: false, reason: ''});   
   }
 
+  /**
+   * dialog handles for save position button 
+   */
+  handleUpVocOpen(){    
+    this.message = '座標値を保存します\nよろしいですか？';
+    this.setState({dlgUpVocOpen: true});
+  }
+  handleUpVocClose(){
+    this.message = '';
+    this.setState({dlgUpVocOpen: false});
+
+    this.updateVocabularys();
+  }
+  handleUpVocCancelClose(){
+    this.message = '';
+    this.setState({dlgUpVocOpen: false});    
+  }
 
   /**
    * render
@@ -976,6 +1018,16 @@ export default
               >
               {transformTogle ? "座標変換済み" : "座標変換"}
               </Button>
+              <Button
+                style={{marginTop:'15px', marginRight:'8px'}}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                onClick={()=>this.handleUpVocOpen()}
+              >
+                座標値を保存
+              </Button>
             </Box>
           </Grid>
           <Grid item xs={2}>
@@ -1008,6 +1060,13 @@ export default
           onOkClose={() => this.handleBroaderClose()}
           onCancel={() =>this.handleBroaderCancelClose()}  
           open={this.state.dlgBroaderOpen}
+          classes={this.props.classes}
+          message={this.message}
+        />
+        <DialogOkCancel
+          onOkClose={() => this.handleUpVocClose()}
+          onCancel={() =>this.handleUpVocCancelClose()}  
+          open={this.state.dlgUpVocOpen}
           classes={this.props.classes}
           message={this.message}
         />
