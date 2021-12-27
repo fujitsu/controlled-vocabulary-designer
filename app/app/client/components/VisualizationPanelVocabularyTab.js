@@ -66,6 +66,7 @@ export default
       dlgSynonymOpen: false,  // dialog for Synonym term
       dlgBroaderOpen: false,  // dialog for Broader term
       dlgUpVocOpen: false,    // dialog for save position
+      dlgDeselectTermOpen: false, // dialog for deselect term confirm
       dlgErrOpen: false,      // dialog for Error
       reason: '',             // Reason for Error 
     };
@@ -793,22 +794,6 @@ export default
     });
   }
 
-  /**
-   * deselection term
-   */
-   async deselectionConfirm(){
-    if( confirm("用語の選択を解除します。　よろしいですか？")){
-      const selectedTermList = this.props.editingVocabulary.selectedTermList;
-
-      for (let num in selectedTermList) {
-        const item = selectedTermList[num];
-        await this.changeSelectedTermColor(item.id, false);
-      }
-      // currentNode clear
-      await this.props.editingVocabulary.deselectTermList();       
-      await this.props.editingVocabulary.setCurrentNodeByTerm('');
-    }
-  }
 
   /**
    * coordinate transform
@@ -888,8 +873,6 @@ export default
     cy.elements().layout( defaults).run();
     
     nodes.unlock();
-
-    this.setState({transformTogle: true});   
   }
   
   /**
@@ -908,6 +891,21 @@ export default
     }
   }
   
+  /**
+   * deselection term
+   */
+   async deselectionConfirm(){
+
+      const selectedTermList = this.props.editingVocabulary.selectedTermList;
+
+      for (let num in selectedTermList) {
+        const item = selectedTermList[num];
+        await this.changeSelectedTermColor(item.id, false);
+      }
+      // currentNode clear
+      await this.props.editingVocabulary.deselectTermList();       
+      await this.props.editingVocabulary.setCurrentNodeByTerm('');
+  }
   /**
    * When setting a synonym, select a Preferred term and then close the dialog 
    */
@@ -969,6 +967,21 @@ export default
     this.setState({dlgUpVocOpen: false});    
   }
 
+  handleDeselectTermOpen(){
+    this.message = "用語の選択を解除します。\nよろしいですか？";
+    this.setState({dlgDeselectTermOpen: true});  
+  }
+  handleDeselectTermClose(){
+    this.message = '';
+    this.setState({dlgDeselectTermOpen: false});
+    
+    this.deselectionConfirm();
+  }
+  handleDeselectTermCancelClose(){
+    this.message = '';
+    this.setState({dlgDeselectTermOpen: false});
+  }
+
   /**
    * render
    * @return {element}
@@ -1003,7 +1016,7 @@ export default
                 color="primary"
                 size={'small'}
                 disabled={!disabledConfirm}
-                onClick={()=>this.deselectionConfirm()}
+                onClick={()=>this.handleDeselectTermOpen()}
               >
                 選択全解除
               </Button>
@@ -1070,6 +1083,14 @@ export default
           classes={this.props.classes}
           message={this.message}
         />
+        <DialogOkCancel
+          onOkClose={() => this.handleDeselectTermClose()}
+          onCancel={() =>this.handleDeselectTermCancelClose()}  
+          open={this.state.dlgDeselectTermOpen}
+          classes={this.props.classes}
+          message={this.message}
+        />
+
         <DialogUpdateVocabularyError
           onClose={() => this.handleErrClose()}
           open={this.state.dlgErrOpen}
