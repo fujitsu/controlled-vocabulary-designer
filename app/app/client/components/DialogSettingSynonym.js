@@ -38,6 +38,14 @@ export default class DialogSettingSynonym extends React.Component {
   */
   handleClose() {
     
+    this.crearDatas();
+    this.props.onClose('cancel');
+  };
+
+  /**
+  * Data crear
+  */
+  crearDatas(){
     this.preferredList = [];
     this.broaderList = [];
     this.broaderClassName = this.props.classes.displayNone;
@@ -45,8 +53,7 @@ export default class DialogSettingSynonym extends React.Component {
       selectPreferred: '',
       selectBroader: '',
      });
-     this.props.onClose('cancel');
-  };
+  }
 
   /**
    * initialization
@@ -103,6 +110,11 @@ export default class DialogSettingSynonym extends React.Component {
    */
   execSetSynonym() {
     
+    if ( this.state.selectPreferred === '') {
+      window.alert('代表語を選択してください');
+
+      return false;
+    }
     if (this.props.editingVocabulary.tmpBroaderTerm.list.length > 1
       && this.state.selectBroader === '') {
         window.alert('上位語を選択してください');
@@ -115,6 +127,7 @@ export default class DialogSettingSynonym extends React.Component {
 
     const ret = this.props.editingVocabulary.updateVocabulary();
 
+    this.crearDatas();
     this.props.onClose( ret);
   }
 
