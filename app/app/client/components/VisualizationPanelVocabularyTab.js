@@ -31,7 +31,7 @@ import Button from '@material-ui/core/Button';
 
 import {observer} from 'mobx-react';
 
-import DialogSelectPreferred from './DialogSelectPreferred';
+import DialogSettingSynonym from './DialogSettingSynonym';
 import DialogOkCancel from './DialogOkCancel';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
 import Search from './Search';
@@ -59,13 +59,11 @@ export default
     this.message = '';
     this.synonymSource = null;
     this.synonymTarget = null;
-    this.preferredList = [];
-    this.synonymAllList = [];
 
     this.state = { 
       transformTogle: false,
       dlgSynonymOpen: false,  // dialog for Synonym term
-      dlgBorderOpen: false,   // dialog for Border term
+      dlgBroaderOpen: false,  // dialog for Broader term
       dlgErrOpen: false,      // dialog for Error
       reason: '',             // Reason for Error 
     };
@@ -498,9 +496,9 @@ export default
 
       if( this.hitHandle == 1){
         this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します\nよろしいですか？';
-        this.setState({dlgBorderOpen: true});
-      } else{
-        this.setSynonym(sourceNode.data(), targetNode.data());
+        this.setState({dlgBroaderOpen: true});
+      } else{        
+        this.setState({dlgSynonymOpen: true});   
       }
     });
 
@@ -549,7 +547,7 @@ export default
               'line-color': 'blue',
               'line-style': 'dotted',
               'target-arrow-shape': 'none',
-              'target-arrow-color': 'none',
+              'target-arrow-color': '',
               'curve-style': 'straight',
             });
           }
@@ -635,7 +633,7 @@ export default
    * Set BroaderTerm 
    * 
    */
-  setBorderTerm(){
+  setBroaderTerm(){
 
     const source = this.synonymSource;
     
@@ -656,63 +654,6 @@ export default
   }
 
   /**
-   * Save synonyms and Preferred term selected in the dialog 
-   * 
-   * @param {string} value  - selected Preferred term
-   */
-  onSelectPreferred(value) {
-
-    this.setState({ selectPreferred: value });
-    let tmpSynonym = [
-      ...this.props.editingVocabulary.tmpSynonym.list,
-      this.synonymTarget.term
-    ];    
-    this.props.editingVocabulary.updataSynonym(tmpSynonym);
-    
-    this.props.editingVocabulary.updataPreferredLabel( [ value ]);
-
-    const ret = this.props.editingVocabulary.updateVocabulary();
-    if (ret !== '') {
-      this.setState({dlgErrOpen: true, reason : ret});  
-    }
-  }
-
-  /**
-   * Create a list of sources and targets and all their synonyms and display a dialog to select 
-   * After selection, onSelectPreferred () is called 
-   * 
-   */
-  setSynonym(){
-    
-    const source = this.synonymSource;    
-    const target = this.synonymTarget;
-
-    this.props.editingVocabulary.deselectTermList();
-    if(this.props.editingVocabulary.currentNode.id !=  source.id){
-      this.props.editingVocabulary.setSelectedTermList(source.term);
-    }
-    this.props.editingVocabulary.setCurrentNodeByTerm(this.synonymSource.term, null, null, true);
-    
-    const sourcePreferredLabel = source?(source.preferred_label === undefined ?'':source.preferred_label):'';
-    const targetPreferredLabel = target?(target.preferred_label === undefined ?'':target.preferred_label):'';
-
-    let preferredList = [];
-    if(sourcePreferredLabel && targetPreferredLabel){
-
-      const nodeList = this.props.editingVocabulary.termListForVocabulary;
-      this.synonymAllList = nodeList.filter((item)=>{
-        return (item.data.preferred_label === sourcePreferredLabel) || (item.data.preferred_label === targetPreferredLabel);
-      });
-      for(let item of this.synonymAllList){
-        preferredList.push(item.data.term);
-      }
-    }
-    this.preferredList = preferredList;
-    
-    this.setState({dlgSynonymOpen: true});   
-  }
-
-  /**
   * Initialization of array storing zoom and pan for each file 
   *
   * Called from EdithingVocablary.js 
@@ -724,7 +665,6 @@ export default
       this.situationArr[ num] = undefined;
     }
   }
-
 
   /**
    * Layout update process for vocabulary selection
@@ -946,26 +886,37 @@ export default
   /**
    * When setting a synonym, select a Preferred term and then close the dialog 
    */
-  handleClose(){
-    this.setState({dlgSynonymOpen: false});    
-  }
-
-  /**
-   * Close the confirmation dialog and set the Border term
-   */
-  handleBorderClose(){
-    this.message = '';
-    this.setState({dlgBorderOpen: false});   
+  handleClose( ret){
+    this.setState({dlgSynonymOpen: false});
     
-    this.setBorderTerm(); 
+    if(ret ==='cancel'){
+      // dialog return cancel click
+      this.props.editingVocabulary.currentNodeClear();
+      this.props.editingVocabulary.tmpDataClear();
+      this.props.editingVocabulary.deselectTermList();
+
+    }else if(ret !== ''){
+      // updateVocabulary() return error reason
+      this.setState({dlgErrOpen: true, reason : ret});  
+    }
   }
 
   /**
-   * Close the confirmation dialog and do not set the Border term
+   * Close the confirmation dialog and set the Broader term
    */
-  handleBorderCancelClose(){
+  handleBroaderClose(){
     this.message = '';
-    this.setState({dlgBorderOpen: false});
+    this.setState({dlgBroaderOpen: false});   
+    
+    this.setBroaderTerm(); 
+  }
+
+  /**
+   * Close the confirmation dialog and do not set the Broader term
+   */
+  handleBroaderCancelClose(){
+    this.message = '';
+    this.setState({dlgBroaderOpen: false});
   }
 
   /**
@@ -985,8 +936,6 @@ export default
     const edgesList = this.props.editingVocabulary.edgesList;
     const disabledConfirm = this.props.editingVocabulary.selectedTermList.length;
     const transformTogle = this.state.transformTogle;
-    const synonymSourceTerm=this.synonymSource?(this.synonymSource.term?this.synonymSource.term:''):'';
-    const synonymTargetTerm=this.synonymTarget?(this.synonymTarget.term?this.synonymTarget.term:''):'';
 
     return (
       <div>
@@ -1047,21 +996,18 @@ export default
             </Box>
           </Grid>
         </Grid>
-
-        <DialogSelectPreferred
-          onClose={() => this.handleClose()}
-          onSelectPreferred={this.onSelectPreferred.bind(this)}  
+        <DialogSettingSynonym
+          onClose={this.handleClose.bind(this)}  
           open={this.state.dlgSynonymOpen}
           editingVocabulary={this.props.editingVocabulary}
           classes={this.props.classes}
-          preferredList={this.preferredList}
-          sourceTerm={synonymSourceTerm}
-          targetTerm={synonymTargetTerm}
+          source={this.synonymSource}
+          target={this.synonymTarget}
         />
         <DialogOkCancel
-          onOkClose={() => this.handleBorderClose()}
-          onCancel={() =>this.handleBorderCancelClose()}  
-          open={this.state.dlgBorderOpen}
+          onOkClose={() => this.handleBroaderClose()}
+          onCancel={() =>this.handleBroaderCancelClose()}  
+          open={this.state.dlgBroaderOpen}
           classes={this.props.classes}
           message={this.message}
         />
