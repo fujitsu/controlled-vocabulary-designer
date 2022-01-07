@@ -197,8 +197,7 @@ export default
     
     const initPan = {x: cy.width()/2, y: cy.height()/2};
     if( undefined == this.situationArr[ this.props.editingVocabulary.selectedFile.id]){
-      cy.pan( initPan);
-      cy.zoom( 0.005);
+      cy.fit(cy.nodes,50 );
     }else{
       cy.pan( this.situationArr[ this.props.editingVocabulary.selectedFile.id].pan || initPan);
       cy.zoom( this.situationArr[ this.props.editingVocabulary.selectedFile.id].zoom || 0.005);
