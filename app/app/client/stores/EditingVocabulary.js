@@ -356,6 +356,7 @@ class EditingVocabulary {
                 this.currentNodeClear();
                 this.tmpDataClear();
                 this.deselectTermList();
+                this.fitToVisualArea();
               }
 
               break;
@@ -368,6 +369,7 @@ class EditingVocabulary {
                 this.currentNodeClear();
                 this.tmpDataClear();
                 this.deselectTermList();
+                this.fitToVisualArea();
               }
               break;
             case '3':
@@ -379,11 +381,13 @@ class EditingVocabulary {
                 this.currentNodeClear();
                 this.tmpDataClear();
                 this.deselectTermList();
+                this.fitToVisualArea();
               }
               break;
             default:
               break;
           }
+
         }).catch((err) => {
           console.log(
               '[Error] get ReferenceVocabulary' +
@@ -1133,6 +1137,12 @@ class EditingVocabulary {
   fitToCurrent() {
     if (this.visualVocRef.current) {
       this.visualVocRef.current.fitToCurrent();
+    }
+  }
+  
+  fitToVisualArea(){
+    if (this.visualVocRef.current) {
+      this.visualVocRef.current.fitToVisualArea();
     }
   }
 
