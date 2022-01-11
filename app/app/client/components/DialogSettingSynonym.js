@@ -71,18 +71,19 @@ export default class DialogSettingSynonym extends React.Component {
     }
     this.props.editingVocabulary.setCurrentNodeByTerm(source.term, null, null, true);
     
-    let tmpSynonym = new Set([
-      ...this.props.editingVocabulary.tmpSynonym.list,
-      target.term
-    ]);    
+    let tmpSynonym = [...this.props.editingVocabulary.tmpSynonym.list, target.term];    
 
     this.props.editingVocabulary.updataSynonym(tmpSynonym);
 
-    this.preferredList = new Set([...this.props.editingVocabulary.tmpSynonym.list, source.term]);
+    this.preferredList = [...this.props.editingVocabulary.tmpSynonym.list, source.term].filter((val, i, self)=>{
+      return i === self.indexOf(val);
+    });
     
     if (this.props.editingVocabulary.tmpBroaderTerm.list.length > 1) {
       
-      this.broaderList=[...this.props.editingVocabulary.tmpBroaderTerm.list];
+      this.broaderList=[...this.props.editingVocabulary.tmpBroaderTerm.list].filter((val, i, self)=>{
+        return i === self.indexOf(val);
+      });
       this.broaderClassName= this.props.classes.formControl;
     }else{
       this.setState({ selectPreferred: this.props.source.term });
