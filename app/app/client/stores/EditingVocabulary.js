@@ -356,6 +356,7 @@ class EditingVocabulary {
                 this.currentNodeClear();
                 this.tmpDataClear();
                 this.deselectTermList();
+                this.fitToVisualArea();
               }
 
               break;
@@ -368,6 +369,7 @@ class EditingVocabulary {
                 this.currentNodeClear();
                 this.tmpDataClear();
                 this.deselectTermList();
+                this.fitToVisualArea();
               }
               break;
             case '3':
@@ -379,11 +381,13 @@ class EditingVocabulary {
                 this.currentNodeClear();
                 this.tmpDataClear();
                 this.deselectTermList();
+                this.fitToVisualArea();
               }
               break;
             default:
               break;
           }
+
         }).catch((err) => {
           console.log(
               '[Error] get ReferenceVocabulary' +
@@ -1135,6 +1139,12 @@ class EditingVocabulary {
       this.visualVocRef.current.fitToCurrent();
     }
   }
+  
+  fitToVisualArea(){
+    if (this.visualVocRef.current) {
+      this.visualVocRef.current.fitToVisualArea();
+    }
+  }
 
 
   /**
@@ -1739,6 +1749,17 @@ class EditingVocabulary {
         pow(10, Math.log10(Math.abs(position))*3.0/4.0)*2000;
   }
 
+  
+  /**
+   * Calculate the coordinates of the term from the coordinates of the visualization panel 
+   * @param  {Number} position x or y position
+   * @return {Number} - reverse value
+   */
+   calcReversePosition(position) {     
+    const ret =  Math.sign(position)*1.0/10000.0*Math.pow(Math.E, 4.0/3.0*Math.log(1.0/2.0*Math.abs(position)));
+    return ret;
+  }
+
   /**
    * [calcPositionByHomotopic description]
    * @param  {Number} a vec0 - coordinate value
@@ -1993,6 +2014,84 @@ class EditingVocabulary {
     history.following = following;
     this.updateRequest(updateTermList, deleteIdList, updateCurrent, history);
 
+    return '';
+  }
+  /**
+   * Updating coordinate values etc. to DB 
+   * @param  {object} nodes - cytoscape nodes
+   * @return {string} - error message
+   */
+  @action updateVocabularys( nodes) {
+    const error = this.errorCheck();
+    if (error != '') {
+      return error;
+    }
+
+    // Get coordinate information from the visualization panel
+    const updateTermList = [];
+    const threshold = 0.00001;
+    for (let item of this.editingVocabulary) {
+
+      let position_x = null;
+      let position_y = null;
+      let broader_term = '';
+      for (let node of nodes) {
+        const posi = node.position();
+        if( item.term === node.data().term){
+          position_x = this.calcReversePosition( posi.x);
+          position_y = this.calcReversePosition( posi.y);
+
+          if(( threshold > Math.abs( Number( item.position_x) - position_x))
+          || ( threshold > Math.abs( Number( item.position_y) - position_y))){
+            position_x = null;
+          }
+          broader_term = node.data().broader_term !== undefined ? node.data().broader_term : '';
+
+          break;
+        }
+      }
+      if( position_x === null){
+        continue;
+      }
+
+      const dbData = {
+        term: item.term,
+        preferred_label: '',
+        uri: '',
+        broader_term: '',
+        synonym_candidate: [],
+        broader_term_candidate: [],
+        part_of_speech: item.part_of_speech,
+        position_x: String( position_x),
+        position_y: String( position_y),
+        color1: item.color1,
+        color2: item.color2,
+        hidden: item.hidden,
+        confirm: item.confirm,
+      };
+      if (item.id) {
+        dbData.id = Number(item.id);
+      }
+      dbData.preferred_label = item.preferred_label;
+      dbData.uri = item.uri;
+
+      if (item.synonym_candidate) {
+        item.synonym_candidate.forEach((term) => {
+          dbData.synonym_candidate.push(term);
+        });
+      }
+      dbData.broader_term = broader_term || item.broader_term;
+      if (item.broader_term_candidate) {
+        item.broader_term_candidate.forEach((term) => {
+          dbData.broader_term_candidate.push(term);
+        });
+      }
+      updateTermList.push( dbData);
+    }
+    if( updateTermList.length > 0){
+      this.updateRequest(updateTermList, [], updateTermList[0], null, null, false);
+    }
+    
     return '';
   }
 
@@ -2392,9 +2491,10 @@ class EditingVocabulary {
    * @param  {object} current - vocabulary data to be updated
    * @param  {object} history - history data 
    * @param  {object} oldNode - vocabulary data to be updated
+   * @param  {bool} setCurrent - do setCurrentNodeByTerm() 
    * @param  {object} [history=null] - history information (null: undo/redo requests)
    */
-  updateRequest(updateList, deleteList, current, history = null, oldNode = null) {
+  updateRequest(updateList, deleteList, current, history = null, oldNode = null, setCurrent=true) {
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
 
@@ -2500,7 +2600,9 @@ class EditingVocabulary {
             this.setEditingVocabularyData(response.data);
 
             // Reselect to reset tmp information
-            this.setCurrentNodeByTerm(current.term, current.id, null, oldNode?false:true);
+            if( setCurrent){
+              this.setCurrentNodeByTerm(current.term, current.id, null, oldNode?false:true);
+            }
 
             if (history) {
               if (!history.targetId) {
