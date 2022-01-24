@@ -28,7 +28,8 @@ const useStyles = (theme) => ({
   },
 
   'mainPanel': {
-    height: '680px',
+    width: '97vw',
+    height: '86vh',
   },
 
   'colorChartCheckBox': {
@@ -122,10 +123,58 @@ const useStyles = (theme) => ({
   },
 
   'visualizationVocabularyHead': {
-    width: '64%',
+    width: '97vw',
+    height: '50px',
+    margin: 0,
     position: 'absolute',
     zIndex: 2,
+    backgroundColor: '#99999980',
   },
+
+  'buttons': {
+    marginTop:'0',
+    marginRight:'16px',
+    backgroundColor: '#555555',
+    borderRadius: '0',
+    boxShadow: 'none',
+  },
+
+  'buttonsNewAdd': {
+    marginTop:'0',
+    marginRight:'8px',
+    borderRadius: '0',
+    boxShadow: 'none',
+  },
+
+  'popoverTitle': {
+    minWidth: "90%",
+    paddingLeft: "20px",
+    borderBottom: 'solid 1px #eee',
+    display: "flex",
+    justifyContent: "space-between",
+    Height: "48px",
+    lineHeight: "48px"
+  },
+
+  'popoverTitleCloseButton': {
+    position: 'absolute',
+    right: theme.spacing(1),
+    color: theme.palette.grey[500],
+  },
+  
+  'editPanelVoc': {
+    padding: '30px',
+  },
+
+  'editPanelVocVerticalGap': {
+    marginTop: '10px',
+  },
+
+  'editPanelVocUsageGap': {
+    marginTop: '10px',
+    marginBottom: '2px',
+  },
+
 
   'fileSelecter': {
     zIndex: 1,
@@ -239,16 +288,17 @@ class App extends React.Component {
           </Grid>
         </Grid>
         <Grid container spacing={3}>
-          <Grid item xs={8}>
+          <Grid item xs={12}>
             <Box border={1} className={this.props.classes.mainPanel}>
               <VisualizationPanel classes={this.props.classes}/>
             </Box>
           </Grid>
-          <Grid item xs={4}>
-            <Box border={1} className={this.props.classes.mainPanel}>
-              <EditPanel classes={this.props.classes}/>
-            </Box>
-          </Grid>
+
+          {/* ↓Cannot be deleted because it affects apiErrorDialog. Fixed later */}
+          <Box border={1} className={this.props.classes.displayNone}>
+            <EditPanel classes={this.props.classes}/>
+          </Box>
+          {/* ↑Cannot be deleted because it affects apiErrorDialog. Fixed later */}
         </Grid>
         <DialogApiError
           open={editingVocabularyStore.apiErrorDialog.open}
