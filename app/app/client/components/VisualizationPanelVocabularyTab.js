@@ -28,9 +28,15 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import Popover from "@material-ui/core/Popover";
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 import {observer} from 'mobx-react';
 
+import EditPanelVocabularyTab from './EditPanelVocabularyTab';
+import EditPanelVocabularyNewTab from './EditPanelVocabularyNewTab';
 import DialogSettingSynonym from './DialogSettingSynonym';
 import DialogOkCancel from './DialogOkCancel';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
@@ -62,7 +68,9 @@ export default
     this.synonymTarget = null;
 
     this.state = { 
-      transformTogle: false,
+      anchorEl: false,        // Edit Panel togle
+      anchorNewEl: false,     // Edit nNew Term Panel togle
+      transformTogle: false,  // transform coordinate togle
       dlgSynonymOpen: false,  // dialog for Synonym term
       dlgBroaderOpen: false,  // dialog for Broader term
       dlgUpVocOpen: false,    // dialog for save position
@@ -992,6 +1000,18 @@ export default
     this.message = '';
     this.setState({dlgDeselectTermOpen: false});
   }
+  handleEditPopoverOpen(e){
+    this.setState({anchorEl: this.state.anchorEl ? null : e.currentTarget});
+  }
+  handleEditPopoverClose(){
+    this.setState({anchorEl: null});
+  }
+  handleNewEditPopoverOpen(e){
+    this.setState({anchorNewEl: this.state.anchorNewEl ? null : e.currentTarget});
+  }
+  handleNewEditPopoverClose(){
+    this.setState({anchorNewEl: null});
+  }
 
   /**
    * render
@@ -1000,8 +1020,16 @@ export default
   render() {
     const nodeList = this.props.editingVocabulary.termListForVocabulary;
     const edgesList = this.props.editingVocabulary.edgesList;
-    const disabledConfirm = this.props.editingVocabulary.selectedTermList.length;
+    const disabledConfirm = this.props.editingVocabulary.selectedTermList.length > 0 ? false : true;
     const transformTogle = this.state.transformTogle;
+    const anchorEl = this.state.anchorEl;
+    const open = Boolean(anchorEl);
+    const id = open ? "popover" : undefined;
+    const anchorNewEl = this.state.anchorNewEl;
+    const openNew = Boolean(anchorNewEl);
+    const idNew = openNew ? "popover-new" : undefined;
+    const editButtondisabled = this.props.editingVocabulary.currentNode.term ? true : false;
+    const editButtonsDisableSwitchByFile  = this.props.editingVocabulary.selectedFile.id !== 0 ? true : false;
 
     return (
       <div>
@@ -1012,27 +1040,8 @@ export default
         >
           <Grid item xs={5}>
             <Box>
-              <Search
-                classes={this.props.classes}
-                editingVocabulary={this.props.editingVocabulary}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={5}>
-            <Box>
               <Button
-                style={{marginTop:'15px', marginRight:'8px'}}
-                ml={3}
-                variant="contained"
-                color="primary"
-                size={'small'}
-                disabled={!disabledConfirm}
-                onClick={()=>this.handleDeselectTermOpen()}
-              >
-                選択全解除
-              </Button>
-              <Button
-                style={{marginTop:'15px', marginRight:'8px'}}
+                className={this.props.classes.buttons}
                 ml={3}
                 variant="contained"
                 color="primary"
@@ -1041,6 +1050,17 @@ export default
                 onClick={()=>this.coordinateTransform()}
               >
               {transformTogle ? "座標変換済み" : "座標変換"}
+              </Button>
+              <Button
+                className={this.props.classes.buttons}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                disabled={disabledConfirm}
+                onClick={()=>this.handleDeselectTermOpen()}
+              >
+                選択全解除
               </Button>
               <Button
                 style={{marginTop:'15px', marginRight:'8px'}}
@@ -1052,6 +1072,121 @@ export default
               >
                 座標値を保存
               </Button>
+            </Box>
+          </Grid>
+          <Grid item xs={3}>
+            <Box>
+              <Search
+                classes={this.props.classes}
+                editingVocabulary={this.props.editingVocabulary}
+              />
+            </Box>
+          </Grid>
+          
+          <Grid item xs={2}>
+            <Box>
+              <Button
+                className={this.props.classes.buttons}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                disabled={ !editButtondisabled || editButtonsDisableSwitchByFile} 
+                onClick={(e)=>this.handleEditPopoverOpen(e)}
+              >
+                編集
+              </Button>
+              
+              <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                anchorReference="anchorPosition"
+                anchorPosition={{ top: 1000, left: 1200 }}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left"
+                }}
+                transformOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left"
+                }}
+                
+                style={{
+                  backgroundColor: "#66666680",
+                }}
+              >
+
+
+                <Typography className={this.props.classes.popoverTitle}>
+                  編集
+                  {this.handleEditPopoverClose ? (
+                    <IconButton
+                      aria-label="close"
+                      className={this.props.classes.popoverTitleCloseButton}
+                      onClick={() => this.handleEditPopoverClose()}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  ) : null}
+                </Typography>
+                
+                <EditPanelVocabularyTab
+                  classes={this.props.classes}
+                  editingVocabulary={this.props.editingVocabulary}
+                />
+              </Popover>
+
+              <Button
+                className={this.props.classes.buttonsNewAdd}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                onClick={(e)=>this.handleNewEditPopoverOpen(e)}
+                disabled={editButtonsDisableSwitchByFile}
+              >
+                新規登録
+              </Button>
+              
+              <Popover
+                id={idNew}
+                open={openNew}
+                anchorEl={anchorNewEl}
+                anchorReference="anchorPosition"
+                anchorPosition={{ top: 1000, left: 1200 }}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left"
+                }}
+                transformOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left"
+                }}
+                
+                style={{
+                  backgroundColor: "#66666680",
+                }}
+              >
+
+                <Typography className={this.props.classes.popoverTitle}>
+                  新規登録
+                  {this.handleNewEditPopoverClose ? (
+                    <IconButton
+                      aria-label="close"
+                      className={this.props.classes.popoverTitleCloseButton}
+                      onClick={() => this.handleNewEditPopoverClose()}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  ) : null}
+                </Typography>
+                
+                <EditPanelVocabularyNewTab
+                  classes={this.props.classes}
+                  editingVocabulary={this.props.editingVocabulary}
+                />
+              </Popover>
             </Box>
           </Grid>
           <Grid item xs={2}>
@@ -1126,8 +1261,8 @@ export default
               })}
 
           style={{
-            width: '100%',
-            height: '680px',
+            width: '97vw',
+            height: '86vh',
             backgroundColor: '#E3E3E3',
           }}
           stylesheet={[
