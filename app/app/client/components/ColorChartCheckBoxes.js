@@ -17,7 +17,6 @@ import {deepPurple} from '@material-ui/core/colors';
 import {purple} from '@material-ui/core/colors';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Button from '@material-ui/core/Button';
 
 import ColorChartCheckBox from './ColorChartCheckBox';
 
@@ -38,18 +37,11 @@ export default class ColorChartCheckBoxes extends React.Component {
 
   /**
    * Color information update event
-   */
-  updateColor() {
-    this.props.selectColor(this.props.currentId,
-        this.props.colorId, this.props.tmpColor.color);
-  }
-
-  /**
-   * Color information update event
    * @param  {object} event - information of color event for update
    */
   selectColor(event) {
     this.props.selectTmpColor(this.props.currentId, event.target.name);
+    this.props.selectColor(this.props.currentId, this.props.colorId, event.target.name);
   }
 
   /**
@@ -313,15 +305,6 @@ export default class ColorChartCheckBoxes extends React.Component {
           />
 
         </FormGroup>
-        <Button
-          variant='contained'
-          color='primary'
-          size={'small'}
-          onClick={()=>this.updateColor()}
-          disabled={this.props.disabled}
-        >
-          反映
-        </Button>
       </div>
 
     );

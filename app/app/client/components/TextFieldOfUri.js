@@ -43,6 +43,25 @@ export default
   }
 
   /**
+   * componentDidUpdate
+   */
+   componentDidUpdate(prevProps, prevState) {
+    
+    if (prevProps.disabledFlg !== this.props.disabledFlg) {
+      if ( !this.props.disabledFlg) {
+        this.setState({
+          disabledFlg: false,
+          editTerm: this.props.editingVocabulary.currentNode.term,
+        });
+      } else {
+        this.setState({disabledFlg: true});
+      }
+    }else{
+      return;
+    }
+  }
+
+  /**
    * Warning displaying snackbar events
    * @param {String} errorMsg - error message
    */
@@ -63,20 +82,6 @@ export default
    */
   onDelete(event) {
     this.props.editingVocabulary.updataUri('');
-  }
-
-  /**
-   * Disabled switching event
-   */
-  disabledToggle() {
-    if (this.state.disabledFlg) {
-      this.setState({
-        disabledFlg: false,
-        editTerm: this.props.editingVocabulary.currentNode.term,
-      });
-    } else {
-      this.setState({disabledFlg: true});
-    }
   }
 
   /**
@@ -193,7 +198,7 @@ export default
       <div>
         <form noValidate autoComplete="off">
           <Grid container spacing={2}>
-            <Grid item xs={9} style={{paddingRight: 0}}>
+            <Grid item xs={12}>
               <Box border={1}>
 
                 <Autocomplete
@@ -259,16 +264,6 @@ export default
                 </div>
               </Box>
             </Grid>
-            <Grid item xs={3}>
-              <Box mt={2}>
-                <Button
-                  onClick={()=>this.disabledToggle()}
-                  disabled={this.props.disabled}
-                >
-                  <CreateIcon/>
-                </Button>
-              </Box>
-            </Grid>
           </Grid>
         </form>
         <Snackbar
@@ -302,4 +297,5 @@ TextFieldOfUri.propTypes = {
   editingVocabulary: PropTypes.object,
   classes: PropTypes.object,
   disabled: PropTypes.bool,
+  disabledFlg: PropTypes.bool,
 };
