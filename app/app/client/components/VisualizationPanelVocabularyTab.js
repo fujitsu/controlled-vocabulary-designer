@@ -73,7 +73,6 @@ export default
       transformTogle: false,  // transform coordinate togle
       dlgSynonymOpen: false,  // dialog for Synonym term
       dlgBroaderOpen: false,  // dialog for Broader term
-      dlgUpVocOpen: false,    // dialog for save position
       dlgDeselectTermOpen: false, // dialog for deselect term confirm
       dlgErrOpen: false,      // dialog for Error
       reason: '',             // Reason for Error 
@@ -108,6 +107,7 @@ export default
     }else{     
       this.onPanZoom();
     }
+    this.dispCheckEdgeHandle();
   }
   /**
    * Max min scale
@@ -203,10 +203,10 @@ export default
   setPanZoom() {
     const cy = this.cy;
     
-    const initPan = {x: cy.width()/2, y: cy.height()/2};
     if( undefined == this.situationArr[ this.props.editingVocabulary.selectedFile.id]){
       cy.fit(cy.nodes,50 );
     }else{
+      const initPan = {x: cy.width()/2, y: cy.height()/2};
       cy.pan( this.situationArr[ this.props.editingVocabulary.selectedFile.id].pan || initPan);
       cy.zoom( this.situationArr[ this.props.editingVocabulary.selectedFile.id].zoom || 0.005);
     }
@@ -425,8 +425,13 @@ export default
    * init EdgeHandles
    */
    initEdgeHandles(){
+    if( this.props.editingVocabulary.selectedFile.id !== 0){
+      return;
+    }    
+    if( this.ehTop && this.ehLeft && this.ehRight){
+      return;
+    }
     const cy = this.cy;
-
     // the default values of each option are outlined below:
     let defaults ={
       preview: false, // whether to show added edges preview before releasing selection
@@ -462,6 +467,10 @@ export default
    * Event registration
    */
   setUpListeners() {
+    this.cy.on('dragfreeon', 'node', (event) => {      
+      this.updateVocabularys();
+    });
+
     this.cy.on('click', 'node', (event) => {
       
       // excluding edgehandle 
@@ -472,6 +481,7 @@ export default
       const target = event.target.data();
       let isAddTerm=false;
       const withKey = event.originalEvent.ctrlKey|| event.originalEvent.shiftKey;
+      this.fitCenterPan = false;
       if( !withKey){
         if( this.props.editingVocabulary.selectedTermList.length > 1){
           this.props.editingVocabulary.deselectTermList();
@@ -495,9 +505,44 @@ export default
           this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
         }
       }
+      this.fitCenterPan = true;
       this.changeSelectedTermColor(target.id, isAddTerm);
     });
 
+    this.cy.on('pan', (event) => {
+      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
+        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
+          pan:undefined, 
+          zoom:undefined
+        }
+      }
+      const pan = this.cy.pan();
+      const p ={
+        x: pan.x, 
+        y: pan.y
+      };
+      this.situationArr[this.props.editingVocabulary.selectedFile.id].pan= p;
+      this.onPanZoom();
+    });
+
+    this.cy.on('zoom', (event) => {
+      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
+        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
+          pan:undefined, 
+          zoom:undefined
+        }
+      }
+      const z = Number( this.cy.zoom());
+      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = z;
+      this.onPanZoom();
+    });
+  }
+
+  /**
+   * Event registration edgeHandles
+   */
+   setUpListenersEdgeHandles() {
+    this.cy.removeListener('ehcomplete');
     this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       
       addedEdge.remove();
@@ -513,10 +558,12 @@ export default
       }
     });
 
+    this.cy.removeListener('ehstop');
     this.cy.on('ehstop', (event, sourceNode) => {
       this.hideHandlePostion();
     });
 
+    this.cy.removeListener('ehstart');
     this.cy.on('ehstart', (event, sourceNode) => {
 
       if( this.ehTop.handleNode!== undefined && !this.ehTop.handleNode.active()){
@@ -567,6 +614,7 @@ export default
       },50);
     });
 
+    this.cy.removeListener('ehshow');
     this.cy.on('ehshow', (event, sourceNode) => {
       const cy = this.cy;
       
@@ -589,35 +637,7 @@ export default
           'width': val * 1.5,
           'height': val * 1.5,
         });
-      }
-        
-    });
-    this.cy.on('pan', (event) => {
-      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
-        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
-          pan:undefined, 
-          zoom:undefined
-        }
-      }
-      const pan = this.cy.pan();
-      const p ={
-        x: pan.x, 
-        y: pan.y
-      };
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].pan= p;
-      this.onPanZoom();
-    });
-
-    this.cy.on('zoom', (event) => {
-      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
-        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
-          pan:undefined, 
-          zoom:undefined
-        }
-      }
-      const z = Number( this.cy.zoom());
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = z;
-      this.onPanZoom();
+      }        
     });
   }
 
@@ -631,13 +651,45 @@ export default
    */ 
   hideHandlePostion(){
 
+    if( this.ehTop){
       if( this.ehTop.handleNode !== undefined) this.ehTop.handleNode.style('opacity','0');
-      if( this.ehLeft.handleNode !== undefined) this.ehLeft.handleNode.style('opacity','0');
-      if( this.ehRight.handleNode !== undefined) this.ehRight.handleNode.style('opacity','0');
-
       this.ehTop.enable();
+    }
+    if( this.ehLeft){
+      if( this.ehLeft.handleNode !== undefined) this.ehLeft.handleNode.style('opacity','0');
       this.ehLeft.enable();
+    }
+    if( this.ehRight){
+      if( this.ehRight.handleNode !== undefined) this.ehRight.handleNode.style('opacity','0');
       this.ehRight.enable();
+    }
+  }
+
+  /**
+   * Check if edge handles display 
+   */
+   dispCheckEdgeHandle(){
+
+    if( this.props.editingVocabulary.selectedFile.id === 0){  
+            
+      this.initEdgeHandles();      
+    }else{
+      if(this.ehTop){
+        this.ehTop.destroy();
+        this.ehTop = null;
+      } 
+      if(this.ehLeft){
+        this.ehLeft.destroy();
+        this.ehLeft = null;
+      } 
+      if(this.ehRight){
+        this.ehRight.destroy();
+        this.ehRight = null;
+      } 
+
+
+      
+    }
   }
 
   /**
@@ -651,9 +703,7 @@ export default
     const nextBroaderTerm = this.synonymTarget.term;
 
     this.props.editingVocabulary.deselectTermList();
-    if(this.props.editingVocabulary.currentNode.id !=  source.id){
-      this.props.editingVocabulary.setSelectedTermList(source.term);
-    }
+    this.props.editingVocabulary.setSelectedTermList(source.term);
     this.props.editingVocabulary.setCurrentNodeByTerm(source.term, source.id, null, true);
 
     this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
@@ -856,7 +906,7 @@ export default
       rankDir: "TB",
       ranker: "longest-path", 
 
-      stop: function (e) {
+      stop: (function (e, updateVocabularys) {
 
         const cy = e.cy;
         saveRoots.forEach((nd,i) => {
@@ -879,15 +929,15 @@ export default
             }
           });
         });
-      }
+      }, this.updateVocabularys()),
     }
 
     // Extend the minimum length of edge 
-    const zoom = cy.zoom();
-    if( zoom > 0.007){
-      const thisLen = parseInt(1 / zoom);
-      defaults.minLen = thisLen;
-    }
+    // const zoom = cy.zoom();
+    // if( zoom > 0.007){
+    //   const thisLen = parseInt(1 / zoom);
+    //   defaults.minLen = thisLen;
+    // }
     
     cy.elements().layout( defaults).run();
     
@@ -967,25 +1017,6 @@ export default
   handleErrClose(){
     this.setState({dlgErrOpen: false, reason: ''});   
   }
-
-  /**
-   * dialog handles for save position button 
-   */
-  handleUpVocOpen(){    
-    this.message = '座標値を保存します\nよろしいですか？';
-    this.setState({dlgUpVocOpen: true});
-  }
-  handleUpVocClose(){
-    this.message = '';
-    this.setState({dlgUpVocOpen: false});
-
-    this.updateVocabularys();
-  }
-  handleUpVocCancelClose(){
-    this.message = '';
-    this.setState({dlgUpVocOpen: false});    
-  }
-
   handleDeselectTermOpen(){
     this.message = "用語の選択を解除します。\nよろしいですか？";
     this.setState({dlgDeselectTermOpen: true});  
@@ -1062,19 +1093,9 @@ export default
               >
                 選択全解除
               </Button>
-              <Button
-                style={{marginTop:'15px', marginRight:'8px'}}
-                ml={3}
-                variant="contained"
-                color="primary"
-                size={'small'}
-                onClick={()=>this.handleUpVocOpen()}
-              >
-                座標値を保存
-              </Button>
             </Box>
           </Grid>
-          <Grid item xs={3}>
+          <Grid item xs={5}>
             <Box>
               <Search
                 classes={this.props.classes}
@@ -1189,7 +1210,7 @@ export default
               </Popover>
             </Box>
           </Grid>
-          <Grid item xs={2}>
+          {/* <Grid item xs={2}>
             <Box>
               <FormControl className={this.props.classes.fileSelecter}>
                 <Select
@@ -1205,7 +1226,7 @@ export default
                 </Select>
               </FormControl>
             </Box>
-          </Grid>
+          </Grid> */}
         </Grid>
         <DialogSettingSynonym
           onClose={this.handleClose.bind(this)}  
@@ -1219,13 +1240,6 @@ export default
           onOkClose={() => this.handleBroaderClose()}
           onCancel={() =>this.handleBroaderCancelClose()}  
           open={this.state.dlgBroaderOpen}
-          classes={this.props.classes}
-          message={this.message}
-        />
-        <DialogOkCancel
-          onOkClose={() => this.handleUpVocClose()}
-          onCancel={() =>this.handleUpVocCancelClose()}  
-          open={this.state.dlgUpVocOpen}
           classes={this.props.classes}
           message={this.message}
         />
