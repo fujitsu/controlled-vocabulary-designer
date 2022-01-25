@@ -8,6 +8,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 import Button from '@material-ui/core/Button';
 import Box from '@material-ui/core/Box';
 import FormControl from '@material-ui/core/FormControl';
@@ -66,9 +68,7 @@ export default class DialogSettingSynonym extends React.Component {
     const target = this.props.target;
 
     this.props.editingVocabulary.deselectTermList();
-    if(this.props.editingVocabulary.currentNode.id !=  source.id){
-      this.props.editingVocabulary.setSelectedTermList(source.term);
-    }
+    this.props.editingVocabulary.setSelectedTermList(source.term);
     this.props.editingVocabulary.setCurrentNodeByTerm(source.term, null, null, true);
     
     let tmpSynonym = [...this.props.editingVocabulary.tmpSynonym.list, target.term];    
@@ -86,7 +86,10 @@ export default class DialogSettingSynonym extends React.Component {
       });
       this.broaderClassName= this.props.classes.formControl;
     }else{
-      this.setState({ selectPreferred: this.props.source.term });
+      this.setState({ 
+        selectPreferred: this.props.source.term,
+        selectBroader: this.props.editingVocabulary.tmpBroaderTerm.list.length > 0 ? this.props.editingVocabulary.tmpBroaderTerm.list[0] : '' 
+      });   
     }
   }
 
@@ -113,14 +116,11 @@ export default class DialogSettingSynonym extends React.Component {
     
     if ( this.state.selectPreferred === '') {
       window.alert('代表語を選択してください');
-
-      return false;
+      return
     }
-    if (this.props.editingVocabulary.tmpBroaderTerm.list.length > 1
-      && this.state.selectBroader === '') {
-        window.alert('上位語を選択してください');
-
-        return false;
+    if (this.props.editingVocabulary.tmpBroaderTerm.list.length > 1 && this.state.selectBroader === '') {
+      window.alert('上位語を選択してください');
+      return;
     }
     
     this.props.editingVocabulary.updataPreferredLabel( [ this.state.selectPreferred ]);
@@ -149,12 +149,18 @@ export default class DialogSettingSynonym extends React.Component {
           open={this.props.open}
           onEntered={() => this.initPreferred()}
         >
-          <DialogTitle style={
-            {position: 'relative', justifyContent: 'flex-end'}
-          }>
+          <DialogTitle>
             {title}
+            <IconButton
+              aria-label="close"
+              onClick={() => this.handleClose()}
+              className={this.props.classes.closeButton}
+            >
+              <CloseIcon />            
+            </IconButton>
           </DialogTitle>
-          <DialogContent style={{width: '450px',overflow: 'hidden'}}>
+
+          <DialogContent style={{width: '420px',overflow: 'hidden'}}  dividers>
             <Box component="div" display="block" >
 
               <FormControl
