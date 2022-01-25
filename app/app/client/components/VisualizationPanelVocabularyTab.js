@@ -22,9 +22,6 @@ import {blue} from '@material-ui/core/colors';
 import {deepPurple} from '@material-ui/core/colors';
 import {purple} from '@material-ui/core/colors';
 
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -534,8 +531,8 @@ export default
           zoom:undefined
         }
       }
-      const z = Number( this.cy.zoom());
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = z;
+      const zoom = Number( this.cy.zoom());
+      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = zoom;
       this.onPanZoom();
     });
   }
@@ -931,6 +928,9 @@ export default
             }
           });
         });
+
+        updateVocabularys();
+
       }, this.updateVocabularys()),
     }
 
@@ -1212,23 +1212,6 @@ export default
               </Popover>
             </Box>
           </Grid>
-          {/* <Grid item xs={2}>
-            <Box>
-              <FormControl className={this.props.classes.fileSelecter}>
-                <Select
-                  labelId="file-select-label"
-                  id="file-select"
-                  value={this.props.editingVocabulary.selectedFile.id}
-                  onChange={(e) => this.handleChange(e)}
-                >
-                  <MenuItem value={0}>編集用語彙</MenuItem>
-                  <MenuItem value={1}>参照用語彙1</MenuItem>
-                  <MenuItem value={2}>参照用語彙2</MenuItem>
-                  <MenuItem value={3}>参照用語彙3</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-          </Grid> */}
         </Grid>
         <DialogSettingSynonym
           onClose={this.handleClose.bind(this)}  
