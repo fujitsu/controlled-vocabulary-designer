@@ -362,10 +362,10 @@ class App extends React.Component {
   
   }
 
-  // onReadFileChange(){
+  onReadFileChange(){
 
-  //   this.readFileSet();
-  // }
+    this.readFileSet();
+  }
 
   /**
    * render
@@ -379,7 +379,7 @@ class App extends React.Component {
             <ControlPanel
               classes={this.props.classes}
               editingVocabulary={editingVocabularyStore}
-              // onReadFileChange = {() => this.onReadFileChange()}
+              onReadFileChange = {() => this.onReadFileChange()}
             />
           </Grid>
         </Grid>
