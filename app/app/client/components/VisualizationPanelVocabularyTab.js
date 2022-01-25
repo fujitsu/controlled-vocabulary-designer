@@ -1276,7 +1276,7 @@ export default
 
           style={{
             width: '97vw',
-            height: '86vh',
+            height: '85vh',
             backgroundColor: '#E3E3E3',
           }}
           stylesheet={[

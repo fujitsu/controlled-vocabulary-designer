@@ -29,7 +29,7 @@ const useStyles = (theme) => ({
 
   'mainPanel': {
     width: '97vw',
-    height: '86vh',
+    height: '90vh',
   },
 
   'colorChartCheckBox': {
@@ -206,6 +206,26 @@ const useStyles = (theme) => ({
     color: theme.palette.grey[500],
   },
   
+  'closeTitle': {    
+    height: '30px',
+    textAlign: 'right',
+    paddingTop: '5px',
+    paddingRight: '10px',
+    color: theme.palette.grey[500],
+  },
+
+  'closeButton': {
+    position: 'absolute',
+    right: theme.spacing(1),
+    top:   '4px',
+  },
+
+  'dlgFileDownloadTitle': {
+    justifyContent: "space-between",
+    paddingRight: '15px',
+
+  },
+
   'editPanelVoc': {
     padding: '30px',
   },
@@ -365,7 +385,7 @@ class App extends React.Component {
         </Grid>
         <Grid container>
           <Grid item xs={12}>
-            <Box className={this.props.classes.mainPanel}>
+            <Box border={1} className={this.props.classes.mainPanel}>
               <VisualizationPanel 
                 classes={this.props.classes}
                 hensyuName0={this.state.sFileName0}
