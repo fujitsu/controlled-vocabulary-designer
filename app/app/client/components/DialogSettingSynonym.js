@@ -116,7 +116,7 @@ export default class DialogSettingSynonym extends React.Component {
     
     if ( this.state.selectPreferred === '') {
       window.alert('代表語を選択してください');
-      return
+      return;
     }
     if (this.props.editingVocabulary.tmpBroaderTerm.list.length > 1 && this.state.selectBroader === '') {
       window.alert('上位語を選択してください');
