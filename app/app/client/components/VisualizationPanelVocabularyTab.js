@@ -452,6 +452,8 @@ export default
     
     defaults.handlePosition = 'right middle ';
     this.ehRight = cy.edgehandles( defaults);
+    
+    this.setUpListenersEdgeHandles();
   }
 
   /**
