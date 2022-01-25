@@ -8,6 +8,8 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 import Button from '@material-ui/core/Button';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import Input from '@material-ui/core/Input';
@@ -243,10 +245,16 @@ export default class DialogFileDownload extends React.Component {
           fullwidth="false"
           onEntered={() => this.initFilesInfo()}
         >
-          <DialogTitle style={
-            {position: 'relative', justifyContent: 'flex-end'}
-          }>
+          <DialogTitle>
             ファイル出力
+            
+            <IconButton
+              aria-label="close"
+              onClick={() => this.handleClose()}
+              className={this.props.classes.closeButton}
+            >
+              <CloseIcon />            
+            </IconButton>
           </DialogTitle>
           <DialogContent style={{width: '450px'}}>
             <Box component="div" display="block">
