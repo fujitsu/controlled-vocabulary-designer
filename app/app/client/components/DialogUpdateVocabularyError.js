@@ -5,8 +5,11 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 /**
  * error dialog
  * @extends React
@@ -200,7 +203,16 @@ export default class DialogUpdateVocabularyError extends React.Component {
         aria-labelledby="dialog-vocabulary-error" 
         open={this.props.open}
       >
-        <DialogContent>
+        <DialogTitle className={this.props.classes.closeTitle}>
+          <IconButton
+            aria-label="close"
+            onClick={() => this.handleClose()}
+            className={this.props.classes.closeButton}
+          >
+            <CloseIcon />            
+          </IconButton>
+        </DialogTitle>
+        <DialogContent dividers>
           <DialogContentText>
             {errorMsg}
           </DialogContentText>
