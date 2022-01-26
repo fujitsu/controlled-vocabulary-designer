@@ -10,6 +10,9 @@ import Button from '@material-ui/core/Button';
 import CreateIcon from '@material-ui/icons/Create';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
 
 import {grey} from '@material-ui/core/colors';
 import {brown} from '@material-ui/core/colors';
@@ -64,6 +67,15 @@ export default
         'color': grey[700],
         '&$checked': {
           color: grey[900],
+        },
+        '&$checked + $track': {
+          backgroundColor: grey[200],
+        },
+      },
+      'grey': {
+        'color': grey[300],
+        '&$checked': {
+          color: grey[500],
         },
         '&$checked + $track': {
           backgroundColor: grey[200],
@@ -233,7 +245,6 @@ export default
     if (this.state.disabledFlg) {
       this.setState({
         disabledFlg: false,
-        // editTerm: this.props.editingVocabulary.currentNode.term,
       });
     } else {
       this.setState({disabledFlg: true});
@@ -254,19 +265,19 @@ export default
    * Confirm switch
    * @param  {Boolean} isConfirm - confirm acceptance
    */
-  toggleConfirm(isConfirm) {
-    // console.log('[toggleConfirm] change to ' + isConfirm);
-    const currentNode = this.props.editingVocabulary.currentNode;
+  // toggleConfirm(isConfirm) {
+  //   // console.log('[toggleConfirm] change to ' + isConfirm);
+  //   const currentNode = this.props.editingVocabulary.currentNode;
 
-    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
-    if (!isConfirm) {
-      // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
-      if (!currentNode.preferred_label) {
-        this.props.editingVocabulary.
-            tmpPreferredLabel.list.push(currentNode.term);
-      }
-    }
-  }
+  //   this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
+  //   if (!isConfirm) {
+  //     // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
+  //     if (!currentNode.preferred_label) {
+  //       this.props.editingVocabulary.
+  //           tmpPreferredLabel.list.push(currentNode.term);
+  //     }
+  //   }
+  // }
 
   /**
    * Fixed term color reflection
@@ -317,10 +328,9 @@ export default
     }
 
     return (
-    
       <div className={this.props.classes.editPanelVoc}>
-
-        {/* <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}> */}
+{/* 
+        <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}> */}
         
         <Grid container spacing={2}>
           <Box p={1} width="400px">
@@ -335,7 +345,7 @@ export default
                 </Box>
               </Grid>
             </Grid>
-
+            
             <Grid container className={this.props.classes.editPanelVocUsageGap}>
               <Grid item xs={4}>
               </Grid>
@@ -348,21 +358,18 @@ export default
                     onDelete={()=>{}}
                     style={{backgroundColor: '#bbdefb'}}
                   />
-
                 </Typography>
               </Grid>
               <Grid item xs={4} style={{textAlign: 'right'}}>
-                <Box mr={0}>
-                  <Typography variant="caption">
-                    新規の設定：
-                    <Chip
-                      size="small" 
-                      label="　"
-                      onDelete={()=>{}}
-                      style={{backgroundColor: '#ffcdd2'}}
-                    />
-                  </Typography>
-                </Box>
+                <Typography variant="caption">
+                  新規の設定：
+                  <Chip
+                    size="small" 
+                    label="　"
+                    onDelete={()=>{}}
+                    style={{backgroundColor: '#ffcdd2'}}
+                  />
+                </Typography>
               </Grid>
             </Grid>
 
@@ -466,11 +473,40 @@ export default
               </Grid>
             </Grid>
 
-            <Grid container>
+            <Grid container spacing={2}>
+              <Grid item xs={3}>
+                <Box mt={1}>
+                  枠線色
+                </Box>
+              </Grid>
+              <Grid item xs={9}>
+                <Box>
+                  <ColorChartCheckBoxes
+                    colorId="color1"
+                    classes={this.props.classes}
+                    currentId={this.props.editingVocabulary.currentNode.id}
+                    color={this.props.editingVocabulary.currentNode.color1}
+                    selectColor={(currentId, colorId, color) =>
+                      this.props.editingVocabulary.updateColor(currentId,
+                          colorId, color)
+                    }
+                    tmpColor={this.props.editingVocabulary.tmpBorderColor}
+                    selectTmpColor={(id, color) =>
+                      this.props.editingVocabulary.selectTmpBorderColor(
+                          id, color)
+                    }
+                    disabled={disabledColor}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+            <Grid container spacing={3}>
               <Grid item xs={5}>
+                <Box>
+                </Box>
               </Grid>
               <Grid item xs={2}>
-                <Box mt={1} pl={2}>
+                <Box mt={1}>
                   <Button
                     variant="contained"
                     color="primary"
@@ -478,7 +514,7 @@ export default
                     onClick={()=>this.updateVocabulary()}
                     disabled={!isCurrentNodeChanged}
                   >
-                    反映
+                    登録
                   </Button>
                   <DialogUpdateVocabularyError
                     onClose={() => this.errorDialogClose()}
@@ -505,40 +541,8 @@ export default
                 </Box> */}
               </Grid>
             </Grid>
-
           </Box>
         </Grid>
-
-        <hr style={{ color: 'grey', }} />
-
-        <Grid container spacing={2}>
-          <Grid item xs={3}>
-            <Box mt={1}>
-              枠線色
-            </Box>
-          </Grid>
-          <Grid item xs={9}>
-            <Box>
-              <ColorChartCheckBoxes
-                colorId="color1"
-                classes={this.props.classes}
-                currentId={this.props.editingVocabulary.currentNode.id}
-                color={this.props.editingVocabulary.currentNode.color1}
-                selectColor={(currentId, colorId, color) =>
-                  this.props.editingVocabulary.updateColor(currentId,
-                      colorId, color)
-                }
-                tmpColor={this.props.editingVocabulary.tmpBorderColor}
-                selectTmpColor={(id, color) =>
-                  this.props.editingVocabulary.selectTmpBorderColor(
-                      id, color)
-                }
-                disabled={disabledColor}
-              />
-            </Box>
-          </Grid>
-        </Grid>
-
 
         {/* <Grid container spacing={2}>
 
