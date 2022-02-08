@@ -2331,6 +2331,19 @@ class EditingVocabulary {
     });
 
     // Extract deleted synonyms and update or delete vocabulary data
+    deleteSynonymList.sort();
+    let setPreferred_label = '';
+
+    const tmpPreLabel = this.editingVocabulary.find( (data) =>
+    data.term === deleteSynonymList[0]);
+
+    if ( tmpPreLabel && tmpPreLabel.preferred_label 
+          && this.currentNode.term === tmpPreLabel.preferred_label) {
+      setPreferred_label = tmpPreLabel.term;
+    }else if ( tmpPreLabel && tmpPreLabel.preferred_label 
+              && deleteSynonymList.indexOf( tmpPreLabel.preferred_label) !== -1) {
+      setPreferred_label = tmpPreLabel.preferred_label;
+    }
     deleteSynonymList.forEach((synonym) => {
       const objDelSynonym = this.editingVocabulary.find( (data) =>
         data.term === synonym);
@@ -2344,10 +2357,7 @@ class EditingVocabulary {
         if (objDelSynonym.term !== objDelSynonym.preferred_label) {
           previous.push(this.makeVocabularyHistoryData(objDelSynonym));
           // Removed synonyms were words belonging to the editing vocabulary (preferred label), so remove the association with the editing vocabulary
-          // objDelSynonym.preferred_label = '';
-          objDelSynonym.preferred_label = objDelSynonym.term;
-          objDelSynonym.uri = '';
-          objDelSynonym.broader_term = '';
+          objDelSynonym.preferred_label = setPreferred_label;
           console.log(
               '[updateVocabulary] ' +
               synonym +
@@ -2490,7 +2500,7 @@ class EditingVocabulary {
    * @param  {array} deleteList - deleted vocabulary list
    * @param  {object} current - vocabulary data to be updated
    * @param  {object} history - history data 
-   * @param  {object} oldNode - vocabulary data to be updated
+   * @param  {object} oldNode - vocabulary old data to be updated
    * @param  {bool} setCurrent - do setCurrentNodeByTerm() 
    * @param  {object} [history=null] - history information (null: undo/redo requests)
    */
