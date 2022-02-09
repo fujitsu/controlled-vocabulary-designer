@@ -752,6 +752,18 @@ export default
   }
 
   /**
+   * Flag to move to the middle 
+   * @param {boolean} flg true: move / false: not move
+   * @return {boolean} Original setting value
+   */
+  centerMoveDisabled(flg){
+    const oldFlg = this.fitCenterPan;
+    this.fitCenterPan = !flg;
+    return !oldFlg;
+  }
+
+
+  /**
    * File selection event
    * @param  {object} event - information of event
    */
