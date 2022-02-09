@@ -1145,6 +1145,19 @@ class EditingVocabulary {
       this.visualVocRef.current.fitToVisualArea();
     }
   }
+  
+  /**
+   * Flag to move to the middle 
+  * @param {boolean} flg true: move / false: not move
+  * @return {boolean} Original setting value
+  */
+  centerMoveDisabled(flg = true) {
+    let ret = true;
+    if (this.visualVocRef.current) {
+      ret = this.visualVocRef.current.centerMoveDisabled( flg);
+    }
+    return ret;
+  }
 
 
   /**
@@ -1214,6 +1227,9 @@ class EditingVocabulary {
         responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
       });
     }  
+    const ret = this.centerMoveDisabled(true);
+    this.setCurrentNodeByTerm('', currentId, null, true);
+    this.centerMoveDisabled( ret);
     //if( responseData)this.setEditingVocabularyData(responseData);
   }
 
@@ -2034,7 +2050,7 @@ class EditingVocabulary {
 
       let position_x = null;
       let position_y = null;
-      let broader_term = '';
+      let tmpData = null;
       for (let node of nodes) {
         const posi = node.position();
         if( item.term === node.data().term){
@@ -2044,15 +2060,21 @@ class EditingVocabulary {
           if(( threshold > Math.abs( Number( item.position_x) - position_x))
           || ( threshold > Math.abs( Number( item.position_y) - position_y))){
             position_x = null;
+          }else{
+            tmpData = node.data();
           }
-          broader_term = node.data().broader_term !== undefined ? node.data().broader_term : '';
-
           break;
         }
       }
-      if( position_x === null){
+      if( !tmpData || position_x === null){
         continue;
       }
+
+      item.position_x = position_x;
+      item.position_y = position_y;
+      item.color1 = tmpData.vocabularyColor;
+      item.color2 = this.confirmColor;
+      item.confirm = tmpData.confirm==''? 0:1;
 
       const dbData = {
         term: item.term,
@@ -2080,7 +2102,7 @@ class EditingVocabulary {
           dbData.synonym_candidate.push(term);
         });
       }
-      dbData.broader_term = broader_term || item.broader_term;
+      dbData.broader_term = item.broader_term;
       if (item.broader_term_candidate) {
         item.broader_term_candidate.forEach((term) => {
           dbData.broader_term_candidate.push(term);
