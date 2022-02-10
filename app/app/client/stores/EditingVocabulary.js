@@ -1145,6 +1145,19 @@ class EditingVocabulary {
       this.visualVocRef.current.fitToVisualArea();
     }
   }
+  
+  /**
+   * Flag to move to the middle 
+  * @param {boolean} flg true: move / false: not move
+  * @return {boolean} Original setting value
+  */
+  centerMoveDisabled(flg = true) {
+    let ret = true;
+    if (this.visualVocRef.current) {
+      ret = this.visualVocRef.current.centerMoveDisabled( flg);
+    }
+    return ret;
+  }
 
 
   /**
@@ -1214,6 +1227,9 @@ class EditingVocabulary {
         responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
       });
     }  
+    const ret = this.centerMoveDisabled(true);
+    this.setCurrentNodeByTerm('', currentId, null, true);
+    this.centerMoveDisabled( ret);
     //if( responseData)this.setEditingVocabularyData(responseData);
   }
 
@@ -2034,7 +2050,7 @@ class EditingVocabulary {
 
       let position_x = null;
       let position_y = null;
-      let broader_term = '';
+      let tmpData = null;
       for (let node of nodes) {
         const posi = node.position();
         if( item.term === node.data().term){
@@ -2044,15 +2060,21 @@ class EditingVocabulary {
           if(( threshold > Math.abs( Number( item.position_x) - position_x))
           || ( threshold > Math.abs( Number( item.position_y) - position_y))){
             position_x = null;
+          }else{
+            tmpData = node.data();
           }
-          broader_term = node.data().broader_term !== undefined ? node.data().broader_term : '';
-
           break;
         }
       }
-      if( position_x === null){
+      if( !tmpData || position_x === null){
         continue;
       }
+
+      item.position_x = position_x;
+      item.position_y = position_y;
+      item.color1 = tmpData.vocabularyColor;
+      item.color2 = this.confirmColor;
+      item.confirm = tmpData.confirm==''? 0:1;
 
       const dbData = {
         term: item.term,
@@ -2080,7 +2102,7 @@ class EditingVocabulary {
           dbData.synonym_candidate.push(term);
         });
       }
-      dbData.broader_term = broader_term || item.broader_term;
+      dbData.broader_term = item.broader_term;
       if (item.broader_term_candidate) {
         item.broader_term_candidate.forEach((term) => {
           dbData.broader_term_candidate.push(term);
@@ -2331,6 +2353,19 @@ class EditingVocabulary {
     });
 
     // Extract deleted synonyms and update or delete vocabulary data
+    deleteSynonymList.sort();
+    let setPreferred_label = '';
+
+    const tmpPreLabel = this.editingVocabulary.find( (data) =>
+    data.term === deleteSynonymList[0]);
+
+    if ( tmpPreLabel && tmpPreLabel.preferred_label 
+          && this.currentNode.term === tmpPreLabel.preferred_label) {
+      setPreferred_label = tmpPreLabel.term;
+    }else if ( tmpPreLabel && tmpPreLabel.preferred_label 
+              && deleteSynonymList.indexOf( tmpPreLabel.preferred_label) !== -1) {
+      setPreferred_label = tmpPreLabel.preferred_label;
+    }
     deleteSynonymList.forEach((synonym) => {
       const objDelSynonym = this.editingVocabulary.find( (data) =>
         data.term === synonym);
@@ -2344,10 +2379,8 @@ class EditingVocabulary {
         if (objDelSynonym.term !== objDelSynonym.preferred_label) {
           previous.push(this.makeVocabularyHistoryData(objDelSynonym));
           // Removed synonyms were words belonging to the editing vocabulary (preferred label), so remove the association with the editing vocabulary
-          // objDelSynonym.preferred_label = '';
-          objDelSynonym.preferred_label = objDelSynonym.term;
+          objDelSynonym.preferred_label = setPreferred_label;
           objDelSynonym.uri = '';
-          objDelSynonym.broader_term = '';
           console.log(
               '[updateVocabulary] ' +
               synonym +
@@ -2490,7 +2523,7 @@ class EditingVocabulary {
    * @param  {array} deleteList - deleted vocabulary list
    * @param  {object} current - vocabulary data to be updated
    * @param  {object} history - history data 
-   * @param  {object} oldNode - vocabulary data to be updated
+   * @param  {object} oldNode - vocabulary old data to be updated
    * @param  {bool} setCurrent - do setCurrentNodeByTerm() 
    * @param  {object} [history=null] - history information (null: undo/redo requests)
    */
