@@ -867,13 +867,12 @@ export default
     });
   }
 
-
   /**
-   * coordinate transform
+   * save root position for coordinate transform 
    */
-  coordinateTransform(){
+  getSaveRoot(){
     const cy = this.cy;
-  
+
     const nodes = cy.nodes();
     const edges = cy.edges();
 
@@ -908,6 +907,20 @@ export default
       
       saveRoots = [...saveRoots, {id:id,successors :suc ,pos:{x:posi.x, y:posi.y}} ];
     });
+
+    return saveRoots;
+  }
+
+  /**
+   * coordinate transform
+   */
+  async coordinateTransform(){
+    const cy = this.cy;
+  
+    const saveRoots = await this.getSaveRoot();
+
+    if( !saveRoots || 1 > saveRoots.length)
+      return;
     
     // [ dagre ] layout options
     const defaults={      
@@ -917,9 +930,8 @@ export default
       rankDir: "TB",
       ranker: "longest-path", 
 
-      stop: (function (e, updateVocabularys) {
-
-        const cy = e.cy;
+      stop: (function (e) {
+        // const cy = e.cy;
         saveRoots.forEach((nd,i) => {
           
           const fromPosi = nd.pos;
@@ -940,10 +952,7 @@ export default
             }
           });
         });
-
-        updateVocabularys();
-
-      }, this.updateVocabularys()),
+      }),
     }
 
     // Extend the minimum length of edge 
@@ -953,9 +962,11 @@ export default
     //   defaults.minLen = thisLen;
     // }
     
-    cy.elements().layout( defaults).run();
+    await cy.elements().layout( defaults).run();
     
-    nodes.unlock();
+    await this.updateVocabularys();
+    
+    await cy.nodes().unlock();
   }
   
   /**
