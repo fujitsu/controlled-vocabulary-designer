@@ -2380,6 +2380,7 @@ class EditingVocabulary {
           previous.push(this.makeVocabularyHistoryData(objDelSynonym));
           // Removed synonyms were words belonging to the editing vocabulary (preferred label), so remove the association with the editing vocabulary
           objDelSynonym.preferred_label = setPreferred_label;
+          objDelSynonym.uri = '';
           console.log(
               '[updateVocabulary] ' +
               synonym +
