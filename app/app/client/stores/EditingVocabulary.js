@@ -1226,6 +1226,9 @@ class EditingVocabulary {
       selectedTermList.forEach((item)=>{      
         responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
       });
+      const ret = this.centerMoveDisabled(true);
+      this.setCurrentNodeByTerm('', currentId, null, true);
+      this.centerMoveDisabled( ret);
     }  
   }
 
