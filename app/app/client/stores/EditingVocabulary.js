@@ -1227,10 +1227,6 @@ class EditingVocabulary {
         responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
       });
     }  
-    const ret = this.centerMoveDisabled(true);
-    this.setCurrentNodeByTerm('', currentId, null, true);
-    this.centerMoveDisabled( ret);
-    //if( responseData)this.setEditingVocabularyData(responseData);
   }
 
   tmpUpdateColor(currentId, colorId, tmpColor, isHistory = false) {
