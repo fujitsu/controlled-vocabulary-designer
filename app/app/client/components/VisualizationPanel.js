@@ -7,12 +7,9 @@ import PropTypes from 'prop-types';
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
+import { withStyles} from '@material-ui/core/styles';
 
-import VisualizationPanelRelationWordTab
-  from './VisualizationPanelRelationWordTab';
 import VisualizationPanelVocabularyTab from './VisualizationPanelVocabularyTab';
-import VisualizationTabPanel from './VisualizationTabPanel';
-
 import editingVocabularyStore from '../stores/EditingVocabulary';
 
 /**
@@ -49,30 +46,18 @@ export default class VisualizationPanel extends React.Component {
    * @param  {number} newValue - selection tab index
    */
   selectTab(event, newValue) {
-    if (newValue == 0 && editingVocabularyStore.getSelected(0)) {
-      editingVocabularyStore.setSelected(0, false);
-      this.setState({value: newValue});
-    } else if (newValue == 1 && editingVocabularyStore.getSelected(1)) {
-      editingVocabularyStore.setSelected(1, false);
-      this.setState({value: newValue});
-    } else {
-      this.setState({value: newValue});
-    }
-
+    
+    editingVocabularyStore.selectFile(newValue);
     if (newValue == 0) {
-      setTimeout(()=> {
-        editingVocabularyStore.selectFile(0);
-      }, 500);
+      editingVocabularyStore.setSelected(0, true);
+      editingVocabularyStore.setSelected(1, false);
+    } else {
+      editingVocabularyStore.setSelected(0, true);
+      editingVocabularyStore.setSelected(1, true);
     }
 
-    editingVocabularyStore.selectCurrentVisualTab(newValue);
+    this.setState({value: newValue});
 
-    if (newValue == 1) {
-      // If panzoom is changed while the vocabulary tab is hidden (Selection of terms, etc.), panzoom will not be executed after the vocabulary tab is displayed because panzoom is not set to the correct position.
-      setTimeout(() =>{
-        editingVocabularyStore.fitToCurrent();
-      }, 200);
-    }
   }
 
   /**
@@ -80,51 +65,73 @@ export default class VisualizationPanel extends React.Component {
    * @return {element}
    */
   render() {
-    return (
+
+    const hensyuName0 = this.props.hensyuName0; 
+    const sansyouName1 = this.props.sansyouName1; 
+    const sansyouName2 = this.props.sansyouName2; 
+    const sansyouName3 = this.props.sansyouName3; 
+    
+
+    // const LightTooltip = withStyles((theme) => ({
+    //   tooltip: {
+    //     backgroundColor: theme.palette.common.white,
+    //     color: 'rgba(0, 0, 0, 0.87)',
+    //     // boxShadow: theme.shadows[1],
+    //     marginTop: '-50px',
+    //     marginLeft: '50px',
+    //     border: '1px #eee solid',
+    //     fontSize: 11,
+    //   },
+    // }))(Tooltip);
+
+    return(
       <div className={this.props.classes.root}>
-        {/* <AppBar position="static" color="default">
-          <Tabs
-            value={this.state.value}
-            onChange={(event, newValue) => this.selectTab(event, newValue)}
-            aria-label="visualization panel tabs"
-            indicatorColor="primary"
-            textColor="inherit"
-            variant="scrollable"
-            scrollButtons="auto"
-          > */}
-            {/* <Tab
-              label="関連用語"
-              {...this.a11yProps(0)}
-              classes={{root: this.props.classes.tabs}}
-            /> */}
-            {/* <Tab
-              label="語彙"
-              {...this.a11yProps(0)}
-              classes={{root: this.props.classes.tabs}}
-            />
-          </Tabs>
-        </AppBar> */}
-        {/* <VisualizationTabPanel
+        <Tabs
           value={this.state.value}
-          editingVocabulary={editingVocabularyStore}
-          index={0}
+          onChange={(event, newValue) => this.selectTab(event, newValue)}
+          aria-label="visualization panel tabs"
+          textColor="inherit"
+          variant="scrollable"
+          scrollButtons="auto"
+          classes={{root: this.props.classes.tabs}}
         >
-          <VisualizationPanelRelationWordTab
-            classes={this.props.classes}
-            editingVocabulary={editingVocabularyStore}
-          />
-        </VisualizationTabPanel> */}
-        {/* <VisualizationTabPanel
-          value={this.state.value}
+          {/* <LightTooltip title={hensyuName0} > */}
+            <Tab
+              label="編集用語彙"
+              {...this.a11yProps(0)}
+              classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
+            />
+          {/* </LightTooltip>
+          <LightTooltip title={sansyouName1} > */}
+            <Tab
+              label="参照用語彙1"
+              {...this.a11yProps(1)}
+              classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
+              disabled={ !sansyouName1}
+            />
+          {/* </LightTooltip>
+          <LightTooltip title={sansyouName2} > */}
+            <Tab
+              label="参照用語彙2"
+              {...this.a11yProps(2)}
+              classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
+              disabled={ !sansyouName2}
+            />
+          {/* </LightTooltip>
+          <LightTooltip title={sansyouName3} > */}
+            <Tab
+              label="参照用語彙3"
+              {...this.a11yProps(3)}
+              classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
+              disabled={ !sansyouName3}
+            />
+          {/* </LightTooltip> */}
+        </Tabs>
+        <VisualizationPanelVocabularyTab
+          ref={editingVocabularyStore.visualVocRef}
+          classes={this.props.classes}
           editingVocabulary={editingVocabularyStore}
-          index={0}
-        > */}
-          <VisualizationPanelVocabularyTab
-            ref={editingVocabularyStore.visualVocRef}
-            classes={this.props.classes}
-            editingVocabulary={editingVocabularyStore}
-          />
-        {/* </VisualizationTabPanel> */}
+        />
       </div>
     );
   }
@@ -132,4 +139,8 @@ export default class VisualizationPanel extends React.Component {
 
 VisualizationPanel.propTypes = {
   classes: PropTypes.object,
+  hensyuName0: PropTypes.string,
+  sansyouName1: PropTypes.string,
+  sansyouName2: PropTypes.string,
+  sansyouName3: PropTypes.string,
 };

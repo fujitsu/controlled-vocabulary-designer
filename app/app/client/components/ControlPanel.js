@@ -11,6 +11,7 @@ import RedoIcon from '@material-ui/icons/Redo';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 import DialogFileSelecter from './DialogFileSelecter';
 import DialogFileDownload from './DialogFileDownload';
@@ -158,15 +159,15 @@ export default class ControlPanel extends React.Component {
   render() {
     return (
       <div>
-        <Box m={2}>
-
+        <Box>
           <Button
             aria-controls="customized-menu"
             aria-haspopup="true"
             onClick={this.handleMenuOpen.bind(this)}
-            variant="contained"
+            size="large" 
+            className={this.props.classes.buttonsTop}
           >
-            ファイル
+             <ExpandMoreIcon />ファイル
           </Button>
 
           <Menu
@@ -225,17 +226,24 @@ export default class ControlPanel extends React.Component {
               統制語彙
             </MenuItem>
           </Menu>
-          <Button onClick={this.undo.bind(this)} variant="contained">
-            <UndoIcon/>
+          <Button 
+            onClick={this.undo.bind(this)}  
+            size="large" 
+            className={this.props.classes.buttonsTop}> 
+            <UndoIcon/>取り消し
           </Button>
-          <Button onClick={this.redo.bind(this)} variant="contained">
-            <RedoIcon/>
+          <Button 
+            onClick={this.redo.bind(this)}  
+            size="large" 
+            className={this.props.classes.buttonsTop}> 
+            <RedoIcon/>やり直し
           </Button>
           <DialogFileSelecter
             open={this.state.uploadOpen}
             close={this.state.close}
             okCancel={this.state.okCancel}
             onClose={() => this.handleDialogClose()}
+            onReadFileChange = {() => this.props.onReadFileChange()}
             classes={this.props.classes}
             editingVocabulary={this.props.editingVocabulary}
           />
@@ -261,4 +269,5 @@ export default class ControlPanel extends React.Component {
 ControlPanel.propTypes = {
   classes: PropTypes.object,
   editingVocabulary: PropTypes.object,
+  onReadFileChange : PropTypes.func,
 };

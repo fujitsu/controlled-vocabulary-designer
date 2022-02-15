@@ -22,15 +22,18 @@ import {blue} from '@material-ui/core/colors';
 import {deepPurple} from '@material-ui/core/colors';
 import {purple} from '@material-ui/core/colors';
 
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import Popover from "@material-ui/core/Popover";
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 import {observer} from 'mobx-react';
 
+import EditPanelVocabularyTab from './EditPanelVocabularyTab';
+import EditPanelVocabularyNewTab from './EditPanelVocabularyNewTab';
 import DialogSettingSynonym from './DialogSettingSynonym';
 import DialogOkCancel from './DialogOkCancel';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
@@ -62,10 +65,11 @@ export default
     this.synonymTarget = null;
 
     this.state = { 
-      transformTogle: false,
+      anchorEl: false,        // Edit Panel togle
+      anchorNewEl: false,     // Edit nNew Term Panel togle
+      transformTogle: false,  // transform coordinate togle
       dlgSynonymOpen: false,  // dialog for Synonym term
       dlgBroaderOpen: false,  // dialog for Broader term
-      dlgUpVocOpen: false,    // dialog for save position
       dlgDeselectTermOpen: false, // dialog for deselect term confirm
       dlgErrOpen: false,      // dialog for Error
       reason: '',             // Reason for Error 
@@ -100,6 +104,7 @@ export default
     }else{     
       this.onPanZoom();
     }
+    this.dispCheckEdgeHandle();
   }
   /**
    * Max min scale
@@ -195,10 +200,10 @@ export default
   setPanZoom() {
     const cy = this.cy;
     
-    const initPan = {x: cy.width()/2, y: cy.height()/2};
     if( undefined == this.situationArr[ this.props.editingVocabulary.selectedFile.id]){
       cy.fit(cy.nodes,50 );
     }else{
+      const initPan = {x: cy.width()/2, y: cy.height()/2};
       cy.pan( this.situationArr[ this.props.editingVocabulary.selectedFile.id].pan || initPan);
       cy.zoom( this.situationArr[ this.props.editingVocabulary.selectedFile.id].zoom || 0.005);
     }
@@ -417,8 +422,13 @@ export default
    * init EdgeHandles
    */
    initEdgeHandles(){
+    if( this.props.editingVocabulary.selectedFile.id !== 0){
+      return;
+    }    
+    if( this.ehTop && this.ehLeft && this.ehRight){
+      return;
+    }
     const cy = this.cy;
-
     // the default values of each option are outlined below:
     let defaults ={
       preview: false, // whether to show added edges preview before releasing selection
@@ -439,6 +449,8 @@ export default
     
     defaults.handlePosition = 'right middle ';
     this.ehRight = cy.edgehandles( defaults);
+    
+    this.setUpListenersEdgeHandles();
   }
 
   /**
@@ -454,6 +466,10 @@ export default
    * Event registration
    */
   setUpListeners() {
+    this.cy.on('dragfreeon', 'node', (event) => {      
+      this.updateVocabularys();
+    });
+
     this.cy.on('click', 'node', (event) => {
       
       // excluding edgehandle 
@@ -464,6 +480,7 @@ export default
       const target = event.target.data();
       let isAddTerm=false;
       const withKey = event.originalEvent.ctrlKey|| event.originalEvent.shiftKey;
+      this.fitCenterPan = false;
       if( !withKey){
         if( this.props.editingVocabulary.selectedTermList.length > 1){
           this.props.editingVocabulary.deselectTermList();
@@ -487,9 +504,44 @@ export default
           this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
         }
       }
+      this.fitCenterPan = true;
       this.changeSelectedTermColor(target.id, isAddTerm);
     });
 
+    this.cy.on('pan', (event) => {
+      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
+        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
+          pan:undefined, 
+          zoom:undefined
+        }
+      }
+      const pan = this.cy.pan();
+      const p ={
+        x: pan.x, 
+        y: pan.y
+      };
+      this.situationArr[this.props.editingVocabulary.selectedFile.id].pan= p;
+      this.onPanZoom();
+    });
+
+    this.cy.on('zoom', (event) => {
+      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
+        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
+          pan:undefined, 
+          zoom:undefined
+        }
+      }
+      const zoom = Number( this.cy.zoom());
+      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = zoom;
+      this.onPanZoom();
+    });
+  }
+
+  /**
+   * Event registration edgeHandles
+   */
+   setUpListenersEdgeHandles() {
+    this.cy.removeListener('ehcomplete');
     this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       
       addedEdge.remove();
@@ -505,10 +557,12 @@ export default
       }
     });
 
+    this.cy.removeListener('ehstop');
     this.cy.on('ehstop', (event, sourceNode) => {
       this.hideHandlePostion();
     });
 
+    this.cy.removeListener('ehstart');
     this.cy.on('ehstart', (event, sourceNode) => {
 
       if( this.ehTop.handleNode!== undefined && !this.ehTop.handleNode.active()){
@@ -559,6 +613,7 @@ export default
       },50);
     });
 
+    this.cy.removeListener('ehshow');
     this.cy.on('ehshow', (event, sourceNode) => {
       const cy = this.cy;
       
@@ -581,35 +636,7 @@ export default
           'width': val * 1.5,
           'height': val * 1.5,
         });
-      }
-        
-    });
-    this.cy.on('pan', (event) => {
-      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
-        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
-          pan:undefined, 
-          zoom:undefined
-        }
-      }
-      const pan = this.cy.pan();
-      const p ={
-        x: pan.x, 
-        y: pan.y
-      };
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].pan= p;
-      this.onPanZoom();
-    });
-
-    this.cy.on('zoom', (event) => {
-      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
-        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
-          pan:undefined, 
-          zoom:undefined
-        }
-      }
-      const z = Number( this.cy.zoom());
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = z;
-      this.onPanZoom();
+      }        
     });
   }
 
@@ -623,13 +650,45 @@ export default
    */ 
   hideHandlePostion(){
 
+    if( this.ehTop){
       if( this.ehTop.handleNode !== undefined) this.ehTop.handleNode.style('opacity','0');
-      if( this.ehLeft.handleNode !== undefined) this.ehLeft.handleNode.style('opacity','0');
-      if( this.ehRight.handleNode !== undefined) this.ehRight.handleNode.style('opacity','0');
-
       this.ehTop.enable();
+    }
+    if( this.ehLeft){
+      if( this.ehLeft.handleNode !== undefined) this.ehLeft.handleNode.style('opacity','0');
       this.ehLeft.enable();
+    }
+    if( this.ehRight){
+      if( this.ehRight.handleNode !== undefined) this.ehRight.handleNode.style('opacity','0');
       this.ehRight.enable();
+    }
+  }
+
+  /**
+   * Check if edge handles display 
+   */
+   dispCheckEdgeHandle(){
+
+    if( this.props.editingVocabulary.selectedFile.id === 0){  
+            
+      this.initEdgeHandles();      
+    }else{
+      if(this.ehTop){
+        this.ehTop.destroy();
+        this.ehTop = null;
+      } 
+      if(this.ehLeft){
+        this.ehLeft.destroy();
+        this.ehLeft = null;
+      } 
+      if(this.ehRight){
+        this.ehRight.destroy();
+        this.ehRight = null;
+      } 
+
+
+      
+    }
   }
 
   /**
@@ -643,9 +702,7 @@ export default
     const nextBroaderTerm = this.synonymTarget.term;
 
     this.props.editingVocabulary.deselectTermList();
-    if(this.props.editingVocabulary.currentNode.id !=  source.id){
-      this.props.editingVocabulary.setSelectedTermList(source.term);
-    }
+    this.props.editingVocabulary.setSelectedTermList(source.term);
     this.props.editingVocabulary.setCurrentNodeByTerm(source.term, source.id, null, true);
 
     this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
@@ -693,6 +750,18 @@ export default
     const cy = this.cy;
     cy.fit(cy.nodes,50 );
   }
+
+  /**
+   * Flag to move to the middle 
+   * @param {boolean} flg true: move / false: not move
+   * @return {boolean} Original setting value
+   */
+  centerMoveDisabled(flg){
+    const oldFlg = this.fitCenterPan;
+    this.fitCenterPan = !flg;
+    return !oldFlg;
+  }
+
 
   /**
    * File selection event
@@ -798,13 +867,12 @@ export default
     });
   }
 
-
   /**
-   * coordinate transform
+   * save root position for coordinate transform 
    */
-  coordinateTransform(){
+  getSaveRoot(){
     const cy = this.cy;
-  
+
     const nodes = cy.nodes();
     const edges = cy.edges();
 
@@ -839,6 +907,20 @@ export default
       
       saveRoots = [...saveRoots, {id:id,successors :suc ,pos:{x:posi.x, y:posi.y}} ];
     });
+
+    return saveRoots;
+  }
+
+  /**
+   * coordinate transform
+   */
+  async coordinateTransform(){
+    const cy = this.cy;
+  
+    const saveRoots = await this.getSaveRoot();
+
+    if( !saveRoots || 1 > saveRoots.length)
+      return;
     
     // [ dagre ] layout options
     const defaults={      
@@ -848,9 +930,8 @@ export default
       rankDir: "TB",
       ranker: "longest-path", 
 
-      stop: function (e) {
-
-        const cy = e.cy;
+      stop: (function (e) {
+        // const cy = e.cy;
         saveRoots.forEach((nd,i) => {
           
           const fromPosi = nd.pos;
@@ -871,19 +952,21 @@ export default
             }
           });
         });
-      }
+      }),
     }
 
     // Extend the minimum length of edge 
-    const zoom = cy.zoom();
-    if( zoom > 0.007){
-      const thisLen = parseInt(1 / zoom);
-      defaults.minLen = thisLen;
-    }
+    // const zoom = cy.zoom();
+    // if( zoom > 0.007){
+    //   const thisLen = parseInt(1 / zoom);
+    //   defaults.minLen = thisLen;
+    // }
     
-    cy.elements().layout( defaults).run();
+    await cy.elements().layout( defaults).run();
     
-    nodes.unlock();
+    await this.updateVocabularys();
+    
+    await cy.nodes().unlock();
   }
   
   /**
@@ -959,25 +1042,6 @@ export default
   handleErrClose(){
     this.setState({dlgErrOpen: false, reason: ''});   
   }
-
-  /**
-   * dialog handles for save position button 
-   */
-  handleUpVocOpen(){    
-    this.message = '座標値を保存します\nよろしいですか？';
-    this.setState({dlgUpVocOpen: true});
-  }
-  handleUpVocClose(){
-    this.message = '';
-    this.setState({dlgUpVocOpen: false});
-
-    this.updateVocabularys();
-  }
-  handleUpVocCancelClose(){
-    this.message = '';
-    this.setState({dlgUpVocOpen: false});    
-  }
-
   handleDeselectTermOpen(){
     this.message = "用語の選択を解除します。\nよろしいですか？";
     this.setState({dlgDeselectTermOpen: true});  
@@ -992,6 +1056,18 @@ export default
     this.message = '';
     this.setState({dlgDeselectTermOpen: false});
   }
+  handleEditPopoverOpen(e){
+    this.setState({anchorEl: this.state.anchorEl ? null : e.currentTarget});
+  }
+  handleEditPopoverClose(){
+    this.setState({anchorEl: null});
+  }
+  handleNewEditPopoverOpen(e){
+    this.setState({anchorNewEl: this.state.anchorNewEl ? null : e.currentTarget});
+  }
+  handleNewEditPopoverClose(){
+    this.setState({anchorNewEl: null});
+  }
 
   /**
    * render
@@ -1000,8 +1076,16 @@ export default
   render() {
     const nodeList = this.props.editingVocabulary.termListForVocabulary;
     const edgesList = this.props.editingVocabulary.edgesList;
-    const disabledConfirm = this.props.editingVocabulary.selectedTermList.length;
+    const disabledConfirm = this.props.editingVocabulary.selectedTermList.length > 0 ? false : true;
     const transformTogle = this.state.transformTogle;
+    const anchorEl = this.state.anchorEl;
+    const open = Boolean(anchorEl);
+    const id = open ? "popover" : undefined;
+    const anchorNewEl = this.state.anchorNewEl;
+    const openNew = Boolean(anchorNewEl);
+    const idNew = openNew ? "popover-new" : undefined;
+    const editButtondisabled = this.props.editingVocabulary.currentNode.term ? true : false;
+    const editButtonsDisableSwitchByFile  = this.props.editingVocabulary.selectedFile.id !== 0 ? true : false;
 
     return (
       <div>
@@ -1012,27 +1096,8 @@ export default
         >
           <Grid item xs={5}>
             <Box>
-              <Search
-                classes={this.props.classes}
-                editingVocabulary={this.props.editingVocabulary}
-              />
-            </Box>
-          </Grid>
-          <Grid item xs={5}>
-            <Box>
               <Button
-                style={{marginTop:'15px', marginRight:'8px'}}
-                ml={3}
-                variant="contained"
-                color="primary"
-                size={'small'}
-                disabled={!disabledConfirm}
-                onClick={()=>this.handleDeselectTermOpen()}
-              >
-                選択全解除
-              </Button>
-              <Button
-                style={{marginTop:'15px', marginRight:'8px'}}
+                className={this.props.classes.buttons}
                 ml={3}
                 variant="contained"
                 color="primary"
@@ -1043,32 +1108,131 @@ export default
               {transformTogle ? "座標変換済み" : "座標変換"}
               </Button>
               <Button
-                style={{marginTop:'15px', marginRight:'8px'}}
+                className={this.props.classes.buttons}
                 ml={3}
                 variant="contained"
                 color="primary"
                 size={'small'}
-                onClick={()=>this.handleUpVocOpen()}
+                disabled={disabledConfirm}
+                onClick={()=>this.handleDeselectTermOpen()}
               >
-                座標値を保存
+                選択全解除
               </Button>
             </Box>
           </Grid>
+          <Grid item xs={5}>
+            <Box>
+              <Search
+                classes={this.props.classes}
+                editingVocabulary={this.props.editingVocabulary}
+              />
+            </Box>
+          </Grid>
+          
           <Grid item xs={2}>
             <Box>
-              <FormControl className={this.props.classes.fileSelecter}>
-                <Select
-                  labelId="file-select-label"
-                  id="file-select"
-                  value={this.props.editingVocabulary.selectedFile.id}
-                  onChange={(e) => this.handleChange(e)}
-                >
-                  <MenuItem value={0}>編集用語彙</MenuItem>
-                  <MenuItem value={1}>参照用語彙1</MenuItem>
-                  <MenuItem value={2}>参照用語彙2</MenuItem>
-                  <MenuItem value={3}>参照用語彙3</MenuItem>
-                </Select>
-              </FormControl>
+              <Button
+                className={this.props.classes.buttons}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                disabled={ !editButtondisabled || editButtonsDisableSwitchByFile} 
+                onClick={(e)=>this.handleEditPopoverOpen(e)}
+              >
+                編集
+              </Button>
+              
+              <Popover
+                id={id}
+                open={open}
+                anchorEl={anchorEl}
+                anchorReference="anchorPosition"
+                anchorPosition={{ top: 1000, left: 1200 }}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left"
+                }}
+                transformOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left"
+                }}
+                
+                style={{
+                  backgroundColor: "#66666680",
+                }}
+              >
+
+
+                <Typography className={this.props.classes.popoverTitle}>
+                  編集
+                  {this.handleEditPopoverClose ? (
+                    <IconButton
+                      aria-label="close"
+                      className={this.props.classes.popoverTitleCloseButton}
+                      onClick={() => this.handleEditPopoverClose()}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  ) : null}
+                </Typography>
+                
+                <EditPanelVocabularyTab
+                  classes={this.props.classes}
+                  editingVocabulary={this.props.editingVocabulary}
+                />
+              </Popover>
+
+              <Button
+                className={this.props.classes.buttonsNewAdd}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                onClick={(e)=>this.handleNewEditPopoverOpen(e)}
+                disabled={editButtonsDisableSwitchByFile}
+              >
+                新規登録
+              </Button>
+              
+              <Popover
+                id={idNew}
+                open={openNew}
+                anchorEl={anchorNewEl}
+                anchorReference="anchorPosition"
+                anchorPosition={{ top: 1000, left: 1200 }}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left"
+                }}
+                transformOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left"
+                }}
+                
+                style={{
+                  backgroundColor: "#66666680",
+                }}
+              >
+
+                <Typography className={this.props.classes.popoverTitle}>
+                  新規登録
+                  {this.handleNewEditPopoverClose ? (
+                    <IconButton
+                      aria-label="close"
+                      className={this.props.classes.popoverTitleCloseButton}
+                      onClick={() => this.handleNewEditPopoverClose()}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  ) : null}
+                </Typography>
+                
+                <EditPanelVocabularyNewTab
+                  classes={this.props.classes}
+                  editingVocabulary={this.props.editingVocabulary}
+                />
+              </Popover>
             </Box>
           </Grid>
         </Grid>
@@ -1084,13 +1248,6 @@ export default
           onOkClose={() => this.handleBroaderClose()}
           onCancel={() =>this.handleBroaderCancelClose()}  
           open={this.state.dlgBroaderOpen}
-          classes={this.props.classes}
-          message={this.message}
-        />
-        <DialogOkCancel
-          onOkClose={() => this.handleUpVocClose()}
-          onCancel={() =>this.handleUpVocCancelClose()}  
-          open={this.state.dlgUpVocOpen}
           classes={this.props.classes}
           message={this.message}
         />
@@ -1126,8 +1283,8 @@ export default
               })}
 
           style={{
-            width: '100%',
-            height: '680px',
+            width: '97vw',
+            height: '85vh',
             backgroundColor: '#E3E3E3',
           }}
           stylesheet={[
