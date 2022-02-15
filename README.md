@@ -139,4 +139,4 @@ You can set Positive and Negative numbers.
 This work was supported by Council for Science, Technology and Innovation, “Cross-ministerial Strategic Innovation Promotion Program (SIP), Big-data and AI-enabled Cyberspace Technologies”. (funding agency: NEDO)
 
 # Contact
-labs-cvd-contact@dl.jp.fujitsu.com
+contact-cvd@cs.jp.fujitsu.com
