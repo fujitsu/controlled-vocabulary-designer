@@ -4,9 +4,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import DialogTitle from '@material-ui/core/DialogTitle';
 import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 import Button from '@material-ui/core/Button';
 
 /**
@@ -34,12 +37,19 @@ export default class DialogOkCancel extends React.Component {
           onClose={() => this.props.onCancel()}
           open={this.props.open}
         >
-          <DialogTitle style={
-            {position: 'relative', justifyContent: 'flex-end'}
-          }>
-            {renderTexts()}
-                  
+          <DialogTitle className={this.props.classes.closeTitle}>
+            <IconButton
+              aria-label="close"
+              onClick={() => this.props.onCancel()}
+              className={this.props.classes.closeButton}
+            >
+              <CloseIcon />            
+            </IconButton>
           </DialogTitle>
+          
+          <DialogContent dividers>          
+            {renderTexts()}
+          </DialogContent>
           <DialogActions>
             <Button onClick={() => this.props.onOkClose()} color="primary">
             OK
