@@ -32,10 +32,13 @@ import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
 import SelectOfTerm from './SelectOfTerm';
 import TextFieldOfSynonym from './TextFieldOfSynonym';
 import TextFieldOfPreferredLabel from './TextFieldOfPreferredLabel';
+import TextFieldOfId from './TextFieldOfId'; 
 import TextFieldOfUri from './TextFieldOfUri';
 import TextFieldOfBroaderTerm from './TextFieldOfBroaderTerm';
 import TextFieldOfSubordinateTerm from './TextFieldOfSubordinateTerm';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
+import TextFieldOfTermDescription from './TextFieldOfTermDescription'; 
+import TextFieldOfOtherVocSynUri from './TextFieldOfOtherVocSynUri'; 
 
 /**
  * Edit Operation panel Vocabulary tab Component
@@ -56,7 +59,9 @@ export default
       reason: '',
       synymact: false,
       prfrrdlblact: false,
+      idofuriact: false,
       broadertermact: false,
+      termdescriptionact: false, 
     };
 
     this.switchStyles = {
@@ -181,8 +186,14 @@ export default
       if (this.state.prfrrdlblact) {
         this.props.editingVocabulary.popPreferredLabel();
       }
+      if (this.state.idofuriact) {
+        this.props.editingVocabulary.popIdofUri();
+      }
       if (this.state.broadertermact) {
         this.props.editingVocabulary.popBroaderTerm();
+      }
+      if (this.state.termdescriptionact) { 
+        this.props.editingVocabulary.popTermDescription(); 
       }
     }
     if (event.keyCode === 13) {
@@ -203,8 +214,15 @@ export default
       case 'PreferredLabel':
         this.setState({prfrrdlblact: value});
         break;
+      case 'Id':
+        this.setState({idofuriact: value});
+        break;
       case 'broaderTerm':
         this.setState({broadertermact: value});
+        break;
+      case 'TermDescription': 
+        this.setState({termdescriptionact: value}); 
+          break;
         break;
         defalut:
         break;
@@ -407,6 +425,26 @@ export default
             </Grid>
 
             <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
+              <Grid item xs={2}>
+                <Box mt={1}>
+                  ID
+                </Box>
+              </Grid>
+              <Grid item xs={10}>
+                <Box>
+                  <TextFieldOfId
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    disabled={disabledTextField}
+                    change={
+                      (target, value) => this.changeFocus(target, value)
+                    }
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
               <Grid item xs={5}>
                 <Box mt={1}>
                   代表語のURI
@@ -458,6 +496,43 @@ export default
               <Grid item xs={10}>
                 <Box>
                   <TextFieldOfSubordinateTerm
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    fileId={fileId}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
+              <Grid item xs={2}>
+                <Box mt={1}>
+                  用語の説明
+                </Box>
+              </Grid>
+              <Grid item xs={10}>
+                <Box>
+                  <TextFieldOfTermDescription
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    disabled={disabledTextField}
+                    change={
+                      (target, value) => this.changeFocus(target, value)
+                    }
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
+              <Grid item xs={2}>
+                <Box mt={1}>
+                  他語彙体系の同義語のURI
+                </Box>
+              </Grid>
+              <Grid item xs={10}>
+                <Box>
+                  <TextFieldOfOtherVocSynUri
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
                     fileId={fileId}
