@@ -163,13 +163,35 @@ export default
    */
   render() {
     const uri = this.props.editingVocabulary.tmpUri.list;
+
+    //  URI display in real time
+    let finalUri;
+    let idofuri = this.props.editingVocabulary.tmpUri.list[0];
+    let id  = this.props.editingVocabulary.tmpIdofUri.list[0];
+    if (idofuri != undefined) {
+      if ((idofuri.substring(idofuri.lastIndexOf('/')+1))!=id && id != undefined) {
+          idofuri = idofuri.replace(idofuri.substring(idofuri.lastIndexOf('/')+1), id);
+          finalUri = [idofuri];
+      }
+    }
+
+    // uri number of before
+    let urihttp = this.props.editingVocabulary.editingVocabulary.find((data) => data.uri);
+    if (urihttp != undefined) {
+      urihttp = urihttp.uri;
+    }
+    if (id != undefined && idofuri == undefined) {
+      idofuri = urihttp.replace(urihttp.substring(urihttp.lastIndexOf('/')+1), id);
+      finalUri = [idofuri];
+    }
+
     /* eslint-disable no-unused-vars */
     // object for rendering
     const uriNum = this.props.editingVocabulary.tmpUri.list.length;
     /* eslint-enable no-unused-vars */
 
     // Replace URI prefixes with display labels only
-    const alteredUri = uri.map((targetUri) => {
+    let alteredUri = uri.map((targetUri) => {
       const prefixList = this.state.config.prefix;
       const foundPrefix = prefixList.find((prefix) => {
         return targetUri.startsWith(prefix.origin);
@@ -180,6 +202,10 @@ export default
         return targetUri;
       }
     });
+
+    if (finalUri != undefined){
+      alteredUri = finalUri;
+    }
 
 
     const currentTerm = this.props.editingVocabulary.currentNode.term;

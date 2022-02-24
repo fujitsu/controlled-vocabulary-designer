@@ -18,11 +18,14 @@ import {observer} from 'mobx-react';
 import SelectOfTerm from './SelectOfTerm';
 import TextFieldOfSynonym from './TextFieldOfSynonym';
 import TextFieldOfPreferredLabel from './TextFieldOfPreferredLabel';
+import TextFieldOfId from './TextFieldOfId'; 
 import TextFieldOfUri from './TextFieldOfUri';
 import TextFieldOfBroaderTerm from './TextFieldOfBroaderTerm';
 import TextFieldOfSubordinateTerm from './TextFieldOfSubordinateTerm';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
 import DialogOkCancel from './DialogOkCancel';
+import TextFieldOfTermDescription from './TextFieldOfTermDescription'; 
+import TextFieldOfOtherVocSynUri from './TextFieldOfOtherVocSynUri'; 
 
 /**
  * Edit Operation panel Vocabulary tab Component
@@ -43,8 +46,112 @@ export default
       reason: '',
       synymact: false,
       prfrrdlblact: false,
+      idofuriact: false,
       broadertermact: false,
       dlgDeleteTermOpen: false,   // dialog for delete term confirm
+      termdescriptionact: false, 
+    };
+
+    this.switchStyles = {
+      'black': {
+        'color': grey[700],
+        '&$checked': {
+          color: grey[900],
+        },
+        '&$checked + $track': {
+          backgroundColor: grey[200],
+        },
+      },
+      'brown': {
+        'color': grey[700],
+        '&$checked': {
+          color: brown[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: brown[200],
+        },
+      },
+      'red': {
+        'color': grey[700],
+        '&$checked': {
+          color: red[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: red[200],
+        },
+      },
+      'orange': {
+        'color': grey[700],
+        '&$checked': {
+          color: orange[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: orange[200],
+        },
+      },
+      'yellow': {
+        'color': grey[700],
+        '&$checked': {
+          color: yellow[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: yellow[200],
+        },
+      },
+      'lightGreen': {
+        'color': grey[700],
+        '&$checked': {
+          color: lightGreen[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: lightGreen[200],
+        },
+      },
+      'green': {
+        'color': grey[700],
+        '&$checked': {
+          color: green[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: green[200],
+        },
+      },
+      'lightBlue': {
+        'color': grey[700],
+        '&$checked': {
+          color: lightBlue[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: lightBlue[200],
+        },
+      },
+      'blue': {
+        'color': grey[700],
+        '&$checked': {
+          color: blue[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: blue[200],
+        },
+      },
+      'deepPurple': {
+        'color': grey[700],
+        '&$checked': {
+          color: deepPurple[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: deepPurple[200],
+        },
+      },
+      'purple': {
+        'color': grey[700],
+        '&$checked': {
+          color: purple[500],
+        },
+        '&$checked + $track': {
+          backgroundColor: purple[200],
+        },
+      },
     };
   }
 
@@ -67,8 +174,14 @@ export default
       if (this.state.prfrrdlblact) {
         this.props.editingVocabulary.popPreferredLabel();
       }
+      if (this.state.idofuriact) {
+        this.props.editingVocabulary.popIdofUri();
+      }
       if (this.state.broadertermact) {
         this.props.editingVocabulary.popBroaderTerm();
+      }
+      if (this.state.termdescriptionact) { 
+        this.props.editingVocabulary.popTermDescription(); 
       }
     }
     if (event.keyCode === 13) {
@@ -89,8 +202,15 @@ export default
       case 'PreferredLabel':
         this.setState({prfrrdlblact: value});
         break;
+      case 'Id':
+        this.setState({idofuriact: value});
+        break;
       case 'broaderTerm':
         this.setState({broadertermact: value});
+        break;
+      case 'TermDescription': 
+        this.setState({termdescriptionact: value}); 
+          break;
         break;
         defalut:
         break;
@@ -286,6 +406,26 @@ export default
             </Grid>
 
             <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
+              <Grid item xs={2}>
+                <Box mt={1}>
+                  ID
+                </Box>
+              </Grid>
+              <Grid item xs={10}>
+                <Box>
+                  <TextFieldOfId
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    disabled={disabledTextField}
+                    change={
+                      (target, value) => this.changeFocus(target, value)
+                    }
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
               <Grid item xs={5}>
                 <Box mt={1}>
                   代表語のURI
@@ -344,51 +484,86 @@ export default
                 </Box>
               </Grid>
             </Grid>
-
-            <Box mt={1} ml={3}>
-              <Grid container justify="center" spacing={2}>
-                <Grid item>
-                  <Button
-                    className={this.props.classes.buttonPrimary}
-                    variant="contained"
-                    color="primary"
-                    size={'small'}
-                    onClick={()=>this.updateVocabulary()}
-                    disabled={!isCurrentNodeChanged}
-                  >
-                    反映
-                  </Button>
-                  <DialogUpdateVocabularyError
-                    onClose={() => this.errorDialogClose()}
-                    open={this.state.open}
+            <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
+              <Grid item xs={2}>
+                <Box mt={1}>
+                  用語の説明
+                </Box>
+              </Grid>
+              <Grid item xs={10}>
+                <Box>
+                  <TextFieldOfTermDescription
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
-                    isFromEditPanel={true}
-                    reason={this.state.reason}
+                    disabled={disabledTextField}
+                    change={
+                      (target, value) => this.changeFocus(target, value)
+                    }
                   />
-                </Grid>
-                <Grid item>
-                  <Button
-                    className={this.props.classes.buttonsDelete}
-                    ml={3}
-                    variant="contained"
-                    color="secondary"
-                    size={'small'}
-                    onClick={(e)=>this.handleTermDelete(e)}
-                  >
-                    削除
-                  </Button>
-                  <DialogOkCancel
-                    onOkClose={() => this.handleDeleteTermClose()}
-                    onCancel={() =>this.handleDeleteTermCancelClose()}  
-                    open={this.state.dlgDeleteTermOpen}
-                    classes={this.props.classes}
-                    message={this.message}
-                  />
-                </Grid>
+                </Box>
               </Grid>
+            </Grid>
 
-            </Box>
+            <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
+              <Grid item xs={2}>
+                <Box mt={1}>
+                  他語彙体系の同義語のURI
+                </Box>
+              </Grid>
+              <Grid item xs={10}>
+                <Box>
+                  <TextFieldOfOtherVocSynUri
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    fileId={fileId}
+                  />
+                </Box>
+              </Grid>
+            </Grid>
+
+            <Grid container>
+              <Grid item xs={5}>
+              </Grid>
+              <Grid item xs={2}>
+                <Button
+                  className={this.props.classes.buttonPrimary}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  onClick={()=>this.updateVocabulary()}
+                  disabled={!isCurrentNodeChanged}
+                >
+                  反映
+                </Button>
+                <DialogUpdateVocabularyError
+                  onClose={() => this.errorDialogClose()}
+                  open={this.state.open}
+                  classes={this.props.classes}
+                  editingVocabulary={this.props.editingVocabulary}
+                  isFromEditPanel={true}
+                  reason={this.state.reason}
+                />
+              </Grid>
+              <Grid item>
+                <Button
+                  className={this.props.classes.buttonsDelete}
+                  ml={3}
+                  variant="contained"
+                  color="secondary"
+                  size={'small'}
+                  onClick={(e)=>this.handleTermDelete(e)}
+                >
+                  削除
+                </Button>
+                <DialogOkCancel
+                  onOkClose={() => this.handleDeleteTermClose()}
+                  onCancel={() =>this.handleDeleteTermCancelClose()}  
+                  open={this.state.dlgDeleteTermOpen}
+                  classes={this.props.classes}
+                  message={this.message}
+                />
+              </Grid>
+            </Grid>
           </Box>
         </Grid>
 

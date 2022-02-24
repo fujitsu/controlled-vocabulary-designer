@@ -5,6 +5,7 @@ file_controller.py COPYRIGHT FUJITSU LIMITED 2021
 
 import json
 import pandas as pd
+import numpy as np
 import pathlib
 import requests
 import rdflib
@@ -127,7 +128,7 @@ def upload_file(editing_vocabulary=None, reference_vocabulary1=None, reference_v
                   location())
             return exec_res, status_code
 
-        _repair_broader_term(df)
+        # _repair_broader_term(df)
 
         exec_res, status_code = _check_synonymous_relationship(df)
         if not status_code == 200:
@@ -463,15 +464,27 @@ def _make_bulk_data_reference_vocabulary(excel_data, r_extension):
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
+        if '言語' in item:
+            insert_data['language'] =\
+                item['言語'] if pd.notnull(item['言語']) else None
         if '代表語のURI' in item:
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
-        if '上位語' in item:
+        if '上位語のURI' in item:
             insert_data['broader_term'] =\
-                item['上位語'] if pd.notnull(item['上位語']) else None
-        if '品詞' in item:
-            insert_data['part_of_speech'] =\
-                item['品詞'] if pd.notnull(item['品詞']) else None
+                item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+        if '他語彙体系の同義語のURI' in item:
+            insert_data['other_voc_syn_uri'] =\
+                item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+        if '用語の説明' in item:
+            insert_data['term_description'] =\
+                item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+        if '作成日' in item:
+            insert_data['created_time'] =\
+                item['作成日'] if pd.notnull(item['作成日']) else None
+        if '最終更新日' in item:
+            insert_data['modified_time'] =\
+                item['最終更新日'] if pd.notnull(item['最終更新日']) else None
         if 'x座標値' in item:
             insert_data['position_x'] =\
                 item['x座標値'] if pd.notnull(item['x座標値']) else None
@@ -493,12 +506,27 @@ def _make_bulk_data_editing_vocabulary(data_frame):
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
+        if '言語' in item:
+            insert_data['language'] =\
+                item['言語'] if pd.notnull(item['言語']) else None
         if '代表語のURI' in item:
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
-        if '上位語' in item:
+        if '上位語のURI' in item:
             insert_data['broader_term'] =\
-                item['上位語'] if pd.notnull(item['上位語']) else None
+                item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+        if '他語彙体系の同義語のURI' in item:
+            insert_data['other_voc_syn_uri'] =\
+                item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+        if '用語の説明' in item:
+            insert_data['term_description'] =\
+                item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+        if '作成日' in item:
+            insert_data['created_time'] =\
+                item['作成日'] if pd.notnull(item['作成日']) else None
+        if '最終更新日' in item:
+            insert_data['modified_time'] =\
+                item['最終更新日'] if pd.notnull(item['最終更新日']) else None
         if '同義語候補' in item:
             insert_data['synonym_candidate'] =\
                 [x.strip() for x in item['同義語候補'].split(',')]\
@@ -507,9 +535,6 @@ def _make_bulk_data_editing_vocabulary(data_frame):
             insert_data['broader_term_candidate'] =\
                 [x.strip() for x in item['上位語候補'].split(',')]\
                 if pd.notnull(item['上位語候補']) else []
-        if '品詞' in item:
-            insert_data['part_of_speech'] =\
-                item['品詞'] if pd.notnull(item['品詞']) else None
         if 'x座標値' in item:
             insert_data['position_x'] =\
                 item['x座標値'] if pd.notnull(item['x座標値']) else None
@@ -660,17 +685,21 @@ def _read_file_strage(file_strage, r_extension):
 
 # check column
 def _check_columns(data_frame):
-    # columns = '用語名 代表語 代表語のURI 上位語 同義語候補 上位語候補 品詞 x座標値 y座標値 色1 色2'
+    # columns = '用語名 代表語 言語 代表語のURI 上位語のURI 他語彙体系の同義語のURI 用語の説明 作成日 最終更新日 同義語候補 上位語候補 x座標値 y座標値 色1 色2'
     # ins_f = lambda x:columns not in x
     for index, item in data_frame.iterrows():
         # if any(map(ins_f, item)):
         if ('用語名' not in item
          or '代表語' not in item
+         or '言語' not in item
          or '代表語のURI' not in item
-         or '上位語' not in item
+         or '上位語のURI' not in item
+         or '他語彙体系の同義語のURI' not in item
+         or '用語の説明' not in item
+         or '作成日' not in item
+         or '最終更新日' not in item
          or '同義語候補' not in item
          or '上位語候補' not in item
-         or '品詞' not in item
          or 'x座標値' not in item
          or 'y座標値' not in item
          or '色1' not in item
@@ -722,6 +751,25 @@ def _make_row_data_frame(term, col):
             0,
         ]
         return row
+    elif col == 15:
+        row = [
+            term,
+            term,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            'black',
+            'black',
+            0,
+        ]
+        return row
     else:
         return None
 
@@ -736,7 +784,7 @@ def _repair_broader_term(df):
 
     """
     for index, item in df.iterrows():
-        broader_term = item['上位語'] if pd.notnull(item['上位語']) else None
+        broader_term = item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
         if broader_term is not None:
             resdf = df.query('用語名 == @broader_term')
             if len(resdf) == 0:
@@ -893,14 +941,21 @@ def _check_synonymous_relationship_3_1(preferredlist):
         wk_preferred =\
             name['preferred_label']\
             if pd.notnull(name['preferred_label']) else None
+        wk_language =\
+            name['language']\
+            if pd.notnull(name['language']) else None
         for nameb in preferredlist:
             wk_group_uri1b =\
                 nameb['uri'] if pd.notnull(nameb['uri']) else None
             wk_preferred1b =\
                 nameb['preferred_label']\
                 if pd.notnull(nameb['preferred_label']) else None
+            wk_language1b =\
+                nameb['language']\
+                if pd.notnull(nameb['language']) else None
             if wk_group_uri is not None and\
                     wk_group_uri == wk_group_uri1b and\
+                    wk_language == wk_language1b and\
                     wk_preferred != wk_preferred1b:
                 for name_er in preferredlist:
                     if wk_group_uri == name_er['uri']:
@@ -997,7 +1052,7 @@ def _chk_broader_term(payload_s, looplist, key_preferred):
     ret_flg = 1
     for index2, item2 in name_p2.iterrows():
         wk_broader_term =\
-            str(item2['上位語']) if pd.notnull(item2['上位語']) else None
+            str(item2['上位語のURI']) if pd.notnull(item2['上位語のURI']) else None
         if wk_broader_term is None:
             return 0
         else:
@@ -1027,7 +1082,7 @@ def _chk_preferred_group(payload_s, preferredlist, looplist, key_preferred):
             return 0
         else:
             wk_preferred = item2['代表語'] if pd.notnull(item2['代表語']) else None
-            # Loop check
+            # 循環チェック
             for loopitem in looplist:
                 if loopitem == wk_preferred:
                     return 2
@@ -1088,10 +1143,20 @@ def _add_list(paylist, item, preferred_group, group_uri):
         item['用語名'] if pd.notnull(item['用語名']) else None
     insert_data['preferred_label'] =\
         item['代表語'] if pd.notnull(item['代表語']) else None
+    insert_data['language'] =\
+        item['言語'] if pd.notnull(item['言語']) else None
     insert_data['uri'] =\
         item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
     insert_data['broader_term'] =\
-        item['上位語'] if pd.notnull(item['上位語']) else None
+        item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+    insert_data['other_voc_syn_uri'] =\
+        item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+    insert_data['term_description'] =\
+        item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+    insert_data['created_time'] =\
+        item['作成日'] if pd.notnull(item['作成日']) else None
+    insert_data['modified_time'] =\
+        item['最終更新日'] if pd.notnull(item['最終更新日']) else None
 
     insert_data['preferred_group'] = preferred_group
     insert_data['group_uri'] = group_uri
@@ -1113,10 +1178,21 @@ def _add_preferred_list(paylist, item):
         item['用語名'] if pd.notnull(item['用語名']) else None
     insert_data['preferred_label'] =\
         item['代表語'] if pd.notnull(item['代表語']) else None
+    insert_data['language'] =\
+        item['言語'] if pd.notnull(item['言語']) else None
     insert_data['uri'] =\
         item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
     insert_data['broader_term'] =\
-        item['上位語'] if pd.notnull(item['上位語']) else None
+        item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+    insert_data['other_voc_syn_uri'] =\
+        item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+    insert_data['term_description'] =\
+        item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+    insert_data['created_time'] =\
+        item['作成日'] if pd.notnull(item['作成日']) else None
+    insert_data['modified_time'] =\
+        item['最終更新日'] if pd.notnull(item['最終更新日']) else None
+
     paylist.append(insert_data)
 
     return True
@@ -1125,15 +1201,27 @@ def _add_preferred_list(paylist, item):
 def _download_file_make(pl_simple):
     g = rdflib.ConjunctiveGraph()
     g.bind("skos", rdflib.namespace.SKOS)
+    g.bind("dct", rdflib.namespace.DCTERMS)
+    g.bind("rdf", rdflib.namespace.RDF)
 
     # make triples
     # Base
     rtype = rdflib.namespace.RDF.type  # Type
     scon = rdflib.namespace.SKOS.Concept  # Concept
+    sinscheme = rdflib.namespace.SKOS.inScheme  # inScheme
+    sconceptscheme = rdflib.namespace.SKOS.ConceptScheme  # ConceptScheme
     plabel = rdflib.namespace.SKOS.prefLabel  # prefLabel
     alabel = rdflib.namespace.SKOS.altLabel  # altLabel
     broader = rdflib.namespace.SKOS.broader  # broader
     narrower = rdflib.namespace.SKOS.narrower  # narrower
+    exactMatch = rdflib.namespace.SKOS.exactMatch  # exactMatch
+    title = rdflib.namespace.DCTERMS.title # title
+    hasVersion = rdflib.namespace.DCTERMS.hasVersion # hasVersion
+    description = rdflib.namespace.DCTERMS.description # description
+    creator = rdflib.namespace.DCTERMS.creator # creator
+    created = rdflib.namespace.DCTERMS.created # created
+    modified = rdflib.namespace.DCTERMS.modified # modified
+
     # add List
     namel = []
     # broader
@@ -1144,10 +1232,16 @@ def _download_file_make(pl_simple):
     # JSON convert to pandas.DataFrame
     nm = pd.json_normalize(pl_simple)
 
+    # replace nan with ""
+    nm["other_voc_syn_uri"] = nm["other_voc_syn_uri"].replace(np.nan, "")
+    nm["term_description"] = nm["term_description"].replace(np.nan, "")
+    nm["created_time"] = nm["created_time"].replace(np.nan, "")
+    nm["modified_time"] = nm["modified_time"].replace(np.nan, "")
+
     # JSON query Get Concept, prefLabel and narrower base
     namelpl = nm.query('term == preferred_label and uri != ""')
     # get uri and term
-    namelx = namelpl.loc[:, ['term', 'uri']].values
+    namelx = namelpl.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
         nameb = [rdflib.URIRef(str(name[1])), rtype, scon]
@@ -1155,7 +1249,7 @@ def _download_file_make(pl_simple):
         nameb = [
             rdflib.URIRef(str(name[1])),
             plabel,
-            rdflib.Literal(str(name[0]))
+            rdflib.Literal(str(name[0]), lang=name[2])
         ]
         namel.append(nameb)
         # narrower
@@ -1164,13 +1258,13 @@ def _download_file_make(pl_simple):
     # query altLabel
     namelal = nm.query('term != preferred_label and uri != ""')
     # get uri and term
-    namelx = namelal.loc[:, ['term', 'uri']].values
+    namelx = namelal.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
         # print('altLabel:' + str(name[0])+' '+str(name[1]))
         nameb = [
             rdflib.URIRef(str(name[1])),
             alabel,
-            rdflib.Literal(str(name[0]))
+            rdflib.Literal(str(name[0]), lang=name[2])
         ]
         namel.append(nameb)
 
@@ -1187,7 +1281,7 @@ def _download_file_make(pl_simple):
         #       str(namebt[1]), str(namebt[2]))
         # query prefLabel
         wkquery =\
-            'term == preferred_label and term == "' + str(namebt[0]) + '"'
+            'term == preferred_label and uri == "' + str(namebt[0]) + '"'
         # print(wkquery)
         namelpl = nm.query(wkquery)
         # get uri and term
@@ -1207,7 +1301,7 @@ def _download_file_make(pl_simple):
         # query prefLabel
         wkquery =\
             'term == preferred_label and uri != "" and broader_term == "' +\
-            str(namenw[0]) + '"'
+            str(namenw[2]) + '"'
         # print(wkquery)
         namelpl = nm.query(wkquery)
         # get uri and term
@@ -1220,6 +1314,25 @@ def _download_file_make(pl_simple):
             ]
             namel.append(nameb)
             # print('add narrower:'+str(name[0])+' '+str(name[1]))
+
+    # create other links
+    namelpl = nm.query('uri != ""')
+    # get language, uri, othervoc_syn_uri, term_description, created and modified
+    namelx = namelpl.loc[:, ['language', 'uri', 'other_voc_syn_uri', 'term_description', 'created_time', 'modified_time']].values
+    for name in namelx:
+        if(str(name[2]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), exactMatch, rdflib.URIRef(str(name[2]))]
+            namel.append(nameb)
+        if(str(name[3]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), description, rdflib.Literal(str(name[3]), lang=name[0])]
+            namel.append(nameb)
+        if(str(name[4]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), created, rdflib.Literal(str(name[4]))]
+            namel.append(nameb)
+        if(str(name[5]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), modified, rdflib.Literal(str(name[5]))]
+            namel.append(nameb)
+          
     # Add List to Graph
     for name in namel:
         g.add((name[0], name[1], name[2]))
@@ -1273,14 +1386,30 @@ def _download_file_ev_serialize(pl_simple, p_format):
         df_org['broader_term_candidate'].str.replace('\'', '')
     # delete columns id hidden
     df_org.drop(columns=['id', 'hidden'], inplace=True)
+    # make dictionary {preferred_label: uri}
+    dic_preflabel_uri = dict(zip(df_org['preferred_label'], df_org['uri']))
+    # if broader_term is label, convert label into uri
+    col_broader_uri = []
+    for broader_term in list(df_org['broader_term']):
+        if broader_term in list(df_org['uri']):
+            col_broader_uri.append(broader_term)
+        elif broader_term in list(df_org['preferred_label']):
+            col_broader_uri.append(dic_preflabel_uri[broader_term])
+        else:
+            col_broader_uri.append(np.nan)
+    df_org.loc[:, 'broader_term'] = col_broader_uri
     # header change
     df_org = df_org.rename(columns={'term': '用語名',
                                     'preferred_label': '代表語',
+                                    'language': '言語',
                                     'uri': '代表語のURI',
-                                    'broader_term': '上位語',
+                                    'broader_term': '上位語のURI',
+                                    'other_voc_syn_uri': '他語彙体系の同義語のURI',
+                                    'term_description': '用語の説明',
+                                    'created_time': '作成日',
+                                    'modified_time': '最終更新日',
                                     'broader_term_candidate': '上位語候補',
                                     'synonym_candidate': '同義語候補',
-                                    'part_of_speech': '品詞',
                                     'position_x': 'x座標値',
                                     'position_y': 'y座標値',
                                     'color1': '色1',
