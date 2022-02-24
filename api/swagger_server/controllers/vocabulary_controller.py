@@ -226,15 +226,19 @@ def _create_update_payload(target_data):
     update_data = {}
     update_data['term'] = target_data['term']
     update_data['preferred_label'] = target_data['preferred_label']
+    update_data['language'] = target_data['language']
     update_data['uri'] = target_data['uri']
     update_data['broader_term'] = target_data['broader_term']
+    update_data['other_voc_syn_uri'] = target_data['other_voc_syn_uri']
+    update_data['term_description'] = target_data['term_description']
+    update_data['created_time'] = target_data['created_time']
+    update_data['modified_time'] = target_data['modified_time']
     update_data['synonym_candidate'] = \
         target_data['synonym_candidate'] \
         if len(target_data['synonym_candidate']) != 0 else []
     update_data['broader_term_candidate'] = \
         target_data['broader_term_candidate'] \
         if len(target_data['broader_term_candidate']) != 0 else []
-    update_data['part_of_speech'] = target_data['part_of_speech']
     update_data['position_x'] = target_data['position_x']
     update_data['position_y'] = target_data['position_y']
     update_data['color1'] = target_data['color1']

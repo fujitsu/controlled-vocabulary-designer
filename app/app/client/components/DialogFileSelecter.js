@@ -62,6 +62,11 @@ export default class DialogFileSelecter extends React.Component {
           size: '',
           file: {},
         },
+        {
+          name: '',
+          size: '',
+          file: {},
+        },
       ],
     };
   }
@@ -149,6 +154,18 @@ export default class DialogFileSelecter extends React.Component {
           fileInfo.name + ' is already uploaded(not upload).');
       } else {
         formData.append('example_phrases', fileInfo.file);
+      }
+    }
+    if (undefined != this.state.files[5].file.name) {
+      const fileInfo = this.state.files[5];
+      if (this.isSameFile(
+          fileInfo.file,
+          localStorage.getItem('fileName5'),
+          localStorage.getItem('fileSize5'))) {
+        console.log('[setUploadRequestBody] ' +
+          fileInfo.name + ' is already uploaded(not upload).');
+      } else {
+        formData.append('editing_vocabulary_meta', fileInfo.file);
       }
     }
     return formData;
@@ -343,6 +360,9 @@ export default class DialogFileSelecter extends React.Component {
       case 4:
         $('#exampleSentences').val('');
         break;
+      case 5:
+        $('#editingVocabularyMeta').val('');
+        break;
       default:
         break;
     }
@@ -464,6 +484,69 @@ export default class DialogFileSelecter extends React.Component {
                 value=""
                 component="label"
                 onClick={() => this.delFileInfo(0)}
+                disableElevation
+                size="small"
+              >
+                Clear
+              </Button>
+            </Box>
+
+            <Box component="div" display="block">
+
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <Box component="span" display="inline">
+                  編集用語彙_meta
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box textAlign="right">
+                    <Box
+                      component="span"
+                      display="inline"
+                      style={{fontSize: '0.75em'}}
+                    >
+                      {this.state.files[5].size}
+                    </Box>
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Input
+                value={this.state.files[5].name}
+                type="text"
+                readOnly
+                startAdornment={
+                  <InputAdornment position="start">
+                    <InsertDriveFileIcon />
+                  </InputAdornment>
+                }
+                style={
+                  {marginBottom: '25px', marginRight: '15px', width: '300px'}
+                }
+              />
+              <Button
+                variant="contained"
+                value=""
+                component="label"
+                disableElevation
+                style={{marginRight: '5px'}}
+                size="small"
+              >
+                <input
+                  style={{display: 'none'}}
+                  id="editingVocabularyMeta"
+                  type="file"
+                  onChange={(e) => this.setFileInfo(e, 5)}
+                  accept=".xlsx,.csv"
+                />
+                参照
+              </Button>
+              <Button
+                variant="contained"
+                value=""
+                component="label"
+                onClick={() => this.delFileInfo(5)}
                 disableElevation
                 size="small"
               >
@@ -727,7 +810,7 @@ export default class DialogFileSelecter extends React.Component {
 
           <DialogActions style={{display: this.props.okCancel?'':'none'}}>
             <Button onClick={(e) => this.fileUpload(e)} color="primary">
-            OK
+            NEXT
             </Button>
             <Button onClick={() => this.handleClose()} color="primary">
             Cancel
