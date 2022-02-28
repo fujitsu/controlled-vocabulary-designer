@@ -19,7 +19,9 @@ const useStyles = (theme) => ({
   '@global': {
     body: {
       backgroundColor: theme.palette.common.white,
-      overflowY: 'scroll',
+      overflowY: 'hidden !important',
+      margin:'0 !important',
+      padding:0,
     },
   },
 
@@ -28,8 +30,9 @@ const useStyles = (theme) => ({
   },
 
   'mainPanel': {
-    width: '97vw',
-    height: '90vh',
+    width: '100vw',
+    height: '98vh',
+    backgroundColor: '#E3E3E3',
   },
 
   'colorChartCheckBox': {
@@ -126,7 +129,7 @@ const useStyles = (theme) => ({
     backgroundColor: '#555555',
     minHeight: '35px',
     height: '35px',
-    width: '97vw',
+    width: '100vw',
     "& .MuiTabs-indicator": {
       display: "none",
     }
@@ -160,7 +163,7 @@ const useStyles = (theme) => ({
   },
   
   'visualizationVocabularyHead': {
-    width: '97vw',
+    width: '100vw',
     height: '50px',
     margin: 0,
     position: 'absolute',
@@ -385,7 +388,7 @@ class App extends React.Component {
         </Grid>
         <Grid container>
           <Grid item xs={12}>
-            <Box border={1} className={this.props.classes.mainPanel}>
+            <Box className={this.props.classes.mainPanel}>
               <VisualizationPanel 
                 classes={this.props.classes}
                 hensyuName0={this.state.sFileName0}
@@ -396,7 +399,7 @@ class App extends React.Component {
             </Box>
           </Grid>
           {/* ↓Cannot be deleted because it affects apiErrorDialog. Fixed later */}
-          <Box border={1} className={this.props.classes.displayNone}>
+          <Box className={this.props.classes.displayNone}>
             <EditPanel classes={this.props.classes}/>
           </Box>
           {/* ↑Cannot be deleted because it affects apiErrorDialog. Fixed later */}
