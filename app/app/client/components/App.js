@@ -180,7 +180,19 @@ const useStyles = (theme) => ({
 
   'buttons': {
     marginTop:'0',
-    marginRight:'16px',
+    marginRight:'8px',
+    backgroundColor: '#555555',
+    borderRadius: '0',
+    boxShadow: 'none',
+  },
+
+  'buttonPrimary': {
+    borderRadius: '0',
+    boxShadow: 'none',
+  },
+
+  'buttonsGrp': {
+    marginTop:'0',
     backgroundColor: '#555555',
     borderRadius: '0',
     boxShadow: 'none',

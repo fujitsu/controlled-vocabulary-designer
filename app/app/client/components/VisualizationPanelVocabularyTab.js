@@ -25,13 +25,17 @@ import {purple} from '@material-ui/core/colors';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Popover from "@material-ui/core/Popover";
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import SettingsIcon from '@material-ui/icons/Settings';
 
 import {observer} from 'mobx-react';
 
+import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
+import ColorChartCheckBoxes from './ColorChartCheckBoxes';
 import EditPanelVocabularyTab from './EditPanelVocabularyTab';
 import EditPanelVocabularyNewTab from './EditPanelVocabularyNewTab';
 import DialogSettingSynonym from './DialogSettingSynonym';
@@ -65,14 +69,18 @@ export default
     this.synonymTarget = null;
 
     this.state = { 
-      anchorEl: false,        // Edit Panel togle
-      anchorNewEl: false,     // Edit nNew Term Panel togle
-      transformTogle: false,  // transform coordinate togle
-      dlgSynonymOpen: false,  // dialog for Synonym term
-      dlgBroaderOpen: false,  // dialog for Broader term
+      anchorEl: false,            // Edit Panel togle
+      anchorNewEl: false,         // Edit nNew Term Panel togle
+      anchorElC: false,           // Confirm Color Setting popover togle
+      anchorElColor: false,       // border color setting popover togle
+      transformTogle: false,      // transform coordinate togle
+      dlgSynonymOpen: false,      // dialog for Synonym term
+      dlgBroaderOpen: false,      // dialog for Broader term confirm
       dlgDeselectTermOpen: false, // dialog for deselect term confirm
-      dlgErrOpen: false,      // dialog for Error
-      reason: '',             // Reason for Error 
+      dlgErrOpen: false,          // dialog for Error
+      popBorderColorOpen: false,  // popover for border color setting
+      reason: '',                 // Reason for Error 
+      sliderValue: 0,
     };
 
     this.ehTop = null;      // edgehandles top   object
@@ -1042,31 +1050,116 @@ export default
   handleErrClose(){
     this.setState({dlgErrOpen: false, reason: ''});   
   }
+
+  /**
+   * All selection cancellation dialog open 
+   */
   handleDeselectTermOpen(){
     this.message = "用語の選択を解除します。\nよろしいですか？";
     this.setState({dlgDeselectTermOpen: true});  
   }
+
+  /**
+   * All selection cancellation dialog close
+   */
   handleDeselectTermClose(){
     this.message = '';
     this.setState({dlgDeselectTermOpen: false});
     
     this.deselectionConfirm();
   }
+
+  /**
+   * Border Color change dialog open 
+   */
+   handleBorderColorPopOpen(e){
+    this.setState({anchorElColor: this.state.anchorElColor ? null : e.currentTarget});
+  }
+
+  /**
+   * Border Color change dialog close
+   */
+  handleBorderColorPopClose(){
+    this.setState({anchorElColor: false});
+  }
+
+  /**
+   * All selection cancellation dialog Cancel
+   */
   handleDeselectTermCancelClose(){
     this.message = '';
     this.setState({dlgDeselectTermOpen: false});
   }
+
+  /**
+   * Edit popover open
+   */
   handleEditPopoverOpen(e){
     this.setState({anchorEl: this.state.anchorEl ? null : e.currentTarget});
   }
+
+  /**
+   * Edit popover Close
+   */
   handleEditPopoverClose(){
     this.setState({anchorEl: null});
   }
+
+  /**
+   * Confirm Color popover open
+   */
+  handleConfirmColorPopoverOpen(e){
+    // e.stopPropagation();
+    // e.preventDefault();
+    this.setState({anchorElC: this.state.anchorElC ? null : e.currentTarget});
+  }
+
+  /**
+   * Confirm Color popover Close
+   */
+   handleConfirmColorPopoverClose(e){
+    this.setState({anchorElC: null});
+  }
+
+  /**
+   * new Term add popover Open
+   */
   handleNewEditPopoverOpen(e){
     this.setState({anchorNewEl: this.state.anchorNewEl ? null : e.currentTarget});
   }
+
+  /**
+   * new Term add popover close
+   */
   handleNewEditPopoverClose(){
     this.setState({anchorNewEl: null});
+  }
+
+  /**
+   * Fixed term color reflection
+   * @param  {String} color - string of changed color
+   */
+   seletConfirmColor(color) {
+    console.log('[seletConfirmColor] change to ', color);
+    this.props.editingVocabulary.seletConfirmColor(color);
+  }
+
+  /**
+   * Confirm switch
+   * @param  {Boolean} isConfirm - confirm acceptance
+   */
+   toggleConfirm(isConfirm) {
+    // console.log('[toggleConfirm] change to ' + isConfirm);
+    const currentNode = this.props.editingVocabulary.currentNode;
+
+    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
+    if (!isConfirm) {
+      // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
+      if (!currentNode.preferred_label) {
+        this.props.editingVocabulary.
+            tmpPreferredLabel.list.push(currentNode.term);
+      }
+    }
   }
 
   /**
@@ -1074,9 +1167,11 @@ export default
    * @return {element}
    */
   render() {
-    const nodeList = this.props.editingVocabulary.termListForVocabulary;
-    const edgesList = this.props.editingVocabulary.edgesList;
-    const disabledConfirm = this.props.editingVocabulary.selectedTermList.length > 0 ? false : true;
+    const editingVocabulary = this.props.editingVocabulary;
+
+    const nodeList = editingVocabulary.termListForVocabulary;
+    const edgesList = editingVocabulary.edgesList;
+    const disabledDeselectConfirm = editingVocabulary.selectedTermList.length > 0 ? false : true;
     const transformTogle = this.state.transformTogle;
     const anchorEl = this.state.anchorEl;
     const open = Boolean(anchorEl);
@@ -1084,9 +1179,47 @@ export default
     const anchorNewEl = this.state.anchorNewEl;
     const openNew = Boolean(anchorNewEl);
     const idNew = openNew ? "popover-new" : undefined;
-    const editButtondisabled = this.props.editingVocabulary.currentNode.term ? true : false;
-    const editButtonsDisableSwitchByFile  = this.props.editingVocabulary.selectedFile.id !== 0 ? true : false;
+    const anchorElC = this.state.anchorElC;
+    const openC = Boolean(anchorElC);
+    const idC = openC ? "popover-c" : undefined;
+    const anchorElColor = this.state.anchorElColor;
+    const openColor = Boolean(anchorElColor);
+    const idColor = openColor ? "popover-color" : undefined;
+    const editButtondisabled = editingVocabulary.currentNode.term ? true : false;
+    const editButtonsDisableSwitchByFile  = editingVocabulary.selectedFile.id !== 0 ? true : false;
 
+    // for Confirm Button
+    let fileId = editingVocabulary.selectedFile.id;
+    // Change border color disabled
+    let disabledColor = true;
+    if ( fileId == 0 && editingVocabulary.currentNode.id) {
+      // Allow each component to operate during editing vocabulary selection and term selection
+      disabledColor = false;
+    }
+
+    // Firm button disabled condition
+    // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
+    const isCurrentNodeChanged = editingVocabulary.isCurrentNodeChanged;
+    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
+
+    const confirmed = editingVocabulary.currentNode.confirm;
+    let isConfirm = false;
+    if (confirmed && confirmed == 1) {
+      isConfirm = true;
+    }
+
+    // Disabled determination of TextField area
+    // Undetermined while selecting a term when editing vocabulary pulldown is selected:enabled
+    // No term selected when selecting vocabulary pull-down for editing:enabled
+    const disabledTextField =
+     ( !isConfirm && editingVocabulary.currentNode.id) ||
+       ( !editingVocabulary.currentNode.id) ? false : true;
+
+    // Fix button text
+    let confirmButtonText = '確定';
+    if (disabledTextField) {
+      confirmButtonText = '確定解除';
+    }
     return (
       <div>
         <Grid
@@ -1118,6 +1251,105 @@ export default
               >
                 選択全解除
               </Button>
+              <Button
+                className={this.props.classes.buttons}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                disabled={disabledDeselectConfirm}
+                onClick={(e)=>this.handleBorderColorPopOpen(e)}
+              >
+                枠線色変更
+              </Button>
+              <Popover 
+
+                id={idColor}
+                open={openColor}
+                anchorEl={anchorElColor}
+                onClose={()=>this.handleBorderColorPopClose()}
+                style={{
+                  backgroundColor: "#66666680",
+                }}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+              >
+                <ColorChartCheckBoxes
+                  colorId="color1"
+                  classes={this.props.classes}
+                  currentId={this.props.editingVocabulary.currentNode.id}
+                  color={this.props.editingVocabulary.currentNode.color1}
+                  selectColor={(currentId, colorId, color) =>
+                    this.props.editingVocabulary.updateColor(currentId,
+                        colorId, color)
+                  }
+                  tmpColor={this.props.editingVocabulary.tmpBorderColor}
+                  selectTmpColor={(id, color) =>
+                    this.props.editingVocabulary.selectTmpBorderColor(
+                        id, color)
+                  }
+                  disabled={disabledColor}
+                  close={()=>this.handleBorderColorPopClose()}
+                />
+              </Popover>
+              <ButtonGroup>           
+                <Button
+                  className={this.props.classes.buttonsGrp}
+                  ml={3}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  disabled={disabledConfirm}
+                  onClick={()=>this.toggleConfirm(!isConfirm)}
+                >
+                  {confirmButtonText}
+                
+                </Button>       
+                <Button
+                  className={this.props.classes.buttonsGrp}
+                  ml={3}
+                  variant="contained"
+                  color="primary"
+                  disabled={disabledConfirm}
+                  size={'small'}
+                  onClick={(e)=>this.handleConfirmColorPopoverOpen(e)}
+                >
+                  <SettingsIcon fontSize="small" />
+                </Button>
+              </ButtonGroup>
+              <Popover 
+                id={idC}
+                open={openC}
+                anchorEl={anchorElC}
+                onClose={()=>this.handleConfirmColorPopoverClose()}
+                style={{
+                  backgroundColor: "#66666680",
+                }}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
+              >
+                <ColorChartCheckBoxesOfConfirm
+                  classes={this.props.classes}
+                  currentId={this.props.editingVocabulary.currentNode.id}
+                  color={this.props.editingVocabulary.confirmColor}
+                  selectColor={(color) =>
+                    this.seletConfirmColor(color)
+                  }
+                  close={()=>this.handleConfirmColorPopoverClose()}
+                />
+              </Popover>
             </Box>
           </Grid>
           <Grid item xs={5}>
