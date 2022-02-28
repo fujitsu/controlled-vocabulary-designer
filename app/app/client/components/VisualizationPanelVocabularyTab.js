@@ -1283,8 +1283,8 @@ export default
               })}
 
           style={{
-            width: '97vw',
-            height: '85vh',
+            width: '100vw',
+            height: '96vh',
             backgroundColor: '#E3E3E3',
           }}
           stylesheet={[
