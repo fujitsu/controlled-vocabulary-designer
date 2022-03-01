@@ -4,6 +4,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import {grey} from '@material-ui/core/colors';
 import {withStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -35,10 +36,6 @@ const useStyles = (theme) => ({
     backgroundColor: '#E3E3E3',
   },
 
-  'colorChartCheckBox': {
-    marginRight: '-6px',
-  },
-
   'autocompleteInputRoot': {
     overflowX: 'scroll',
     flexWrap: 'nowrap',
@@ -54,6 +51,51 @@ const useStyles = (theme) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.15)',
   },
 
+  'sliderDivRoot': {
+    height: '400px',  
+    width: '50px',
+    position: 'absolute',
+    left: '15px',
+    bottom: '15px',
+    zIndex: 1,
+    backgroundColor: 'white',
+  },
+  
+  'sliderRoot':{
+    height: '300px !important',  
+    padding: '0 23px !important',
+  },
+
+
+  'sliderRail':{
+    backgroundColor: grey[300],
+    marginLeft:'-3px !important',
+    width: '7px !important',
+    borderRadius: '4px !important',
+
+  },
+
+  'sliderTrackt':{
+    backgroundColor: grey[600],
+    marginLeft:'-3px !important',
+    width: '7px !important',
+    borderRadius: '4px !important',
+  },
+  'sliderThumb':{
+    backgroundColor: 'white',
+    border: `2px solid ${grey[600]}`,
+    marginLeft:'-4px !important',
+    width: '8px !important',
+    height: '8px !important',  
+  },
+
+  sliderMark:{
+    backgroundColor: grey[400],
+    marginLeft:'-4px !important',
+    width: '8px !important',
+
+  },
+
   'displayNone': {
     display: 'none',
   },
@@ -65,22 +107,7 @@ const useStyles = (theme) => ({
     flexWrap: 'nowrap',
   },
 
-  'width100': {
-    width: '100%',
-  },
 
-  'noWrap': {
-    whiteSpace: 'nowrap',
-  },
-
-  'underlineNone': {
-    '&:before': {
-      border: '0px',
-    },
-    '&:after': {
-      border: '0px',
-    },
-  },
 
   'searchRoot': {
     position: 'absolute',
@@ -109,8 +136,8 @@ const useStyles = (theme) => ({
     width: '100%',
   },
 
-  'exampleInput': {
-    padding: theme.spacing(1),
+  'conpaneIcon': {
+    marginRight: '5px',
   },
 
   'muiDialogTitle': {
@@ -152,15 +179,6 @@ const useStyles = (theme) => ({
     'selected': {},
   },
   'selected': {},
-
-  'tabToolTip': {    
-    backgroundColor: '#f5f5f9',
-    color: 'rgba(0, 0, 0, 0.87)',
-    // maxWidth: 220,
-    // fontSize: theme.typography.pxToRem(12),
-    // border: '1px solid #dadde9',
-    marginTop: '-20px',
-  },
   
   'visualizationVocabularyHead': {
     width: '100vw',
@@ -205,6 +223,20 @@ const useStyles = (theme) => ({
     boxShadow: 'none',
   },
 
+  'buttonsDelete': {
+    marginTop:'0',
+    marginRight:'8px',
+    borderRadius: '0',
+    boxShadow: 'none',
+  },
+
+  'popoverPanelRoot': {
+    backgroundColor: "#66666680",
+  },
+  'popoverPanelpaper': {
+    borderRadius: '0',
+  },
+  
   'popoverTitle': {
     minWidth: "90%",
     paddingLeft: "20px",
@@ -235,12 +267,6 @@ const useStyles = (theme) => ({
     top:   '4px',
   },
 
-  'dlgFileDownloadTitle': {
-    justifyContent: "space-between",
-    paddingRight: '15px',
-
-  },
-
   'editPanelVoc': {
     padding: '30px',
   },
@@ -264,11 +290,6 @@ const useStyles = (theme) => ({
     paddingTop: '0px',
     backgroundColor: 'white',
     float: 'right',
-  },
-
-  'uploading': {
-    zIndex: theme.zIndex.drawer + 1,
-    color: '#fff',
   },
 
   'selectFileFormat': {
@@ -315,16 +336,12 @@ const useStyles = (theme) => ({
     minWidth: '300px',
   },
 
-  'iconImg': {
-    padding: theme.spacing(1),
-    marginLeft: theme.spacing(3),
-    width: '119px',
-    height: '75px',
+  'selectTermForm': {
+    width: '100%',
   },
 
   'selectTerm': {
-    width: '100%',
-    textAlign: 'center',
+    height: '40px',
   },
   
 });

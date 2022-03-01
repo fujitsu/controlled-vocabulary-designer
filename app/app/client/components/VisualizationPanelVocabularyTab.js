@@ -22,6 +22,7 @@ import {blue} from '@material-ui/core/colors';
 import {deepPurple} from '@material-ui/core/colors';
 import {purple} from '@material-ui/core/colors';
 
+import Slider from '@material-ui/core/Slider';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -31,6 +32,8 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import SettingsIcon from '@material-ui/icons/Settings';
+import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
+import IndeterminateCheckBoxOutlinedIcon from "@material-ui/icons/IndeterminateCheckBoxOutlined";
 
 import {observer} from 'mobx-react';
 
@@ -67,6 +70,9 @@ export default
     this.message = '';
     this.synonymSource = null;
     this.synonymTarget = null;
+    this.sliderStep = 20,
+    this.initSlider = 0;
+    this.sliderPercent = 0;
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
@@ -147,6 +153,22 @@ export default
       // Update layout
       const currentZoom = cy.zoom();
       const currentPan = cy.pan();
+
+      // maximum magnification
+      let maxZoom = cy.maxZoom();
+      const maxMagnf = 5;
+      maxZoom = (currentZoom*maxMagnf>maxZoom?maxZoom:currentZoom*maxMagnf);
+      
+      // 1% of zoom range 
+      this.sliderPercent = (maxZoom - currentZoom) / 100; 
+
+      // Initialize zoom (0% zoom value)   
+      this.initSlider = currentZoom;
+
+      cy.minZoom(currentZoom);
+      cy.maxZoom(maxZoom);
+
+      this.setState({sliderValue:0});
 
       if (this.isReset) {
         this.isReset = false;
@@ -542,6 +564,9 @@ export default
       const zoom = Number( this.cy.zoom());
       this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = zoom;
       this.onPanZoom();
+      this.setState({sliderValue : ((zoom - this.initSlider) / this.sliderPercent)});
+
+      event.preventDefault();
     });
   }
 
@@ -1136,6 +1161,35 @@ export default
   }
 
   /**
+   * zoom Slider Change
+   */
+   zoomSliderChange(event, newValue){
+    const cy = this.cy;
+    cy.zoom(this.sliderPercent * Number(newValue) + this.initSlider);
+  }
+  
+  sliderPlus() {
+    let plusValue = Number(this.state.sliderValue) + Number(this.sliderStep);
+    if( 100 >= plusValue){
+      this.setState({sliderValue: plusValue});
+    }else{
+      plusValue = 100;
+    }
+    const cy = this.cy;
+    cy.zoom(this.sliderPercent * Number(plusValue) + this.initSlider);
+  }
+  sliderMinus() {
+    let minusValue = Number(this.state.sliderValue) - Number(this.sliderStep);
+    if( minusValue >= 0){
+      this.setState({sliderValue: minusValue});
+    }else{
+      minusValue = 0;
+    }
+    const cy = this.cy;
+    cy.zoom(this.sliderPercent * Number(minusValue) + this.initSlider);
+  }
+
+  /**
    * Fixed term color reflection
    * @param  {String} color - string of changed color
    */
@@ -1220,6 +1274,22 @@ export default
     if (disabledTextField) {
       confirmButtonText = '確定解除';
     }
+
+    const zoomMarks = [
+      {
+        value: 20,
+      },
+      {
+        value: 40,
+      },
+      {
+        value: 60,
+      },
+      {
+        value: 80,
+      },
+    ];
+
     return (
       <div>
         <Grid
@@ -1246,7 +1316,7 @@ export default
                 variant="contained"
                 color="primary"
                 size={'small'}
-                disabled={disabledConfirm}
+                disabled={disabledDeselectConfirm}
                 onClick={()=>this.handleDeselectTermOpen()}
               >
                 選択全解除
@@ -1352,69 +1422,72 @@ export default
               </Popover>
             </Box>
           </Grid>
-          <Grid item xs={5}>
-            <Box>
-              <Search
-                classes={this.props.classes}
-                editingVocabulary={this.props.editingVocabulary}
-              />
-            </Box>
+          <Grid item xs={4}>              
+            <Grid container spacing={0}>
+              <Grid item>
+                  <Search
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    fileLoadCount={this.props.fileLoadCount}
+                  />
+              </Grid>
+              <Grid item>
+                  <Button
+                    className={this.props.classes.buttons}
+                    ml={3}
+                    variant="contained"
+                    color="primary"
+                    size={'small'}
+                    disabled={ !editButtondisabled || editButtonsDisableSwitchByFile} 
+                    onClick={(e)=>this.handleEditPopoverOpen(e)}
+                  >
+                    編集
+                  </Button>          
+                  <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    anchorReference="anchorPosition"
+                    anchorPosition={{ top: 1000, left: 1200 }}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left"
+                    }}
+                    transformOrigin={{
+                      vertical: "bottom",
+                      horizontal: "left"
+                    }}
+                    classes={{
+                      root: this.props.classes.popoverPanelRoot,
+                      paper: this.props.classes.popoverPanelpaper,
+                    }}
+                  >
+                    <Typography className={this.props.classes.popoverTitle}>
+                      編集
+                      {this.handleEditPopoverClose ? (
+                        <IconButton
+                          aria-label="close"
+                          className={this.props.classes.popoverTitleCloseButton}
+                          onClick={() => this.handleEditPopoverClose()}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      ) : null}
+                    </Typography>
+                    
+                    <EditPanelVocabularyTab
+                      classes={this.props.classes}
+                      editingVocabulary={this.props.editingVocabulary}
+                      close={() =>this.handleEditPopoverClose()}
+                    />
+                  </Popover>
+              </Grid>
+
+            </Grid>
           </Grid>
-          
-          <Grid item xs={2}>
+            
+          <Grid item xs={3}>
             <Box>
-              <Button
-                className={this.props.classes.buttons}
-                ml={3}
-                variant="contained"
-                color="primary"
-                size={'small'}
-                disabled={ !editButtondisabled || editButtonsDisableSwitchByFile} 
-                onClick={(e)=>this.handleEditPopoverOpen(e)}
-              >
-                編集
-              </Button>
-              
-              <Popover
-                id={id}
-                open={open}
-                anchorEl={anchorEl}
-                anchorReference="anchorPosition"
-                anchorPosition={{ top: 1000, left: 1200 }}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left"
-                }}
-                transformOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left"
-                }}
-                
-                style={{
-                  backgroundColor: "#66666680",
-                }}
-              >
-
-
-                <Typography className={this.props.classes.popoverTitle}>
-                  編集
-                  {this.handleEditPopoverClose ? (
-                    <IconButton
-                      aria-label="close"
-                      className={this.props.classes.popoverTitleCloseButton}
-                      onClick={() => this.handleEditPopoverClose()}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  ) : null}
-                </Typography>
-                
-                <EditPanelVocabularyTab
-                  classes={this.props.classes}
-                  editingVocabulary={this.props.editingVocabulary}
-                />
-              </Popover>
-
               <Button
                 className={this.props.classes.buttonsNewAdd}
                 ml={3}
@@ -1426,7 +1499,6 @@ export default
               >
                 新規登録
               </Button>
-              
               <Popover
                 id={idNew}
                 open={openNew}
@@ -1441,12 +1513,11 @@ export default
                   vertical: "bottom",
                   horizontal: "left"
                 }}
-                
-                style={{
-                  backgroundColor: "#66666680",
+                classes={{
+                  root: this.props.classes.popoverPanelRoot,
+                  paper: this.props.classes.popoverPanelpaper,
                 }}
               >
-
                 <Typography className={this.props.classes.popoverTitle}>
                   新規登録
                   {this.handleNewEditPopoverClose ? (
@@ -1459,10 +1530,10 @@ export default
                     </IconButton>
                   ) : null}
                 </Typography>
-                
                 <EditPanelVocabularyNewTab
                   classes={this.props.classes}
                   editingVocabulary={this.props.editingVocabulary}
+                  close={() => this.handleNewEditPopoverClose()}
                 />
               </Popover>
             </Box>
@@ -1500,6 +1571,46 @@ export default
           reason={this.state.reason}
         />
 
+<div className={this.props.classes.sliderDivRoot}>          
+          <Typography id="slider-slider-plus">        
+            <IconButton
+              aria-label="slider-plus"
+              onClick={()=>this.sliderPlus()}
+            >
+              <AddBoxOutlinedIcon />
+            </IconButton>
+          </Typography>
+
+          <Slider
+            classes={{
+              root: this.props.classes.sliderRoot,
+              vertical: this.props.classes.sliderRoot,
+              rail: this.props.classes.sliderRail,
+              track: this.props.classes.sliderTrackt,
+              thumb: this.props.classes.sliderThumb,
+              mark: this.props.classes.sliderMark,
+            }}
+            orientation="vertical"
+            key={`slider-${this.state.sliderValue}`}
+            defaultValue={this.state.sliderValue}
+            value={this.state.sliderValue}
+            aria-labelledby="vertical-slider"
+            marks={zoomMarks}
+            step={this.sliderStep}
+            valueLabelDisplay="off"
+            onChangeCommitted={(event, newValue) =>this.zoomSliderChange(event, newValue)}
+            
+          />       
+          <Typography id="slider-slider-minus">        
+            <IconButton
+              aria-label="slider-minus"
+              onClick={()=>this.sliderMinus()}
+            >
+              <IndeterminateCheckBoxOutlinedIcon />
+            </IconButton>
+          </Typography>
+        </div>
+
         <CytoscapeComponent
           id="relation_term_graph_container"
 
@@ -1507,7 +1618,7 @@ export default
           cy={(cy) => {
             this.cy = cy;
           }}
-          wheelSensitivity={0.5}
+          wheelSensitivity={0.1}
           elements={CytoscapeComponent.normalizeElements(
               {
                 nodes: nodeList,
@@ -1744,5 +1855,4 @@ export default
 VisualizationPanelVocabularyTab.propTypes = {
   editingVocabulary: PropTypes.object,
   classes: PropTypes.object,
-  selectFile: PropTypes.func,
 };
