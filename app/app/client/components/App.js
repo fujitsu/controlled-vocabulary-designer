@@ -107,33 +107,15 @@ const useStyles = (theme) => ({
     flexWrap: 'nowrap',
   },
 
-
-
   'searchRoot': {
-    position: 'absolute',
+    marginRight: '3px',
+  },
+
+  'selectIcon': {
     zIndex: 1,
-    marginTop: '0',
-    backgroundColor: 'white',
-  },
-
-  'search': {
     position: 'relative',
-    width: '100%',
-  },
-
-  'searchIcon': {
-    width: '60%',
-    height: '100%',
-  },
-
-  'inputRoot': {
-    color: 'inherit',
-    width: '100%',
-  },
-
-  'inputInput': {
-    paddingLeft: theme.spacing(4),
-    width: '100%',
+    left: '35px',
+    top: '4px',
   },
 
   'conpaneIcon': {
@@ -362,6 +344,7 @@ class App extends React.Component {
       sFileName1: '',
       sFileName2: '',
       sFileName3: '',
+      fileLoadCount: 0,
     };
   }
   /**
@@ -397,6 +380,7 @@ class App extends React.Component {
   onReadFileChange(){
 
     this.readFileSet();
+    this.setState({fileLoadCount : ++this.state.fileLoadCount })
   }
 
   /**
@@ -424,6 +408,7 @@ class App extends React.Component {
                 sansyouName1={this.state.sFileName1}
                 sansyouName2={this.state.sFileName2}
                 sansyouName3={this.state.sFileName3}
+                fileLoadCount={this.state.fileLoadCount}
               />
             </Box>
           </Grid>

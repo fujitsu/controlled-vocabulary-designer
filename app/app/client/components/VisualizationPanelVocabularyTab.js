@@ -1428,7 +1428,6 @@ export default
                   <Search
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
-                    fileLoadCount={this.props.fileLoadCount}
                   />
               </Grid>
               <Grid item>
@@ -1571,7 +1570,7 @@ export default
           reason={this.state.reason}
         />
 
-<div className={this.props.classes.sliderDivRoot}>          
+        <div className={this.props.classes.sliderDivRoot}>          
           <Typography id="slider-slider-plus">        
             <IconButton
               aria-label="slider-plus"
