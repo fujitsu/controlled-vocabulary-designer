@@ -35,8 +35,8 @@ def hypernym(txt_preprocessed_file, domain_word_file):
         words_pre2 = list(itertools.chain.from_iterable(words_pre1)) # convert a two-dimensional array to a one-dimensional array
 
     # Import a list of terms in a field, normalize strings of terms
-    tag_file = pd.read_csv(domain_word_file, header=None)
-    tag = list(tag_file[0])
+    tag_file = pd.read_csv(domain_word_file)
+    tag = list(tag_file["用語名"])
     tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalize term strings to match case
     tag = list(set(tag)) # normalize term strings and reduce term duplication by using lowercase letters
 
@@ -114,7 +114,7 @@ if __name__ == '__main__':
         description =
 '''
 example:
-  $ python3 ./HypernymExtraction.py -c config.json -i wiki_wakati_preprocessed.txt tag.csv -o HypernymExtraction.npy
+  $ python3 ./HypernymExtraction.py -c config.json -i domain_text_wakati_preprocessed.txt domain_words.csv -o HypernymExtraction.npy
 ''',
         add_help = True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -137,3 +137,4 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
+

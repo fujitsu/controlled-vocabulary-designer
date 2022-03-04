@@ -28,8 +28,8 @@ def filt(domain_word_file, domain_text_preprocessed_file, vec):
     # Returns only field terms if domain _ word _ file exists in the same folder
     if os.path.exists(domain_word_file) is True:
         # Read tag data (terms for the field)
-        tag_file = pd.read_csv(domain_word_file, header=None)
-        tag = list(tag_file[0])
+        tag_file = pd.read_csv(domain_word_file)
+        tag = list(tag_file["用語名"])
         tag = list(set(tag)) # reduce term duplication by using lowercase letters
 
         return tag
@@ -92,7 +92,7 @@ if __name__ == '__main__':
         description =
 '''
 example:
-  $ python3 ./Filtering.py -c config.json -i tag.csv domain_wakati_preprocessed.txt WordEmbedding.npy -o Filtering.npy
+  $ python3 ./Filtering.py -c config.json -i domain_words.csv domain_wakati_preprocessed.txt WordEmbedding.npy -o Filtering.npy
 ''',
         add_help = True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -115,3 +115,4 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
+

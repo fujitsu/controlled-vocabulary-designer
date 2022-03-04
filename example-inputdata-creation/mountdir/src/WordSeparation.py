@@ -59,7 +59,7 @@ def part_of_speech(txt_file, txt_preprocessed_file):
     ########## Other preprocessings ##########
     # Separate each sentence with a newline, excluding punctuation, such as & punctuation
     txt_wakati_preprocessed = re.sub(r'^<[^>]*>\s*$', '', txt_wakati, flags=re.MULTILINE)
-    table = str.maketrans("", "", string.punctuation+"「」"+"、"+"《"+"》"+"『"+"』"+"·"+"■")
+    table = str.maketrans("", "", string.punctuation+"「」"+"、"+"《"+"》"+"『"+"』"+"・"+"■")
     txt_wakati_preprocessed = txt_wakati_preprocessed.translate(table)
     txt_wakati_preprocessed = re.sub(r'\d', '', txt_wakati_preprocessed, flags=re.MULTILINE)
     txt_wakati_preprocessed = re.sub(r' +', ' ', txt_wakati_preprocessed, flags=re.MULTILINE)
@@ -132,7 +132,7 @@ if __name__ == '__main__':
         description =
 '''
 example:
-  $ python3 ./WordSeparation.py -c config.json -i wiki.txt wiki_wakati_preprocessed.txt -o WordSeparation.npy
+  $ python3 ./WordSeparation.py -c config.json -i domain_text.txt domain_text_wakati_preprocessed.txt -o WordSeparation.npy
 ''',
         add_help = True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -155,3 +155,4 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
+

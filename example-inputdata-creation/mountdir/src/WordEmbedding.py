@@ -49,8 +49,8 @@ def vector(txt_preprocessed_file, domain_word_file, domain_text_preprocessed_fil
     if os.path.exists(domain_word_file) is True:
 
         # Import a list of terms in a field, normalize strings of terms
-        tag_file = pd.read_csv(domain_word_file, header=None)
-        tag = list(tag_file[0])
+        tag_file = pd.read_csv(domain_word_file)
+        tag = list(tag_file["用語名"])
         tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalize term strings to match case
         tag = list(set(tag)) # normalized and lowercase to remove term duplication
 
@@ -193,7 +193,7 @@ if __name__ == '__main__':
         description =
 '''
 example:
-  $ python3 ./WordEmbedding.py -c config.json -i wiki_wakati_preprocessed.txt tag.csv domain_wakati_preprocessed.txt -o WordEmbedding.npy WordEmbedding.model
+  $ python3 ./WordEmbedding.py -c config.json -i domain_text_wakati_preprocessed.txt domain_words.csv domain_wakati_preprocessed.txt -o WordEmbedding.npy WordEmbedding.model
 ''',
         add_help = True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -216,3 +216,4 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
+

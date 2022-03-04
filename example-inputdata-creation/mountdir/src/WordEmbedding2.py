@@ -24,7 +24,7 @@ def poincare(relations_file, key_epochs):
     # read relation file
     with open(relations_file) as f:
         output_all = json.load(f)
-    relations = [(x[0], x[3]) for x in output_all if x[3] != ""]
+    relations = [(x[0], x[4]) for x in output_all if x[4] != ""]
 
     # ######### poincare embedding ##########
     # train
@@ -138,3 +138,4 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
+
