@@ -1,7 +1,8 @@
 {
   "Hensyugoi": {
     "Hensyugoi": {
-        "VectorMagnification": 10
+        "VectorMagnification": 10,
+        "URI": "http://sampleVocab/"
     },
     "WordEmbedding": {
       "Algorithm": "word2vec",
@@ -21,12 +22,12 @@
     "ExternalVocabulary": {
         "Algorithm": "wordnet",
         "wordnet": {},
-        "CVO": {
-           "File": "cvo_ver_2_03.ttl"
-        }
+        "reference.csv": {},
+        "reference.ttl": {}
     },
     "WordEmbedding2": {
-        "poincare.epochs": 2000
+        "poincare.epochs": 20
     }
   }
 }
+
