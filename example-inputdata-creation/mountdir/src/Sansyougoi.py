@@ -57,8 +57,8 @@ def sansyougoi(relations_file, vec_file, input_file):
 
     # ######### File output (terms relating to the terms of the field) ##########
     # Read and normalize tag data (terms for the field)
-    tag_file = pd.read_csv(input_file, header=None)
-    tag = list(tag_file[0])
+    tag_file = pd.read_csv(input_file)
+    tag = list(tag_file["用語名"])
     # normalize term strings to match case
     tag = list(set(tag))
 
@@ -77,6 +77,7 @@ def sansyougoi(relations_file, vec_file, input_file):
 
     # csv
     df2 = pd.DataFrame(output_target, columns=header)
+    df2.drop(columns=['上位語'], inplace=True)
     # df2.to_excel(output_file_xlsx_target, index=False)
     return df1, df2
 
