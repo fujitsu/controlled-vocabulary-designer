@@ -1521,7 +1521,7 @@ export default
                   />
                 </Popover>
               </Grid>
-              <Grid item>
+              {/* <Grid item>
                 <Button
                   className={this.props.classes.buttonsNewAdd}
                   ml={3}
@@ -1570,7 +1570,7 @@ export default
                     close={() => this.handleNewEditPopoverClose()}
                   />
                 </Popover>
-              </Grid>
+              </Grid> */}
             </Grid>
           </Grid>
         </Grid>
