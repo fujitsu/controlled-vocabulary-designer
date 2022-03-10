@@ -186,38 +186,33 @@ export default class Search extends React.Component {
 
     return (
       <div className={this.props.classes.searchRoot}>
-        { (selectData && selectData.length > 0) &&
-          <Grid container>
-            <Grid item xs={1}>
-              <SearchIcon 
-                id="select-searchIcon"
-                className={this.props.classes.selectIcon}
-              />
-            </Grid>
-            <Grid item xs={11}>
-              <Select
-                isClearable={true}
-                placeholder="登録済み用語検索"
-                styles={customStyles}
-                options={selectData}
-                isMulti
-                value={initValue}
-                maxMenuHeight={600}
-                
-                height= '20px'
-                // maxLength={15}
-                // maxHeight={15}
-                // max={15}
-                
-                noOptionsMessage={(obj) =>this.noOptionsMessage(obj)}
-                onChange={(newValue) =>{ this.search(newValue.slice(-1)[0]); }}
-                isOptionSelected={(e) =>{ this.errTerm=''; }}
-                onKeyDown={(e,newValue) =>{ this.onKeyDown(e,newValue); }}
-                onInputChange={(newValue, actionMeta) =>{ this.onInputChange(newValue, actionMeta) }}
-              />
-            </Grid>
+        <Grid container>
+          <Grid item xs={1}>
+            <SearchIcon 
+              id="select-searchIcon"
+              className={this.props.classes.selectIcon}
+            />
           </Grid>
-        }
+          <Grid item xs={11}>
+            <Select
+              isClearable={true}
+              placeholder="登録済み用語検索"
+              styles={customStyles}
+              options={selectData}
+              isMulti
+              value={initValue}
+              maxMenuHeight={600}
+              
+              height= '20px'
+              
+              noOptionsMessage={(obj) =>this.noOptionsMessage(obj)}
+              onChange={(newValue) =>{ this.search(newValue.slice(-1)[0]); }}
+              isOptionSelected={(e) =>{ this.errTerm=''; }}
+              onKeyDown={(e,newValue) =>{ this.onKeyDown(e,newValue); }}
+              onInputChange={(newValue, actionMeta) =>{ this.onInputChange(newValue, actionMeta) }}
+            />
+          </Grid>
+        </Grid>
         <DialogSearchTermError
           classes={this.props.classes}
           open={this.state.open}
