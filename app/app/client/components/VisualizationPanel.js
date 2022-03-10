@@ -111,6 +111,7 @@ export default class VisualizationPanel extends React.Component {
           classes={this.props.classes}
           editingVocabulary={editingVocabularyStore}
           fileLoadCount={this.props.fileLoadCount}
+          fileId={editingVocabularyStore.selectedFile.id}
         />
       </div>
     );

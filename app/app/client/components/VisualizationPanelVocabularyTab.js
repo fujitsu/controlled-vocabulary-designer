@@ -71,8 +71,8 @@ export default
     this.synonymSource = null;
     this.synonymTarget = null;
     this.sliderStep = 20,
-    this.initSlider = 0;
-    this.sliderPercent = 0;
+    this.initSlider = 0;      // Initialize zoom (0% zoom value)
+    this.sliderPercent = 0;   // 1% of zoom range
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
@@ -86,7 +86,7 @@ export default
       dlgErrOpen: false,          // dialog for Error
       popBorderColorOpen: false,  // popover for border color setting
       reason: '',                 // Reason for Error 
-      sliderValue: 0,
+      sliderValue: 0,             // zoomSlider value
     };
 
     this.ehTop = null;      // edgehandles top   object
@@ -120,6 +120,7 @@ export default
     }
     this.dispCheckEdgeHandle();
   }
+
   /**
    * Max min scale
    */
@@ -131,6 +132,44 @@ export default
     const cyh = cy.height();
     cy.viewport({zoom: 0.005, pan: {x: cyw/2, y: cyh/2}});
   }
+
+  /**
+   * zoomSlider settings
+   */
+  setIniZoom(){
+    const cy = this.cy;
+    const currentZoom = cy.zoom();
+
+    // maximum magnification
+    let maxZoom = cy.maxZoom();
+    const maxMagnf = 5;
+    maxZoom = (currentZoom*maxMagnf>maxZoom?maxZoom:currentZoom*maxMagnf);
+
+    // 1% of zoom range
+    this.sliderPercent = (maxZoom - currentZoom) / 100;
+
+    // Initialize zoom (0% zoom value)
+    this.initSlider = currentZoom;
+
+    cy.minZoom(currentZoom/2);
+    cy.maxZoom(maxZoom);
+
+    const fileId = this.props.editingVocabulary.selectedFile.id;
+    if(undefined == this.situationArr[ fileId]){
+      this.situationArr[ fileId] = {
+        pan: undefined, 
+        zoom: undefined,
+      }
+    }
+    if(undefined == this.situationArr[ fileId].sliderPercent && this.sliderPercent != 0){
+      this.situationArr[ fileId].sliderPercent = this.sliderPercent ? this.sliderPercent : 0 ;
+    }
+    if(undefined == this.situationArr[ fileId].initSlider && this.initSlider != 0){
+      this.situationArr[ fileId].initSlider = this.initSlider ? this.initSlider : 0;
+    }
+    this.setState({sliderValue:0});
+  }
+
   /**
    * Update graph data
    */
@@ -153,22 +192,6 @@ export default
       // Update layout
       const currentZoom = cy.zoom();
       const currentPan = cy.pan();
-
-      // maximum magnification
-      let maxZoom = cy.maxZoom();
-      const maxMagnf = 5;
-      maxZoom = (currentZoom*maxMagnf>maxZoom?maxZoom:currentZoom*maxMagnf);
-      
-      // 1% of zoom range 
-      this.sliderPercent = (maxZoom - currentZoom) / 100; 
-
-      // Initialize zoom (0% zoom value)   
-      this.initSlider = currentZoom;
-
-      cy.minZoom(currentZoom);
-      cy.maxZoom(maxZoom);
-
-      this.setState({sliderValue:0});
 
       if (this.isReset) {
         this.isReset = false;
@@ -230,14 +253,21 @@ export default
   setPanZoom() {
     const cy = this.cy;
     
-    if( undefined == this.situationArr[ this.props.editingVocabulary.selectedFile.id]){
+    const fileId = this.props.editingVocabulary.selectedFile.id;
+    if( undefined == this.situationArr[ fileId]){
       cy.fit(cy.nodes,50 );
+      this.setIniZoom();
     }else{
       const initPan = {x: cy.width()/2, y: cy.height()/2};
-      cy.pan( this.situationArr[ this.props.editingVocabulary.selectedFile.id].pan || initPan);
-      cy.zoom( this.situationArr[ this.props.editingVocabulary.selectedFile.id].zoom || 0.005);
+
+      this.sliderPercent = this.situationArr[ fileId].sliderPercent ? this.situationArr[ fileId].sliderPercent : 0 ;
+      this.initSlider    = this.situationArr[ fileId].initSlider ? this.situationArr[ fileId].initSlider : 0 ;
+
+      cy.pan( this.situationArr[ fileId].pan || initPan);
+      cy.zoom( this.situationArr[ fileId].zoom || 0.005);
     }
   }
+
   /**
    * [onPanZoom description]
    */
@@ -539,10 +569,11 @@ export default
     });
 
     this.cy.on('pan', (event) => {
-      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
-        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
-          pan:undefined, 
-          zoom:undefined
+      const fileId = this.props.editingVocabulary.selectedFile.id;
+      if(undefined == this.situationArr[ fileId]){
+        this.situationArr[ fileId] = {
+          pan: undefined,
+          zoom: undefined,
         }
       }
       const pan = this.cy.pan();
@@ -550,19 +581,20 @@ export default
         x: pan.x, 
         y: pan.y
       };
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].pan= p;
+      this.situationArr[ fileId].pan= p;
       this.onPanZoom();
     });
 
     this.cy.on('zoom', (event) => {
-      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
-        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
+      const fileId = this.props.editingVocabulary.selectedFile.id;
+      if(undefined == this.situationArr[ fileId]){
+        this.situationArr[ fileId] = {
           pan:undefined, 
           zoom:undefined
         }
       }
       const zoom = Number( this.cy.zoom());
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = zoom;
+      this.situationArr[ fileId].zoom = zoom;
       this.onPanZoom();
       this.setState({sliderValue : ((zoom - this.initSlider) / this.sliderPercent)});
 
@@ -1170,21 +1202,29 @@ export default
   
   sliderPlus() {
     let plusValue = Number(this.state.sliderValue) + Number(this.sliderStep);
-    if( 100 >= plusValue){
-      this.setState({sliderValue: plusValue});
+    if( 1 > plusValue){
+      plusValue = 0;
+    }else if( 100 >= plusValue){
+      // 0.5 = Simple fine-tuning for integerization
+      plusValue = Math.ceil( plusValue / Number(this.sliderStep)-0.5 )*Number(this.sliderStep)
     }else{
       plusValue = 100;
     }
+    this.setState({sliderValue: plusValue});
     const cy = this.cy;
     cy.zoom(this.sliderPercent * Number(plusValue) + this.initSlider);
   }
   sliderMinus() {
     let minusValue = Number(this.state.sliderValue) - Number(this.sliderStep);
-    if( minusValue >= 0){
-      this.setState({sliderValue: minusValue});
+    if( minusValue > 100){
+      minusValue = 100;
+    }else if( minusValue >= 0){
+      // 0.5 = Simple fine-tuning for integerization
+      minusValue = Math.floor( minusValue / Number(this.sliderStep)+0.5 )*Number(this.sliderStep)
     }else{
       minusValue = 0;
     }
+    this.setState({sliderValue: minusValue});
     const cy = this.cy;
     cy.zoom(this.sliderPercent * Number(minusValue) + this.initSlider);
   }
@@ -1295,9 +1335,10 @@ export default
         <Grid
           container
           spacing={2}
+          justify={'space-between'}
           className={this.props.classes.visualizationVocabularyHead}
         >
-          <Grid item xs={5}>
+          <Grid item>
             <Box>
               <Button
                 className={this.props.classes.buttons}
@@ -1422,120 +1463,115 @@ export default
               </Popover>
             </Box>
           </Grid>
-          <Grid item xs={4}>              
+          <Grid item>
             <Grid container spacing={0}>
               <Grid item>
-                  <Search
-                    classes={this.props.classes}
-                    editingVocabulary={this.props.editingVocabulary}
-                  />
-              </Grid>
-              <Grid item>
-                  <Button
-                    className={this.props.classes.buttons}
-                    ml={3}
-                    variant="contained"
-                    color="primary"
-                    size={'small'}
-                    disabled={ !editButtondisabled || editButtonsDisableSwitchByFile} 
-                    onClick={(e)=>this.handleEditPopoverOpen(e)}
-                  >
-                    編集
-                  </Button>          
-                  <Popover
-                    id={id}
-                    open={open}
-                    anchorEl={anchorEl}
-                    anchorReference="anchorPosition"
-                    anchorPosition={{ top: 1000, left: 1200 }}
-                    anchorOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left"
-                    }}
-                    transformOrigin={{
-                      vertical: "bottom",
-                      horizontal: "left"
-                    }}
-                    classes={{
-                      root: this.props.classes.popoverPanelRoot,
-                      paper: this.props.classes.popoverPanelpaper,
-                    }}
-                  >
-                    <Typography className={this.props.classes.popoverTitle}>
-                      編集
-                      {this.handleEditPopoverClose ? (
-                        <IconButton
-                          aria-label="close"
-                          className={this.props.classes.popoverTitleCloseButton}
-                          onClick={() => this.handleEditPopoverClose()}
-                        >
-                          <CloseIcon />
-                        </IconButton>
-                      ) : null}
-                    </Typography>
-                    
-                    <EditPanelVocabularyTab
-                      classes={this.props.classes}
-                      editingVocabulary={this.props.editingVocabulary}
-                      close={() =>this.handleEditPopoverClose()}
-                    />
-                  </Popover>
-              </Grid>
-
-            </Grid>
-          </Grid>
-            
-          <Grid item xs={3}>
-            <Box>
-              <Button
-                className={this.props.classes.buttonsNewAdd}
-                ml={3}
-                variant="contained"
-                color="primary"
-                size={'small'}
-                onClick={(e)=>this.handleNewEditPopoverOpen(e)}
-                disabled={editButtonsDisableSwitchByFile}
-              >
-                新規登録
-              </Button>
-              <Popover
-                id={idNew}
-                open={openNew}
-                anchorEl={anchorNewEl}
-                anchorReference="anchorPosition"
-                anchorPosition={{ top: 1000, left: 1200 }}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left"
-                }}
-                transformOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left"
-                }}
-                classes={{
-                  root: this.props.classes.popoverPanelRoot,
-                  paper: this.props.classes.popoverPanelpaper,
-                }}
-              >
-                <Typography className={this.props.classes.popoverTitle}>
-                  新規登録
-                  {this.handleNewEditPopoverClose ? (
-                    <IconButton
-                      aria-label="close"
-                      className={this.props.classes.popoverTitleCloseButton}
-                      onClick={() => this.handleNewEditPopoverClose()}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  ) : null}
-                </Typography>
-                <EditPanelVocabularyNewTab
+                <Search
                   classes={this.props.classes}
                   editingVocabulary={this.props.editingVocabulary}
-                  close={() => this.handleNewEditPopoverClose()}
                 />
-              </Popover>
-            </Box>
+              </Grid>
+              <Grid item>
+                <Button
+                  className={this.props.classes.buttons}
+                  ml={3}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  disabled={ !editButtondisabled || editButtonsDisableSwitchByFile}
+                  onClick={(e)=>this.handleEditPopoverOpen(e)}
+                >
+                  編集
+                </Button>
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEl}
+                  anchorReference="anchorPosition"
+                  anchorPosition={{ top: 1000, left: 1200 }}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                  }}
+                  transformOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                  }}
+                  classes={{
+                    root: this.props.classes.popoverPanelRoot,
+                    paper: this.props.classes.popoverPanelpaper,
+                  }}
+                >
+                  <Typography className={this.props.classes.popoverTitle}>
+                    編集
+                    {this.handleEditPopoverClose ? (
+                      <IconButton
+                        aria-label="close"
+                        className={this.props.classes.popoverTitleCloseButton}
+                        onClick={() => this.handleEditPopoverClose()}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    ) : null}
+                  </Typography>
+                  <EditPanelVocabularyTab
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    close={() =>this.handleEditPopoverClose()}
+                  />
+                </Popover>
+              </Grid>
+              <Grid item>
+                <Button
+                  className={this.props.classes.buttonsNewAdd}
+                  ml={3}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  onClick={(e)=>this.handleNewEditPopoverOpen(e)}
+                  disabled={editButtonsDisableSwitchByFile}
+                >
+                  新規登録
+                </Button>
+                <Popover
+                  id={idNew}
+                  open={openNew}
+                  anchorEl={anchorNewEl}
+                  anchorReference="anchorPosition"
+                  anchorPosition={{ top: 1000, left: 1200 }}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                  }}
+                  transformOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                  }}
+                  classes={{
+                    root: this.props.classes.popoverPanelRoot,
+                    paper: this.props.classes.popoverPanelpaper,
+                  }}
+                >
+                  <Typography className={this.props.classes.popoverTitle}>
+                    新規登録
+                    {this.handleNewEditPopoverClose ? (
+                      <IconButton
+                        aria-label="close"
+                        className={this.props.classes.popoverTitleCloseButton}
+                        onClick={() => this.handleNewEditPopoverClose()}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    ) : null}
+                  </Typography>
+                  <EditPanelVocabularyNewTab
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    close={() => this.handleNewEditPopoverClose()}
+                  />
+                </Popover>
+              </Grid>
+            </Grid>
           </Grid>
         </Grid>
         <DialogSettingSynonym
@@ -1854,4 +1890,6 @@ export default
 VisualizationPanelVocabularyTab.propTypes = {
   editingVocabulary: PropTypes.object,
   classes: PropTypes.object,
+  fileLoadCount: PropTypes.number,
+  fileId: PropTypes.number,
 };
