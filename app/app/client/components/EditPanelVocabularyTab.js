@@ -161,8 +161,9 @@ export default
     const ret = this.props.editingVocabulary.updateVocabulary();
     if (ret !== '') {
       this.errorDialogOpen(ret);
+    }else{
+      this.props.close();
     }
-    this.props.close();
   }
 
   /**
