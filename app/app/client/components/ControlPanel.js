@@ -12,6 +12,7 @@ import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 import DialogFileSelecter from './DialogFileSelecter';
 import DialogFileDownload from './DialogFileDownload';
@@ -230,14 +231,24 @@ export default class ControlPanel extends React.Component {
             onClick={this.undo.bind(this)}  
             size="large" 
             className={this.props.classes.buttonsTop}> 
-            <UndoIcon/>取り消し
+            <UndoIcon className={this.props.classes.conpaneIcon}/>取り消し
           </Button>
           <Button 
             onClick={this.redo.bind(this)}  
             size="large" 
             className={this.props.classes.buttonsTop}> 
-            <RedoIcon/>やり直し
+            <RedoIcon className={this.props.classes.conpaneIcon}/>やり直し
           </Button>
+          <Button 
+            size="large" 
+            className={this.props.classes.buttonsTop}
+            href='https://www.google.com/?hl=ja'
+            target="_blank"
+            rel="noopener"
+          > 
+            <OpenInNewIcon className={this.props.classes.conpaneIcon}/>ヘルプ
+          </Button>
+
           <DialogFileSelecter
             open={this.state.uploadOpen}
             close={this.state.close}

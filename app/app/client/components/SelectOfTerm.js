@@ -4,10 +4,10 @@
  import React from 'react';
  import PropTypes from 'prop-types';
  
+ import FormControl from '@material-ui/core/FormControl';
  import MenuItem from '@material-ui/core/MenuItem';
  import Select from '@material-ui/core/Select';
  import Grid from '@material-ui/core/Grid';
- import Box from '@material-ui/core/Box';
  
  import {observer} from 'mobx-react';
  
@@ -70,21 +70,25 @@
      return (
        <form noValidate autoComplete="off">
          <Grid item xs={12}>
-           <Box border={1}>
-             <Select
-               open={this.state.open}
-               onClose={this.handleClose}
-               onOpen={this.handleOpen}
-               value={currentId}
-               onChange={this.handleChange}
-               className={this.props.classes.selectTerm}
-             >
-             {sortedNodeList.map((item, i) => (
-               <MenuItem key={i} value={item.id} 
-               onClick={(event) => this.selectCurrentTerm(event)}>{item.term}</MenuItem>
-             ))}
-             </Select>
-           </Box>
+          <FormControl
+            variant="outlined"
+            className={this.props.classes.selectTermForm}
+          >
+            <Select
+              open={this.state.open}
+              onClose={this.handleClose}
+              onOpen={this.handleOpen}
+              value={currentId}
+              onChange={this.handleChange}
+              className={this.props.classes.selectTerm}
+              SelectDisplayProps={{ style: { paddingTop: 0, paddingBottom: 0 , paddingLeft: '20px'} }}
+            >
+            {sortedNodeList.map((item, i) => (
+              <MenuItem key={i} value={item.id} 
+              onClick={(event) => this.selectCurrentTerm(event)}>{item.term}</MenuItem>
+            ))}
+            </Select>
+          </FormControl>
          </Grid>
        </form>
      );

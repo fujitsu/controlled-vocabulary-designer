@@ -22,16 +22,23 @@ import {blue} from '@material-ui/core/colors';
 import {deepPurple} from '@material-ui/core/colors';
 import {purple} from '@material-ui/core/colors';
 
+import Slider from '@material-ui/core/Slider';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Popover from "@material-ui/core/Popover";
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
+import SettingsIcon from '@material-ui/icons/Settings';
+import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
+import IndeterminateCheckBoxOutlinedIcon from "@material-ui/icons/IndeterminateCheckBoxOutlined";
 
 import {observer} from 'mobx-react';
 
+import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
+import ColorChartCheckBoxes from './ColorChartCheckBoxes';
 import EditPanelVocabularyTab from './EditPanelVocabularyTab';
 import EditPanelVocabularyNewTab from './EditPanelVocabularyNewTab';
 import DialogSettingSynonym from './DialogSettingSynonym';
@@ -63,16 +70,23 @@ export default
     this.message = '';
     this.synonymSource = null;
     this.synonymTarget = null;
+    this.sliderStep = 20,
+    this.initSlider = 0;      // Initialize zoom (0% zoom value)
+    this.sliderPercent = 0;   // 1% of zoom range
 
     this.state = { 
-      anchorEl: false,        // Edit Panel togle
-      anchorNewEl: false,     // Edit nNew Term Panel togle
-      transformTogle: false,  // transform coordinate togle
-      dlgSynonymOpen: false,  // dialog for Synonym term
-      dlgBroaderOpen: false,  // dialog for Broader term
+      anchorEl: false,            // Edit Panel togle
+      anchorNewEl: false,         // Edit nNew Term Panel togle
+      anchorElC: false,           // Confirm Color Setting popover togle
+      anchorElColor: false,       // border color setting popover togle
+      transformTogle: false,      // transform coordinate togle
+      dlgSynonymOpen: false,      // dialog for Synonym term
+      dlgBroaderOpen: false,      // dialog for Broader term confirm
       dlgDeselectTermOpen: false, // dialog for deselect term confirm
-      dlgErrOpen: false,      // dialog for Error
-      reason: '',             // Reason for Error 
+      dlgErrOpen: false,          // dialog for Error
+      popBorderColorOpen: false,  // popover for border color setting
+      reason: '',                 // Reason for Error 
+      sliderValue: 0,             // zoomSlider value
     };
 
     this.ehTop = null;      // edgehandles top   object
@@ -106,6 +120,7 @@ export default
     }
     this.dispCheckEdgeHandle();
   }
+
   /**
    * Max min scale
    */
@@ -117,6 +132,44 @@ export default
     const cyh = cy.height();
     cy.viewport({zoom: 0.005, pan: {x: cyw/2, y: cyh/2}});
   }
+
+  /**
+   * zoomSlider settings
+   */
+  setIniZoom(){
+    const cy = this.cy;
+    const currentZoom = cy.zoom();
+
+    // maximum magnification
+    let maxZoom = cy.maxZoom();
+    const maxMagnf = 5;
+    maxZoom = (currentZoom*maxMagnf>maxZoom?maxZoom:currentZoom*maxMagnf);
+
+    // 1% of zoom range
+    this.sliderPercent = (maxZoom - currentZoom) / 100;
+
+    // Initialize zoom (0% zoom value)
+    this.initSlider = currentZoom;
+
+    cy.minZoom(currentZoom/2);
+    cy.maxZoom(maxZoom);
+
+    const fileId = this.props.editingVocabulary.selectedFile.id;
+    if(undefined == this.situationArr[ fileId]){
+      this.situationArr[ fileId] = {
+        pan: undefined, 
+        zoom: undefined,
+      }
+    }
+    if(undefined == this.situationArr[ fileId].sliderPercent && this.sliderPercent != 0){
+      this.situationArr[ fileId].sliderPercent = this.sliderPercent ? this.sliderPercent : 0 ;
+    }
+    if(undefined == this.situationArr[ fileId].initSlider && this.initSlider != 0){
+      this.situationArr[ fileId].initSlider = this.initSlider ? this.initSlider : 0;
+    }
+    this.setState({sliderValue:0});
+  }
+
   /**
    * Update graph data
    */
@@ -200,14 +253,21 @@ export default
   setPanZoom() {
     const cy = this.cy;
     
-    if( undefined == this.situationArr[ this.props.editingVocabulary.selectedFile.id]){
+    const fileId = this.props.editingVocabulary.selectedFile.id;
+    if( undefined == this.situationArr[ fileId]){
       cy.fit(cy.nodes,50 );
+      this.setIniZoom();
     }else{
       const initPan = {x: cy.width()/2, y: cy.height()/2};
-      cy.pan( this.situationArr[ this.props.editingVocabulary.selectedFile.id].pan || initPan);
-      cy.zoom( this.situationArr[ this.props.editingVocabulary.selectedFile.id].zoom || 0.005);
+
+      this.sliderPercent = this.situationArr[ fileId].sliderPercent ? this.situationArr[ fileId].sliderPercent : 0 ;
+      this.initSlider    = this.situationArr[ fileId].initSlider ? this.situationArr[ fileId].initSlider : 0 ;
+
+      cy.pan( this.situationArr[ fileId].pan || initPan);
+      cy.zoom( this.situationArr[ fileId].zoom || 0.005);
     }
   }
+
   /**
    * [onPanZoom description]
    */
@@ -509,10 +569,11 @@ export default
     });
 
     this.cy.on('pan', (event) => {
-      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
-        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
-          pan:undefined, 
-          zoom:undefined
+      const fileId = this.props.editingVocabulary.selectedFile.id;
+      if(undefined == this.situationArr[ fileId]){
+        this.situationArr[ fileId] = {
+          pan: undefined,
+          zoom: undefined,
         }
       }
       const pan = this.cy.pan();
@@ -520,20 +581,24 @@ export default
         x: pan.x, 
         y: pan.y
       };
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].pan= p;
+      this.situationArr[ fileId].pan= p;
       this.onPanZoom();
     });
 
     this.cy.on('zoom', (event) => {
-      if(undefined == this.situationArr[this.props.editingVocabulary.selectedFile.id]){
-        this.situationArr[this.props.editingVocabulary.selectedFile.id] = {
+      const fileId = this.props.editingVocabulary.selectedFile.id;
+      if(undefined == this.situationArr[ fileId]){
+        this.situationArr[ fileId] = {
           pan:undefined, 
           zoom:undefined
         }
       }
       const zoom = Number( this.cy.zoom());
-      this.situationArr[this.props.editingVocabulary.selectedFile.id].zoom = zoom;
+      this.situationArr[ fileId].zoom = zoom;
       this.onPanZoom();
+      this.setState({sliderValue : ((zoom - this.initSlider) / this.sliderPercent)});
+
+      event.preventDefault();
     });
   }
 
@@ -1042,31 +1107,153 @@ export default
   handleErrClose(){
     this.setState({dlgErrOpen: false, reason: ''});   
   }
+
+  /**
+   * All selection cancellation dialog open 
+   */
   handleDeselectTermOpen(){
     this.message = "用語の選択を解除します。\nよろしいですか？";
     this.setState({dlgDeselectTermOpen: true});  
   }
+
+  /**
+   * All selection cancellation dialog close
+   */
   handleDeselectTermClose(){
     this.message = '';
     this.setState({dlgDeselectTermOpen: false});
     
     this.deselectionConfirm();
   }
+
+  /**
+   * Border Color change dialog open 
+   */
+   handleBorderColorPopOpen(e){
+    this.setState({anchorElColor: this.state.anchorElColor ? null : e.currentTarget});
+  }
+
+  /**
+   * Border Color change dialog close
+   */
+  handleBorderColorPopClose(){
+    this.setState({anchorElColor: false});
+  }
+
+  /**
+   * All selection cancellation dialog Cancel
+   */
   handleDeselectTermCancelClose(){
     this.message = '';
     this.setState({dlgDeselectTermOpen: false});
   }
+
+  /**
+   * Edit popover open
+   */
   handleEditPopoverOpen(e){
     this.setState({anchorEl: this.state.anchorEl ? null : e.currentTarget});
   }
+
+  /**
+   * Edit popover Close
+   */
   handleEditPopoverClose(){
     this.setState({anchorEl: null});
   }
+
+  /**
+   * Confirm Color popover open
+   */
+  handleConfirmColorPopoverOpen(e){
+    // e.stopPropagation();
+    // e.preventDefault();
+    this.setState({anchorElC: this.state.anchorElC ? null : e.currentTarget});
+  }
+
+  /**
+   * Confirm Color popover Close
+   */
+   handleConfirmColorPopoverClose(e){
+    this.setState({anchorElC: null});
+  }
+
+  /**
+   * new Term add popover Open
+   */
   handleNewEditPopoverOpen(e){
     this.setState({anchorNewEl: this.state.anchorNewEl ? null : e.currentTarget});
   }
+
+  /**
+   * new Term add popover close
+   */
   handleNewEditPopoverClose(){
     this.setState({anchorNewEl: null});
+  }
+
+  /**
+   * zoom Slider Change
+   */
+   zoomSliderChange(event, newValue){
+    const cy = this.cy;
+    cy.zoom(this.sliderPercent * Number(newValue) + this.initSlider);
+  }
+  
+  sliderPlus() {
+    let plusValue = Number(this.state.sliderValue) + Number(this.sliderStep);
+    if( 1 > plusValue){
+      plusValue = 0;
+    }else if( 100 >= plusValue){
+      // 0.5 = Simple fine-tuning for integerization
+      plusValue = Math.ceil( plusValue / Number(this.sliderStep)-0.5 )*Number(this.sliderStep)
+    }else{
+      plusValue = 100;
+    }
+    this.setState({sliderValue: plusValue});
+    const cy = this.cy;
+    cy.zoom(this.sliderPercent * Number(plusValue) + this.initSlider);
+  }
+  sliderMinus() {
+    let minusValue = Number(this.state.sliderValue) - Number(this.sliderStep);
+    if( minusValue > 100){
+      minusValue = 100;
+    }else if( minusValue >= 0){
+      // 0.5 = Simple fine-tuning for integerization
+      minusValue = Math.floor( minusValue / Number(this.sliderStep)+0.5 )*Number(this.sliderStep)
+    }else{
+      minusValue = 0;
+    }
+    this.setState({sliderValue: minusValue});
+    const cy = this.cy;
+    cy.zoom(this.sliderPercent * Number(minusValue) + this.initSlider);
+  }
+
+  /**
+   * Fixed term color reflection
+   * @param  {String} color - string of changed color
+   */
+   seletConfirmColor(color) {
+    console.log('[seletConfirmColor] change to ', color);
+    this.props.editingVocabulary.seletConfirmColor(color);
+  }
+
+  /**
+   * Confirm switch
+   * @param  {Boolean} isConfirm - confirm acceptance
+   */
+   toggleConfirm(isConfirm) {
+    // console.log('[toggleConfirm] change to ' + isConfirm);
+    const currentNode = this.props.editingVocabulary.currentNode;
+
+    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
+    if (!isConfirm) {
+      // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
+      if (!currentNode.preferred_label) {
+        this.props.editingVocabulary.
+            tmpPreferredLabel.list.push(currentNode.term);
+      }
+    }
   }
 
   /**
@@ -1074,9 +1261,11 @@ export default
    * @return {element}
    */
   render() {
-    const nodeList = this.props.editingVocabulary.termListForVocabulary;
-    const edgesList = this.props.editingVocabulary.edgesList;
-    const disabledConfirm = this.props.editingVocabulary.selectedTermList.length > 0 ? false : true;
+    const editingVocabulary = this.props.editingVocabulary;
+
+    const nodeList = editingVocabulary.termListForVocabulary;
+    const edgesList = editingVocabulary.edgesList;
+    const disabledDeselectConfirm = editingVocabulary.selectedTermList.length > 0 ? false : true;
     const transformTogle = this.state.transformTogle;
     const anchorEl = this.state.anchorEl;
     const open = Boolean(anchorEl);
@@ -1084,17 +1273,72 @@ export default
     const anchorNewEl = this.state.anchorNewEl;
     const openNew = Boolean(anchorNewEl);
     const idNew = openNew ? "popover-new" : undefined;
-    const editButtondisabled = this.props.editingVocabulary.currentNode.term ? true : false;
-    const editButtonsDisableSwitchByFile  = this.props.editingVocabulary.selectedFile.id !== 0 ? true : false;
+    const anchorElC = this.state.anchorElC;
+    const openC = Boolean(anchorElC);
+    const idC = openC ? "popover-c" : undefined;
+    const anchorElColor = this.state.anchorElColor;
+    const openColor = Boolean(anchorElColor);
+    const idColor = openColor ? "popover-color" : undefined;
+    const editButtondisabled = editingVocabulary.currentNode.term ? true : false;
+    const editButtonsDisableSwitchByFile  = editingVocabulary.selectedFile.id !== 0 ? true : false;
+
+    // for Confirm Button
+    let fileId = editingVocabulary.selectedFile.id;
+    // Change border color disabled
+    let disabledColor = true;
+    if ( fileId == 0 && editingVocabulary.currentNode.id) {
+      // Allow each component to operate during editing vocabulary selection and term selection
+      disabledColor = false;
+    }
+
+    // Firm button disabled condition
+    // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
+    const isCurrentNodeChanged = editingVocabulary.isCurrentNodeChanged;
+    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
+
+    const confirmed = editingVocabulary.currentNode.confirm;
+    let isConfirm = false;
+    if (confirmed && confirmed == 1) {
+      isConfirm = true;
+    }
+
+    // Disabled determination of TextField area
+    // Undetermined while selecting a term when editing vocabulary pulldown is selected:enabled
+    // No term selected when selecting vocabulary pull-down for editing:enabled
+    const disabledTextField =
+     ( !isConfirm && editingVocabulary.currentNode.id) ||
+       ( !editingVocabulary.currentNode.id) ? false : true;
+
+    // Fix button text
+    let confirmButtonText = '確定';
+    if (disabledTextField) {
+      confirmButtonText = '確定解除';
+    }
+
+    const zoomMarks = [
+      {
+        value: 20,
+      },
+      {
+        value: 40,
+      },
+      {
+        value: 60,
+      },
+      {
+        value: 80,
+      },
+    ];
 
     return (
       <div>
         <Grid
           container
           spacing={2}
+          justify={'space-between'}
           className={this.props.classes.visualizationVocabularyHead}
         >
-          <Grid item xs={5}>
+          <Grid item>
             <Box>
               <Button
                 className={this.props.classes.buttons}
@@ -1113,127 +1357,221 @@ export default
                 variant="contained"
                 color="primary"
                 size={'small'}
-                disabled={disabledConfirm}
+                disabled={disabledDeselectConfirm}
                 onClick={()=>this.handleDeselectTermOpen()}
               >
                 選択全解除
               </Button>
-            </Box>
-          </Grid>
-          <Grid item xs={5}>
-            <Box>
-              <Search
-                classes={this.props.classes}
-                editingVocabulary={this.props.editingVocabulary}
-              />
-            </Box>
-          </Grid>
-          
-          <Grid item xs={2}>
-            <Box>
               <Button
                 className={this.props.classes.buttons}
                 ml={3}
                 variant="contained"
                 color="primary"
                 size={'small'}
-                disabled={ !editButtondisabled || editButtonsDisableSwitchByFile} 
-                onClick={(e)=>this.handleEditPopoverOpen(e)}
+                disabled={disabledDeselectConfirm}
+                onClick={(e)=>this.handleBorderColorPopOpen(e)}
               >
-                編集
+                枠線色変更
               </Button>
-              
-              <Popover
-                id={id}
-                open={open}
-                anchorEl={anchorEl}
-                anchorReference="anchorPosition"
-                anchorPosition={{ top: 1000, left: 1200 }}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left"
-                }}
-                transformOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left"
-                }}
-                
+              <Popover 
+
+                id={idColor}
+                open={openColor}
+                anchorEl={anchorElColor}
+                onClose={()=>this.handleBorderColorPopClose()}
                 style={{
                   backgroundColor: "#66666680",
                 }}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
               >
-
-
-                <Typography className={this.props.classes.popoverTitle}>
-                  編集
-                  {this.handleEditPopoverClose ? (
-                    <IconButton
-                      aria-label="close"
-                      className={this.props.classes.popoverTitleCloseButton}
-                      onClick={() => this.handleEditPopoverClose()}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  ) : null}
-                </Typography>
-                
-                <EditPanelVocabularyTab
+                <ColorChartCheckBoxes
+                  colorId="color1"
                   classes={this.props.classes}
-                  editingVocabulary={this.props.editingVocabulary}
+                  currentId={this.props.editingVocabulary.currentNode.id}
+                  color={this.props.editingVocabulary.currentNode.color1}
+                  selectColor={(currentId, colorId, color) =>
+                    this.props.editingVocabulary.updateColor(currentId,
+                        colorId, color)
+                  }
+                  tmpColor={this.props.editingVocabulary.tmpBorderColor}
+                  selectTmpColor={(id, color) =>
+                    this.props.editingVocabulary.selectTmpBorderColor(
+                        id, color)
+                  }
+                  disabled={disabledColor}
+                  close={()=>this.handleBorderColorPopClose()}
                 />
               </Popover>
-
-              <Button
-                className={this.props.classes.buttonsNewAdd}
-                ml={3}
-                variant="contained"
-                color="primary"
-                size={'small'}
-                onClick={(e)=>this.handleNewEditPopoverOpen(e)}
-                disabled={editButtonsDisableSwitchByFile}
-              >
-                新規登録
-              </Button>
-              
-              <Popover
-                id={idNew}
-                open={openNew}
-                anchorEl={anchorNewEl}
-                anchorReference="anchorPosition"
-                anchorPosition={{ top: 1000, left: 1200 }}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left"
-                }}
-                transformOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left"
-                }}
+              <ButtonGroup>           
+                <Button
+                  className={this.props.classes.buttonsGrp}
+                  ml={3}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  disabled={disabledConfirm}
+                  onClick={()=>this.toggleConfirm(!isConfirm)}
+                >
+                  {confirmButtonText}
                 
+                </Button>       
+                <Button
+                  className={this.props.classes.buttonsGrp}
+                  ml={3}
+                  variant="contained"
+                  color="primary"
+                  disabled={disabledConfirm}
+                  size={'small'}
+                  onClick={(e)=>this.handleConfirmColorPopoverOpen(e)}
+                >
+                  <SettingsIcon fontSize="small" />
+                </Button>
+              </ButtonGroup>
+              <Popover 
+                id={idC}
+                open={openC}
+                anchorEl={anchorElC}
+                onClose={()=>this.handleConfirmColorPopoverClose()}
                 style={{
                   backgroundColor: "#66666680",
                 }}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'center',
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'center',
+                }}
               >
-
-                <Typography className={this.props.classes.popoverTitle}>
-                  新規登録
-                  {this.handleNewEditPopoverClose ? (
-                    <IconButton
-                      aria-label="close"
-                      className={this.props.classes.popoverTitleCloseButton}
-                      onClick={() => this.handleNewEditPopoverClose()}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  ) : null}
-                </Typography>
-                
-                <EditPanelVocabularyNewTab
+                <ColorChartCheckBoxesOfConfirm
                   classes={this.props.classes}
-                  editingVocabulary={this.props.editingVocabulary}
+                  currentId={this.props.editingVocabulary.currentNode.id}
+                  color={this.props.editingVocabulary.confirmColor}
+                  selectColor={(color) =>
+                    this.seletConfirmColor(color)
+                  }
+                  close={()=>this.handleConfirmColorPopoverClose()}
                 />
               </Popover>
             </Box>
+          </Grid>
+          <Grid item>
+            <Grid container spacing={0}>
+              <Grid item>
+                <Search
+                  classes={this.props.classes}
+                  editingVocabulary={this.props.editingVocabulary}
+                />
+              </Grid>
+              <Grid item>
+                <Button
+                  className={this.props.classes.buttons}
+                  ml={3}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  disabled={ !editButtondisabled || editButtonsDisableSwitchByFile}
+                  onClick={(e)=>this.handleEditPopoverOpen(e)}
+                >
+                  編集
+                </Button>
+                <Popover
+                  id={id}
+                  open={open}
+                  anchorEl={anchorEl}
+                  anchorReference="anchorPosition"
+                  anchorPosition={{ top: 1000, left: 1200 }}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                  }}
+                  transformOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                  }}
+                  classes={{
+                    root: this.props.classes.popoverPanelRoot,
+                    paper: this.props.classes.popoverPanelpaper,
+                  }}
+                >
+                  <Typography className={this.props.classes.popoverTitle}>
+                    編集
+                    {this.handleEditPopoverClose ? (
+                      <IconButton
+                        aria-label="close"
+                        className={this.props.classes.popoverTitleCloseButton}
+                        onClick={() => this.handleEditPopoverClose()}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    ) : null}
+                  </Typography>
+                  <EditPanelVocabularyTab
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    close={() =>this.handleEditPopoverClose()}
+                  />
+                </Popover>
+              </Grid>
+              {/* <Grid item>
+                <Button
+                  className={this.props.classes.buttonsNewAdd}
+                  ml={3}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  onClick={(e)=>this.handleNewEditPopoverOpen(e)}
+                  disabled={editButtonsDisableSwitchByFile}
+                >
+                  新規登録
+                </Button>
+                <Popover
+                  id={idNew}
+                  open={openNew}
+                  anchorEl={anchorNewEl}
+                  anchorReference="anchorPosition"
+                  anchorPosition={{ top: 1000, left: 1200 }}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                  }}
+                  transformOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left"
+                  }}
+                  classes={{
+                    root: this.props.classes.popoverPanelRoot,
+                    paper: this.props.classes.popoverPanelpaper,
+                  }}
+                >
+                  <Typography className={this.props.classes.popoverTitle}>
+                    新規登録
+                    {this.handleNewEditPopoverClose ? (
+                      <IconButton
+                        aria-label="close"
+                        className={this.props.classes.popoverTitleCloseButton}
+                        onClick={() => this.handleNewEditPopoverClose()}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    ) : null}
+                  </Typography>
+                  <EditPanelVocabularyNewTab
+                    classes={this.props.classes}
+                    editingVocabulary={this.props.editingVocabulary}
+                    close={() => this.handleNewEditPopoverClose()}
+                  />
+                </Popover>
+              </Grid> */}
+            </Grid>
           </Grid>
         </Grid>
         <DialogSettingSynonym
@@ -1268,6 +1606,46 @@ export default
           reason={this.state.reason}
         />
 
+        <div className={this.props.classes.sliderDivRoot}>          
+          <Typography id="slider-slider-plus">        
+            <IconButton
+              aria-label="slider-plus"
+              onClick={()=>this.sliderPlus()}
+            >
+              <AddBoxOutlinedIcon />
+            </IconButton>
+          </Typography>
+
+          <Slider
+            classes={{
+              root: this.props.classes.sliderRoot,
+              vertical: this.props.classes.sliderRoot,
+              rail: this.props.classes.sliderRail,
+              track: this.props.classes.sliderTrackt,
+              thumb: this.props.classes.sliderThumb,
+              mark: this.props.classes.sliderMark,
+            }}
+            orientation="vertical"
+            key={`slider-${this.state.sliderValue}`}
+            defaultValue={this.state.sliderValue}
+            value={this.state.sliderValue}
+            aria-labelledby="vertical-slider"
+            marks={zoomMarks}
+            step={this.sliderStep}
+            valueLabelDisplay="off"
+            onChangeCommitted={(event, newValue) =>this.zoomSliderChange(event, newValue)}
+            
+          />       
+          <Typography id="slider-slider-minus">        
+            <IconButton
+              aria-label="slider-minus"
+              onClick={()=>this.sliderMinus()}
+            >
+              <IndeterminateCheckBoxOutlinedIcon />
+            </IconButton>
+          </Typography>
+        </div>
+
         <CytoscapeComponent
           id="relation_term_graph_container"
 
@@ -1275,7 +1653,7 @@ export default
           cy={(cy) => {
             this.cy = cy;
           }}
-          wheelSensitivity={0.5}
+          wheelSensitivity={0.1}
           elements={CytoscapeComponent.normalizeElements(
               {
                 nodes: nodeList,
@@ -1283,8 +1661,8 @@ export default
               })}
 
           style={{
-            width: '97vw',
-            height: '85vh',
+            width: '100vw',
+            height: '96vh',
             backgroundColor: '#E3E3E3',
           }}
           stylesheet={[
@@ -1512,5 +1890,6 @@ export default
 VisualizationPanelVocabularyTab.propTypes = {
   editingVocabulary: PropTypes.object,
   classes: PropTypes.object,
-  selectFile: PropTypes.func,
+  fileLoadCount: PropTypes.number,
+  fileId: PropTypes.number,
 };
