@@ -5,11 +5,8 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 import Grid from '@material-ui/core/Grid';
-import Box from '@material-ui/core/Box';
-import Input from '@material-ui/core/Input';
 import SearchIcon from '@material-ui/icons/Search';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import IconButton from '@material-ui/core/IconButton';
+import Select from 'react-select'
 
 import DialogSearchTermError from './DialogSearchTermError';
 
@@ -24,7 +21,15 @@ export default class Search extends React.Component {
    */
   constructor(props) {
     super(props);
-    this.state = {open: false, term: '', value: ''};
+    this.init=false,
+    this.errTerm='',
+    this.state = {
+      open: false, 
+      term: '', 
+      values: [],
+      inputValue: '',
+      selectMenuIsOpen: false,
+    };
   }
 
   /**
@@ -44,50 +49,60 @@ export default class Search extends React.Component {
 
   /**
    * Search run
-   * @param  {object} e - information of event
+   * @param  {object} value - selected object
    */
-  search(e) {
+   search( value) {
+    if ( value === undefined){
+      this.setState({values: []}); 
+      return;
+    }
+    if ( !value || !value.value) return;
+    
+    const newValue = value.value;
+    this.setState({values: [value]});
+
+    this.errTerm='';
     const editingVocabulary = this.props.editingVocabulary;
-    if (e.type == 'click' || (e.type == 'keydown' && e.keyCode === 13) ) {
-      const convStr = this.hankana2Zenkana(this.state.value);
-      let result;
-      switch (editingVocabulary.currentVisualTab.id) {
-        case 0:
-        // Temporarily commented out, scheduled to be deleted 
-        //     when organizing the Visualization Panel 
-        // ------------------------------------------------------------
-        //   result = editingVocabulary.termListForRelationWord
-        //       .find((node) => // Case-insensitive comparison
-        //         node.data.term.toUpperCase() === convStr.toUpperCase());
-        //   if (result) {
-        //     editingVocabulary.deselectTermList();
-        //     editingVocabulary.setSelectedTermList(
-        //       result.term,
-        //     );
-        //     editingVocabulary.setCurrentNodeByTerm(
-        //         result.data.term, '', null, true);
-        //   } else {
-        //     this.handleClickOpen(this.state.value);
-        //   }
-        //   break;
-        // case 1:
-          const targetFileData = editingVocabulary.getTargetFileData(
-              editingVocabulary.selectedFile.id);
-          result = targetFileData.find((node) => // Case-insensitive comparison
-            node.term.toUpperCase() === convStr.toUpperCase());
-          if (result) {
-            editingVocabulary.deselectTermList();
-            editingVocabulary.setSelectedTermList(
-              result.term,
-            );
-            editingVocabulary.setCurrentNodeByTerm(
-                result.term, '', null, true);
-          } else {
-            this.handleClickOpen(this.state.value);
+    const convStr = this.hankana2Zenkana(newValue);
+    let result;
+    const targetFileData = editingVocabulary.getTargetFileData( editingVocabulary.selectedFile.id);
+    result = targetFileData.find((node) => // Case-insensitive comparison
+      node.term.toUpperCase() === convStr.toUpperCase());
+    if (result) {
+      editingVocabulary.deselectTermList();
+      editingVocabulary.setSelectedTermList( result.term,);
+      editingVocabulary.setCurrentNodeByTerm( result.term, '', null, true);
+    } else {
+      
+        this.handleClickOpen(newValue);
+    }
+  }
+
+  onKeyDown(e, newValue) {    
+    if(e.type == 'keydown'){
+      switch( e.keyCode){
+        case 13:  // enter
+          if (this.errTerm && this.errTerm.length > 0){
+            this.search( {value: this.errTerm});
           }
+          break;
+        case 8:   // Backspace
+        case 46:  // delete
+          this.setState({values: [] });
           break;
       }
     }
+  }  
+
+  noOptionsMessage(obj){
+    if(obj && obj.inputValue){
+      this.errTerm=obj.inputValue;
+      return '「'+obj.inputValue+'」は存在しません';
+    }    
+  }
+
+  onInputChange(newValue, actionMeta) {
+    this.errTerm=newValue;
   }
 
   /**
@@ -128,53 +143,74 @@ export default class Search extends React.Component {
   };
 
   /**
-   * Search icon click event
-   * @param  {object} e - information of event
-   */
-  handleMouseDown(e) {
-    e.preventDefault();
-  };
-
-  /**
-   * Search term input event
-   * @param  {object} e - information of event
-   */
-  handleChange(e) {
-    this.setState({value: e.target.value});
-  };
-
-  /**
    * render
    * @return {element}
    */
   render() {
+    // const targetFileData = this.props.editingVocabulary.getTargetFileData(this.props.editingVocabulary.selectedFile.id);
+    const initValue = this.state.values || [];
+    // const selectData = targetFileData.map((d) => ({
+    const selectData = this.props.editingVocabulary.sortedNodeList.map((d) => ({
+      
+      value: d.term,
+      label: d.term
+    }));
+
+    const customStyles = {
+      control: (provided) => ({
+        ...provided,
+        
+        width: '300px',
+        height: '31px',
+        minHeight: '31px',
+        paddingLeft: '30px',
+        border: '2px solid #444444',
+        borderRadius: 0,
+      }),
+      valueContainer: (base) => ({
+        ...base,
+        marginTop: '-5px !important',
+      }),
+      indicatorsContainer: (base) => ({
+        ...base,
+        marginTop: '-5px !important',
+      }),
+      multiValueRemove: (base) => ({
+        display:'none'
+      }),
+      multiValue: (base) => ({
+        // ...base,
+        // none css
+      }),
+    }
+
     return (
       <div className={this.props.classes.searchRoot}>
-        <Grid container spacing={2} border={1}>
-          <Grid item xs={12}>
-            <Box className={this.props.classes.search}>
-              <Input
-                placeholder="検索"
-                disableUnderline
-                classes={{
-                  root: this.props.classes.inputRoot,
-                  input: this.props.classes.inputInput,
-                }}
-                onKeyDown={(e) => this.search(e)}
-                onChange={(e) => this.handleChange(e)}
-                endAdornment={
-                  <InputAdornment >
-                    <IconButton
-                      className={this.props.classes.searchIcon}
-                      onClick={(e) => this.search(e)}
-                      onMouseDown={(e) => this.handleMouseDown(e)}
-                    >
-                      <SearchIcon/>
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            </Box>
+        <Grid container>
+          <Grid item xs={1}>
+            <SearchIcon 
+              id="select-searchIcon"
+              className={this.props.classes.selectIcon}
+            />
+          </Grid>
+          <Grid item xs={11}>
+            <Select
+              isClearable={true}
+              placeholder="登録済み用語検索"
+              styles={customStyles}
+              options={selectData}
+              isMulti
+              value={initValue}
+              maxMenuHeight={600}
+              
+              height= '20px'
+              
+              noOptionsMessage={(obj) =>this.noOptionsMessage(obj)}
+              onChange={(newValue) =>{ this.search(newValue.slice(-1)[0]); }}
+              isOptionSelected={(e) =>{ this.errTerm=''; }}
+              onKeyDown={(e,newValue) =>{ this.onKeyDown(e,newValue); }}
+              onInputChange={(newValue, actionMeta) =>{ this.onInputChange(newValue, actionMeta) }}
+            />
           </Grid>
         </Grid>
         <DialogSearchTermError
