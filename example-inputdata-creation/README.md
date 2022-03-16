@@ -4,12 +4,12 @@ Example of generating editing vocabulary, reference vocabulary and corpus.
 
 
 ## How to generate
-### Case editing vocabulary and corpus
+### In the case of editing vocabulary and corpus
 1. Put domain_words.csv and domain_text.txt in mountdir/data/. (The examples of these files are shown near the bottom of this README.)
     - domain_words.csv
       - Column "用語名" is required and columns "代表語" through "用語の説明" are optional. It may have columns after column "用語の説明".
-      - Case generating an editing vocabulary from zero, it only needs to have column "用語名".
-      - Case expanding the editing vocabulary to a format to be read by CVD based on the existing editing vocabulary, the existing editing vocabulary may be used as it is.
+      - In the case of generating an editing vocabulary from zero, it only needs to have column "用語名".
+      - In the case of expanding the editing vocabulary to a format to be read by CVD based on the existing editing vocabulary, the existing editing vocabulary may be used as it is.
       - If it does not have column "代表語のURI", change setting of URI of mountdir/src/config.json to the URI of the controlled vocabulary. Default settings of URI is "http\://sampleVocab/", and if left at the default, the representative URIs for each term is "http\://sampleVocab/1", "http\://sampleVocab/2", and so on.
         ```
         {
@@ -20,7 +20,7 @@ Example of generating editing vocabulary, reference vocabulary and corpus.
             },
           ...
         ```
-      - Character code must be BOM-ed UTF-8.
+      - The character code must be BOM-ed UTF-8.
     - domain_text.csv
       - It is text data related to a term to be controlled, and symbols may be included.
 2. ```$ cd example-inputdata-creation```
@@ -30,7 +30,7 @@ Example of generating editing vocabulary, reference vocabulary and corpus.
    * Hensyugoi.csv (editing vocabulary)
    * wiki_wakati_preprocessed.txt (corpus)
 
-### Case reference vocabulary
+### In the case of reference vocabulary
 6. Put domain_words.csv and reference.csv(or reference.ttl) in mountdir/data/. (The example of reference.ttl is shown near the bottom of this README. The format of reference.csv is same as domain_words.csv)  
    Reference.csv and reference.ttl are optional. If you use reference.csv or reference.ttl, set "reference.csv" or "reference.ttl" to "Algorithm" of "ExternalVocabulary" of mountdir/src/config.json. Default settings is "wordnet".
     ```
@@ -46,13 +46,13 @@ Example of generating editing vocabulary, reference vocabulary and corpus.
     ```
     - domain_words.csv
       - Column "用語名" is required and columns "代表語" through "用語の説明" are optional. It may have columns after column "用語の説明".
-      - Case generating an reference vocabulary, it only needs to have column "用語名".
-      - Character code must be BOM-ed UTF-8.
+      - In the case of generating an reference vocabulary, it only needs to have column "用語名".
+      - The character code must be BOM-ed UTF-8.
     - reference.csv
       - It is optional.
       - If there is a controlled vocabulary (.csv) that you want to refer to, put it in the name of "reference.csv".
       - Columns "用語名" through "用語の説明" are required.
-      - Character code must be BOM-ed UTF-8.
+      - The character code must be BOM-ed UTF-8.
     - reference.ttl
       - It is optional.
       - If there is a controlled vocabulary (.ttl) that you want to refer to, put it in the name of "reference.ttl".
