@@ -1,10 +1,10 @@
 """
-Put the file you want to convert in the same folder as old_to_new.py.
+Put the file you want to convert in the same folder as old2new.py.
 
 command: 
-python old_to_new.py [file name before conversion] [file name after conversion] [namespace]
+python old2new.py [input old format csv] [output new format csv] [URI prefix]
 
-ex) python old_to_new.py sample_before.csv sample_after.csv http://myVocab/
+ex) python old2new.py in_old.csv out_new.csv http://myVocab/
 
 """
 
@@ -18,7 +18,7 @@ import numpy as np
 ##### Import command line arguments #####
 args = sys.argv
 old_format_file_name = args[1]
-new_format_file_name = args[2]
+out_file_name = args[2]
 namespace = args[3]
 
 
@@ -33,9 +33,6 @@ old_format_file.insert(6, '用語の説明', np.nan)
 old_format_file.insert(7, '作成日', np.nan)
 old_format_file.insert(8, '最終更新日', np.nan)
 
-
-##### Delete column #####
-old_format_file.drop(columns='品詞', inplace=True)
 
 
 ##### Change column name #####
@@ -75,5 +72,5 @@ new_format_file.loc[:, "上位語のURI"] = col_broader_uri
 
 
 ##### Export csv file #####
-new_format_file.to_csv(new_format_file_name, encoding='utf-8-sig', index=False)
+new_format_file.to_csv(out_file_name, encoding='utf-8-sig', index=False)
 

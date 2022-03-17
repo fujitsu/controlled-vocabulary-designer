@@ -1,10 +1,10 @@
 """
-Put the file you want to convert in the same folder as new_to_old.py.
+Put the file you want to convert in the same folder as new2old.py.
 
 command: 
-python new_to_old.py [file name before conversion] [file name after conversion]
+python new2old.py [input new format csv] [output old format csv]
 
-ex) python new_to_old.py sample_after.csv sample_before.csv
+ex) python new2old.py in_new.csv out_old.csv
 
 """
 
@@ -18,8 +18,10 @@ import numpy as np
 ##### Import command line arguments #####
 args = sys.argv
 new_format_file_name = args[1]
-old_format_file_name = args[2]
+out_file_name = args[2]
 
+#new_format_file_name ="newdatasample01.csv"
+#out_file_name = "outold1.csv"
 
 ##### Import csv file #####
 new_format_file = pd.read_csv(new_format_file_name)
@@ -27,6 +29,9 @@ new_format_file = pd.read_csv(new_format_file_name)
 
 ##### Add column #####
 new_format_file.insert(11, '品詞', np.nan)
+
+##### Delete non japanese rows #####
+new_format_file = pd.DataFrame(new_format_file[new_format_file['言語'] != "en"])
 
 
 ##### Delete column #####
@@ -38,10 +43,12 @@ old_format_file = new_format_file.rename(columns={'上位語のURI': '上位語'
 
 
 ##### Change value of broader term column #####
-# Make mapping dictionary
+# Make mapping dictionary from uri to word
+
 dic_uri_preflabel = {}
-for idx, term in enumerate(old_format_file['代表語のURI']):
-    dic_uri_preflabel[term] = old_format_file['代表語'][idx]
+for index, row in old_format_file.iterrows():
+    dic_uri_preflabel[row['代表語のURI']] = row['代表語']
+
 
 # Replace URI with label
 col_broader = []
@@ -55,5 +62,5 @@ old_format_file.loc[:, "上位語"] = col_broader
 
 
 ##### Export csv file #####
-old_format_file.to_csv(old_format_file_name, encoding='utf-8-sig', index=False)
+old_format_file.to_csv(out_file_name, encoding='utf-8-sig', index=False)
 
