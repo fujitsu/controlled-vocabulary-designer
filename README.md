@@ -40,7 +40,26 @@ http://(hostname):10081/
   * editing vocabulary : .xlsx, .csv format
   * cntrolled vocabulary : .n3, .nquads, .nt, .trix, .turtle, .xml, .jsonld format
 
-## Example of editing vocabulary
+
+## **Tentative Teatment.** File format conversion
+
+While the input/output file format of this tool is csv, the schema was changed in FY2021.
+So you need to convert the file from old(FY2020) to new(FY2021).
+Limitation: All words are treated as Japanese. 
+
+### How to convert from an newer file format to a older file format
+1. Put the newer file you want to convert in the same directory as new2old.py.
+2. ```$ python new2old.py [input new format csv] [output old format csv]```
+ex) python new2old.py in_new.csv out_old.csv
+The words with "en" in "言語" column are deleted in the conversion process.
+
+### How to convert from an older file format to a newer file format
+1. Put the older file you want to convert in the same directory as old_to_new.py.
+2.```python old2new.py [input old format csv] [output new format csv] [URI prefix]```
+ex) python old2new.py in_old.csv out_new.csv http://myVocab/
+All words have "ja" value in "言語" column after the conversion.
+
+## Example of editing vocabulary (FY2021)
 
 |用語名|代表語|代表語のURI|上位語|同義語候補|上位語候補|品詞|x座標値|y座標値|色1|色2|
 |----|----|----|----|----|----|----|----|----|----|----|
