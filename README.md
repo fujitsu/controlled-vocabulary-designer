@@ -40,6 +40,21 @@ http://(hostname):10081/
   * editing vocabulary : .xlsx, .csv format
   * cntrolled vocabulary : .n3, .nquads, .nt, .trix, .turtle, .xml, .jsonld format
 
+
+## **Tentative Teatment.** File format conversion
+
+While the input/output file format of this tool is csv, the schema was changed in FY2021.
+So you need to convert the file from old(FY2020) to new(FY2021).
+
+### How to convert from an older file format to a newer file format
+1. Put the older file you want to convert in the same directory as old_to_new.py.
+2. ```$ python old_to_new.py [file name before conversion] [file name after conversion] [namespace]```
+
+### How to convert from an newer file format to a older file format
+1. Put the newer file you want to convert in the same directory as new_to_old.py.
+2. ```$ python new_to_old.py [file name before conversion] [file name after conversion]```
+
+
 ## Example of editing vocabulary
 
 |用語名|代表語|代表語のURI|上位語|同義語候補|上位語候補|品詞|x座標値|y座標値|色1|色2|
