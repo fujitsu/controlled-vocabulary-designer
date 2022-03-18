@@ -444,7 +444,7 @@ class EditingVocabulary {
    * @return {string} - source information
    */
   @action getReferenceFromData(term, type) {
-    let str = '( ';
+    let str = '';
 
     if ((0 == this.selectedFile.id) && (this.currentNode.id)) {
       switch (type) {
@@ -512,7 +512,7 @@ class EditingVocabulary {
       }
     }
 
-    str += ')';
+    str += '';
     return str;
   }
 
