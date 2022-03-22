@@ -37,7 +37,7 @@ import IndeterminateCheckBoxOutlinedIcon from "@material-ui/icons/IndeterminateC
 
 import {observer} from 'mobx-react';
 
-import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
+// import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
 import ColorChartCheckBoxes from './ColorChartCheckBoxes';
 import EditPanelVocabularyTab from './EditPanelVocabularyTab';
 import EditPanelVocabularyNewTab from './EditPanelVocabularyNewTab';
@@ -1233,10 +1233,10 @@ export default
    * Fixed term color reflection
    * @param  {String} color - string of changed color
    */
-   seletConfirmColor(color) {
-    console.log('[seletConfirmColor] change to ', color);
-    this.props.editingVocabulary.seletConfirmColor(color);
-  }
+  //  seletConfirmColor(color) {
+  //   console.log('[seletConfirmColor] change to ', color);
+  //   this.props.editingVocabulary.seletConfirmColor(color);
+  // }
 
   /**
    * Confirm switch
@@ -1411,7 +1411,7 @@ export default
                   close={()=>this.handleBorderColorPopClose()}
                 />
               </Popover>
-              <ButtonGroup>           
+              {/* <ButtonGroup>            */}
                 <Button
                   className={this.props.classes.buttonsGrp}
                   ml={3}
@@ -1424,7 +1424,7 @@ export default
                   {confirmButtonText}
                 
                 </Button>       
-                <Button
+                {/* <Button
                   className={this.props.classes.buttonsGrp}
                   ml={3}
                   variant="contained"
@@ -1462,7 +1462,7 @@ export default
                   }
                   close={()=>this.handleConfirmColorPopoverClose()}
                 />
-              </Popover>
+              </Popover> */}
             </Box>
           </Grid>
           <Grid item>

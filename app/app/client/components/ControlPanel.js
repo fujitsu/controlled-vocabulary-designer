@@ -13,11 +13,14 @@ import MenuItem from '@material-ui/core/MenuItem';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import Popover from "@material-ui/core/Popover";
 
 import DialogFileSelecter from './DialogFileSelecter';
 import DialogFileDownload from './DialogFileDownload';
 import DialogHistory from './DialogHistory';
 import editingHistoryStore from '../stores/EditingHistory';
+
+import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
 
 /**
  * Control panel components
@@ -33,6 +36,7 @@ export default class ControlPanel extends React.Component {
     this.state = {
       anchorEl: null,
       anchorEl2: null,
+      anchorElC: false,           // Confirm Color Setting popover togle
       close: false,
       okCancel: false,
       uploadOpen: false,
@@ -154,10 +158,53 @@ export default class ControlPanel extends React.Component {
   };
 
   /**
+   * Confirm Color popover open
+   */
+   handleConfirmColorPopoverOpen(e){
+    // e.stopPropagation();
+    // e.preventDefault();
+    this.setState({anchorElC: this.state.anchorElC ? null : e.currentTarget});
+  }
+  /**
+   * Confirm Color popover Close
+   */
+   handleConfirmColorPopoverClose(e){
+    this.setState({anchorElC: null});
+  }
+
+  /**
+   * Fixed term color reflection
+   * @param  {String} color - string of changed color
+   */
+   seletConfirmColor(color) {
+    console.log('[seletConfirmColor] change to ', color);
+    this.props.editingVocabulary.seletConfirmColor(color);
+  }
+
+  /**
    * render
    * @return {element}
    */
   render() {
+    const editingVocabulary = this.props.editingVocabulary;
+    // for Confirm Button
+    let fileId = editingVocabulary.selectedFile.id;
+    // Change border color disabled
+    let disabledColor = true;
+    if ( fileId == 0 && editingVocabulary.currentNode.id) {
+      // Allow each component to operate during editing vocabulary selection and term selection
+      disabledColor = false;
+    }
+
+    // Firm button disabled condition
+    // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
+    const isCurrentNodeChanged = editingVocabulary.isCurrentNodeChanged;
+    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
+    
+    const anchorElC = this.state.anchorElC;
+    const openC = Boolean(anchorElC);
+    const idC = openC ? "popover-c" : undefined;
+
     return (
       <div>
         <Box>
@@ -239,6 +286,43 @@ export default class ControlPanel extends React.Component {
             className={this.props.classes.buttonsTop}> 
             <RedoIcon className={this.props.classes.conpaneIcon}/>やり直し
           </Button>
+
+  
+          <Button
+            className={this.props.classes.buttonsTop}
+            size="large" 
+            onClick={(e)=>this.handleConfirmColorPopoverOpen(e)}
+          >
+            確定色変更
+          </Button>
+          <Popover 
+            id={idC}
+            open={openC}
+            anchorEl={anchorElC}
+            onClose={()=>this.handleConfirmColorPopoverClose()}
+            style={{
+              backgroundColor: "#66666680",
+            }}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'center',
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'center',
+            }}
+          >
+            <ColorChartCheckBoxesOfConfirm
+              classes={this.props.classes}
+              currentId={this.props.editingVocabulary.currentNode.id}
+              color={this.props.editingVocabulary.confirmColor}
+              selectColor={(color) =>
+                this.seletConfirmColor(color)
+              }
+              close={()=>this.handleConfirmColorPopoverClose()}
+            />
+          </Popover>
+
           <Button 
             size="large" 
             className={this.props.classes.buttonsTop}
