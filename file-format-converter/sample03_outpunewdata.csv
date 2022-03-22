@@ -1,0 +1,5 @@
+﻿用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明,作成日,最終更新日,同義語候補,上位語候補,x座標値,y座標値,色1,色2,確定済み用語
+店舗,店舗,ja,http://myVocabulary/2,,,,,,"drug store, store, the corner shop, コンビニエンスストア, convenience store, セーヌ, 王, 感, 研究所, 北, 革命, 評価, 流行, ヴェルサイユ, 家","営業所, 小売店, 小売り店, 店舗, 店鋪, デポー, リポジトリ, 保管所, 倉, 受託所, 蔵, 貯蔵室, 貯蔵所, 預かり所",27.6396656,86.91725731,black,red,1
+店,店舗,ja,http://myVocabulary/2,,,,,,"the corner shop, drug store, shop, store, コンビニエンスストア, the corner shop, ガ, 経, 初期, キリシタン, 回, 順, 生, 漢, 言い回し","小売店, 小売り店, 店舗, 店鋪",88.97895813,-54.24488544,black,red,1
+コンビニエンスストア,コンビニエンスストア,ja,http://myVocabulary/1,http://myVocabulary/2,,,,,"コンビニ, the corner shop, drug store, store, convenience store, コンビニ, 学者, 順, ア, 県, 感, the corner shop, ウマ, われ, ニ","ストア, ショップ, 商店, 売店, 店, 店屋, 店舗, 店鋪, 舗, 販売店",32.06689358,28.875494,black,black,0
+コンビニ,コンビニエンスストア,ja,http://myVocabulary/1,http://myVocabulary/2,,,,,"コンビニエンスストア, the corner shop, drug store, store, convenience store, コンビニエンスストア, ニ, 感, 北部, 学者, 系, 北, 規範, 王, 期","ストア, ショップ, 商店, 売店, 店, 店屋, 店舗, 店鋪, 舗, 販売店",30.39971352,29.86063004,black,black,0
