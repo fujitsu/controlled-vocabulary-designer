@@ -1,11 +1,6 @@
 ﻿用語名,代表語,代表語のURI,上位語,同義語候補,上位語候補,x座標値,y座標値,色1,色2,確定済み用語
-shop,store,http://myVocabulary/2,,"the corner shop, convenience store, drug store, store, コンビニエンスストア, the corner shop, h, 図, p, 漫画, 民族, 四, 語源, 辞書, 言",,14.33353662,-140.7403469,black,red,1
 店舗,店舗,http://myVocabulary/2,,"drug store, store, the corner shop, コンビニエンスストア, convenience store, セーヌ, 王, 感, 研究所, 北, 革命, 評価, 流行, ヴェルサイユ, 家","営業所, 小売店, 小売り店, 店舗, 店鋪, デポー, リポジトリ, 保管所, 倉, 受託所, 蔵, 貯蔵室, 貯蔵所, 預かり所",27.6396656,86.91725731,black,red,1
-convenience store,convenience store,http://myVocabulary/1,店舗,"store, drug store, the corner shop, shop, コンビニエンスストア, store, drug store, the corner shop, 県, 辞書, 抄, 各国, 諸島, shop, 世",,38.45558882,-54.4187212,red,black,0
-the corner shop,convenience store,http://myVocabulary/1,店舗,"drug store, shop, convenience store, store, コンビニエンスストア, drug store, shop, convenience store, store, 一段, 県, 辞書, 言, 書, 漫画",,38.80554199,-64.5039463,red,black,0
-drug store,convenience store,http://myVocabulary/1,店舗,"store, the corner shop, convenience store, shop, コンビニエンスストア, store, the corner shop, convenience store, s, 順, 世, 県, 脳, 抄, 人文",,56.20409489,-10.61900377,red,black,0
 店,店舗,http://myVocabulary/2,,"the corner shop, drug store, shop, store, コンビニエンスストア, the corner shop, ガ, 経, 初期, キリシタン, 回, 順, 生, 漢, 言い回し","小売店, 小売り店, 店舗, 店鋪",88.97895813,-54.24488544,black,red,1
-store,store,http://myVocabulary/2,,"drug store, convenience store, the corner shop, shop, コンビニエンスストア, drug store, convenience store, the corner shop, s, 人文, 順, 脳, 県, 北海道, 及び",,57.00627804,-8.090900779,black,red,1
 コンビニエンスストア,コンビニエンスストア,http://myVocabulary/1,店舗,"コンビニ, the corner shop, drug store, store, convenience store, コンビニ, 学者, 順, ア, 県, 感, the corner shop, ウマ, われ, ニ","ストア, ショップ, 商店, 売店, 店, 店屋, 店舗, 店鋪, 舗, 販売店",32.06689358,28.875494,black,black,0
 コンビニ,コンビニエンスストア,http://myVocabulary/1,店舗,"コンビニエンスストア, the corner shop, drug store, store, convenience store, コンビニエンスストア, ニ, 感, 北部, 学者, 系, 北, 規範, 王, 期","ストア, ショップ, 商店, 売店, 店, 店屋, 店舗, 店鋪, 舗, 販売店",30.39971352,29.86063004,black,black,0
 薬局,薬局,,,,,4.4,3.3,black,black,0
