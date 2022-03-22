@@ -51,7 +51,7 @@ if(namespace[-1] != "/"):
 dic_preflabel_uri = {}
 
 for index, row in new_format_file.iterrows():
-    if row['代表語のURI'] is np.nan:
+    if pd.isna(row['代表語のURI']):
         dic_preflabel_uri[row['代表語']] = namespace + str(random.randint(100000,1000000))
     else:
         dic_preflabel_uri[row['代表語']] = row['代表語のURI']
