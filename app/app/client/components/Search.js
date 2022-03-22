@@ -147,16 +147,37 @@ export default class Search extends React.Component {
    * @return {element}
    */
   render() {
-    // const targetFileData = this.props.editingVocabulary.getTargetFileData(this.props.editingVocabulary.selectedFile.id);
     const initValue = this.state.values || [];
-    // const selectData = targetFileData.map((d) => ({
+
+    const bgColors = {
+      'black':'none',
+      'red':'pink',
+      'orange':'#FFCC99',
+      'blue':'#99FFFF',
+      'green':'#CCFFCC',
+      'purple':'#FF66FF',
+    }
     const selectData = this.props.editingVocabulary.sortedNodeList.map((d) => ({
-      
       value: d.term,
-      label: d.term
+      label: d.term,
+      fontweight: d.term==this.props.editingVocabulary.currentNode.term?'bold':'default',
+      color: d.confirm?'#BBBBBB':'inherit',
+      bgcolor: bgColors[d.color1],
     }));
 
     const customStyles = {
+      menu: (provided) => ({
+        ...provided,
+        padding: '1px',
+      }),
+      option: (provided) => ({
+        ...provided,
+        padding: '5px 10px',
+      }),
+      multiValueLabel: (provided) => ({
+        ...provided,
+        // backgroundColor:'yellow',
+      }),
       control: (provided) => ({
         ...provided,
         
@@ -183,6 +204,11 @@ export default class Search extends React.Component {
         // none css
       }),
     }
+    const formatOptionLabel = ({ value, label, fontweight, color, bgcolor }) => (
+      <div style={{ borderRadius:'10px', fontWeight: fontweight, color: color, backgroundColor: bgcolor, paddingLeft: '15px' }}>
+          {label} 
+      </div>
+    );
 
     return (
       <div className={this.props.classes.searchRoot}>
@@ -199,6 +225,7 @@ export default class Search extends React.Component {
               placeholder="登録済み用語検索"
               styles={customStyles}
               options={selectData}
+              formatOptionLabel={formatOptionLabel}
               isMulti
               value={initValue}
               maxMenuHeight={600}
