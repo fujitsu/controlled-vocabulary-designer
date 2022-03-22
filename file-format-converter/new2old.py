@@ -20,8 +20,6 @@ args = sys.argv
 new_format_file_name = args[1]
 out_file_name = args[2]
 
-#new_format_file_name ="newdatasample01.csv"
-#out_file_name = "outold1.csv"
 
 ##### Import csv file #####
 new_format_file = pd.read_csv(new_format_file_name)

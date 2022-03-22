@@ -13,6 +13,7 @@ ex) python old2new.py in_old.csv out_new.csv http://myVocab/
 import sys
 import pandas as pd
 import numpy as np
+import random
 
 
 ##### Import command line arguments #####
@@ -44,12 +45,16 @@ new_format_file = old_format_file.rename(columns={'上位語': '上位語のURI'
 if(namespace[-1] != "/"):
     namespace = namespace + "/"
 
-# Assign a unique URI because each URI is NaN.
+# Assign a unique URI because each URI may be NaN.
 # Make sure that synonyms have the same URI.
 # First, assign a unique URI for each preferred label.
 dic_preflabel_uri = {}
-for idx, term in enumerate(new_format_file['代表語']):
-    dic_preflabel_uri[term] = namespace + str(idx + 1)
+
+for index, row in new_format_file.iterrows():
+    if row['代表語のURI'] is np.nan:
+        dic_preflabel_uri[row['代表語']] = namespace + str(random.randint(100000,1000000))
+    else:
+        dic_preflabel_uri[row['代表語']] = row['代表語のURI']
 
 # Assign unique URIs for each term, taking synonyms into account
 col_uri = []
@@ -57,7 +62,6 @@ for term in new_format_file['代表語']:
     col_uri.append(dic_preflabel_uri[term])
 
 new_format_file.loc[:, "代表語のURI"] = col_uri
-
 
 ##### Change value of broader URI column #####
 # Replace label with URI
