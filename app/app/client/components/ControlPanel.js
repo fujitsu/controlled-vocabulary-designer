@@ -10,6 +10,10 @@ import UndoIcon from '@material-ui/icons/Undo';
 import RedoIcon from '@material-ui/icons/Redo';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import Popover from "@material-ui/core/Popover";
+import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
@@ -17,6 +21,7 @@ import DialogFileSelecter from './DialogFileSelecter';
 import DialogFileDownload from './DialogFileDownload';
 import DialogHistory from './DialogHistory';
 import editingHistoryStore from '../stores/EditingHistory';
+import EditPanelMetaTab from './EditPanelMetaTab';
 
 /**
  * Control panel components
@@ -32,6 +37,7 @@ export default class ControlPanel extends React.Component {
     this.state = {
       anchorEl: null,
       anchorEl2: null,
+      anchorElpop: false,
       close: false,
       okCancel: false,
       uploadOpen: false,
@@ -50,6 +56,7 @@ export default class ControlPanel extends React.Component {
     this.setState({
       anchorEl: null,
       anchorEl2: null,
+      anchorElpop: false, 
       close: false,
       okCancel: false,
       uploadOpen: false,
@@ -61,10 +68,25 @@ export default class ControlPanel extends React.Component {
   };
 
   /**
+   * Basic vocabulary information dialog (Meta edit dialog) open event
+   * @param  {object} event - information of key event
+   */
+  handleEditPopoverOpen(e){
+    this.setState({anchorElpop: this.state.anchorElpop ? null : e.currentTarget});
+  }
+
+  /**
+   * Basic vocabulary information dialog (Meta edit dialog) close event
+   */
+  handleEditPopoverClose(){
+    this.setState({anchorElpop: null});
+  }
+
+  /**
    * Key event registration
    */
   componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    // window.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   /**
@@ -157,8 +179,13 @@ export default class ControlPanel extends React.Component {
    * @return {element}
    */
   render() {
+    const anchorEl = this.state.anchorElpop;
+    const open = Boolean(anchorEl);
+    const id = open ? "popover" : undefined;
+    const leftPostion = (window.innerWidth - 480) / 2;
+
     return (
-      <div>
+      <div onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
         <Box>
           <Button
             aria-controls="customized-menu"
@@ -221,6 +248,11 @@ export default class ControlPanel extends React.Component {
               編集用語彙
             </MenuItem>
             <MenuItem onClick={(fileType) =>
+              this.downloadDialogOpen('editing_vocabulary_meta')}
+            >
+              編集用語彙_meta
+            </MenuItem>
+            <MenuItem onClick={(fileType) =>
               this.downloadDialogOpen('controlled_vocabulary')}
             >
               統制語彙
@@ -238,6 +270,12 @@ export default class ControlPanel extends React.Component {
             className={this.props.classes.buttonsTop}> 
             <RedoIcon/>やり直し
           </Button>
+          <Button 
+            onClick={(e)=>this.handleEditPopoverOpen(e)}
+            size="large" 
+            className={this.props.classes.buttonsTop}> 
+            <ExpandMoreIcon />語彙基本情報
+          </Button>
           <DialogFileSelecter
             open={this.state.uploadOpen}
             close={this.state.close}
@@ -246,6 +284,7 @@ export default class ControlPanel extends React.Component {
             onReadFileChange = {() => this.props.onReadFileChange()}
             classes={this.props.classes}
             editingVocabulary={this.props.editingVocabulary}
+            editingVocabularyMeta={this.props.editingVocabularyMeta}
           />
           <DialogFileDownload
             open={this.state.downloadOpen}
@@ -260,6 +299,46 @@ export default class ControlPanel extends React.Component {
             classes={this.props.classes}
             historyMessage={this.state.historyMessage}
           />
+
+          
+          <Popover
+            id={id}
+            open={open}
+            anchorEl={anchorEl}
+            anchorReference="anchorPosition"
+            anchorPosition={{ top: 80, left: leftPostion }}
+            anchorOrigin={{
+              vertical: "center",
+              horizontal: "center"
+            }}
+            
+            style={{
+              backgroundColor: "#66666680",
+            }}
+          >
+
+
+            <Typography className={this.props.classes.popoverTitle}>
+              編集
+              {this.handleEditPopoverClose ? (
+                <IconButton
+                  aria-label="close"
+                  className={this.props.classes.popoverTitleCloseButton}
+                  onClick={() => this.handleEditPopoverClose()}
+                >
+                  <CloseIcon />
+                </IconButton>
+              ) : null}
+            </Typography>
+            <EditPanelMetaTab
+                classes={this.props.classes}
+                editingVocabulary={this.props.editingVocabulary}
+                editingVocabularyMeta={this.props.editingVocabularyMeta}
+                submitDisabled={false}
+                value={false}
+              />
+
+          </Popover>  
         </Box>
       </div>
     );
@@ -269,5 +348,6 @@ export default class ControlPanel extends React.Component {
 ControlPanel.propTypes = {
   classes: PropTypes.object,
   editingVocabulary: PropTypes.object,
+  editingVocabularyMeta: PropTypes.object,
   onReadFileChange : PropTypes.func,
 };

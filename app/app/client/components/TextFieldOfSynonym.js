@@ -93,6 +93,14 @@ export default
    */
   render() {
     const synonym = this.props.editingVocabulary.tmpSynonym.list;
+    let currentSynonym;
+    // synonym on the selected term
+    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+      currentSynonym = this.props.editingVocabulary.currentSynonym.list;
+    } else { // synonym when switching with the  language radio button in the selected term
+      currentSynonym = this.props.editingVocabulary.currentLangDiffSynonym.list; 
+    }
+
     /* eslint-disable no-unused-vars */
     // object for rendering
     const length = this.props.editingVocabulary.tmpSynonym.list.length;
@@ -151,7 +159,7 @@ export default
                       key={index}
                       {...getTagProps({index})}
                       label={option}
-                      synonym={this.props.editingVocabulary.currentSynonym.list}
+                      synonym={currentSynonym}
                     />
                   ));
                 }}

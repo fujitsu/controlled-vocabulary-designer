@@ -49,7 +49,15 @@
 
    render() {
      const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.list;
-     const currentTermDescription = this.props.editingVocabulary.currentNode.term_description;
+     let currentTermDescription;
+     // term description on the selected term
+     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+       currentTermDescription =
+         this.props.editingVocabulary.currentNode.term_description;
+     } else { // term description when switching with the  language radio button in the selected term
+       currentTermDescription =
+         this.props.editingVocabulary.currentLangDiffNode.term_description;
+     }
 
 return (
     <div>

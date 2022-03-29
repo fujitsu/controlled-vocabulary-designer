@@ -16,11 +16,21 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Snackbar from '@material-ui/core/Snackbar';
+import Stepper from "@material-ui/core/Stepper";
+import Step from "@material-ui/core/Step";
+import StepLabel from "@material-ui/core/StepLabel";
+import Typography from "@material-ui/core/Typography";
+import SettingsIcon from "@material-ui/icons/Settings";
+import InsertDriveFileOutlinedIcon from "@material-ui/icons/InsertDriveFileOutlined";
+
 
 import axios from 'axios';
 import $ from 'jquery';
 
 import DialogApiError from './DialogApiError';
+import EditPanelMetaTab from './EditPanelMetaTab';
+import DialogUpdateVocabularyMetaError from './DialogUpdateVocabularyMetaError';
+import DialogApiMetaError from './DialogApiMetaError';
 
 /**
  * File selection dialog
@@ -36,6 +46,8 @@ export default class DialogFileSelecter extends React.Component {
     this.state = {
       uploading: false,
       open: false,
+      reason: '',
+      activeStep: 0,
       files: [
         {
           name: '',
@@ -70,6 +82,24 @@ export default class DialogFileSelecter extends React.Component {
       ],
     };
   }
+
+  /**
+   * NEXT button press event
+   */
+  handleNext(){
+    const step = this.state.activeStep;
+    // this.setState({activeStep: step + 1});
+    // temporary solution
+    setTimeout( ()=>{ this.setState({activeStep: step + 1});}, 1000 )
+  };
+
+  /**
+   * PREV button press event
+   */
+  handleBack(){
+    const step = this.state.activeStep;
+    this.setState({activeStep: step - 1});
+  };
 
   /**
    * Determines if the file being uploaded is already uploaded
@@ -205,6 +235,9 @@ export default class DialogFileSelecter extends React.Component {
           if (undefined != this.state.files[3].file.name) {
             this.props.editingVocabulary.getReferenceVocabularyDataFromDB('3');
           }
+          if (undefined != this.state.files[5].file.name) {
+            this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
+          }
         }).catch((err) => {
           console.log('error callback.');
           this.uploadingEnd();
@@ -275,7 +308,7 @@ export default class DialogFileSelecter extends React.Component {
               errMsg,
           );
         });
-    this.handleClose();
+    this.handleNext();
   }
 
   /**
@@ -298,6 +331,7 @@ export default class DialogFileSelecter extends React.Component {
 
    */
   handleClose() {
+    this.setState({activeStep: 0});
     this.props.onClose();
   };
 
@@ -308,11 +342,7 @@ export default class DialogFileSelecter extends React.Component {
     this.state.files.forEach((file, index) => {
       if (file.name != '') {
         localStorage.setItem('fileName' + index, file.name);
-        localStorage.setItem('sFileName' + index, file.name);
         localStorage.setItem('fileSize' + index, file.size);
-
-        // Send to VisualizationPanel.js 
-        this.props.onReadFileChange();
       }
     });
   }
@@ -398,10 +428,422 @@ export default class DialogFileSelecter extends React.Component {
   }
 
   /**
+   * Error dialog open
+   * @param  {string} ret - error content
+   */
+   errorDialogOpen(ret) {
+    this.setState({open: true, reason: ret});
+  }
+
+  /**
+   * Error dialog close
+   */
+  errorDialogClose() {
+    this.setState({open: false, reason: ''});
+  }
+
+  /**
+   * Update edits
+   */
+  updateVocabulary() {
+    const ret = this.props.editingVocabularyMeta.updateVocabulary();
+    if (ret !== '') {
+      this.errorDialogOpen(ret);
+    }
+    this.handleClose();
+  }
+
+  /**
    * render
    * @return {element}
    */
   render() {
+
+    const stepProps = {};
+    const labelProps = {};
+
+    const fileReadContent = (
+      <>
+        <Box component="div" display="block">
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box component="span" display="inline">
+              編集用語彙
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box textAlign="right">
+                <Box
+                  component="span"
+                  display="inline"
+                  style={{fontSize: '0.75em'}}
+                >
+                  {this.state.files[0].size}
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+
+          <Input
+            value={this.state.files[0].name}
+            type="text"
+            readOnly
+            startAdornment={
+              <InputAdornment position="start">
+                <InsertDriveFileIcon />
+              </InputAdornment>
+            }
+            style={
+              {marginBottom: '25px', marginRight: '15px', width: '300px'}
+            }
+          />
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            disableElevation
+            style={{marginRight: '5px'}}
+            size="small"
+          >
+            <input
+              style={{display: 'none'}}
+              id="editingVocabulary"
+              type="file"
+              onChange={(e) => this.setFileInfo(e, 0)}
+              accept=".xlsx,.csv"
+            />
+            参照
+          </Button>
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            onClick={() => this.delFileInfo(0)}
+            disableElevation
+            size="small"
+          >
+            Clear
+          </Button>
+        </Box>
+
+        <Box component="div" display="block">
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box component="span" display="inline">
+              編集用語彙_meta
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box textAlign="right">
+                <Box
+                  component="span"
+                  display="inline"
+                  style={{fontSize: '0.75em'}}
+                >
+                  {this.state.files[5].size}
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+
+          <Input
+            value={this.state.files[5].name}
+            type="text"
+            readOnly
+            startAdornment={
+              <InputAdornment position="start">
+                <InsertDriveFileIcon />
+              </InputAdornment>
+            }
+            style={
+              {marginBottom: '25px', marginRight: '15px', width: '300px'}
+            }
+          />
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            disableElevation
+            style={{marginRight: '5px'}}
+            size="small"
+          >
+            <input
+              style={{display: 'none'}}
+              id="editingVocabularyMeta"
+              type="file"
+              onChange={(e) => this.setFileInfo(e, 5)}
+              accept=".xlsx,.csv"
+            />
+            参照
+          </Button>
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            onClick={() => this.delFileInfo(5)}
+            disableElevation
+            size="small"
+          >
+            Clear
+          </Button>
+        </Box>
+
+        <Box component="div" display="block">
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box component="span" display="inline">
+              参照用語彙1
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box textAlign="right">
+                <Box
+                  component="span"
+                  display="inline"
+                  style={{fontSize: '0.75em'}}
+                >
+                  {this.state.files[1].size}
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+
+          <Input
+            value={this.state.files[1].name}
+            type="text"
+            readOnly
+            startAdornment={
+              <InputAdornment position="start">
+                <InsertDriveFileIcon />
+              </InputAdornment>
+            }
+            style={
+              {marginBottom: '25px', marginRight: '15px', width: '300px'}
+            }
+          />
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            disableElevation
+            style={{marginRight: '5px'}}
+            size="small"
+          >
+            <input
+              style={{display: 'none'}}
+              id="referenceVocaburary1"
+              type="file"
+              onChange={(e) => this.setFileInfo(e, 1)}
+              accept=".xlsx,.csv"
+            />
+            参照
+          </Button>
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            onClick={() => this.delFileInfo(1)}
+            disableElevation
+            size="small"
+          >
+            Clear
+          </Button>
+        </Box>
+
+        <Box component="div" display="block">
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box component="span" display="inline">
+              参照用語彙2
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box textAlign="right">
+                <Box
+                  component="span"
+                  display="inline"
+                  style={{fontSize: '0.75em'}}
+                >
+                  {this.state.files[2].size}
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+
+          <Input
+            value={this.state.files[2].name}
+            type="text"
+            readOnly
+            startAdornment={
+              <InputAdornment position="start">
+                <InsertDriveFileIcon />
+              </InputAdornment>
+            }
+            style={
+              {marginBottom: '25px', marginRight: '15px', width: '300px'}
+            }
+          />
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            disableElevation
+            style={{marginRight: '5px'}}
+            size="small"
+          >
+            <input
+              style={{display: 'none'}}
+              id="referenceVocaburary2"
+              type="file"
+              onChange={(e) => this.setFileInfo(e, 2)}
+              accept=".xlsx,.csv"
+            />
+          参照
+          </Button>
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            onClick={() => this.delFileInfo(2)}
+            disableElevation
+            size="small"
+          >
+            Clear
+          </Button>
+        </Box>
+
+        <Box component="div" display="block">
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box component="span" display="inline">
+              参照用語彙3
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box textAlign="right">
+                <Box
+                  component="span"
+                  display="inline"
+                  style={{fontSize: '0.75em'}}
+                >
+                  {this.state.files[3].size}
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+
+          <Input
+            value={this.state.files[3].name}
+            type="text"
+            readOnly
+            startAdornment={
+              <InputAdornment position="start">
+                <InsertDriveFileIcon />
+              </InputAdornment>
+            }
+            style={
+              {marginBottom: '25px', marginRight: '15px', width: '300px'}
+            }
+          />
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            disableElevation
+            style={{marginRight: '5px'}}
+            size="small"
+          >
+            <input
+              style={{display: 'none'}}
+              id="referenceVocaburary3"
+              type="file"
+              onChange={(e) => this.setFileInfo(e, 3)}
+              accept=".xlsx,.csv"
+            />
+            参照
+          </Button>
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            onClick={() => this.delFileInfo(3)}
+            disableElevation
+            size="small"
+          >
+            Clear
+          </Button>
+        </Box>
+
+        <Box component="div" display="block">
+
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Box component="span" display="inline">
+              分かち書き済みテキスト
+              </Box>
+            </Grid>
+            <Grid item xs={6}>
+              <Box textAlign="right">
+                <Box
+                  component="span"
+                  display="inline"
+                  style={{fontSize: '0.75em'}}
+                >
+                  {this.state.files[4].size}
+                </Box>
+              </Box>
+            </Grid>
+          </Grid>
+
+          <Input
+            value={this.state.files[4].name}
+            type="text"
+            readOnly
+            startAdornment={
+              <InputAdornment position="start">
+                <InsertDriveFileIcon />
+              </InputAdornment>
+            }
+            style={
+              {marginBottom: '25px', marginRight: '15px', width: '300px'}
+            }
+          />
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            disableElevation
+            style={{marginRight: '5px'}}
+            size="small"
+          >
+            <input
+              style={{display: 'none'}}
+              id="exampleSentences"
+              type="file"
+              onChange={(e) => this.setFileInfo(e, 4)}
+              accept=".txt"
+            />
+          参照
+          </Button>
+          <Button
+            variant="contained"
+            value=""
+            component="label"
+            onClick={() => this.delFileInfo(4)}
+            disableElevation
+            size="small"
+          >
+            Clear
+          </Button>
+        </Box>
+      </>);
+    
+
     return (
       <div>
         <Dialog
@@ -410,14 +852,13 @@ export default class DialogFileSelecter extends React.Component {
           open={this.props.open}
           fullwidth="false"
           onEntered={() => this.initFilesInfo()}
+          classes={{paper:this.props.classes.fileDialogPaper}}
         >
           <DialogTitle
-            style={{
-              position: 'relative',
-              justifyContent: 'flex-end',
-            }}
+          className={this.props.classes.fileDialogTitle}
           >
-            <DialogActions style={{display: this.props.close?'inline':'none'}}>
+
+            <DialogActions style={{display: this.props.close?'inline':'none'}}>              
               <CloseIcon
                 style={
                   {position: 'absolute', right: '30px'}
@@ -426,396 +867,65 @@ export default class DialogFileSelecter extends React.Component {
               />
             </DialogActions>
           </DialogTitle>
-          <DialogContent style={{width: '450px'}}>
+          <DialogContent style={{width: '450px', overflow:'hidden'}}>
 
-            <Box component="div" display="block">
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Box component="span" display="inline">
-                  編集用語彙
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="right">
-                    <Box
-                      component="span"
-                      display="inline"
-                      style={{fontSize: '0.75em'}}
-                    >
-                      {this.state.files[0].size}
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-
-              <Input
-                value={this.state.files[0].name}
-                type="text"
-                readOnly
-                startAdornment={
-                  <InputAdornment position="start">
-                    <InsertDriveFileIcon />
-                  </InputAdornment>
-                }
-                style={
-                  {marginBottom: '25px', marginRight: '15px', width: '300px'}
-                }
-              />
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                disableElevation
-                style={{marginRight: '5px'}}
-                size="small"
-              >
-                <input
-                  style={{display: 'none'}}
-                  id="editingVocabulary"
-                  type="file"
-                  onChange={(e) => this.setFileInfo(e, 0)}
-                  accept=".xlsx,.csv"
-                />
-                参照
-              </Button>
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                onClick={() => this.delFileInfo(0)}
-                disableElevation
-                size="small"
-              >
-                Clear
-              </Button>
-            </Box>
-
-            <Box component="div" display="block">
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Box component="span" display="inline">
-                  編集用語彙_meta
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="right">
-                    <Box
-                      component="span"
-                      display="inline"
-                      style={{fontSize: '0.75em'}}
-                    >
-                      {this.state.files[5].size}
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-
-              <Input
-                value={this.state.files[5].name}
-                type="text"
-                readOnly
-                startAdornment={
-                  <InputAdornment position="start">
-                    <InsertDriveFileIcon />
-                  </InputAdornment>
-                }
-                style={
-                  {marginBottom: '25px', marginRight: '15px', width: '300px'}
-                }
-              />
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                disableElevation
-                style={{marginRight: '5px'}}
-                size="small"
-              >
-                <input
-                  style={{display: 'none'}}
-                  id="editingVocabularyMeta"
-                  type="file"
-                  onChange={(e) => this.setFileInfo(e, 5)}
-                  accept=".xlsx,.csv"
-                />
-                参照
-              </Button>
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                onClick={() => this.delFileInfo(5)}
-                disableElevation
-                size="small"
-              >
-                Clear
-              </Button>
-            </Box>
-
-            <Box component="div" display="block">
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Box component="span" display="inline">
-                  参照用語彙1
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="right">
-                    <Box
-                      component="span"
-                      display="inline"
-                      style={{fontSize: '0.75em'}}
-                    >
-                      {this.state.files[1].size}
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-
-              <Input
-                value={this.state.files[1].name}
-                type="text"
-                readOnly
-                startAdornment={
-                  <InputAdornment position="start">
-                    <InsertDriveFileIcon />
-                  </InputAdornment>
-                }
-                style={
-                  {marginBottom: '25px', marginRight: '15px', width: '300px'}
-                }
-              />
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                disableElevation
-                style={{marginRight: '5px'}}
-                size="small"
-              >
-                <input
-                  style={{display: 'none'}}
-                  id="referenceVocaburary1"
-                  type="file"
-                  onChange={(e) => this.setFileInfo(e, 1)}
-                  accept=".xlsx,.csv"
-                />
-                参照
-              </Button>
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                onClick={() => this.delFileInfo(1)}
-                disableElevation
-                size="small"
-              >
-                Clear
-              </Button>
-            </Box>
-
-            <Box component="div" display="block">
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Box component="span" display="inline">
-                  参照用語彙2
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="right">
-                    <Box
-                      component="span"
-                      display="inline"
-                      style={{fontSize: '0.75em'}}
-                    >
-                      {this.state.files[2].size}
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-
-              <Input
-                value={this.state.files[2].name}
-                type="text"
-                readOnly
-                startAdornment={
-                  <InputAdornment position="start">
-                    <InsertDriveFileIcon />
-                  </InputAdornment>
-                }
-                style={
-                  {marginBottom: '25px', marginRight: '15px', width: '300px'}
-                }
-              />
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                disableElevation
-                style={{marginRight: '5px'}}
-                size="small"
-              >
-                <input
-                  style={{display: 'none'}}
-                  id="referenceVocaburary2"
-                  type="file"
-                  onChange={(e) => this.setFileInfo(e, 2)}
-                  accept=".xlsx,.csv"
-                />
-              参照
-              </Button>
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                onClick={() => this.delFileInfo(2)}
-                disableElevation
-                size="small"
-              >
-                Clear
-              </Button>
-            </Box>
-
-            <Box component="div" display="block">
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Box component="span" display="inline">
-                  参照用語彙3
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="right">
-                    <Box
-                      component="span"
-                      display="inline"
-                      style={{fontSize: '0.75em'}}
-                    >
-                      {this.state.files[3].size}
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-
-              <Input
-                value={this.state.files[3].name}
-                type="text"
-                readOnly
-                startAdornment={
-                  <InputAdornment position="start">
-                    <InsertDriveFileIcon />
-                  </InputAdornment>
-                }
-                style={
-                  {marginBottom: '25px', marginRight: '15px', width: '300px'}
-                }
-              />
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                disableElevation
-                style={{marginRight: '5px'}}
-                size="small"
-              >
-                <input
-                  style={{display: 'none'}}
-                  id="referenceVocaburary3"
-                  type="file"
-                  onChange={(e) => this.setFileInfo(e, 3)}
-                  accept=".xlsx,.csv"
-                />
-                参照
-              </Button>
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                onClick={() => this.delFileInfo(3)}
-                disableElevation
-                size="small"
-              >
-                Clear
-              </Button>
-            </Box>
-
-            <Box component="div" display="block">
-
-              <Grid container spacing={2}>
-                <Grid item xs={6}>
-                  <Box component="span" display="inline">
-                  分かち書き済みテキスト
-                  </Box>
-                </Grid>
-                <Grid item xs={6}>
-                  <Box textAlign="right">
-                    <Box
-                      component="span"
-                      display="inline"
-                      style={{fontSize: '0.75em'}}
-                    >
-                      {this.state.files[4].size}
-                    </Box>
-                  </Box>
-                </Grid>
-              </Grid>
-
-              <Input
-                value={this.state.files[4].name}
-                type="text"
-                readOnly
-                startAdornment={
-                  <InputAdornment position="start">
-                    <InsertDriveFileIcon />
-                  </InputAdornment>
-                }
-                style={
-                  {marginBottom: '25px', marginRight: '15px', width: '300px'}
-                }
-              />
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                disableElevation
-                style={{marginRight: '5px'}}
-                size="small"
-              >
-                <input
-                  style={{display: 'none'}}
-                  id="exampleSentences"
-                  type="file"
-                  onChange={(e) => this.setFileInfo(e, 4)}
-                  accept=".txt"
-                />
-              参照
-              </Button>
-              <Button
-                variant="contained"
-                value=""
-                component="label"
-                onClick={() => this.delFileInfo(4)}
-                disableElevation
-                size="small"
-              >
-                Clear
-              </Button>
-            </Box>
-
+            {this.state.activeStep === 0 ? fileReadContent
+            : <EditPanelMetaTab 
+                classes={this.props.classes}
+                editingVocabulary={this.props.editingVocabulary}
+                editingVocabularyMeta={this.props.editingVocabularyMeta}
+                submitDisabled={true}
+                value={true}
+              />}
           </DialogContent>
 
-          <DialogActions style={{display: this.props.okCancel?'':'none'}}>
-            <Button onClick={(e) => this.fileUpload(e)} color="primary">
-            NEXT
+
+          <Stepper activeStep={this.state.activeStep} classes={{root:this.props.classes.fileDialogStepperRoot}}>
+            <Step key="file-read" {...stepProps}>
+              <StepLabel {...labelProps}>
+                <InsertDriveFileOutlinedIcon />
+              </StepLabel>
+            </Step>
+            <Step key="meta-settings" {...stepProps}>
+              <StepLabel {...labelProps}>
+                <SettingsIcon />
+              </StepLabel>
+            </Step>
+          </Stepper>
+
+          <Grid container justify="center" spacing={1} style={{ marginBottom: '-20px'}}>
+
+            {this.state.activeStep === 0 ?(
+            
+            <Button
+            color="primary"
+            onClick={(e)=>{this.fileUpload(e)}}
+            className={this.props.classes.stepButton}
+            >NEXT</Button>
+                
+              ) :(
+            <Button
+            color="primary"
+            onClick={()=>this.handleBack()}
+            className={this.props.classes.stepButton}
+            >PREV</Button>)}  
+
+            <Button
+              color="primary"
+              onClick={()=>this.handleClose()}
+              className={this.props.classes.stepButton}
+            >
+              CANCEL
             </Button>
-            <Button onClick={() => this.handleClose()} color="primary">
-            Cancel
-            </Button>
-          </DialogActions>
+
+            {this.state.activeStep === 1 && 
+            <Button
+              color="primary"
+              onClick={()=>this.updateVocabulary()}
+              className={this.props.classes.stepButton}
+            >OK</Button>}
+
+          </Grid>
         </Dialog>
 
         <Snackbar
@@ -832,6 +942,22 @@ export default class DialogFileSelecter extends React.Component {
           editingVocabulary={this.props.editingVocabulary}
           close={() => this.props.editingVocabulary.closeApiErrorDialog()}
         />
+        <DialogUpdateVocabularyMetaError
+          onClose={() => this.errorDialogClose()}
+          open={this.state.open}
+          classes={this.props.classes}
+          editingVocabulary={this.props.editingVocabulary}
+          editingVocabularyMeta={this.props.editingVocabularyMeta}
+          isFromEditPanel={true}
+          reason={this.state.reason}
+        />
+        <DialogApiMetaError
+          open={this.props.editingVocabularyMeta.apiErrorDialog.open}
+          classes={this.props.classes}
+          editingVocabulary={this.props.editingVocabulary}
+          editingVocabularyMeta={this.props.editingVocabularyMeta}
+          close={() => this.props.editingVocabularyMeta.closeApiErrorDialog()}
+        />
       </div>
     );
   }
@@ -840,8 +966,8 @@ export default class DialogFileSelecter extends React.Component {
 DialogFileSelecter.propTypes = {
   classes: PropTypes.object,
   editingVocabulary: PropTypes.object,
+  editingVocabularyMeta: PropTypes.object,
   onClose: PropTypes.func,
-  onReadFileChange : PropTypes.func,
   open: PropTypes.bool,
   close: PropTypes.bool,
   okCancel: PropTypes.bool,

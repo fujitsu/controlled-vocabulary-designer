@@ -53,11 +53,12 @@
      for (let i = 0; i < targetTerm.length; i++) {
        if (targetTerm[i].term == currentTerm) {
          this.setState({tabIndex: i});
+         this.props.change( targetTerm[i].language);
          break;
        }
      }
 
-     this.props.editingVocabulary.setCurrentNodeByTerm( currentTerm);     
+     this.props.editingVocabulary.setCurrentNodeByTerm( currentTerm);
      this.props.editingVocabulary.deselectTermList();
      if( this.props.editingVocabulary.currentNode.id){
       this.props.editingVocabulary.setSelectedTermList( currentTerm);
@@ -94,5 +95,6 @@
  SelectOfTerm.propTypes = {
    classes: PropTypes.object,
    editingVocabulary: PropTypes.object,
+   change:  PropTypes.func,
  };
   

@@ -7,6 +7,15 @@ import PropTypes from 'prop-types';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
+import Radio from '@material-ui/core/Radio';
+import RadioGroup from '@material-ui/core/RadioGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import FormControl from '@material-ui/core/FormControl';
+import FormLabel from '@material-ui/core/FormLabel';
+import Dialog from '@material-ui/core/Dialog';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import TextField from '@material-ui/core/TextField'; 
 import CreateIcon from '@material-ui/icons/Create';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
@@ -62,6 +71,7 @@ export default
       idofuriact: false,
       broadertermact: false,
       termdescriptionact: false, 
+      defalutValue: this.props.editingVocabulary.currentNode.language,
     };
 
     this.switchStyles = {
@@ -171,7 +181,7 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    // window.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   /**
@@ -295,6 +305,28 @@ export default
     this.props.editingVocabulary.seletConfirmColor(color);
   }
 
+
+  /**
+   * radio change
+   * @param  {object} event - information of key event
+   */
+   handleRadioChange(e){
+    this.setState({defalutValue: e.target.value});
+    if (e.target.value != this.props.editingVocabulary.currentNode.language) {
+      this.props.editingVocabulary.languageChange();
+    }else {
+      this.props.editingVocabulary.languageSame();
+    }
+  }
+
+  /**
+   * Term select change
+   * @param  {String} lang - string of changed lang
+   */
+   handleTermChange( lang){
+    this.setState({defalutValue: lang});
+  }
+
   /**
    * render
    * @return {element}
@@ -335,8 +367,8 @@ export default
     }
 
     return (
+      <div className={this.props.classes.editPanelVoc} onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
     
-      <div className={this.props.classes.editPanelVoc}>
 
         {/* <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}> */}
         
@@ -349,6 +381,7 @@ export default
                   <SelectOfTerm
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
+                    change={(lang)=>this.handleTermChange( lang)}
                   />
                 </Box>
               </Grid>
@@ -383,6 +416,37 @@ export default
                 </Box>
               </Grid>
             </Grid>
+
+            <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
+              {/* <Box border={1} p={1} width="430px" height='400px' style={{ overflowX: 'hidden', overflowY: 'auto'}}> */}
+                <Grid container spacing={2}>
+                  <Grid item xs={3}>
+                  </Grid>
+                  <Grid item xs={9}>
+                    <FormControl component="fieldset">
+                      <RadioGroup row 
+                        onChange={(e)=>this.handleRadioChange(e)}
+                        aria-label="language" 
+                        name="language" 
+                        value={this.state.defalutValue}
+                      >
+                        <FormControlLabel
+                          value="ja" 
+                          control={<Radio color="primary" />} 
+                          label="日本語" 
+                        />
+                        <FormControlLabel
+                          value="en" 
+                          control={<Radio color="primary" />} 
+                          label="英語" 
+                        />
+                      </RadioGroup>
+                    </FormControl>  
+                  </Grid> 
+                </Grid>
+              {/* </Box> */}
+            </Grid>
+        
 
             <Grid container spacing={2}>
               <Grid item xs={2}>

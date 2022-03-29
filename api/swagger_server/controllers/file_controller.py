@@ -57,9 +57,9 @@ def download_file(file_type, out_format):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify for editing_vocabulary or controlled_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary file.   &#x27;controlled_vocabulary&#x27; get controlled vocabulary file.
+    :param file_type: Specify for editing_vocabulary or editing_vovabulary_meta or controlled_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary file.  &#x27;editing_vocabulary_meta&#x27; get editing vocabulary meta file. &#x27;controlled_vocabulary&#x27; get controlled vocabulary file.
     :type file_type: str
-    :param out_format: Specify the file format.   when editing_vocabulary, format is csv or xlsx.   when controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld.
+    :param out_format: Specify the file format.   when editing_vocabulary and editing_vovabulary_meta, format is csv or xlsx.   when controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld.
     :type out_format: str
 
     :rtype: str
@@ -67,35 +67,66 @@ def download_file(file_type, out_format):  # noqa: E501
     print('file_type:'+file_type+' out_format:'+out_format)
 
     editing_vocabulary = []
-
-    exec_sql = _create_select_sql('editing_vocabulary')
-    exec_res, status_code = _exec_get_postgrest(exec_sql)
-    if not status_code == 200:
-        return ErrorResponse(0, exec_res.message), status_code
-
-    editing_vocabulary = exec_res['result']
-    if len(editing_vocabulary) <= 0:
-        return ErrorResponse(0, 'Download file not found.'), 404
+    editing_vocabulary_meta = []
 
     if file_type == 'editing_vocabulary':
+        exec_sql = _create_select_sql(file_type)
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res.message), status_code
+
+        editing_vocabulary = exec_res['result']
+        if len(editing_vocabulary) <= 0:
+            return ErrorResponse(0, 'Download file not found.'), 404
         # json to csv or xlsx
         ret_serialize =\
             _download_file_ev_serialize(editing_vocabulary, out_format)
-    elif file_type == 'controlled_vocabulary':
+        
+    if file_type == 'controlled_vocabulary':
+        exec_sql = _create_select_sql('editing_vocabulary')
+        exec_sql_meta = _create_select_sql('editing_vocabulary_meta')
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        exec_res_meta, status_code_meta = _exec_get_postgrest(exec_sql_meta)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res.message), status_code
+        if not status_code_meta == 200:
+            return ErrorResponse(0, exec_res_meta.message), status_code_meta
+
+        editing_vocabulary = exec_res['result']
+        editing_vocabulary_meta = exec_res_meta['result']
+        if len(editing_vocabulary) <= 0:
+            return ErrorResponse(0, 'Download file not found.'), 404
+        if len(editing_vocabulary_meta) <= 0:
+            return ErrorResponse(0, 'Download file not found.'), 404
         # Graph
-        ret_graph = _download_file_make(editing_vocabulary)
+        ret_graph = _download_file_make(editing_vocabulary, editing_vocabulary_meta)
         ret_serialize = _download_file_serialize(ret_graph, out_format)
+
+    if file_type == 'editing_vocabulary_meta':
+        exec_sql = _create_select_sql(file_type)
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res.message), status_code
+
+        editing_vocabulary_meta = exec_res['result']
+        if len(editing_vocabulary_meta) <= 0:
+            return ErrorResponse(0, 'Download file not found.'), 404
+         # json to csv or xlsx
+        ret_serialize =\
+            _download_meta_file_ev_serialize(editing_vocabulary_meta, out_format)
 
     return ret_serialize
 
 
-def upload_file(editing_vocabulary=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None, example_phrases=None):  # noqa: E501
+def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None, example_phrases=None):  # noqa: E501
     """Upload the file to the server
 
     Uploads the file selected by the client to the server.     When &#x27;editing_vocabulary&#x27; uploaded, its check integrity.    # noqa: E501
 
     :param editing_vocabulary:
     :type editing_vocabulary: strstr
+    :param editing_vocabulary_meta:
+    :type editing_vocabulary_meta: strstr
     :param reference_vocabulary1:
     :type reference_vocabulary1: strstr
     :param reference_vocabulary2:
@@ -145,6 +176,23 @@ def upload_file(editing_vocabulary=None, reference_vocabulary1=None, reference_v
             print(datetime.datetime.now(),
                   '[Error] failed _exec_insert_postgrest', location())
             return exec_res, status_code
+    
+    if editing_vocabulary_meta is not None:
+        allow_extension, r_ext =\
+            _check_extensions(editing_vocabulary_meta,
+                              VOCABULARY_ALLOWED_EXTENSIONS)
+        if not allow_extension:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_extensions', location())
+            return ErrorResponse(0, 'Data Format Error.'), 400
+
+        # Check Synonymous Relationship
+        df = _read_file_strage(editing_vocabulary_meta, r_ext)
+
+        payload = _make_bulk_data_editing_vocabulary_meta(df)
+
+        exec_res, status_code =\
+            _exec_insert_postgrest(payload, 'editing_vocabulary_meta')
 
     if reference_vocabulary1 is not None:
         allow_extension, r_ext =\
@@ -556,6 +604,37 @@ def _make_bulk_data_editing_vocabulary(data_frame):
 
     return payload
 
+def _make_bulk_data_editing_vocabulary_meta(data_frame):
+
+    payload = []
+
+    for index, item in data_frame.iterrows():
+        insert_data = {}
+        insert_data['meta_name'] = item['語彙の名称']
+        if '語彙の英語名称' in item:
+            insert_data['meta_enname'] =\
+                item['語彙の英語名称'] if pd.notnull(item['語彙の英語名称']) else None
+        if 'バージョン' in item:
+            insert_data['meta_version'] =\
+                item['バージョン'] if pd.notnull(item['バージョン']) else None
+        if '接頭語' in item:
+            insert_data['meta_prefix'] =\
+                item['接頭語'] if pd.notnull(item['接頭語']) else None
+        if '語彙のURI' in item:
+            insert_data['meta_uri'] =\
+                item['語彙のURI'] if pd.notnull(item['語彙のURI']) else None
+        if '語彙の説明' in item:
+            insert_data['meta_description'] =\
+                item['語彙の説明'] if pd.notnull(item['語彙の説明']) else None
+        if '語彙の英語説明' in item:
+            insert_data['meta_endescription'] =\
+                item['語彙の英語説明'] if pd.notnull(item['語彙の英語説明']) else None
+        if '語彙の作成者' in item:
+            insert_data['meta_author'] =\
+                item['語彙の作成者'] if pd.notnull(item['語彙の作成者']) else None
+        payload.append(insert_data)
+
+    return payload
 
 def _copy_file_example_phrases(text_data):
 
@@ -641,6 +720,9 @@ def _create_select_sql(file_type, term=None):
         ret_sql = 'editing_vocabulary'
         if term is not None:
             ret_sql = ret_sql + '?term=eq.' + term
+
+    elif file_type == 'editing_vocabulary_meta':
+        ret_sql = 'editing_vocabulary_meta'
 
     return ret_sql
 
@@ -1198,7 +1280,7 @@ def _add_preferred_list(paylist, item):
     return True
 
 
-def _download_file_make(pl_simple):
+def _download_file_make(pl_simple, pl_simple_meta):
     g = rdflib.ConjunctiveGraph()
     g.bind("skos", rdflib.namespace.SKOS)
     g.bind("dct", rdflib.namespace.DCTERMS)
@@ -1231,6 +1313,7 @@ def _download_file_make(pl_simple):
 
     # JSON convert to pandas.DataFrame
     nm = pd.json_normalize(pl_simple)
+    nm_meta = pd.json_normalize(pl_simple_meta)
 
     # replace nan with ""
     nm["other_voc_syn_uri"] = nm["other_voc_syn_uri"].replace(np.nan, "")
@@ -1238,13 +1321,67 @@ def _download_file_make(pl_simple):
     nm["created_time"] = nm["created_time"].replace(np.nan, "")
     nm["modified_time"] = nm["modified_time"].replace(np.nan, "")
 
+    # create meta
+    namelx = nm_meta.loc[:, ['meta_name', 'meta_enname', 'meta_version', 'meta_prefix', 'meta_uri',  'meta_description', 'meta_endescription', 'meta_author']].values
+    for name in namelx:
+        g.bind(str(name[3]), str(name[4]))
+        nameb = [rdflib.Literal(str(name[3])), rtype, rtype]
+        namel.append(nameb)
+        nameb = [rdflib.Literal(str(name[3])), rtype, sconceptscheme]
+        namel.append(nameb)
+        m_prefix = str(name[3])
+        if(str(name[0]) != ""):
+            nameb = [rdflib.Literal(str(name[3])), title, rdflib.Literal(str(name[0]), lang='ja')]
+            namel.append(nameb)
+        if(str(name[1]) != ""):
+            nameb = [rdflib.Literal(str(name[3])), title, rdflib.Literal(str(name[1]), lang='en')]
+            namel.append(nameb)
+        if(str(name[2]) != ""):
+            nameb = [rdflib.Literal(str(name[3])), hasVersion, rdflib.Literal(str(name[2]))]
+            namel.append(nameb)
+        if(str(name[5]) != ""):
+            nameb = [rdflib.Literal(str(name[3])), description, rdflib.Literal(str(name[5]), lang='ja')]
+            namel.append(nameb)
+        if(str(name[6]) != ""):
+            nameb = [rdflib.Literal(str(name[3])), description, rdflib.Literal(str(name[6]), lang='en')]
+            namel.append(nameb)
+        if(str(name[7]) != ""):
+            nameb = [rdflib.Literal(str(name[3])), creator, rdflib.Literal(str(name[7]))]
+            namel.append(nameb)
+
+    # create type links for OtherVocabulary info
+    nameoi = nm.query('term == preferred_label and other_voc_syn_uri != ""')
+    namelx = nameoi.loc[:, ['other_voc_syn_uri']].values
+    for name in namelx:
+        nameb = [rdflib.URIRef(str(name[0])[:(str(name[0]).rfind('/') + 1)]), rtype, rtype]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[0])[:(str(name[0]).rfind('/') + 1)]), rtype, sconceptscheme]
+        namel.append(nameb)
+
+    # create exactMatch and inscheme for OtherVocabulary link
+    nameou = nm.query('term == preferred_label and other_voc_syn_uri != ""')
+    namelx = nameou.loc[:, ['other_voc_syn_uri', 'uri']].values
+    for name in namelx:
+        nameb = [rdflib.URIRef(str(name[0])), rtype, rtype]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[0])), rtype, scon]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[0])), exactMatch, rdflib.URIRef(str(name[1]))]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[0])), sinscheme, rdflib.URIRef(str(name[0])[:(str(name[0]).rfind('/') + 1)])]
+        namel.append(nameb)
+
     # JSON query Get Concept, prefLabel and narrower base
     namelpl = nm.query('term == preferred_label and uri != ""')
     # get uri and term
     namelx = namelpl.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
+        nameb = [rdflib.URIRef(str(name[1])), rtype, rtype]
+        namel.append(nameb)
         nameb = [rdflib.URIRef(str(name[1])), rtype, scon]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[1])), sinscheme, rdflib.Literal(m_prefix)]
         namel.append(nameb)
         nameb = [
             rdflib.URIRef(str(name[1])),
@@ -1415,6 +1552,45 @@ def _download_file_ev_serialize(pl_simple, p_format):
                                     'color1': '色1',
                                     'color2': '色2',
                                     'confirm': '確定済み用語'})
+
+    if p_format == 'csv':
+        with tempfile.TemporaryFile("w+") as f:
+            # encoding='utf-8', index=False
+            df_org.to_csv(f, encoding='utf-8', index=False)
+            f.seek(0)
+            response = make_response()
+            response.data = f.read()
+            response.headers['Content-Type'] = 'text/csv'
+            response.headers['Content-Disposition'] =\
+                'attachment; filename=test_sample.csv'
+            return response
+    elif p_format == 'xlsx':
+        downloadFileName = 'temp_excel.xlsx'
+        df_org.to_excel(downloadFileName, encoding='utf-8', index=False)
+        response = make_response()
+        response.data = open(downloadFileName, "rb").read()
+        response.headers['Content-Disposition'] = 'attachment;'
+        response.mimetype = XLSX_MIMETYPE
+        os.remove(downloadFileName)
+        return response
+
+def _download_meta_file_ev_serialize(pl_simple, p_format):
+    # format is csv or xlsx
+    df_json = []
+    df_json = pd.json_normalize(pl_simple)
+    # print("--- printing "+p_format+" ---")
+    df_org = df_json.copy()
+    # delete columns id
+    df_org.drop(columns=['id'], inplace=True)
+    # header change
+    df_org = df_org.rename(columns={'meta_name': '語彙の名称',
+                                    'meta_enname': '語彙の英語名称',
+                                    'meta_version': 'バージョン',
+                                    'meta_prefix': '接頭語',
+                                    'meta_uri': '語彙のURI',
+                                    'meta_description': '語彙の説明',
+                                    'meta_endescription': '語彙の英語説明',
+                                    'meta_author': '語彙の作成者'})
 
     if p_format == 'csv':
         with tempfile.TemporaryFile("w+") as f:
