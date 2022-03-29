@@ -406,6 +406,10 @@ components:
           type: string
           description: editing_vocabulary is xlsx file
           format: binary
+        editing_vocabulary_meta:
+          type: string
+          description: editing_vocabulary_meta is xlsx file
+          format: binary
         reference_vocabulary1:
           type: string
           description: reference_vocabulary1 is xlsx file
@@ -495,6 +499,38 @@ components:
         postion_y: "100"
         color1: black
         color2: black
+    EditingVocabularyMeta:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        meta_name:
+          type: string
+        meta_enname:
+          type: string
+        meta_version:
+          type: string
+        meta_prefix:
+          type: string
+        meta_uri:
+          type: string
+        meta_description:
+          type: string
+        meta_endescription:
+          type: string
+        meta_author:
+          type: string
+      example:
+        id: 1
+        meta_name: 名称
+        meta_enname: name
+        meta_version: 1.0.0
+        meta_prefix: my
+        meta_uri: http://myVocab/
+        meta_description: テスト用の語彙です
+        meta_endescription: The vocabulary for test
+        meta_author: Yasutaka Moriwaki
     ReferenceVocabulary:
       type: object
       properties:
@@ -543,6 +579,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EditingVocabulary'
+        EditingVocabularyMeta:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditingVocabularyMeta'
         ReferenceVocabulary:
           type: array
           items:
@@ -566,6 +606,16 @@ components:
           postion_y: "100"
           color1: black
           color2: black
+        EditingVocabularyMeta:
+        - id: 1
+          meta_name: 名称
+          meta_enname: name
+          meta_version: 1.0.0
+          meta_prefix: my
+          meta_uri: http://myVocab/
+          meta_description: テスト用の語彙です
+          meta_endescription: The vocabulary for test
+          meta_author: Yasutaka Moriwaki
         ReferenceVocabulary:
         - id: 1
           term: linux

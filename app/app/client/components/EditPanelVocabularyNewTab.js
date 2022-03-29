@@ -183,7 +183,7 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    // window.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   /**
@@ -345,7 +345,7 @@ export default
     }
 
     return (
-      <div className={this.props.classes.editPanelVoc}>
+      <div className={this.props.classes.editPanelVoc} onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
 {/* 
         <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}> */}
         

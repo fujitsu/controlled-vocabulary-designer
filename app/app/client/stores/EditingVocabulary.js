@@ -285,25 +285,43 @@ class EditingVocabulary {
   setEditingVocabularyData(dbData) {
     const editingVocabulary = [];
 
-    const uri_preferred_label = {};
+    const uri_preferred_label_ja = {};
+    const uri_preferred_label_en = {};
     dbData.forEach( (data) => {
-      // Make dictionary {uri: preferred_label}
-      if (data.preferred_label && data.uri) {
-          uri_preferred_label[data.uri] = data.preferred_label;
+      // Make dictionary {uri: preferred_label} 
+      if (data.preferred_label && data.uri && data.language) {
+        if (data.language === 'ja') { // If the language is Japanese
+          uri_preferred_label_ja[data.uri] = data.preferred_label;
+        } else { // If the language is English
+          uri_preferred_label_en[data.uri] = data.preferred_label;
         }
+      }
     });
 
     dbData.forEach( (data) => {
       // Convert broader_uri into broader_term
-      if (uri_preferred_label[data.broader_term] != undefined) {
-        if((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
-          data.broader_term = uri_preferred_label[data.broader_term];
+      if (data.language === 'ja'){ // If the language is Japanese
+        if (uri_preferred_label_ja[data.broader_term] != undefined) {
+          if((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
+            data.broader_term = uri_preferred_label_ja[data.broader_term];
+          }
+        }else if (data.broader_term != null) {
+          if ((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
+            data.broader_term = '';
+          }
         }
-      } else if (data.broader_term != null) {
-        if ((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
-          data.broader_term = '';
+      }else { // If the language is English
+        if (uri_preferred_label_en[data.broader_term] != undefined) {
+          if((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
+            data.broader_term = uri_preferred_label_en[data.broader_term];
+          }
+        }else if (data.broader_term != null) {
+          if ((data.broader_term.indexOf("http://") != -1) || (data.broader_term.indexOf("https://") != -1)) {
+            data.broader_term = '';
+          }
         }
-      }
+      } 
+      
       data.idofuri = data.uri.substring(data.uri.lastIndexOf('/')+1);
 
       // If the parameter is string (Set the empty string character)
@@ -950,6 +968,27 @@ class EditingVocabulary {
     confirm: 0,
   };
 
+  @observable currentLangDiffNode = {
+    id: null,
+    idofuri: '',
+    uri: '',
+    term: '',
+    language: '',
+    preferred_label: '',
+    hidden: false,
+    broader_term: '',
+    other_voc_syn_uri: '',
+    term_description: '',
+    created_time: '',
+    modified_time: '',
+    position_x: '',
+    position_y: '',
+    locked: null,
+    color1: '',
+    color2: '',
+    confirm: 0,
+  };
+
   /**
    * Selected node information initialization
    */
@@ -988,6 +1027,40 @@ class EditingVocabulary {
       uri: '',
       term: newTerm,
       language: '',
+      preferred_label: '',
+      part_of_speech: '',
+      relationTermColor: '',
+      vocabularyColor: '',
+      hidden: false,
+      broader_term: '',
+      other_voc_syn_uri: '',
+      term_description: '',
+      created_time: '',
+      modified_time: '',
+      position_x: '',
+      position_y: '',
+      locked: null,
+      color1: 'black',
+      color2: 'black',
+      confirm: 0,
+    };
+  }
+
+  /**
+   * Setting of new vocabulary if data don't have when switching with the language radio button for the selected term
+   * @param {string} newTerm - new vocabulary
+   * @param {string} sameIdofUri - same id of uri on the selected term
+   * @param {string} sameUri - same uri on the selected term
+   * @param {string} diffLang - different language on the selected term
+   * @note assume vocabulary that is not in the editing vocabulary
+   */
+  setCurrentLangDiffNodeByNewTerm(newTerm, sameIdofUri, sameUri, diffLang) {
+    this.currentLangDiffNode = {
+      id: null,
+      idofuri: sameIdofUri,
+      uri: sameUri,
+      term: newTerm,
+      language: diffLang,
       preferred_label: '',
       part_of_speech: '',
       relationTermColor: '',
@@ -1159,7 +1232,9 @@ class EditingVocabulary {
         const tmpPrfrdLbl = this.tmpPreferredLabel.list[0];
         if (this.currentNode.preferred_label === tmpPrfrdLbl) {
           return false;
-        } else {
+        } else if (this.currentLangDiffNode.preferred_label == tmpPrfrdLbl) {
+          return false;
+        }else {
           return true;
         }
       } else {
@@ -1186,12 +1261,20 @@ class EditingVocabulary {
         const tmpBrdrTerm = this.tmpBroaderTerm.list[0];
         if (this.currentNode.broader_term === tmpBrdrTerm) {
           return false;
-        } else {
+        } else if(this.currentLangDiffNode.broader_term == tmpBrdrTerm) {
+          return false;
+        }else {
           return true;
         }
       } else {
+        if (this.currentNode.broader_term === '') {
+          return false;
+        } else if(this.currentLangDiffNode.broader_term == '') {
+          return false;
+        }else {
         // Has changed if not one is being edited
         return true;
+        }
       }
     } else {
       if (this.tmpBroaderTerm.list.length == 0) {
@@ -1219,18 +1302,34 @@ class EditingVocabulary {
         return true;
       } else {
         let isAllMatched = true;
-        this.currentSynonym.list.forEach((current) => {
-          const find = this.tmpSynonym.list.find((tmp) => tmp == current);
-          if (!find) {
-            isAllMatched = false;
-          }
-        });
-        this.tmpSynonym.list.forEach((current) => {
-          const find = this.currentSynonym.list.find((tmp) => tmp == current);
-          if (!find) {
-            isAllMatched = false;
-          }
-        });
+        if (this.tmpLanguage.list[0] != this.currentNode.language){ 
+          this.currentLangDiffSynonym.list.forEach((languageCurrent) => {
+            const find = this.tmpSynonym.list.find((tmp) => tmp == languageCurrent);
+            if (!find) {
+              isAllMatched = false;
+            }
+          });
+          this.tmpSynonym.list.forEach((languageCurrent) => {
+            const find = this.currentLangDiffSynonym.list.find((tmp) => tmp == languageCurrent);
+            if (!find) {
+              isAllMatched = false;
+            }
+          });
+        }
+        else{
+          this.currentSynonym.list.forEach((current) => {
+            const find = this.tmpSynonym.list.find((tmp) => tmp == current);
+            if (!find) {
+              isAllMatched = false;
+            }
+          });
+          this.tmpSynonym.list.forEach((current) => {
+            const find = this.currentSynonym.list.find((tmp) => tmp == current);
+            if (!find) {
+              isAllMatched = false;
+            }
+          });
+        }
         if (isAllMatched) {
           return false;
         } else {
@@ -1250,6 +1349,8 @@ class EditingVocabulary {
       if (this.tmpTermDescription.list.length == 1) {
         const tmpTermDescription = this.tmpTermDescription.list[0];
         if (this.currentNode.term_description === tmpTermDescription) {
+          return false;
+        } else if(this.currentLangDiffNode.term_description == tmpTermDescription) {
           return false;
         } else {
           return true;
@@ -1278,7 +1379,9 @@ class EditingVocabulary {
       const tmpLanguage = this.tmpLanguage.list[0];
       if (this.currentNode.language === tmpLanguage) {
         return false;
-      } else {
+      } else if(this.currentLangDiffNode.language == tmpLanguage) {
+        return false;
+      }else {
         return true;
       }
     } else {
@@ -1455,6 +1558,7 @@ isOtherVocSynUriChanged() {
       if (this.currentNode.preferred_label) {
         const synonymNode =
             this.getTargetFileData(this.selectedFile.id).filter((node) =>
+              node.language === this.currentNode.language &&
               node.preferred_label === this.currentNode.preferred_label,
             );
         this.currentSynonym = {id: this.currentNode.id, list: []};
@@ -1574,6 +1678,72 @@ isOtherVocSynUriChanged() {
     this.apiErrorDialog.title = '';
     this.apiErrorDialog.errCode = -1;
     this.apiErrorDialog.errMsg = '';
+  }
+
+  /**
+   * Display language data different from the selected term
+   */
+  @action languageChange() {
+    let languageChangeNode = [];
+    this.getTargetFileData(this.selectedFile.id).forEach((data) => {
+      if(data.language != this.currentNode.language &&
+      data.uri == this.currentNode.uri) {
+        languageChangeNode.push(data);
+      }
+    }); 
+
+    if (languageChangeNode.length > 0){
+      const synonymList= [];
+      languageChangeNode.forEach((synonym) => {
+        synonymList.push(synonym.term);
+      });
+      this.tmpSynonym.list = synonymList;
+      this.currentLangDiffSynonym.list = synonymList;
+
+      const preferredlabel = [];
+      const broaderterm = [];
+      const termdescription = [];
+      const language = [];
+    
+      const languageChangeNodeData = languageChangeNode[0];
+      this.currentLangDiffNode  = languageChangeNodeData;
+
+      if (languageChangeNodeData.preferred_label.length > 0) {
+        preferredlabel.push(languageChangeNodeData.preferred_label);
+      }
+
+      if (languageChangeNodeData.broader_term.length > 0) {
+        broaderterm.push(languageChangeNodeData.broader_term);
+      }
+
+      if (languageChangeNodeData.term_description.length > 0) {
+        termdescription.push(languageChangeNodeData.term_description);
+      }
+
+      if (languageChangeNodeData.language.length > 0) {
+        language.push(languageChangeNodeData.language);
+      }
+
+      this.tmpPreferredLabel.list = preferredlabel;
+      this.tmpBroaderTerm.list = broaderterm;
+      this.tmpTermDescription.list = termdescription;
+      this.tmpLanguage.list = language;
+    }
+    else {
+      this.tmpDataClear();
+      if (this.currentNode.language == 'ja'){
+        this.tmpLanguage.list = 'ja';
+      }else {
+        this.tmpLanguage.list = 'en';
+      }
+    }
+  }
+
+  /**
+   * Display language data same from the selected term
+   */
+  @action languageSame() {
+    this.setCurrentNodeByTerm(this.currentNode.term, this.currentNode.id, null, true); 
   }
 
   /**
@@ -2326,7 +2496,29 @@ isOtherVocSynUriChanged() {
     }
 
     // Add selected vocabulary
-    const updateCurrent = this.createDBFormatDataByCurrentNode();
+    let updateCurrent;
+    // language data same from the selected term
+    if (this.currentNode.language == this.tmpLanguage.list[0]) {
+      updateCurrent = this.createDBFormatDataByCurrentNode();
+    } else{ // language data different from the selected term
+      if (this.tmpBroaderTerm.list && this.tmpBroaderTerm.list.length > 0) {
+        const broaderTerm = this.tmpBroaderTerm.list[0];
+        const findData = this.editingVocabulary.find((data) =>
+          data.term === broaderTerm);
+  
+        // Replace with the preferred label of the specified broader term
+        if (findData && findData.preferred_label) {
+          // Assume that the broader term you want to replace is not a current preferred term or term
+          // Case in which the broader term had a synonymous relationship before amendment
+          if (findData.preferred_label != this.currentLangDiffNode.preferred_label &&
+              findData.preferred_label != this.currentLangDiffNode.term) {
+            // dbData.broader_term = findData.preferred_label;
+            this.tmpBroaderTerm.list[0] = findData.preferred_label;
+          }
+        }
+      }
+      updateCurrent = this.currentLangDiffNode;
+    }
 
     following.push(this.makeVocabularyHistoryData(updateCurrent));
     updateTermList.push(updateCurrent);
@@ -2334,7 +2526,13 @@ isOtherVocSynUriChanged() {
     // Updating vocabulary information by updating a broader term //////////////////
 
     // Pre-Update broader term (current superordinate)
-    const strPrevBrdrTrm = this.currentNode.broader_term;
+    let strPrevBrdrTrm;
+    // language data same from the selected term
+    if (this.currentNode.language == this.tmpLanguage.list[0]) {
+      strPrevBrdrTrm = this.currentNode.broader_term;
+    } else{ // language data different from the selected term
+      strPrevBrdrTrm = this.currentLangDiffNode.broader_term;
+    }
     // Updated broader term
     const strNextBrdrTrm = this.tmpBroaderTerm.list[0];
 
@@ -2353,23 +2551,134 @@ isOtherVocSynUriChanged() {
     // Vocabulary information update by synonym update //////////////////
 
     // List of synonyms deleted in the update
-    const deleteSynonymList =
-      this.currentSynonym.list.filter((i) =>
-        this.tmpSynonym.list.indexOf(i) == -1);
-    if (deleteSynonymList.length > 0) {
-      console.log('delete synonym: ' + deleteSynonymList);
+    let deleteSynonymList = [];
+    // language data same from the selected term
+    if (this.currentNode.language == this.tmpLanguage.list[0]) {
+      deleteSynonymList =
+        this.currentSynonym.list.filter((i) =>
+          this.tmpSynonym.list.indexOf(i) == -1);
+      if (deleteSynonymList.length > 0) {
+        console.log('delete synonym: ' + deleteSynonymList);
+      }
+    } else{ // language data different from the selected term
+      this.currentLangDiffSynonym.list.filter((i) =>
+          this.tmpSynonym.list.indexOf(i) == -1);
+      if (deleteSynonymList.length > 0) {
+        console.log('delete synonym: ' + deleteSynonymList);
+      }   
     }
 
     // List of synonyms added in the update
-    const addSynonymList =
-      this.tmpSynonym.list.filter((i) =>
-        this.currentSynonym.list.indexOf(i) == -1);
-    if (addSynonymList.length > 0) {
-      console.log('add synonym: ' + addSynonymList);
+    let addSynonymList = [];
+    // language data same from the selected term
+    if (this.currentNode.language == this.tmpLanguage.list[0]) {
+      addSynonymList =
+        this.tmpSynonym.list.filter((i) =>
+          this.currentSynonym.list.indexOf(i) == -1);
+      if (addSynonymList.length > 0) {
+        console.log('add synonym: ' + addSynonymList);
+      }
+    } else{ // language data different from the selected term
+      addSynonymList =
+        this.tmpSynonym.list.filter((i) =>
+          this.currentLangDiffSynonym.list.indexOf(i) == -1);
+      if (addSynonymList.length > 0) {
+        console.log('add synonym: ' + addSynonymList);
+      }
     }
 
     // Updated synonym list
     const nextSynonymList = this.tmpSynonym.list;
+
+    // If the list of synonyms to update is the current list of synonyms
+    if (nextSynonymList == this.currentSynonym.list) {
+      // synonym list in different language ​​with the same uri
+      const nextLangDiffSynonymList = this.editingVocabulary.filter((data) => data.uri==this.currentNode.uri && 
+                                                                    data.language != this.currentNode.language);
+      
+      // Updated id of uri and uri
+      if (this.currentNode.idofuri != this.tmpIdofUri.list[0]) {
+        nextLangDiffSynonymList.forEach((synonym) => {
+          let objLangDiffSynonym = this.editingVocabulary.find( (data) =>
+            data.term === synonym.term);
+          previous.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+          objLangDiffSynonym.idofuri = this.tmpIdofUri.list[0];
+          objLangDiffSynonym.uri = this.tmpUri.list[0].replace(this.tmpUri.list[0].substring(this.tmpUri.list[0].lastIndexOf('/')+1), this.tmpIdofUri.list[0]);
+          updateTermList.push(objLangDiffSynonym);
+          following.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+        });
+      }
+      // Updated broader term
+      if (this.currentNode.broader_term != this.tmpBroaderTerm.list[0]) {
+        // Updated uri of broader term
+        const nextfUriofBrdTrm = this.editingVocabulary.find((data) => data.term == this.tmpBroaderTerm.list[0]);
+        if(nextfUriofBrdTrm) { // if not new broader term
+          // preferred label in different language ​​with the same uri
+          const nextLangDiffBrdTrm = this.editingVocabulary.find((data) => data.uri == nextfUriofBrdTrm.uri && 
+                                                                  data.language != this.currentNode.language);          
+          nextLangDiffSynonymList.forEach((synonym) => {
+            let objLangDiffSynonym = this.editingVocabulary.find( (data) =>
+              data.term === synonym.term);
+            previous.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+            objLangDiffSynonym.broader_term = nextLangDiffBrdTrm.preferred_label;
+            updateTermList.push(objLangDiffSynonym);
+            following.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+          });
+        }else { // if new broader term
+          nextLangDiffSynonymList.forEach((synonym) => {
+            let objLangDiffSynonym = this.editingVocabulary.find( (data) =>
+              data.term === synonym.term);
+            previous.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+            objLangDiffSynonym.broader_term = '';
+            updateTermList.push(objLangDiffSynonym);
+            following.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+          });
+        }
+      }
+    } else { // If the list of synonyms to update is the list of synonyms when switching with a language radio button
+      // synonym list in different language ​​with the same uri 
+      const nextLangDiffSynonymList = this.editingVocabulary.filter((data) => data.uri==this.currentNode.uri && 
+                                                                    data.language == this.currentNode.language);
+      // Updated id of uri and uri
+      if (this.currentNode.idofuri != this.tmpIdofUri.list[0]) {
+        nextLangDiffSynonymList.forEach((synonym) => {
+          let objLangDiffSynonym = this.editingVocabulary.find( (data) =>
+            data.term === synonym.term);
+          previous.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+          objLangDiffSynonym.idofuri = this.tmpIdofUri.list[0];
+          objLangDiffSynonym.uri = this.tmpUri.list[0].replace(this.tmpUri.list[0].substring(this.tmpUri.list[0].lastIndexOf('/')+1), this.tmpIdofUri.list[0]);
+          updateTermList.push(objLangDiffSynonym);
+          following.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+        });
+      }
+      // Updated broader term
+      if (strPrevBrdrTrm != this.tmpBroaderTerm.list[0]) {
+        // Updated uri of broader term
+        const nextfUriofBrdTrm = this.editingVocabulary.find((data) => data.term == this.tmpBroaderTerm.list[0]);
+        if(nextfUriofBrdTrm) { // if not new broader term
+          // preferred label in different language ​​with the same uri
+          const nextLangDiffBrdTrm = this.editingVocabulary.find((data) => data.uri == nextfUriofBrdTrm.uri && 
+                                                                  data.language == this.currentNode.language);
+          nextLangDiffSynonymList.forEach((synonym) => {
+            let objLangDiffSynonym = this.editingVocabulary.find( (data) =>
+              data.term === synonym.term);
+            previous.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+            objLangDiffSynonym.broader_term = nextLangDiffBrdTrm.preferred_label;
+            updateTermList.push(objLangDiffSynonym);
+            following.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+          });
+        }else { // if new broader term
+          nextLangDiffSynonymList.forEach((synonym) => {
+            let objLangDiffSynonym = this.editingVocabulary.find( (data) =>
+              data.term === synonym.term);
+            previous.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+            objLangDiffSynonym.broader_term = '';
+            updateTermList.push(objLangDiffSynonym);
+            following.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
+          });
+        }
+      }
+    }
 
     this.updateVocabularyForSynonym(
         deleteSynonymList,
@@ -2383,9 +2692,15 @@ isOtherVocSynUriChanged() {
 
     // Updating vocabulary information by updating preferred label //////////////////
 
-    // Pre-update preferred label
-    const prevPrfrdLbl = this.currentNode.preferred_label;
-    // Updated preferred label
+    // Pre-update broader term
+    let prevPrfrdLbl;
+    // language data same from the selected term
+    if (this.currentNode.language == this.tmpLanguage.list[0]) {
+      prevPrfrdLbl = this.currentNode.preferred_label;
+    } else{ // language data different from the selected term
+      prevPrfrdLbl = this.currentLangDiffNode.preferred_label;
+    }
+    // Updated broader term
     const nextPrfrdLbl = updateCurrent.preferred_label;
 
     this.updateVocabularyForPreferredLabel(
@@ -3536,7 +3851,8 @@ isOtherVocSynUriChanged() {
       if ((this.tmpIdofUri.list.length > 0) && (this.tmpIdofUri.list[0])) {
         const idofuri = this.tmpIdofUri.list[0];
         const prfrrdLbl = this.tmpPreferredLabel.list[0];
-        if (this.isInvalidIdofUri(idofuri, prfrrdLbl)) {
+        const language = this.tmpLanguage.list[0];
+        if (this.isInvalidIdofUri(idofuri, prfrrdLbl, language)) {
           console.log('[errorCheck] equalIdofUri.');
           errorKind = 'equalIdofUri';
           return errorKind;
@@ -3547,7 +3863,8 @@ isOtherVocSynUriChanged() {
     if ((this.tmpUri.list.length > 0) && (this.tmpUri.list[0])) {
       const uri = this.tmpUri.list[0];
       const prfrrdLbl = this.tmpPreferredLabel.list[0];
-      if (this.isInvalidUri(uri, prfrrdLbl)) {
+      const language = this.tmpLanguage.list[0];
+      if (this.isInvalidUri(uri, prfrrdLbl, language)) {
         console.log('[errorCheck] equalUri.');
         errorKind = 'equalUri';
         return errorKind;
@@ -3634,7 +3951,7 @@ isOtherVocSynUriChanged() {
    * @param  {String}  prfrrdLbl - preferred label of URI
    * @return {Boolean} - true: inappropriate, false: appropriate
    */
-  isInvalidUri(uri, prfrrdLbl) {
+  isInvalidUri(uri, prfrrdLbl, language) {
     let isSameUri = false;
 
     if (!uri) {
@@ -3643,10 +3960,12 @@ isOtherVocSynUriChanged() {
 
     const tmpPreferredLabel = prfrrdLbl;
     const tmpUri = uri;
+    const tmpLanguage = language;
 
-    // Extract vocabulary with same URI
+    // Extract vocabulary with same URI and same language
     let uriVocList = this.editingVocabulary.filter((data) =>
-      data.uri === tmpUri);
+      data.uri === tmpUri &&
+      data.language === tmpLanguage);
     if (uriVocList) {
       // Exclude terms and terms in preferred label being edited
       if (tmpPreferredLabel) {
@@ -3701,7 +4020,7 @@ isOtherVocSynUriChanged() {
    * @param  {String}  prfrrdLbl - preferred label of Id of URI
    * @return {Boolean} - true: inappropriate, false: appropriate
    */
-   isInvalidIdofUri(idofuri, prfrrdLbl) {
+   isInvalidIdofUri(idofuri, prfrrdLbl, language) {
     let isSameIdofUri = false;
 
     if (!idofuri) {
@@ -3710,10 +4029,13 @@ isOtherVocSynUriChanged() {
 
     const tmpPreferredLabel = prfrrdLbl;
     const tmpIdofUri = idofuri;
+    const tmpLanguage = language;
 
-    // Extract vocabulary with same Id of URI
+    // Extract vocabulary with same Id of URI and same language
     let idofuriVocList = this.editingVocabulary.filter((data) =>
-      data.idofuri === tmpIdofUri);
+      data.idofuri === tmpIdofUri &&
+      data.language === tmpLanguage);
+    console.log(idofuriVocList);
     if (idofuriVocList) {
       // Exclude terms and terms in preferred label being edited
       if (tmpPreferredLabel) {
@@ -4026,6 +4348,10 @@ isOtherVocSynUriChanged() {
     list: [],
   };
   @observable currentSynonym = {
+    id: '',
+    list: [],
+  };
+  @observable currentLangDiffSynonym = {
     id: '',
     list: [],
   };
@@ -4381,8 +4707,16 @@ isOtherVocSynUriChanged() {
       selectedFilesList.forEach((data) => {
         // Add a preferred label to a narrower term from the set of terms in the broader term
         if (data.broader_term === prfrdLbl) {
-          if (data.preferred_label === data.term) {
-            subordinateTerm.push(data.term);
+          // language data same from the selected term
+          if (data.preferred_label === data.term &&
+            this.tmpLanguage.list[0] == this.currentNode.language) {
+              subordinateTerm.push(data.term);
+          }
+          // language data different from the selected term
+          if (data.preferred_label === data.term &&
+             data.preferred_label != this.currentNode.preferred_label &&
+             data.language != this.currentNode.language) {
+              subordinateTerm.push(data.term);
           }
           // Terms without preferred labels are also broader term
           if (!data.preferred_label) {

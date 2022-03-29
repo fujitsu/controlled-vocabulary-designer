@@ -8,6 +8,7 @@ import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 
+import EditPanelMetaTab from './EditPanelMetaTab';
 import EditPanelVocabularyTab from './EditPanelVocabularyTab';
 import EditTabPanel from './EditTabPanel';
 import editingVocabularyStore from '../stores/EditingVocabulary';
@@ -23,7 +24,7 @@ export default class EditPanel extends React.Component {
   constructor() {
     super();
     this.state = {
-      value: 0,
+      value: 1,
     };
   }
 
@@ -46,10 +47,10 @@ export default class EditPanel extends React.Component {
   render() {
     return (
       <div className={this.props.classes.root}>
-        {/* <AppBar position="static" color="default">
+        <AppBar position="static" color="default">
           <Tabs
             value={this.state.value}
-            // onChange={(event, newValue) => this.setState({value: newValue})}
+            onChange={(event, newValue) => this.setState({value: newValue})}
             aria-label="visualization panel tabs"
             indicatorColor="primary"
             textColor="inherit"
@@ -57,13 +58,25 @@ export default class EditPanel extends React.Component {
             scrollButtons="auto"
           >
             <Tab
-              label="語彙"
+              label="語彙基本情報"
               {...this.a11yProps(0)}
               classes={{root: this.props.classes.tabs}}
             />
+            <Tab
+              label="用語"
+              {...this.a11yProps(1)}
+              classes={{root: this.props.classes.tabs}}
+            />
           </Tabs>
-        </AppBar> */}
+        </AppBar>
         <EditTabPanel value={this.state.value} index={0}>
+          <EditPanelMetaTab
+            classes={this.props.classes}
+            editingVocabulary={editingVocabularyStore}
+            submitDisabled={false}
+          />
+        </EditTabPanel>
+        <EditTabPanel value={this.state.value} index={1}>
           <EditPanelVocabularyTab
             classes={this.props.classes}
             editingVocabulary={editingVocabularyStore}

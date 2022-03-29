@@ -166,14 +166,19 @@ export default
 
     //  URI display in real time
     let finalUri;
-    let idofuri = this.props.editingVocabulary.tmpUri.list[0];
-    let id  = this.props.editingVocabulary.tmpIdofUri.list[0];
+    let idofuri;
+    let id;
+    if( this.props.editingVocabulary.tmpUri.list.length > 0 &&
+        this.props.editingVocabulary.tmpIdofUri.list.length > 0) {
+          idofuri = this.props.editingVocabulary.tmpUri.list[0];
+          id  = this.props.editingVocabulary.tmpIdofUri.list[0];
+        }
     if (idofuri != undefined) {
       if ((idofuri.substring(idofuri.lastIndexOf('/')+1))!=id && id != undefined) {
           idofuri = idofuri.replace(idofuri.substring(idofuri.lastIndexOf('/')+1), id);
           finalUri = [idofuri];
       }
-    }
+    } 
 
     // uri number of before
     let urihttp = this.props.editingVocabulary.editingVocabulary.find((data) => data.uri);
