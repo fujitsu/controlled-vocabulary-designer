@@ -70,6 +70,18 @@ CREATE TABLE IF NOT EXISTS example_phrases (
   "phrase" text NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS editing_vocabulary_meta (
+  "id" serial PRIMARY KEY,
+  "meta_name" text,
+  "meta_enname" text,
+  "meta_version" text,
+  "meta_prefix" text,
+  "meta_uri" text,
+  "meta_description" text,
+  "meta_endescription" text,
+  "meta_author" text
+);
+
 CREATE TABLE IF NOT EXISTS part_of_speech_filter (
   "noun" boolean NOT NULL,
   "verb" boolean NOT NULL,

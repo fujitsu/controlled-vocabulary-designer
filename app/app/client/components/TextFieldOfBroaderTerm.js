@@ -126,8 +126,16 @@ export default
    */
   render() {
     const broaderTerm = this.props.editingVocabulary.tmpBroaderTerm.list;
-    const currentBroaderTerm =
+    let currentBroaderTerm;
+    // broader term on the selected term
+    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+      currentBroaderTerm =
         this.props.editingVocabulary.currentNode.broader_term;
+    } else { // broader term when switching with the  language radio button in the selected term
+      currentBroaderTerm =
+        this.props.editingVocabulary.currentLangDiffNode.broader_term;
+    }
+    
     /* eslint-disable no-unused-vars */
     // object for rendering
     const length = this.props.editingVocabulary.tmpBroaderTerm.list.length;

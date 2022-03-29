@@ -17,11 +17,13 @@ class Upload(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, editing_vocabulary: str=None, reference_vocabulary1: str=None, reference_vocabulary2: str=None, reference_vocabulary3: str=None, example_phrases: str=None):  # noqa: E501
+    def __init__(self, editing_vocabulary: str=None, editing_vocabulary_meta: str=None, reference_vocabulary1: str=None, reference_vocabulary2: str=None, reference_vocabulary3: str=None, example_phrases: str=None):  # noqa: E501
         """Upload - a model defined in Swagger
 
         :param editing_vocabulary: The editing_vocabulary of this Upload.  # noqa: E501
         :type editing_vocabulary: str
+        :param editing_vocabulary_meta: The editing_vocabulary_meta of this Upload.  # noqa: E501
+        :type editing_vocabulary_meta: str
         :param reference_vocabulary1: The reference_vocabulary1 of this Upload.  # noqa: E501
         :type reference_vocabulary1: str
         :param reference_vocabulary2: The reference_vocabulary2 of this Upload.  # noqa: E501
@@ -33,6 +35,7 @@ class Upload(Model):
         """
         self.swagger_types = {
             'editing_vocabulary': str,
+            'editing_vocabulary_meta': str,
             'reference_vocabulary1': str,
             'reference_vocabulary2': str,
             'reference_vocabulary3': str,
@@ -41,12 +44,14 @@ class Upload(Model):
 
         self.attribute_map = {
             'editing_vocabulary': 'editing_vocabulary',
+            'editing_vocabulary_meta': 'editing_vocabulary_meta',
             'reference_vocabulary1': 'reference_vocabulary1',
             'reference_vocabulary2': 'reference_vocabulary2',
             'reference_vocabulary3': 'reference_vocabulary3',
             'example_phrases': 'example_phrases'
         }
         self._editing_vocabulary = editing_vocabulary
+        self._editing_vocabulary_meta = editing_vocabulary_meta
         self._reference_vocabulary1 = reference_vocabulary1
         self._reference_vocabulary2 = reference_vocabulary2
         self._reference_vocabulary3 = reference_vocabulary3
@@ -85,6 +90,29 @@ class Upload(Model):
         """
 
         self._editing_vocabulary = editing_vocabulary
+    
+    @property
+    def editing_vocabulary_meta(self) -> str:
+        """Gets the editing_vocabulary_meta of this Upload.
+
+        editing_vocabulary_meta is xlsx file  # noqa: E501
+
+        :return: The editing_vocabulary_meta of this Upload.
+        :rtype: str
+        """
+        return self._editing_vocabulary_meta
+
+    @editing_vocabulary_meta.setter
+    def editing_vocabulary_meta(self, editing_vocabulary_meta: str):
+        """Sets the editing_vocabulary_meta of this Upload.
+
+        editing_vocabulary_meta is xlsx file  # noqa: E501
+
+        :param editing_vocabulary_meta: The editing_vocabulary_meta of this Upload.
+        :type editing_vocabulary_meta: str
+        """
+
+        self._editing_vocabulary_meta = editing_vocabulary_meta
 
     @property
     def reference_vocabulary1(self) -> str:

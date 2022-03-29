@@ -7,6 +7,7 @@ import json
 import requests
 
 from swagger_server.models.editing_vocabulary import EditingVocabulary  # noqa: E501
+from swagger_server.models.editing_vocabulary_meta import EditingVocabularyMeta  # noqa: E501
 from swagger_server.models.error_response import ErrorResponse  # noqa: E501
 from swagger_server.models.get_all_success_response import GetAllSuccessResponse  # noqa: E501
 from swagger_server import util
@@ -23,15 +24,11 @@ REFERENCE_VOCABULARY = ['reference_vocabulary1',
 
 def delete_vocabulary_term(body, file_type):  # noqa: E501
     """Delete editing vocabulary term
-
      # noqa: E501
-
     :param body: Specify the term id to request.
-
     :type body: List[]
     :param file_type: Specify only editing_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.
     :type file_type: str
-
     :rtype: List[EditingVocabulary]
     """
 
@@ -71,6 +68,7 @@ def get_vocabulary_data(file_type):  # noqa: E501
 
     reference_vocabulary = []
     editing_vocabulary = []
+    editing_vocabulary_meta = []
 
     if file_type in REFERENCE_VOCABULARY:
         exec_sql = _create_select_sql(file_type)
@@ -87,12 +85,21 @@ def get_vocabulary_data(file_type):  # noqa: E501
             return ErrorResponse(0, exec_res['message']), status_code
 
         editing_vocabulary = exec_res['result']
+    
+    elif file_type == 'editing_vocabulary_meta':
+        exec_sql = _create_select_sql(file_type)
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res['message']), status_code
+
+        editing_vocabulary_meta = exec_res['result']
+    
 
     else:
         print('[get_vocabulary_data] invalid param ', file_type)
         return ErrorResponse(0, 'Invalid parameter.'), 400
 
-    return GetAllSuccessResponse(editing_vocabulary, reference_vocabulary), 200
+    return GetAllSuccessResponse(editing_vocabulary, editing_vocabulary_meta ,reference_vocabulary), 200
 
 
 def get_vocabulary_term(file_type, term):  # noqa: E501
@@ -107,21 +114,37 @@ def get_vocabulary_term(file_type, term):  # noqa: E501
 
     :rtype: EditingVocabulary
     """
-    if not file_type == 'editing_vocabulary':
-        print('[get_vocabulary_term] error. invalid param', file_type)
+    if file_type == 'editing_vocabulary':
+
+        editing_vocabulary = None
+
+        exec_sql = _create_select_sql(file_type, term)
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res['message']), status_code
+
+        if len(exec_res['result']) != 0:
+            editing_vocabulary = exec_res['result'][0]
+
+        return EditingVocabulary(editing_vocabulary), 200
+
+    elif file_type == 'editing_vocabulary_meta':
+    
+        editing_vocabulary_meta = None
+
+        exec_sql = _create_select_sql(file_type, term)
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res['message']), status_code
+
+        if len(exec_res['result']) != 0:
+            editing_vocabulary_meta = exec_res['result'][0]
+
+        return EditingVocabularyMeta(editing_vocabulary_meta), 200
+
+    else:
+        print('[get_vocabulary_term] invalid param ', file_type)
         return ErrorResponse(0, 'Invalid parameter.'), 400
-
-    editing_vocabulary = None
-
-    exec_sql = _create_select_sql(file_type, term)
-    exec_res, status_code = _exec_get_postgrest(exec_sql)
-    if not status_code == 200:
-        return ErrorResponse(0, exec_res['message']), status_code
-
-    if len(exec_res['result']) != 0:
-        editing_vocabulary = exec_res['result'][0]
-
-    return EditingVocabulary(editing_vocabulary), 200
 
 
 def post_vocabulary_term(body, file_type, term):  # noqa: E501
@@ -139,40 +162,60 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
     :rtype: List[EditingVocabulary]
     """
 
-    # print('[post_vocabulary_term] file_type :', file_type )
-    # print('[post_vocabulary_term] term :', term )
+    if file_type == 'editing_vocabulary':
+        for item in body:
+            payload = _create_update_payload(item)
 
-    if not file_type == 'editing_vocabulary':
-        print('[post_vocabulary_term] error. invalid param', file_type)
+            if 'id' in item:
+                # update data.
+                update_sql = _create_update_sql(file_type, item['id'])
+                exec_res, status_code = _exec_update_postgrest(payload, update_sql)
+                if not status_code == 200:
+                    return exec_res, status_code
+            else:
+                # add data.
+                exec_res, status_code = \
+                    _exec_insert_postgrest(payload, 'editing_vocabulary')
+                if not status_code == 200:
+                    return exec_res, status_code
+
+        editing_vocabulary = []
+        exec_res, status_code = _exec_get_postgrest('editing_vocabulary')
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res['message']), status_code
+
+        editing_vocabulary = exec_res['result']
+
+        return editing_vocabulary, 200
+
+    elif file_type == 'editing_vocabulary_meta':
+        for item in body:
+            payload = _create_updatemeta_payload(item)
+
+            if 'id' in item:
+                # update data.
+                update_sql = _create_update_sql(file_type, item['id'])
+                exec_res, status_code = _exec_update_postgrest(payload, update_sql)
+                if not status_code == 200:
+                    return exec_res, status_code
+            else:
+                # add data.
+                exec_res, status_code = \
+                    _exec_insert_postgrest(payload, 'editing_vocabulary_meta')
+                if not status_code == 200:
+                    return exec_res, status_code
+
+        editing_vocabulary_meta = []
+        exec_res, status_code = _exec_get_postgrest('editing_vocabulary_meta')
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res['message']), status_code
+
+        editing_vocabulary_meta = exec_res['result']
+
+        return editing_vocabulary_meta, 200
+    else:
+        print('[post_vocabulary_term] invalid param ', file_type)
         return ErrorResponse(0, 'Invalid parameter.'), 400
-
-    for item in body:
-        # print('[post_vocabulary_term] item :', item )
-        payload = _create_update_payload(item)
-        # print('[post_vocabulary_term] payload :', payload )
-
-        if 'id' in item:
-            # update data.
-            update_sql = _create_update_sql(file_type, item['id'])
-            exec_res, status_code = _exec_update_postgrest(payload, update_sql)
-            if not status_code == 200:
-                return exec_res, status_code
-        else:
-            # add data.
-            exec_res, status_code = \
-                _exec_insert_postgrest(payload, 'editing_vocabulary')
-            if not status_code == 200:
-                return exec_res, status_code
-
-    editing_vocabulary = []
-    exec_res, status_code = _exec_get_postgrest('editing_vocabulary')
-    if not status_code == 200:
-        return ErrorResponse(0, exec_res['message']), status_code
-
-    editing_vocabulary = exec_res['result']
-
-    return editing_vocabulary, 200
-
 
 def _create_select_sql(file_type, term=None):
 
@@ -188,6 +231,11 @@ def _create_select_sql(file_type, term=None):
 
     elif file_type == 'editing_vocabulary':
         ret_sql = 'editing_vocabulary'
+        if term is not None:
+            ret_sql = ret_sql + '?term=eq.' + term
+
+    elif file_type == 'editing_vocabulary_meta':
+        ret_sql = 'editing_vocabulary_meta'
         if term is not None:
             ret_sql = ret_sql + '?term=eq.' + term
 
@@ -208,6 +256,10 @@ def _create_update_sql(file_type, id):
 
     elif file_type == 'editing_vocabulary':
         ret_sql = 'editing_vocabulary'
+        ret_sql = ret_sql + '?id=eq.' + str(id)
+
+    elif file_type == 'editing_vocabulary_meta':
+        ret_sql = 'editing_vocabulary_meta'
         ret_sql = ret_sql + '?id=eq.' + str(id)
 
     return ret_sql
@@ -245,6 +297,20 @@ def _create_update_payload(target_data):
     update_data['color2'] = target_data['color2']
     update_data['hidden'] = target_data['hidden']
     update_data['confirm'] = target_data['confirm']
+
+    return update_data
+
+def _create_updatemeta_payload(target_data):
+
+    update_data = {}
+    update_data['meta_name'] = target_data['meta_name']
+    update_data['meta_enname'] = target_data['meta_enname']
+    update_data['meta_version'] = target_data['meta_version']
+    update_data['meta_prefix'] = target_data['meta_prefix']
+    update_data['meta_uri'] = target_data['meta_uri']
+    update_data['meta_description'] = target_data['meta_description']
+    update_data['meta_endescription'] = target_data['meta_endescription']
+    update_data['meta_author'] = target_data['meta_author']
 
     return update_data
 
