@@ -1,0 +1,76 @@
+@charset "utf-8";
+/* CSS Document */
+
+html { box-sizing: border-box; } 
+*, *:before, *:after { box-sizing: inherit; }
+
+
+/************ 一般的なタグへの設定 ************/
+body{
+    font-family: "游ゴシック体", YuGothic, "游ゴシック", "Yu Gothic","メイリオ", "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif;
+    font-weight: 500;
+    font-feature-settings: "palt" 1;/* プロポーショナルメトリクスを有効に */
+    color:#444;
+    background-color: #fff;
+    text-align: center;
+    -webkit-text-size-adjust: 100%;
+}
+
+body, html {
+    margin: 0;
+    padding: 0;
+    font-size: 16px;
+    line-height: 1.65;
+    color: #444;
+}
+
+body,
+header,
+section,
+article,
+footer,
+figure,
+h1,
+h2,
+h3,
+h4,
+h5 {
+    margin: 0;
+    padding: 0;
+}
+P {
+    margin: 0;
+    padding: 0;
+    line-height: 1.65;
+}
+
+img{
+    outline: none;
+    border-style: none;
+    vertical-align: middle;
+}
+
+a {
+    text-decoration: none;
+    color: #3B69D9;
+}
+a:hover {opacity: 0.5;}
+
+
+/*flexレイアウトのための設定（主に縦・横センター揃えのために使用）*/
+.flex-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.flex-y {
+    display: flex;
+    align-items: center;
+}
+
+/*flortレイアウトのための設定*/
+.clearfix::after {
+  content: "";
+  display: block;
+  clear: both;
+}
