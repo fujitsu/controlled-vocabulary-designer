@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,7 @@
     <title>CVDヘルプページ</title>
     <meta name="description" content="ページの内容を表す文章120文字くらい">
     <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/add_style.css">
+    <link rel="stylesheet" href="css/help_style.css">
 </head>
     
 <body>
@@ -27,6 +27,7 @@
     <dt>CVDのいろいろな機能</dt>
     <dd><a href="#Section09">枠線色の変更</a></dd>
     <dd><a href="#Section10">確定について</a></dd>
+    <dd><a href="#Section20">CVDのサポートブラウザ</a></dd>
   </dl>
   <ul>
     <li>統制語彙作成支援ツール</li>
@@ -160,21 +161,64 @@
   </div>
 
   <div id="Section09" class="section">
-    <h1>枠線色の変更</h1>
-    <p></p>
-    <p class="Emp"><span class="red"></span></p>
+    <h1>用語の枠線色を変更する</h1>
+    <p class="Emp">可視化画面に表示されている用語の枠線の色を個々に変更することが可能です。</p>
+    <p>この機能を利用して、用語毎のグループ分けや、編集途中などのステータスの区別を表示する事ができます。</p>
+    <ol>
+      <li>用語を選択すると枠線色変更ボタンがアクティブになります。</li>
+      <li>ボタンを押し下げ後、枠線色を選択すると選択された用語の可視化画面上での枠線色が変更されます。</li>
+    </ol>
     <div class="Img margin0">
       <figure><img src="images/illst_9.png"></figure>
+    </div>
+    <div class="Point">
+      <p class="Emp red margin0"><em>複数まとめて変更可能</em></p>
+      <p>可視化画面上でShiftキーを押しながら用語をクリックして複数選択が可能です。<br>
+      用語を複数選択して枠線色変更ボタンを押して、枠線色を選べば選択されている用語すべてに適用されます。</p>
     </div>
   </div>
 
   <div id="Section10" class="section">
     <h1>確定について</h1>
-    <p></p>
-    <p class="Emp"><span class="red"></span></p>
+    <p class="Emp">各用語の編集状態をロックしたり解除することが可能です。</p>
+    <p>編集操作タブパネルの「確定」をクリックすると、「確定」が「確定解除」に変わると同時に編集内容にロックがかかり、編集ができなくなります。</p>
+    <p>「確定解除」をクリックすると、編集可能な状態に戻ります。</p>
+    <p>メニューの確定色を選択すると、確定した用語の背景色を指定した色に変更可能です。</p>
     <div class="Img margin0">
       <figure><img src="images/illst_10.png"></figure>
     </div>
+  </div>
+
+  <div id="Section20" class="section">
+    <h1>CVDのサポートブラウザ</h1>
+    <p>サポートするWebブラウザは下記の通りです。</p>
+    <table>
+      <tr>
+        <th>ブラウザ</th>
+        <th>サポート</th>
+      </tr>
+      <tr>
+        <td>Google Chrome</td>
+        <td>○ サポート</td>
+      </tr>
+      <tr>
+        <td>Internet Explorer</td>
+        <td>× サポートしない</td>
+      </tr>
+      <tr>
+        <td>Microsoft Edge</td>
+        <td>○ サポート</td>
+      </tr>
+      <tr>
+        <td>Firefox</td>
+        <td>○ サポート</td>
+      </tr>
+      <tr>
+        <td>その他ブラウザ</td>
+        <td>× 保証しない</td>
+      </tr>
+    </table>
+      
   </div>
 
 </div>
