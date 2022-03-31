@@ -1,4 +1,4 @@
-@charset "utf-8";
+﻿@charset "utf-8";
 /* CSS Document */
 
 
@@ -9,7 +9,7 @@ body, html {font-size: 14px;}
 .bgimg-1, .bgimg-2, .bgimg-3 {
   position: relative;
   background-attachment: fixed;
-  background-position: center -20em;
+  background-position: center -15em;
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -18,12 +18,13 @@ body, html {font-size: 14px;}
 }
 .bgimg-1 {
     background-image: url("../images/index_bg.png");
-    min-height: 70vh;
+    min-height: 75vh;
+    background-color: #EBEBEB;
 }
 /************ headerロゴの設定 ************/
 #Logo {
     position: absolute;
-    top: 35%;
+    top: 25%;
     width: 100%;
     text-align: center;
 }
@@ -83,22 +84,28 @@ body, html {font-size: 14px;}
     #Docker p {font-size: 1.2rem;}
 }
 
-.content3 {margin: 10em auto;}
+.content3 {margin: 4.5vh auto;}
 .Button {
     display: inline-block;
-    margin: 0.5em 1em;
+    margin: 1em;
+    padding: 1.2em 2em 1em;
 }
 .Button p {
     line-height: 1.1;
     margin: 0;
 }
 .Button a {
+    color: #fff;
     font-size: 1.3rem;
-    background-color: #fefefe;
-    padding: 0.8em 2em 0.6em;
-    margin: 1em;
-    border: #ccc 3px solid;
+    padding: 1.2em 2em 1em;
+    background-color: #0082FF;
     border-radius: 5px;
+    display: block;
+    width: 15em;
+}
+.Button a img {
+    width: 1em;
+    margin-right: 0.5em;
 }
 
 .bgimg-2 {}
@@ -120,9 +127,26 @@ body, html {font-size: 14px;}
 #footer {
     display: inline-block;
     background-color: #ccc;
-    padding: 3%;
+    padding: 2% 3%;
     margin: 0 auto;
     text-align: center
 }
-
+#footer h1 {
+    font-size: 5vw;
+    line-height: 1.1;
+    letter-spacing: 0.3em;
+    color: #222;
+    margin-bottom: 0;
+}
+#footer p {
+    font-size: 1.2rem;
+    line-height: 1.1;
+    margin-bottom: 0;
+}
+@media screen and (max-width: 800px) {
+    #footer h1 {font-size: 2.5rem;}
+}
+@media screen and (min-width: 1200px) {
+    #footer h1 {font-size: 4rem;}
+}
 
