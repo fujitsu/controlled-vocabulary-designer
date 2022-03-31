@@ -1,0 +1,227 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CVDヘルプページ</title>
+    <meta name="description" content="ページの内容を表す文章120文字くらい">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/help_style.css">
+</head>
+    
+<body>
+<nav>
+  <dl id="menu">
+    <dt>統制語彙編集とCVD</dt>
+    <dd><a href="#Section01">はじめに</a></dd>
+    <dd><a href="#Section02">統制語彙とは</a></dd>
+    <dd><a href="#Section03">CVDとは</a></dd>
+    <dt>CVDでファイルを使う</dt>
+    <dd><a href="#Section04">ファイルの読み込み</a></dd>
+    <dd><a href="#Section05">ファイルの書き出し</a></dd>
+    <dt>CVDで用語を編集する</dt>
+    <dd><a href="#Section06">関係線を使う</a></dd>
+    <dd><a href="#Section07">用語の選択</a></dd>
+    <dd><a href="#Section08">編集パネル</a></dd>
+    <dt>CVDのいろいろな機能</dt>
+    <dd><a href="#Section09">枠線色の変更</a></dd>
+    <dd><a href="#Section10">確定について</a></dd>
+    <dd><a href="#Section20">CVDのサポートブラウザ</a></dd>
+  </dl>
+  <ul>
+    <li>統制語彙作成支援ツール</li>
+    <li><b>CVD</b></li>
+  </ul>
+</nav>
+
+<div id="Content">
+
+  <div id="Section01" class="section">
+    <h1>はじめに</h1>
+    <p>モノの名前だったり事象だったり、同一の事柄に対して、いろいろな呼び方（言葉）が存在するときがあります。これは表現が豊かになる反面、なにかと不便です。そこで、これら同じ事柄を指す言葉の関係性を、誰にでもわかりやすく整理しようというのが<em>統制語彙の編集</em>です。</p>
+    <div class="Img">
+      <figure><img src="images/illst_1.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section02" class="section">
+    <h1>統制語彙とは</h1>
+    <p>それぞれの言葉は、ほかの言葉とさまざまな関係を持ちます。</p>
+    <ul class="Emp">
+      <li>同じ意味を持つ言葉<em class="red">➡同義語</em></li>
+      <li>同じ意味を持つ言葉の中で代表となる言葉<em class="red">➡代表語</em></li>
+      <li>言葉を包括している言葉<em class="red">➡上位語</em></li>
+    </ul>
+    <p><em>このような関係性を持つ用語の集まりを統制語彙といいます。</em></p>
+    <div class="Img">
+      <figure><img src="images/illst_2.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section03" class="section">
+    <h1>統制語彙作成支援ツール CVDとは</h1>
+    <p>統制語彙作成では、以下のような様々な用語の情報を編集する必要があります。</p>
+    <ul class="Emp">
+      <li>同義語</li>
+      <li>代表語</li>
+      <li>代表語のURI</li>
+      <li>上位語</li>
+    </ul>
+    <p>このような多くの関係性や情報を、それぞれの言葉・用語ごとに整理するのは大変な作業です。そこで、これらの作業を支援するために開発されたのが、<em>CVD（Controlled Vocabulary Designer）</em>です。</p>
+    <div class="Img">
+      <div class="BalloonRight">
+        <p>関係性を可視化して直感的な操作が可能</p>
+        <p>AIを活用することで、作業を効率化</p>
+      </div>
+      <figure><img src="images/illst_3.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section04" class="section">
+    <h1>ファイルの読み込み</h1>
+    <p>画面の左上の「ファイル」メニューから入力用データの読み込みができます。</p>
+    <p><em>入力可能なデータは2種類です</em></p>
+    <ul class="Emp Descr">
+      <li>編集用語彙（csv形式）<br><span class="descr">用語の同義関係や上下関係を編集中のデータ。</span></li>
+      <li>参照用語彙（csv形式）<br><span class="descr">既存の語彙情報を表形式にまとめたデータ。編集することはできません。参照専用のデータになります。3つまでファイルを読み込むことが可能です。</span></li>
+    </ul>
+    <ul class="Attention">
+      <li>※過去にファイルを読み込んだことがある場合、ファイル読み込みダイアログに過去に読み込んだファイル名とファイルサイズが表示されます。</li>
+      <li>※新規ファイルで、ファイル名とファイルサイズが過去に読み込んだものと同じ場合には、いったん“CLEAR”して参照しなおす必要があります。</li>
+    </ul>
+    <div class="Img margin0">
+      <figure><img src="images/illst_4.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section05" class="section">
+    <h1>ファイルの書き出し</h1>
+    <p>左上の「ファイル」→「保存」→「編集用語彙」または「統制語彙」をクリックします。ファイル出力ダイアログが表示されるので、任意のファイル名を入力し、「OK」をクリック。しばらくすると、ファイルがローカル環境にダウンロードされます。</p>
+    <p><em>出力可能なデータは2種類です</em></p>
+    <ul class="Emp Descr">
+      <li>編集用語彙（csv形式）<br><span class="descr">同義関係や上下関係を編集中のデータ。</span></li>
+      <li>統制語彙（n3, nquads, nt, trix, turtle, xml, jsonld形式）<br><span class="descr">公開する統制語彙。</span></li>
+    </ul>
+    <div class="Img margin0">
+      <figure><img src="images/illst_5.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section06" class="section">
+    <h1>関係線を使って編集が可能</h1>
+    <p>可視化画面内で、登録済みの用語にマウスポインタを合わせると、ポイントが３つ表示されます。このポイントから用語の関係線を引き出すことが可能です。</p>
+    <p>ポイント上でマウスボタンを押し下げたまま、ドラッグすると関係線を引き出すことができます。他の用語と線を結ぶとダイアログが表示されるので、指示に従えば編集を完了することができます。</p>
+    <div class="Img margin0">
+      <figure><img src="images/illst_6.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section07" class="section">
+    <h1>用語の選択</h1>
+    <p>まず編集する用語を選択します。すでに登録された用語の選択方法は次の２つです。</p>
+    <ol class="Emp Descr">
+      <li>可視化画面で用語をクリックする<br><span class="descr">可視化画面で用語が選択されると枠線が太くなって、強調表示されます。</span></li>
+      <li>検索ボックスで検索する<br><span class="descr">検索ボックスに用語名を入力して検索します。目的の用語が見つかると画面の中央に表示されます。</span></li>
+    </ol>
+    <p class="Emp">選択出来たら、画面右上の編集ボタンをクリックすると編集パネルが開きます。<br><span class="red">選択中の用語、選択全解除ボタンをクリックすると選択が解除されます。</span></p>
+    <div class="Img margin0">
+      <figure><img src="images/illst_7.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section08" class="section">
+    <h1>編集パネル</h1>
+    <p>用語を選択し「編集」ボタンを押すと、編集パネルが開きます。</p>
+    <div id="HensyuPanel" >
+      <ol class="Descr">
+        <li>① 同義語<br><span class="descr">語形や音が異なる、意味が同じ語。複数個の設定が可能です。</span></li>
+        <li>② 代表語<br><span class="descr">選択中の用語と同義語の中から、代表となる用語を、ひとつ設定。</span></li>
+        <li>③ 代表語のURI<br><span class="descr">代表語に割り当てられた一意のURIがある場合は設定します。鉛筆アイコンのクリックで編集できます。</span></li>
+        <li>④ 上位語<br><span class="descr">選択中の用語の意味範囲を包括する語。ひとつだけ設定が可能。</span></li>
+        <li>⑤ 下位語<br><span class="descr">下位語は変更できません。</span></li>
+        <li>⑥ クローズボタン<br><span class="descr">クリックすると編集パネルを閉じます。</span></li>
+        <li>⑦ 選択中の用語を表示<br><span class="descr">編集中の用語名が表示されます。プルダウンから別の用語を選択すると選択中の用語が変更されます。</span></li>
+        <li>⑧ 新規の項目の背景はピンク、既存の項目の背景はブルーで表示されます。</li>
+        
+      </ol>
+      <div class="Img">
+        <p style="top: 29.5%; left: 5.5%;">①</p>
+        <p style="top: 41.5%; left: 5.5%;">②</p>
+        <p style="top: 55%; left: 5.5%;">③</p>
+        <p style="top: 65%; left: 5.5%;">④</p>
+        <p style="top: 77%; left: 5.5%;">⑤</p>
+        <p style="top: 5.5%; left: 81.5%;">⑥</p>
+        <p style="top: 17.5%; left: 21.5%;">⑦</p>
+        <p style="top: 28%; left: 45%;">⑧</p>
+        <figure><img src="images/illst_8.png"></figure>
+      </div>
+    </div>
+    <p class="Emp red">各入力項目は、入力後、Enterキーで入力が決定されます。</p>
+  </div>
+
+  <div id="Section09" class="section">
+    <h1>用語の枠線色を変更する</h1>
+    <p class="Emp">可視化画面に表示されている用語の枠線の色を個々に変更することが可能です。</p>
+    <p>この機能を利用して、用語毎のグループ分けや、編集途中などのステータスの区別を表示する事ができます。</p>
+    <ol>
+      <li>用語を選択すると枠線色変更ボタンがアクティブになります。</li>
+      <li>ボタンを押し下げ後、枠線色を選択すると選択された用語の可視化画面上での枠線色が変更されます。</li>
+    </ol>
+    <div class="Img margin0">
+      <figure><img src="images/illst_9.png"></figure>
+    </div>
+    <div class="Point">
+      <p class="Emp red margin0"><em>複数まとめて変更可能</em></p>
+      <p>可視化画面上でShiftキーを押しながら用語をクリックして複数選択が可能です。<br>
+      用語を複数選択して枠線色変更ボタンを押して、枠線色を選べば選択されている用語すべてに適用されます。</p>
+    </div>
+  </div>
+
+  <div id="Section10" class="section">
+    <h1>確定について</h1>
+    <p class="Emp">各用語の編集状態をロックしたり解除することが可能です。</p>
+    <p>編集操作タブパネルの「確定」をクリックすると、「確定」が「確定解除」に変わると同時に編集内容にロックがかかり、編集ができなくなります。</p>
+    <p>「確定解除」をクリックすると、編集可能な状態に戻ります。</p>
+    <p>メニューの確定色を選択すると、確定した用語の背景色を指定した色に変更可能です。</p>
+    <div class="Img margin0">
+      <figure><img src="images/illst_10.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section20" class="section">
+    <h1>CVDのサポートブラウザ</h1>
+    <p>サポートするWebブラウザは下記の通りです。</p>
+    <table>
+      <tr>
+        <th>ブラウザ</th>
+        <th>サポート</th>
+      </tr>
+      <tr>
+        <td>Google Chrome</td>
+        <td>○ サポート</td>
+      </tr>
+      <tr>
+        <td>Internet Explorer</td>
+        <td>× サポートしない</td>
+      </tr>
+      <tr>
+        <td>Microsoft Edge</td>
+        <td>○ サポート</td>
+      </tr>
+      <tr>
+        <td>Firefox</td>
+        <td>○ サポート</td>
+      </tr>
+      <tr>
+        <td>その他ブラウザ</td>
+        <td>× 保証しない</td>
+      </tr>
+    </table>
+      
+  </div>
+
+</div>
+
+</body>
+</html>
