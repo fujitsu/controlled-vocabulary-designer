@@ -189,6 +189,14 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
         # Check Synonymous Relationship
         df = _read_file_strage(editing_vocabulary_meta, r_ext)
 
+        # Check columns
+        exec_res, status_code = _check_columns_meta(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_columns',
+                  location())
+            return exec_res, status_code
+
         payload = _make_bulk_data_editing_vocabulary_meta(df)
 
         exec_res, status_code =\
@@ -787,6 +795,23 @@ def _check_columns(data_frame):
          or '色1' not in item
          or '色2' not in item):
             return ErrorResponse(0, 'Data Format Error.'), 400
+    return SuccessResponse('request is success.'), 200
+
+
+# check column meta
+def _check_columns_meta(data_frame):
+    # columns = '語彙の名称 語彙の英語名称 バージョン 接頭語 語彙のURI 語彙の説明 語彙の英語説明 語彙の作成者'
+    for index, item in data_frame.iterrows():
+        # if any(map(ins_f, item)):
+        if ('語彙の名称' not in item
+         or '語彙の英語名称' not in item
+         or 'バージョン' not in item
+         or '接頭語' not in item
+         or '語彙のURI' not in item
+         or '語彙の説明' not in item
+         or '語彙の英語説明' not in item
+         or '語彙の作成者' not in item):
+            return ErrorResponse(0, 'Data Format Error. meta file columns'), 400
     return SuccessResponse('request is success.'), 200
 
 
