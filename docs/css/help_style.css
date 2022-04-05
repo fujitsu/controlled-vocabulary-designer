@@ -50,7 +50,7 @@ nav ul {
     text-align: center;
     width: 100%;
     position: absolute;
-    bottom: 5px;
+    bottom: 15px;
 }
 nav ul li{
     margin: 0;
@@ -66,7 +66,7 @@ nav ul li b{
     nav ul {position: relative; margin-top: 10px;}
 }
 
-/************ コンテンツブロックの設定 ************/
+/*************** ここからコンテンツブロックの設定 ***************/
 
 #Content {
     width: calc(100% - 200px);
@@ -74,9 +74,9 @@ nav ul li b{
     text-align: center;
 }
 
-/************ コンテンツのフォントサイズを変更するには以下を調整 ************/
+/*** コンテンツのフォントサイズを変更するには以下を調整 ***/
 body, html {font-size: 14px;}
-/************************************************************************/
+/******************************************************/
 
 .section{
     padding: 2.5vw;
@@ -197,6 +197,61 @@ body, html {font-size: 14px;}
     line-height: 1;
     color: #FF0000;
     margin: 0;
+}
+
+#Section06 .Img p#Text01 {
+    width: 37%;
+    color: #fff;
+    font-size: 1.7vw;
+    line-height: 1.4;
+    margin: 0;
+    background-color: #FF9170;
+    padding: 0.5em;
+    border-radius: 7px;
+    top: 70%;
+    z-index: 9;
+}
+#Section06 .Img #Text02,
+#Section06 .Img #Text03 {
+    color: #366999;
+    position: absolute;
+    width: 28%;
+    top: 0%;
+}
+#Section06 .Img #Text02 p ,
+#Section06 .Img #Text03 p {
+    font-size: 1.6vw;
+    font-weight: 500;
+    position: relative;
+    margin: 0.5em 0;
+    line-height: 1.4;
+}
+#Section06 .Img #Text02 > p:first-child ,
+#Section06 .Img #Text03 > p:first-child {
+    font-weight: 600;
+    margin-left: 1.2em;
+    margin-bottom: 0;
+}
+#Section06 .Img #Text02 > p:first-child:before {
+    content: "";
+    position: absolute;
+    top: 0.3em;
+    margin-left: -1.1em;
+    border: 0.4em solid #4169E1;
+}
+#Section06 .Img #Text03 > p:first-child:before {
+    content: "";
+    position: absolute;
+    top: -0.25em;
+    margin-left: -1.1em;
+    border: 0.45em solid transparent;
+    border-bottom: 0.9em solid #B0C4DE;
+}
+#Section06 .Img #Text02 {left: 40%;}
+#Section06 .Img #Text03 {right: 0%;}
+@media screen and (min-width: 1100px) {
+    #Section06 .Img p#Text01 {font-size: 1.6rem;}
+    #Section06 .Img #Text02 p , #Section06 .Img #Text03 p {font-size: 1.6rem;}
 }
 
 #Section09 ol {
