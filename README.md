@@ -6,6 +6,9 @@ outputs of natural language processing and existing controlled vocabulary.
 Moreover, you can see whole vocabulary on the application window and edit them interactively.
 The created controlled vocabulary can be exported as RDF file.
 
+The help pages is the below which is written in Japanese.  
+https://fujitsu.github.io/controlled-vocabulary-designer/
+
 # Requirement
 
 - docker > 19.03
