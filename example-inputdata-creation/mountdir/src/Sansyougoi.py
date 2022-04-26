@@ -56,23 +56,23 @@ def sansyougoi(relations_file, vec_file, input_file):
     '''
 
     # ######### File output (terms relating to the terms of the field) ##########
-    # Read and normalize tag data (terms for the field)
-    tag_file = pd.read_csv(input_file)
-    tag = list(tag_file["用語名"])
+    # Read and normalize domain_words data (terms for the field)
+    domain_words_csv = pd.read_csv(input_file)
+    domain_words = list(domain_words_csv["用語名"])
     # normalize term strings to match case
-    tag = list(set(tag))
+    domain_words = list(set(domain_words))
 
-    # If there is a term name that is the same as the term name of the tag, extract the preferred label
+    # If there is a term name that is the same as the term name of the domain_words, extract the preferred label
     pref_target = []
     for idx_output in range(len(output_all)):
-        if output_all[idx_output][0] in tag:
+        if output_all[idx_output][0] in domain_words:
             pref_target.append(output_all[idx_output][1])
 
     # Extracts only the terms with preferred labels or broader terms
     output_target = []
     for idx_output in range(len(output_all)):
-        if output_all[idx_output][1] in tag or\
-           output_all[idx_output][4] in tag:
+        if output_all[idx_output][1] in domain_words or\
+           output_all[idx_output][4] in domain_words:
             output_target.append(output_all[idx_output])
 
     # csv
