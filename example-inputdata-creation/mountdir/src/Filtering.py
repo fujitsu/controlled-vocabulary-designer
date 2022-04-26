@@ -23,18 +23,18 @@ from gensim.models import KeyedVectors
 from sklearn.metrics import pairwise_distances
 
 
-def filt(domain_word_file, domain_text_preprocessed_file, vec):
+def filt(domain_words_file, domain_text_preprocessed_file, vec):
 
-    # Returns only field terms if domain _ word _ file exists in the same folder
-    if os.path.exists(domain_word_file) is True:
-        # Read tag data (terms for the field)
-        tag_file = pd.read_csv(domain_word_file)
-        tag = list(tag_file["用語名"])
-        tag = list(set(tag)) # reduce term duplication by using lowercase letters
+    # Returns only field terms if domain_words_file exists in the same folder
+    if os.path.exists(domain_words_file) is True:
+        # Read domain_words data (terms for the field)
+        domain_words_csv = pd.read_csv(domain_words_file)
+        domain_words = list(domain_words_csv["用語名"])
+        domain_words = list(set(domain_words)) # reduce term duplication by using lowercase letters
 
-        return tag
+        return domain_words
 
-    # If domain _ word _ file is not present and domain _ text _ preprocessed _ file is present, returns all text data terms in the field
+    # If domain_words_file is not present and domain _ text _ preprocessed _ file is present, returns all text data terms in the field
     elif os.path.exists(domain_text_preprocessed_file) is True:
         with open(domain_text_preprocessed_file, encoding="utf_8") as f:
             txt = f.read()
@@ -51,10 +51,10 @@ def filt(domain_word_file, domain_text_preprocessed_file, vec):
             words.remove("")
         return words
 
-    # If no duplicate domain _ word _ file or domain _ text _ preprocessed _ file exists, returns all terms learned by word embedding
+    # If no duplicate domain_words_file or domain _ text _ preprocessed _ file exists, returns all terms learned by word embedding
     else:
-        tag = list(vec.item().keys())
-        return tag
+        domain_words = list(vec.item().keys())
+        return domain_words
 
 def check_arg(args, config):
     endslist = [".csv", ".txt", ".npy"]
@@ -74,13 +74,13 @@ def check_arg(args, config):
     return True
 
 def main(args, config):
-    domain_word_file = args.input[0]
+    domain_words_file = args.input[0]
     domain_text_preprocessed_file = args.input[1]
     vector_file = args.input[2]
     output_file = args.output[0]
 
     vec = np.load(file=vector_file, allow_pickle = True)
-    filterddata = filt(domain_word_file, domain_text_preprocessed_file, vec)
+    filterddata = filt(domain_words_file, domain_text_preprocessed_file, vec)
 
     np.save(output_file, filterddata)
     #with open(output_file, 'w') as f:
