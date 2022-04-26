@@ -21,7 +21,7 @@ from nltk.corpus import wordnet as wn
 import subprocess
 import codecs
 
-def hypernym(txt_preprocessed_file, domain_word_file):
+def hypernym(txt_preprocessed_file, domain_words_file):
     # Imort text
     words_pre1 = []
     words_pre2 = []
@@ -35,13 +35,13 @@ def hypernym(txt_preprocessed_file, domain_word_file):
         words_pre2 = list(itertools.chain.from_iterable(words_pre1)) # convert a two-dimensional array to a one-dimensional array
 
     # Import a list of terms in a field, normalize strings of terms
-    tag_file = pd.read_csv(domain_word_file)
-    tag = list(tag_file["用語名"])
-    tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalize term strings to match case
-    tag = list(set(tag)) # normalize term strings and reduce term duplication by using lowercase letters
+    domain_words_csv = pd.read_csv(domain_words_file)
+    domain_words = list(domain_words_csv["用語名"])
+    domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words] # normalize term strings to match case
+    domain_words = list(set(domain_words)) # normalize term strings and reduce term duplication by using lowercase letters
 
     # All terms
-    words = list(set(words_pre2 + tag)) # delete duplicates
+    words = list(set(words_pre2 + domain_words)) # delete duplicates
 
     ########## Extract broader term ##########
     hyper = {} # broader term dictionary ({keys: value} = {term name: broader termx multiple}) for return values
@@ -96,12 +96,12 @@ def check_arg(args, config):
 
 def main(args, config):
     txt_preprocessed_file = args.input[0]
-    domain_word_file = args.input[1]
+    domain_words_file = args.input[1]
     output_file = args.output[0]
 
     mode_switch = config["Hensyugoi"]["HypernymExtraction"]["Algorithm"]
     if mode_switch == "hypernym":
-        hyper = hypernym(txt_preprocessed_file, domain_word_file)
+        hyper = hypernym(txt_preprocessed_file, domain_words_file)
 
     np.save(output_file, hyper)
     #with open(output_file, 'w') as f:
