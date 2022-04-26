@@ -26,28 +26,28 @@ def is_japanese(string):
             return True
     return False
 
-def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain_word_file, voc_uri):
-    # If domain _ word _ file exists in the same folder, extract field terms from domain _ word _ file
-    if os.path.exists(domain_word_file) is True:
+def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain_words_file, voc_uri):
+    # If domain_words_file exists in the same folder, extract field terms from domain_words_file
+    if os.path.exists(domain_words_file) is True:
         # Import a list of terms in a field, normalize strings of terms
-        tag_file = pd.read_csv(domain_word_file)
-        tag_file = tag_file.fillna("")
-        tag = list(tag_file["用語名"])
-        tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalize term strings to match case
-        tag = list(set(tag)) # normalized and lowercase to remove term duplication
+        domain_words_csv = pd.read_csv(domain_words_file)
+        domain_words_csv = domain_words_csv.fillna("")
+        domain_words = list(domain_words_csv["用語名"])
+        domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words] # normalize term strings to match case
+        domain_words = list(set(domain_words)) # normalized and lowercase to remove term duplication
 
     # Check if a column other than the term column exists
-    flag_pref_label = True if('代表語' in tag_file.columns) else False
-    flag_lang = True if('言語' in tag_file.columns) else False
-    flag_uri = True if('代表語のURI' in tag_file.columns) else False
-    flag_broader = True if('上位語のURI' in tag_file.columns) else False
-    flag_other_voc_syn_uri = True if('他語彙体系の同義語のURI' in tag_file.columns) else False
-    flag_term_description = True if('用語の説明' in tag_file.columns) else False
-    flag_created = True if('作成日' in tag_file.columns) else False
-    flag_modified = True if('最終更新日' in tag_file.columns) else False
-    flag_color1 = True if('色1' in tag_file.columns) else False
-    flag_color2 = True if('色2' in tag_file.columns) else False
-    flag_confirmed = True if('確定済み用語' in tag_file.columns) else False
+    flag_pref_label = True if('代表語' in domain_words_csv.columns) else False
+    flag_lang = True if('言語' in domain_words_csv.columns) else False
+    flag_uri = True if('代表語のURI' in domain_words_csv.columns) else False
+    flag_broader = True if('上位語のURI' in domain_words_csv.columns) else False
+    flag_other_voc_syn_uri = True if('他語彙体系の同義語のURI' in domain_words_csv.columns) else False
+    flag_term_description = True if('用語の説明' in domain_words_csv.columns) else False
+    flag_created = True if('作成日' in domain_words_csv.columns) else False
+    flag_modified = True if('最終更新日' in domain_words_csv.columns) else False
+    flag_color1 = True if('色1' in domain_words_csv.columns) else False
+    flag_color2 = True if('色2' in domain_words_csv.columns) else False
+    flag_confirmed = True if('確定済み用語' in domain_words_csv.columns) else False
 
     dic_pref_label = {}
     dic_lang = {}
@@ -60,7 +60,7 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
     dic_color1= {}
     dic_color2= {}
     dic_confirmed= {}
-    for index, row in tag_file.iterrows():
+    for index, row in domain_words_csv.iterrows():
         dic_pref_label[row["用語名"]] = row["代表語"] if flag_pref_label else ""
         dic_lang[row["用語名"]] = row["言語"] if flag_lang else ""
         dic_uri[row["用語名"]] = row["代表語のURI"] if flag_uri else ""
@@ -141,7 +141,7 @@ def main(args, config):
     syn_file = args.input[2]
     hyper_file = args.input[3]
     filterddata_file = args.input[4]
-    domain_word_file = args.input[5]
+    domain_words_file = args.input[5]
     output_file = args.output[0]
 
     pos = np.load(file=pos_file, allow_pickle = True)
@@ -152,7 +152,7 @@ def main(args, config):
 
     tuning = config["Hensyugoi"]["Hensyugoi"]["VectorMagnification"]
     voc_uri = config["Hensyugoi"]["Hensyugoi"]["URI"]
-    hensyugoi(tuning, output_file, pos, vec, syn, hyper, filterddata, domain_word_file, voc_uri)
+    hensyugoi(tuning, output_file, pos, vec, syn, hyper, filterddata, domain_words_file, voc_uri)
 
     #with open(output_file, 'w') as f:
     #    json.dump(vec, f, indent=2, ensure_ascii=False)
