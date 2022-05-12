@@ -726,11 +726,9 @@ class EditingHistory {
     let message = '用語の移動を';
 
     if (this.STR_UNDO === type) {
-      message += '取り消しました。\n \n'
-      message += '( x:' + this.roundNum( history.following.position_x, 2) + ' , y:' + this.roundNum( history.following.position_y, 2) + ') ⇒ ( x:' + this.roundNum( history.previous.position_x, 2) + ' , y:' + this.roundNum( history.previous.position_y, 2) + ')';
+      message += '取り消しました。\n \n';
     } else { // redo
       message += 'やり直しました。\n \n'
-      message += '( x:' + this.roundNum( history.previous.position_x, 2) + ' , y:' + this.roundNum( history.previous.position_y, 2) + ') ⇒ ( x:' + this.roundNum( history.following.position_x, 2) + ' , y:' + this.roundNum( history.following.position_y, 2) + ')';
     }
     return message;
   }
