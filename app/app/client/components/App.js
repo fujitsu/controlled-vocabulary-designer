@@ -11,8 +11,7 @@ import Box from '@material-ui/core/Box';
 
 import ControlPanel from './ControlPanel';
 import VisualizationPanel from './VisualizationPanel';
-import EditPanel from './EditPanel';
-import DialogApiError from './DialogApiError';
+import DialogApiErrorWrap from './DialogApiErrorWrap';
 
 import editingVocabularyStore from '../stores/EditingVocabulary';
 
@@ -412,18 +411,14 @@ class App extends React.Component {
               />
             </Box>
           </Grid>
-          {/* ↓Cannot be deleted because it affects apiErrorDialog. Fixed later */}
+          
           <Box className={this.props.classes.displayNone}>
-            <EditPanel classes={this.props.classes}/>
+            <DialogApiErrorWrap
+              classes={this.props.classes}
+              editingVocabulary={editingVocabularyStore}
+            />
           </Box>
-          {/* ↑Cannot be deleted because it affects apiErrorDialog. Fixed later */}
         </Grid>
-        <DialogApiError
-          open={editingVocabularyStore.apiErrorDialog.open}
-          classes={this.props.classes}
-          close={() => editingVocabularyStore.closeApiErrorDialog()}
-          editingVocabulary={editingVocabularyStore}
-        />
       </div>
     );
   }
