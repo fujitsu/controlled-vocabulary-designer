@@ -1282,6 +1282,8 @@ export default
     const editButtondisabled = editingVocabulary.currentNode.term ? true : false;
     const editButtonsDisableSwitchByFile  = editingVocabulary.selectedFile.id !== 0 ? true : false;
 
+    const sliderValue = editingVocabulary.getTargetFileData(editingVocabulary.selectedFile.id).length > 0 ? this.state.sliderValue: 0;
+
     // for Confirm Button
     let fileId = editingVocabulary.selectedFile.id;
     // Change border color disabled
@@ -1627,8 +1629,9 @@ export default
             }}
             orientation="vertical"
             key={`slider-${this.state.sliderValue}`}
-            defaultValue={this.state.sliderValue}
-            value={this.state.sliderValue}
+            defaultValue={0}
+            // value={this.state.sliderValue}
+            value={sliderValue}
             aria-labelledby="vertical-slider"
             marks={zoomMarks}
             step={this.sliderStep}
