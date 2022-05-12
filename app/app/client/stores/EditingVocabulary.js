@@ -2124,6 +2124,13 @@ class EditingVocabulary {
       if( !tmpData || position_x === null){
         continue;
       }
+      
+      const history = new History('position', item.id);
+      history.previous = { position_x: Number(item.position_x), position_y: Number(item.position_y)};
+      history.following ={ position_x:             position_x , position_y:             position_y };
+      history.targetId = item.id;
+   
+      editingHistoryStore.addHistory(history);
 
       item.position_x = position_x;
       item.position_y = position_y;
