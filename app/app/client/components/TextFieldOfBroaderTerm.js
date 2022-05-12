@@ -160,7 +160,35 @@ export default
                 renderOption={(option, {selected}) => (
                   <React.Fragment>
                     <div style={{width: '100%'}}>
-                      <Box
+                      
+                      <Box display="flex" flexDirection="row" alignItems="center">
+                        <Box
+                          component="span"
+                          display="inline"
+                          style={{fontSize: '16px',whiteSpace: 'nowrap'}}
+                        >
+                          {option}
+                        </Box>
+                        <Box
+                          component="span"
+                          display="inline"
+                          title={
+                            this.props.editingVocabulary.getReferenceFromData(
+                                option,
+                                'broader_term',
+                            )
+                          }
+                          style={{fontSize: '10px',whiteSpace: 'nowrap',textOverflow: 'ellipsis', overflowX: 'hidden', marginLeft: '10px'}}
+                        >
+                          {
+                            this.props.editingVocabulary.getReferenceFromData(
+                                option,
+                                'broader_term',
+                            )
+                          }
+                        </Box>
+                      </Box>
+                      {/* <Box
                         component="span"
                         display="block"
                         style={{fontSize: '16px'}}
@@ -176,7 +204,7 @@ export default
                             option,
                             'broader_term',
                         )}
-                      </Box>
+                      </Box> */}
                     </div>
                   </React.Fragment>
                 )}
