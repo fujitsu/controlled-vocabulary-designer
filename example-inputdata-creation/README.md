@@ -1,44 +1,39 @@
-# Input data creation example
+# 入力用データ作成例
+編集用語彙、参照用語彙、コーパスの作成例です。
 
-Example of generating editing vocabulary, reference vocabulary and corpus.
 
-
-## How to generate
-
-1. Put wiki.txt and tag.csv in mountdir/data/. (The examples of wiki.txt and tag.csv are shown near the bottom of this README)
+## 作成方法
+1. wiki.txtとtag.csvをmountdir/data/に置きます。（wiki.txtとtag.csvのサンプルは、このREADMEの下部に提示しています。）
 2. ```$ cd example-inputdata-creation```
 3. ```$ docker-compose build --build-arg HOST_USER_ID=$(id -u)```
 4. ```$ docker-compose run python /bin/bash```
 
-### Case editing vocabulary and corpus
+### 編集用語彙とコーパスを作成する場合
+5. ```$ ./Hensyugoi.sh```. 以下のファイルが生成されます。
+   * Hensyugoi.csv (編集用語彙)
+   * wiki_wakati_preprocessed.txt (コーパス)
 
-5. ```$ ./Hensyugoi.sh```. The following will be generated.
-   * Hensyugoi.csv (editing vocabulary)
-   * wiki_wakati_preprocessed.txt (corpus)
 
-
-### Case reference vocabulary
-
-6. ```$ ./Sansyougoi.sh```. The following will be generated.
-   * SansyougoiAll.xlsx (reference vocabulary)
+### 参照用語彙を作成する場合
+6. ```$ ./Sansyougoi.sh```. 以下のファイルが生成されます。
+   * SansyougoiAll.xlsx (参照用語彙)
 
 
 ## configure
-
-You can change the settings in 'config.json'.
+「config.json」で設定を変更することができます。
 
 |key1(Category)|key2(Phase)|key3(Param)|key4(Config)|value type|default value|detail|
 | --- | --- | --- | --- | --- | --- | --- |
-|Hensyugoi|Hensyugoi|-----------|VectorMagnification|Number|10|vector magnification.|
-|Hensyugoi|WordEmbedding|-----------|Algorithm|String|word2vec|Select to word embedding algorithm.(word2vec or fasttext)|
-|Hensyugoi|SynonymExtraction|-----------|SimilarityThreshold|Number|0.30|Synonym is filtering by threshold.|
-|Hensyugoi|SynonymExtraction|-----------|SimilarityLimit|Number|10|Find the top-N most similar words.|
-|Hensyugoi|HypernymExtraction|-----------|Algorithm|String|hypernym|Use wordnet.|
-|SanSyogoi|ExternalVocabulary|-----------|Algorithm|String|wordnet|algorithm change(wordnet, CVO).|
-|SanSyogoi|ExternalVocabulary|CVO|File|String|cvo_ver_2_03.ttl|Read file name.<br>Only Japanese is extracted from prefLabel.<br>If a term with the same name exists, the altLabel term will not be registered. (Register only prefLabel terms)<br>If the term has the same name as the broader, it will not be registered in the broader.<br>address:http://www.cavoc.org/cvo.php |
-|SanSyogoi|WordEmbedding2|-----------|poincare.epochs|Number|2000|Number of iterations (epochs) over the corpus.|
+|Hensyugoi|Hensyugoi|-----------|VectorMagnification|Number|10|分散表現モデルによって計算される用語ベクトルの長さの倍率|
+|Hensyugoi|WordEmbedding|-----------|Algorithm|String|word2vec|分散表現モデル（word2vecあるいはfasttextを選択）|
+|Hensyugoi|SynonymExtraction|-----------|SimilarityThreshold|Number|0.30|分散表現モデルによる用語間の類似度計算の閾値|
+|Hensyugoi|SynonymExtraction|-----------|SimilarityLimit|Number|10|分散表現モデルによって計算される類似語上位数の閾値|
+|Hensyugoi|HypernymExtraction|-----------|Algorithm|String|hypernym|上位語推定アルゴリズム（デフォルトではwordnetを使用）|
+|SanSyogoi|ExternalVocabulary|-----------|Algorithm|String|wordnet|参照用語彙（wordnetあるいはCVOを選択）|
+|SanSyogoi|ExternalVocabulary|CVO|File|String|cvo_ver_2_03.ttl|既存語彙のファイル名。<br>※skos:prefLabelの日本語のみを抽出する。同じ用語名が重複して存在する場合は、skos:altLabelの方は無視する。（skos:prefLabelだけを抽出する）また、用語名が上位語と同じ場合は上位語として登録しない。CVOのURL:http://cavoc.org/cvo/ |
+|SanSyogoi|WordEmbedding2|-----------|poincare.epochs|Number|2000|モデル学習のイテレーション数（エポック数）|
 
-## Example of wiki.txt
+## wiki.txtのサンプル
 
 ```
 <doc id="5" url="https://ja.wikipedia.org/wiki?curid=5" title="アンパサンド">
@@ -69,7 +64,7 @@ SGML、XML、HTMLでは、アンパサンドを使ってSGML実体を参照す�
 </doc>
 ```
 
-## Example of tag.csv
+## tag.csvのサンプル
 
 ```
 ２拠点生活,
