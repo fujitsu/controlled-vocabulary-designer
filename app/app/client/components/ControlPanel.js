@@ -16,6 +16,7 @@ import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
 import DialogFileSelecter from './DialogFileSelecter';
 import DialogFileDownload from './DialogFileDownload';
@@ -262,13 +263,28 @@ export default class ControlPanel extends React.Component {
             onClick={this.undo.bind(this)}  
             size="large" 
             className={this.props.classes.buttonsTop}> 
-            <UndoIcon/>取り消し
+            <UndoIcon className={this.props.classes.conpaneIcon}/>取り消し
           </Button>
           <Button 
             onClick={this.redo.bind(this)}  
             size="large" 
             className={this.props.classes.buttonsTop}> 
-            <RedoIcon/>やり直し
+            <RedoIcon className={this.props.classes.conpaneIcon}/>やり直し
+          </Button>
+          <Button 
+            size="large" 
+            className={this.props.classes.buttonsTop}
+            href='https://fujitsu.github.io/controlled-vocabulary-designer/'
+            target="_blank"
+            rel="noopener"
+          > 
+            <OpenInNewIcon className={this.props.classes.conpaneIcon}/>ヘルプ
+          </Button>
+          <Button 
+            onClick={(e)=>this.handleEditPopoverOpen(e)}
+            size="large" 
+            className={this.props.classes.buttonsTop}> 
+            <ExpandMoreIcon />語彙基本情報
           </Button>
           <Button 
             onClick={(e)=>this.handleEditPopoverOpen(e)}

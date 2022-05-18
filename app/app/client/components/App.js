@@ -4,6 +4,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import {grey} from '@material-ui/core/colors';
 import {withStyles} from '@material-ui/core/styles';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
@@ -21,7 +22,39 @@ const useStyles = (theme) => ({
   '@global': {
     body: {
       backgroundColor: theme.palette.common.white,
+      overflowY: 'hidden !important',
+      margin:'0 !important',
+      padding:0,
+    },
+    
+    '.inputTextWrap': {
+      width: "100%",
+      overflowY: "hidden",
+      overflowX: "scroll",
+      scrollbarWidth: 'thin',      
+    },
+    '.inputTextMultiWrap':{
+      backgroundColor: 'white',  
+      borderRadius: 0,
+      padding: 0,
+      width: "100%",
+      height: '5em',
       overflowY: 'scroll',
+      overflowX: 'scroll',  
+    },
+    
+    '.inputTextMultiWrap>textarea':{
+      overflowY: 'scroll',  
+
+    },
+    
+    '.inputTextWrap::-webkit-scrollbar, .inputTextMultiWrap::-webkit-scrollbar, .inputTextMultiWrap>textarea::-webkit-scrollbar': {
+      width: '5px',
+      height: '5px',
+      backgroundColor: '#eee', /* or add it to the track */
+    },
+    '.inputTextWrap::-webkit-scrollbar-thumb, .inputTextMultiWrap::-webkit-scrollbar-thumb, .inputTextMultiWrap>textarea::-webkit-scrollbar-thumb': {
+      background: '#ccc',
     },
     
     '.inputTextWrap': {
@@ -60,12 +93,9 @@ const useStyles = (theme) => ({
   },
 
   'mainPanel': {
-    width: '97vw',
-    height: '90vh',
-  },
-
-  'colorChartCheckBox': {
-    marginRight: '-6px',
+    width: '100vw',
+    height: '98vh',
+    backgroundColor: '#E3E3E3',
   },
 
   'autocompleteInputRoot': {
@@ -83,6 +113,51 @@ const useStyles = (theme) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.15)',
   },
 
+  'sliderDivRoot': {
+    height: '400px',  
+    width: '50px',
+    position: 'absolute',
+    left: '15px',
+    bottom: '15px',
+    zIndex: 1,
+    backgroundColor: 'white',
+  },
+  
+  'sliderRoot':{
+    height: '300px !important',  
+    padding: '0 23px !important',
+  },
+
+
+  'sliderRail':{
+    backgroundColor: grey[300],
+    marginLeft:'-3px !important',
+    width: '7px !important',
+    borderRadius: '4px !important',
+
+  },
+
+  'sliderTrackt':{
+    backgroundColor: grey[600],
+    marginLeft:'-3px !important',
+    width: '7px !important',
+    borderRadius: '4px !important',
+  },
+  'sliderThumb':{
+    backgroundColor: 'white',
+    border: `2px solid ${grey[600]}`,
+    marginLeft:'-4px !important',
+    width: '8px !important',
+    height: '8px !important',  
+  },
+
+  sliderMark:{
+    backgroundColor: grey[400],
+    marginLeft:'-4px !important',
+    width: '8px !important',
+
+  },
+
   'displayNone': {
     display: 'none',
   },
@@ -94,52 +169,19 @@ const useStyles = (theme) => ({
     flexWrap: 'nowrap',
   },
 
-  'width100': {
-    width: '100%',
-  },
-
-  'noWrap': {
-    whiteSpace: 'nowrap',
-  },
-
-  'underlineNone': {
-    '&:before': {
-      border: '0px',
-    },
-    '&:after': {
-      border: '0px',
-    },
-  },
-
   'searchRoot': {
-    position: 'absolute',
+    marginRight: '3px',
+  },
+
+  'selectIcon': {
     zIndex: 1,
-    marginTop: '0',
-    backgroundColor: 'white',
-  },
-
-  'search': {
     position: 'relative',
-    width: '100%',
+    left: '35px',
+    top: '4px',
   },
 
-  'searchIcon': {
-    width: '60%',
-    height: '100%',
-  },
-
-  'inputRoot': {
-    color: 'inherit',
-    width: '100%',
-  },
-
-  'inputInput': {
-    paddingLeft: theme.spacing(4),
-    width: '100%',
-  },
-
-  'exampleInput': {
-    padding: theme.spacing(1),
+  'conpaneIcon': {
+    marginRight: '5px',
   },
 
   'muiDialogTitle': {
@@ -163,7 +205,7 @@ const useStyles = (theme) => ({
     backgroundColor: '#555555',
     minHeight: '35px',
     height: '35px',
-    width: '97vw',
+    width: '100vw',
     "& .MuiTabs-indicator": {
       display: "none",
     }
@@ -186,18 +228,9 @@ const useStyles = (theme) => ({
     'selected': {},
   },
   'selected': {},
-
-  'tabToolTip': {    
-    backgroundColor: '#f5f5f9',
-    color: 'rgba(0, 0, 0, 0.87)',
-    // maxWidth: 220,
-    // fontSize: theme.typography.pxToRem(12),
-    // border: '1px solid #dadde9',
-    marginTop: '-20px',
-  },
   
   'visualizationVocabularyHead': {
-    width: '97vw',
+    width: '100vw',
     height: '50px',
     margin: 0,
     position: 'absolute',
@@ -214,7 +247,19 @@ const useStyles = (theme) => ({
 
   'buttons': {
     marginTop:'0',
-    marginRight:'16px',
+    marginRight:'8px',
+    backgroundColor: '#555555',
+    borderRadius: '0',
+    boxShadow: 'none',
+  },
+
+  'buttonPrimary': {
+    borderRadius: '0',
+    boxShadow: 'none',
+  },
+
+  'buttonsGrp': {
+    marginTop:'0',
     backgroundColor: '#555555',
     borderRadius: '0',
     boxShadow: 'none',
@@ -227,6 +272,20 @@ const useStyles = (theme) => ({
     boxShadow: 'none',
   },
 
+  'buttonsDelete': {
+    marginTop:'0',
+    marginRight:'8px',
+    borderRadius: '0',
+    boxShadow: 'none',
+  },
+
+  'popoverPanelRoot': {
+    backgroundColor: "#66666680",
+  },
+  'popoverPanelpaper': {
+    borderRadius: '0',
+  },
+  
   'popoverTitle': {
     minWidth: "90%",
     paddingLeft: "20px",
@@ -255,12 +314,6 @@ const useStyles = (theme) => ({
     position: 'absolute',
     right: theme.spacing(1),
     top:   '4px',
-  },
-
-  'dlgFileDownloadTitle': {
-    justifyContent: "space-between",
-    paddingRight: '15px',
-
   },
 
   'editPanelVoc': {
@@ -349,11 +402,24 @@ const useStyles = (theme) => ({
     minWidth: '300px',
   },
 
-  'iconImg': {
-    padding: theme.spacing(1),
-    marginLeft: theme.spacing(3),
-    width: '119px',
-    height: '75px',
+  'selectTermForm': {
+    width: '100%',
+  },
+
+  'textInp':{
+    backgroundColor: 'white',  
+    borderRadius: 0,
+    padding: 0,
+    height: 'auto',
+    flexWrap: 'nowrap',
+    overflowY: 'hidden',
+    overflowX: 'scroll',
+
+    '& input':{
+    },
+    '& fieldset':{
+    },
+
   },
 
   'textInp':{
@@ -373,8 +439,19 @@ const useStyles = (theme) => ({
   },
 
   'selectTerm': {
-    width: '100%',
-    textAlign: 'center',
+    height: '40px',
+  },
+  'inputTextWrap': {
+    width: "100%",
+    overflowY: "hidden",
+    overflowX: "scroll",
+    scrollbarWidth: 'thin',
+    '& ::WebkitScrollbar': {
+      width: '8px',
+      height: '8px',
+      backgroundColor: 'red',
+    }
+    
   },
   'inputTextWrap': {
     width: "100%",
@@ -439,6 +516,7 @@ class App extends React.Component {
       sFileName1: '',
       sFileName2: '',
       sFileName3: '',
+      fileLoadCount: 0,
     };
   }
   /**
@@ -474,6 +552,7 @@ class App extends React.Component {
   onReadFileChange(){
 
     this.readFileSet();
+    this.setState({fileLoadCount : ++this.state.fileLoadCount })
   }
 
   /**
@@ -495,18 +574,19 @@ class App extends React.Component {
         </Grid>
         <Grid container>
           <Grid item xs={12}>
-            <Box border={1} className={this.props.classes.mainPanel}>
+            <Box className={this.props.classes.mainPanel}>
               <VisualizationPanel 
                 classes={this.props.classes}
                 hensyuName0={this.state.sFileName0}
                 sansyouName1={this.state.sFileName1}
                 sansyouName2={this.state.sFileName2}
                 sansyouName3={this.state.sFileName3}
+                fileLoadCount={this.state.fileLoadCount}
               />
             </Box>
           </Grid>
           {/* ↓Cannot be deleted because it affects apiErrorDialog. Fixed later */}
-          <Box border={1} className={this.props.classes.displayNone}>
+          <Box className={this.props.classes.displayNone}>
             <EditPanel classes={this.props.classes}/>
           </Box>
           {/* ↑Cannot be deleted because it affects apiErrorDialog. Fixed later */}

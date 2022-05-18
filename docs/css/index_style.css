@@ -1,0 +1,237 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+
+/************ コンテンツのフォントサイズを変更するには以下を調整 ************/
+body, html {font-size: 14px;}
+/************************************************************************/
+
+.bgimg-1, .bgimg-2, .bgimg-3 {
+  position: relative;
+  background-attachment: fixed;
+  background-position: center -15em;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+@media only screen and (max-device-width: 1024px) {
+    .bgimg-1, .bgimg-2, .bgimg-3 {background-attachment: scroll;}
+}
+.bgimg-1 {
+    background-image: url("../images/index_bg.png");
+    min-height: 70vh;
+    background-color: #EBEBEB;
+}
+/************ headerロゴの設定 ************/
+#Logo {
+    position: absolute;
+    top: 25%;
+    width: 100%;
+    text-align: center;
+}
+
+.content{
+    background-color:#fff;
+    padding:10vh 0px 10vh;
+    text-align:center;
+}
+.content h1 {
+    font-size: 4vw;
+    line-height: 1.1;
+    letter-spacing: 0.3em;
+    color: #222;
+    margin-bottom: 0.5em;
+}
+.content p {
+    font-size: 1.8vw;
+    line-height: 2.0;
+    margin-bottom: 2em;
+}
+@media screen and (min-width: 1200px) {
+    .content h1 {font-size: 2.8rem;}
+    .content p {font-size: 1.4rem;}
+}
+.content figure {
+    position: relative;
+    margin: 0 auto 0;
+    max-width: 1000px;
+}
+.content figure img {
+    width: 90%;
+    max-width: 1000px;
+}
+
+.content1 {padding-top: 0;}
+.content1 h1 {margin-top: 7vh;}
+
+#flowchart {
+    background-color: #EBEBEB;
+    border: 1px #CCCCCC solid;
+    margin: 0 auto;
+    width: 90%;
+    max-width: 900px;
+    padding: 1%;
+}
+#flowchart h2{font-size: 1.7vw;}
+#flowchart h2 + p {
+    font-size: 1.3vw;
+    line-height: 1.1;
+    margin-bottom: 1em;
+}
+#flowchart dl {
+    font-size: 1.2vw;
+    font-weight: 600;
+    text-align: center;
+    list-style: none;
+    margin: 0 1.4em 0 0;
+    padding: 0;
+    display: inline-block;
+    width: 22%;
+    vertical-align: top;
+}
+#flowchart dl dt, #flowchart dl dd {
+    margin: 0;
+    padding: 0;
+}
+#flowchart dt+dd {
+    background-color: #bcbcbc;
+    color: #fff;
+    position: relative;
+    height: 2em;
+    line-height: 2.1em;
+}
+#flowchart dt+dd::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: -2em;
+    border: 1em solid transparent;
+    border-left: 1em solid #bcbcbc;
+}
+#flowchart dl#flow1 {color:#8D7B9A;}
+#flowchart dl#flow2 {color:#5D9EDD;}
+#flowchart dl#flow3 {
+    width: 44%;
+    color:#5C8373;
+}
+#flowchart dl#flow1 dt+dd {background-color:#8D7B9A;}
+#flowchart dl#flow1 dt+dd::after {border-left-color: #8D7B9A;}
+#flowchart dl#flow2 dt+dd {background-color:#5D9EDD;}
+#flowchart dl#flow2 dt+dd::after {border-left-color: #5D9EDD;}
+#flowchart dl#flow3 dt+dd {background-color:#5C8373;}
+#flowchart dl#flow3 dt+dd::after {border-left-color: #5C8373;}
+#flowchart dd#flowArrow {
+    margin-right: -0.8em;
+    margin-left: -0.1em;
+    margin-top: 0.2em;
+    background-image: url(../images/flow_arrow.png);
+    background-repeat: no-repeat;
+    background-size: contain;
+    padding-top: 0.3em;
+}
+
+@media screen and (min-width: 1200px) {
+    #flowchart h2{font-size: 1.4rem;}
+    #flowchart h2 + p {font-size: 1rem;}
+    #flowchart dl {font-size: 1.2rem;}
+}
+
+.content1 figure {margin-top: -1vw;}
+
+.content2 {background-color: #f3f3f3;}
+#Docker {
+    display: inline-block;
+    text-align: left;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1%;
+}
+#Docker h1 {
+    font-size: 2.5vw;
+    font-weight: 400;
+    letter-spacing: 0em;
+    margin-bottom: 0.1em;
+}
+#Docker p {
+    font-size: 1.3vw;
+    line-height: 1.5;
+    margin-bottom: 0;
+}
+@media screen and (min-width: 1200px) {
+    #Docker h1 {font-size: 2rem;}
+    #Docker p {font-size: 1.2rem;}
+}
+
+.content3 {margin: 4.5vh auto;}
+.Button {
+    display: inline-block;
+    margin: 1em;
+    padding: 1.2em 2em 1em;
+}
+.Button p {
+    line-height: 1.1;
+    margin: 0;
+}
+.Button a {
+    color: #fff;
+    font-size: 1.3rem;
+    padding: 1.2em 2em 1em;
+    background-color: #0082FF;
+    border-radius: 5px;
+    display: block;
+    width: 15em;
+}
+.Button a img {
+    width: 1em;
+    margin-right: 0.5em;
+}
+.sticky {
+    background-color: #f3f3f3;
+    margin: 0vh auto;
+    padding: 0;
+    position: sticky;
+    top: -1px;
+    z-index: 10;
+}
+
+.bgimg-2 {}
+
+.bgimg-3 {}
+
+
+
+
+
+/************ footerブロックの設定 ************/
+
+#footerArea {
+    width: 100%;
+    position: absolute;
+    top: 35%;
+    text-align: center;
+}
+#footer {
+    display: inline-block;
+    background-color: #ccc;
+    padding: 2% 3%;
+    margin: 0 auto;
+    text-align: center
+}
+#footer h1 {
+    font-size: 5vw;
+    line-height: 1.1;
+    letter-spacing: 0.3em;
+    color: #222;
+    margin-bottom: 0;
+}
+#footer p {
+    font-size: 1.2rem;
+    line-height: 1.1;
+    margin-bottom: 0;
+}
+@media screen and (max-width: 800px) {
+    #footer h1 {font-size: 2.5rem;}
+}
+@media screen and (min-width: 1200px) {
+    #footer h1 {font-size: 4rem;}
+}
+

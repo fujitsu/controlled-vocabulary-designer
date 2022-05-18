@@ -70,19 +70,6 @@ export default class VisualizationPanel extends React.Component {
     const sansyouName1 = this.props.sansyouName1; 
     const sansyouName2 = this.props.sansyouName2; 
     const sansyouName3 = this.props.sansyouName3; 
-    
-
-    // const LightTooltip = withStyles((theme) => ({
-    //   tooltip: {
-    //     backgroundColor: theme.palette.common.white,
-    //     color: 'rgba(0, 0, 0, 0.87)',
-    //     // boxShadow: theme.shadows[1],
-    //     marginTop: '-50px',
-    //     marginLeft: '50px',
-    //     border: '1px #eee solid',
-    //     fontSize: 11,
-    //   },
-    // }))(Tooltip);
 
     return(
       <div className={this.props.classes.root}>
@@ -95,42 +82,36 @@ export default class VisualizationPanel extends React.Component {
           scrollButtons="auto"
           classes={{root: this.props.classes.tabs}}
         >
-          {/* <LightTooltip title={hensyuName0} > */}
-            <Tab
-              label="編集用語彙"
-              {...this.a11yProps(0)}
-              classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
-            />
-          {/* </LightTooltip>
-          <LightTooltip title={sansyouName1} > */}
-            <Tab
-              label="参照用語彙1"
-              {...this.a11yProps(1)}
-              classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
-              disabled={ !sansyouName1}
-            />
-          {/* </LightTooltip>
-          <LightTooltip title={sansyouName2} > */}
-            <Tab
-              label="参照用語彙2"
-              {...this.a11yProps(2)}
-              classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
-              disabled={ !sansyouName2}
-            />
-          {/* </LightTooltip>
-          <LightTooltip title={sansyouName3} > */}
-            <Tab
-              label="参照用語彙3"
-              {...this.a11yProps(3)}
-              classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
-              disabled={ !sansyouName3}
-            />
-          {/* </LightTooltip> */}
+          <Tab
+            label="編集用語彙"
+            {...this.a11yProps(0)}
+            classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
+          />
+          <Tab
+            label="参照用語彙1"
+            {...this.a11yProps(1)}
+            classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
+            disabled={ !sansyouName1}
+          />
+          <Tab
+            label="参照用語彙2"
+            {...this.a11yProps(2)}
+            classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
+            disabled={ !sansyouName2}
+          />
+          <Tab
+            label="参照用語彙3"
+            {...this.a11yProps(3)}
+            classes={{root: this.props.classes.tab,  selected: this.props.classes.selected}}
+            disabled={ !sansyouName3}
+          />
         </Tabs>
         <VisualizationPanelVocabularyTab
           ref={editingVocabularyStore.visualVocRef}
           classes={this.props.classes}
           editingVocabulary={editingVocabularyStore}
+          fileLoadCount={this.props.fileLoadCount}
+          fileId={editingVocabularyStore.selectedFile.id}
         />
       </div>
     );
@@ -143,4 +124,5 @@ VisualizationPanel.propTypes = {
   sansyouName1: PropTypes.string,
   sansyouName2: PropTypes.string,
   sansyouName3: PropTypes.string,
+  fileLoadCount: PropTypes.number,
 };

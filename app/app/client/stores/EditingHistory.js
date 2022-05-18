@@ -291,6 +291,8 @@ class EditingHistory {
                 data.broader_term,
                 data.term_description,
             );
+        // addData.position_x = data.position_x;
+        // addData.position_y = data.position_y;
         updateList.push(addData);
       });
       upSynList.forEach((data) => {
@@ -333,6 +335,8 @@ class EditingHistory {
             data.broader_term,
             data.term_description,
         );
+        // addData.position_x = data.position_x;
+        // addData.position_y = data.position_y;
         updateList.push(addData);
       });
       upSynList.forEach((data) => {

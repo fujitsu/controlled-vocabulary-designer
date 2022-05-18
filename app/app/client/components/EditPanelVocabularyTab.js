@@ -20,24 +20,10 @@ import CreateIcon from '@material-ui/icons/Create';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 
-import {grey} from '@material-ui/core/colors';
-import {brown} from '@material-ui/core/colors';
-import {red} from '@material-ui/core/colors';
-import {orange} from '@material-ui/core/colors';
-import {yellow} from '@material-ui/core/colors';
-import {lightGreen} from '@material-ui/core/colors';
-import {green} from '@material-ui/core/colors';
-import {lightBlue} from '@material-ui/core/colors';
-import {blue} from '@material-ui/core/colors';
-import {deepPurple} from '@material-ui/core/colors';
-import {purple} from '@material-ui/core/colors';
-
 import DialogApiError from './DialogApiError';
 
 import {observer} from 'mobx-react';
 
-import ColorChartCheckBoxes from './ColorChartCheckBoxes';
-import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
 import SelectOfTerm from './SelectOfTerm';
 import TextFieldOfSynonym from './TextFieldOfSynonym';
 import TextFieldOfPreferredLabel from './TextFieldOfPreferredLabel';
@@ -46,6 +32,7 @@ import TextFieldOfUri from './TextFieldOfUri';
 import TextFieldOfBroaderTerm from './TextFieldOfBroaderTerm';
 import TextFieldOfSubordinateTerm from './TextFieldOfSubordinateTerm';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
+import DialogOkCancel from './DialogOkCancel';
 import TextFieldOfTermDescription from './TextFieldOfTermDescription'; 
 import TextFieldOfOtherVocSynUri from './TextFieldOfOtherVocSynUri'; 
 
@@ -72,108 +59,9 @@ export default
       broadertermact: false,
       termdescriptionact: false, 
       defalutValue: this.props.editingVocabulary.currentNode.language,
-    };
-
-    this.switchStyles = {
-      'black': {
-        'color': grey[700],
-        '&$checked': {
-          color: grey[900],
-        },
-        '&$checked + $track': {
-          backgroundColor: grey[200],
-        },
-      },
-      'brown': {
-        'color': grey[700],
-        '&$checked': {
-          color: brown[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: brown[200],
-        },
-      },
-      'red': {
-        'color': grey[700],
-        '&$checked': {
-          color: red[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: red[200],
-        },
-      },
-      'orange': {
-        'color': grey[700],
-        '&$checked': {
-          color: orange[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: orange[200],
-        },
-      },
-      'yellow': {
-        'color': grey[700],
-        '&$checked': {
-          color: yellow[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: yellow[200],
-        },
-      },
-      'lightGreen': {
-        'color': grey[700],
-        '&$checked': {
-          color: lightGreen[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: lightGreen[200],
-        },
-      },
-      'green': {
-        'color': grey[700],
-        '&$checked': {
-          color: green[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: green[200],
-        },
-      },
-      'lightBlue': {
-        'color': grey[700],
-        '&$checked': {
-          color: lightBlue[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: lightBlue[200],
-        },
-      },
-      'blue': {
-        'color': grey[700],
-        '&$checked': {
-          color: blue[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: blue[200],
-        },
-      },
-      'deepPurple': {
-        'color': grey[700],
-        '&$checked': {
-          color: deepPurple[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: deepPurple[200],
-        },
-      },
-      'purple': {
-        'color': grey[700],
-        '&$checked': {
-          color: purple[500],
-        },
-        '&$checked + $track': {
-          backgroundColor: purple[200],
-        },
-      },
+      dlgDeleteTermOpen: false,   // dialog for delete term confirm
+      termdescriptionact: false, 
+      defalutValue: this.props.editingVocabulary.currentNode.language,
     };
   }
 
@@ -240,6 +128,34 @@ export default
   }
 
   /**
+   * Term delete dialog open
+   */
+   handleTermDelete(){
+    let mess =  '「' + this.props.editingVocabulary.currentNode.term +'」';
+    this.message = mess+"\nを削除します。よろしいですか？";
+    this.setState({dlgDeleteTermOpen: true});  
+  }
+
+  /**
+   * Term delete dialog close
+   */
+  handleDeleteTermClose(){
+    this.message = '';
+    this.setState({dlgDeleteTermOpen: false});
+    
+    this.props.editingVocabulary.deleteVocabulary();
+    this.props.close();
+  }
+
+  /**
+   * Term delete dialog Cancel
+   */
+  handleDeleteTermCancelClose(){
+    this.message = '';
+    this.setState({dlgDeleteTermOpen: false});
+  } 
+
+  /**
    * Error dialog open
    * @param  {string} ret - error content
    */
@@ -275,6 +191,8 @@ export default
     const ret = this.props.editingVocabulary.updateVocabulary();
     if (ret !== '') {
       this.errorDialogOpen(ret);
+    }else{
+      this.props.close();
     }
   }
 
@@ -360,21 +278,11 @@ export default
      ( !isConfirm && this.props.editingVocabulary.currentNode.id) ||
        ( !this.props.editingVocabulary.currentNode.id) ? false : true;
 
-    // Fix button text
-    let confirmButtonText = '確定';
-    if (disabledTextField) {
-      confirmButtonText = '確定解除';
-    }
-
     return (
       <div className={this.props.classes.editPanelVoc} onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
-    
-
         {/* <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}> */}
-        
         <Grid container spacing={2}>
           <Box p={1} width="400px">
-
             <Grid container spacing={2}>
               <Grid item xs={12}>
                 <Box>
@@ -567,7 +475,6 @@ export default
                 </Box>
               </Grid>
             </Grid>
-
             <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
               <Grid item xs={2}>
                 <Box mt={1}>
@@ -608,99 +515,70 @@ export default
             <Grid container>
               <Grid item xs={5}>
               </Grid>
+            </Grid>
+
+            <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
               <Grid item xs={2}>
-                <Box mt={1} pl={2}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size={'small'}
-                    onClick={()=>this.updateVocabulary()}
-                    disabled={!isCurrentNodeChanged}
-                  >
-                    反映
-                  </Button>
-                  <DialogUpdateVocabularyError
-                    onClose={() => this.errorDialogClose()}
-                    open={this.state.open}
+                <Box mt={1}>
+                  他語彙体系の同義語のURI
+                </Box>
+              </Grid>
+              <Grid item xs={10}>
+                <Box>
+                  <TextFieldOfOtherVocSynUri
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
-                    isFromEditPanel={true}
-                    reason={this.state.reason}
+                    fileId={fileId}
                   />
                 </Box>
               </Grid>
-              <Grid item xs={5}>
-                {/* <Box mt={1}>
-                  <Button
-                    ml={3}
-                    variant="contained"
-                    color="primary"
-                    size={'small'}
-                    disabled={disabledConfirm}
-                    onClick={()=>this.toggleConfirm(!isConfirm)}
-                  >
-                    {confirmButtonText}
-                  </Button>
-                </Box> */}
-              </Grid>
             </Grid>
 
+            <Grid container>
+              <Grid item xs={5}>
+              </Grid>
+              <Grid item xs={2}>
+                <Button
+                  className={this.props.classes.buttonPrimary}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  onClick={()=>this.updateVocabulary()}
+                  disabled={!isCurrentNodeChanged}
+                >
+                  反映
+                </Button>
+                <DialogUpdateVocabularyError
+                  onClose={() => this.errorDialogClose()}
+                  open={this.state.open}
+                  classes={this.props.classes}
+                  editingVocabulary={this.props.editingVocabulary}
+                  isFromEditPanel={true}
+                  reason={this.state.reason}
+                />
+              </Grid>
+              <Grid item>
+                <Button
+                  className={this.props.classes.buttonsDelete}
+                  ml={3}
+                  variant="contained"
+                  color="secondary"
+                  size={'small'}
+                  onClick={(e)=>this.handleTermDelete(e)}
+                >
+                  削除
+                </Button>
+                <DialogOkCancel
+                  onOkClose={() => this.handleDeleteTermClose()}
+                  onCancel={() =>this.handleDeleteTermCancelClose()}  
+                  open={this.state.dlgDeleteTermOpen}
+                  classes={this.props.classes}
+                  message={this.message}
+                />
+              </Grid>
+            </Grid>
           </Box>
         </Grid>
-
-        <hr style={{ color: 'grey', }} />
-
-        <Grid container spacing={2}>
-          <Grid item xs={3}>
-            <Box mt={1}>
-              枠線色
-            </Box>
-          </Grid>
-          <Grid item xs={9}>
-            <Box>
-              <ColorChartCheckBoxes
-                colorId="color1"
-                classes={this.props.classes}
-                currentId={this.props.editingVocabulary.currentNode.id}
-                color={this.props.editingVocabulary.currentNode.color1}
-                selectColor={(currentId, colorId, color) =>
-                  this.props.editingVocabulary.updateColor(currentId,
-                      colorId, color)
-                }
-                tmpColor={this.props.editingVocabulary.tmpBorderColor}
-                selectTmpColor={(id, color) =>
-                  this.props.editingVocabulary.selectTmpBorderColor(
-                      id, color)
-                }
-                disabled={disabledColor}
-              />
-            </Box>
-          </Grid>
-        </Grid>
-
-
-        {/* <Grid container spacing={2}>
-
-          <Grid item xs={3}>
-            <Box mt={1} ml={2}>
-              確定色
-            </Box>
-          </Grid>
-
-          <Grid item xs={9}>
-            <Box>
-              <ColorChartCheckBoxesOfConfirm
-                classes={this.props.classes}
-                currentId={this.props.editingVocabulary.currentNode.id}
-                color={this.props.editingVocabulary.confirmColor}
-                selectColor={(color) =>
-                  this.seletConfirmColor(color)
-                }
-              />
-            </Box>
-          </Grid>
-
-        </Grid> */}
 
         <DialogApiError
           open={this.props.editingVocabulary.apiErrorDialog.open}
@@ -716,4 +594,5 @@ export default
 EditPanelVocabularyTab.propTypes = {
   editingVocabulary: PropTypes.object,
   classes: PropTypes.object,
+  close: PropTypes.func,
 };
