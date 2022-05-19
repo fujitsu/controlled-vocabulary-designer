@@ -29,7 +29,7 @@ import $ from 'jquery';
 
 import DialogApiError from './DialogApiError';
 import EditPanelMetaTab from './EditPanelMetaTab';
-import DialogUpdateVocabularyMetaError from './DialogUpdateVocabularyMetaError';
+import DialogUpdateMetaError from './DialogUpdateMetaError';
 import DialogApiMetaError from './DialogApiMetaError';
 
 /**
@@ -238,7 +238,7 @@ export default class DialogFileSelecter extends React.Component {
           if (undefined != this.state.files[5].file.name) {
             this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
           }
-          this.handleNext();
+          //this.handleNext();
         }).catch((err) => {
           console.log('error callback.');
           this.uploadingEnd();
@@ -446,12 +446,13 @@ export default class DialogFileSelecter extends React.Component {
   /**
    * Update edits
    */
-  updateVocabulary() {
-    const ret = this.props.editingVocabularyMeta.updateVocabulary();
+  updateMetaData() {
+    const ret = this.props.editingVocabularyMeta.updateMetaData();
     if (ret !== '') {
       this.errorDialogOpen(ret);
+    }else{
+      this.handleClose();
     }
-    this.handleClose();
   }
 
   /**
@@ -922,7 +923,7 @@ export default class DialogFileSelecter extends React.Component {
             {this.state.activeStep === 1 && 
             <Button
               color="primary"
-              onClick={()=>this.updateVocabulary()}
+              onClick={()=>this.updateMetaData()}
               className={this.props.classes.stepButton}
             >OK</Button>}
 
@@ -943,7 +944,7 @@ export default class DialogFileSelecter extends React.Component {
           editingVocabulary={this.props.editingVocabulary}
           close={() => this.props.editingVocabulary.closeApiErrorDialog()}
         />
-        <DialogUpdateVocabularyMetaError
+        <DialogUpdateMetaError
           onClose={() => this.errorDialogClose()}
           open={this.state.open}
           classes={this.props.classes}
