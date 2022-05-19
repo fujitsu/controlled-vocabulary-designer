@@ -6,13 +6,9 @@
  
  import Grid from '@material-ui/core/Grid';
  import Box from '@material-ui/core/Box';
- import TextField from '@material-ui/core/TextField';
  import Input from '@material-ui/core/Input';
- import Snackbar from '@material-ui/core/Snackbar';
- import IconButton from '@material-ui/core/IconButton';
- import CloseIcon from '@material-ui/icons/Close';
  
-  import {observer} from 'mobx-react';
+ import {observer} from 'mobx-react';
  
  /**
   * Meta description text filed component
@@ -20,32 +16,6 @@
   */
  export default
  @observer class TextFieldMultiLine extends React.Component {
-   /**
-    * constructor
-    * @param {object} props
-    */
-   constructor(props) {
-     super(props);
-     this.state = {
-       open: false, 
-       message: '',
-     };
-   }
-  
-   /**
-    * Warning displaying snackbar events
-    * @param {String} errorMsg - error message
-    */
-   openSnackbar(errorMsg) {
-     this.setState({open: true, message: errorMsg});
-   }
- 
-   /**
-    * Warning hiding snackbar event
-    */
-   handleClose() {
-     this.setState({open: false, message: ''});
-   };
  
    /**
     * Meta description update event
@@ -80,33 +50,12 @@
                     onChange={(e)=>this.onChange(e)}
                     className={this.props.classes.inputText}
                     style={{backgroundColor: bgcolor, minHeight: '4.7em'}}
-                    defaultValue={tmpMetaDescription}
+                    value={tmpMetaDescription}
                  />
                </div>
              </Box>
            </Grid>
          </form>
-         <Snackbar
-           anchorOrigin={{
-             vertical: 'top',
-             horizontal: 'right',
-           }}
-           open={this.state.open}
-           onClose={() => this.handleClose()}
-           message={this.state.message}
-           action={
-             <React.Fragment>
-               <IconButton
-                 size="small"
-                 aria-label="close"
-                 color="inherit"
-                 onClick={() => this.handleClose()}
-               >
-                 <CloseIcon fontSize="small" />
-               </IconButton>
-             </React.Fragment>
-           }
-         />
        </div>
      );
    }
