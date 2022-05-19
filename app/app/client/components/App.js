@@ -42,7 +42,6 @@ const useStyles = (theme) => ({
       overflowY: 'scroll',
       overflowX: 'scroll',  
     },
-    
     '.inputTextMultiWrap>textarea':{
       overflowY: 'scroll',  
 
@@ -323,6 +322,11 @@ const useStyles = (theme) => ({
     minHeight:'30px',
   },
 
+  'uploading': {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
+
   'selectFileFormat': {
     'width': '120px',
     'height': '30px',
@@ -387,9 +391,38 @@ const useStyles = (theme) => ({
 
   },
 
+  'textInp':{
+    backgroundColor: 'white',  
+    borderRadius: 0,
+    padding: 0,
+    height: 'auto',
+    flexWrap: 'nowrap',
+    overflowY: 'hidden',
+    overflowX: 'scroll',
+
+    '& input':{
+    },
+    '& fieldset':{
+    },
+
+  },
+
   'selectTerm': {
     height: '40px',
   },
+  'inputTextWrap': {
+    width: "100%",
+    overflowY: "hidden",
+    overflowX: "scroll",
+    scrollbarWidth: 'thin',
+    '& ::WebkitScrollbar': {
+      width: '8px',
+      height: '8px',
+      backgroundColor: 'red',
+    }
+    
+  },
+  
   'inputTextWrap': {
     width: "100%",
     overflowY: "hidden",
