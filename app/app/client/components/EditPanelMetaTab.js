@@ -11,7 +11,9 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-
+import Snackbar from '@material-ui/core/Snackbar';
+import IconButton from '@material-ui/core/IconButton';
+import CloseIcon from '@material-ui/icons/Close';
 
 import DialogApiMetaError from './DialogApiMetaError';
 
@@ -23,7 +25,7 @@ import TextFieldOfMetaUri from './TextFieldOfMetaUri';
 import TextFieldOfMetaPrefix from './TextFieldOfMetaPrefix';
 import TextFieldMultiLine from './TextFieldMultiLine';
 import TextFieldOfMetaAuthor from './TextFieldOfMetaAuthor';
-import DialogUpdateVocabularyMetaError from './DialogUpdateVocabularyMetaError'; 
+import DialogUpdateMetaError from './DialogUpdateMetaError'; 
 
 /**
  * Edit Meta Operation panel Vocabulary tab Component
@@ -40,13 +42,17 @@ export default
     super(props);
     this.state = {
       open: false,
+      snackOpen: false, 
+      message: '',
       reason: '',
       metaName: '',
+      metaNameEn: '',
       metaVersion: '',
       metaUri: '',
       metaPrefix: '',
       metaAuthor: '',
       metaDescription: '',
+      metaDescriptionEn: '',
       defalutValue: 'ja', 
     };
   }
@@ -55,17 +61,20 @@ export default
    * Key event registration
    */
   componentDidMount() { 
-      if( undefined != this.props.editingVocabularyMeta.editingVocabularyMeta
-        && undefined != this.props.editingVocabularyMeta.editingVocabularyMeta[0]){          
-          this.setState({
-            metaName: this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_name,
-            metaVersion: this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_version,
-            metaUri: this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_uri,
-            metaPrefix: this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_prefix,
-            metaAuthor: this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_author,
-            metaDescription: this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_description
-          });
-      } 
+    this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
+    const len = this.props.editingVocabularyMeta.editingVocabularyMeta.length - 1; 
+    if( undefined != this.props.editingVocabularyMeta.editingVocabularyMeta[len] ){          
+        this.setState({
+          metaName: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_name,
+          metaNameEn: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_enname,
+          metaVersion: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_version,
+          metaUri: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_uri,
+          metaPrefix: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_prefix,
+          metaAuthor: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_author,
+          metaDescription: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_description,
+          metaDescriptionEn: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_endescription,
+        });
+    } 
   }
 
   /**
@@ -79,16 +88,37 @@ export default
   }
 
   /**
+   * Warning displaying snackbar events
+   * @param {String} errorMsg - error message
+   */
+   openSnackbar(errorMsg) {
+    this.setState({snackOpen: true, message: errorMsg});
+  }
+
+  /**
+   * Warning hiding snackbar event
+   */
+   closeSnackbar() {
+    this.setState({snackOpen: false, message: ''});
+  };
+
+  /**
    * textField
    * @param  {text} value 
   //  */
   changeMetaName( value) {
     if(this.state.defalutValue=='ja') {
       this.props.editingVocabularyMeta.updataMetaName(value);
+      this.setState({metaName: value});
+      if( value.trim() === ''){
+        this.openSnackbar('「語彙の名称」を入力してください。');
+      }else{
+        this.closeSnackbar();
+      }
     }else {
       this.props.editingVocabularyMeta.updataMetaEnName(value);
+      this.setState({metaNameEn: value});
     }
-    this.setState({metaName: value});
   }
   changeMetaVer( value) {
     this.props.editingVocabularyMeta.updataMetaVersion(value);
@@ -97,6 +127,11 @@ export default
   changeMetaUri( value) {
     this.props.editingVocabularyMeta.updataMetaUri(value);
     this.setState({metaUri: value});
+    if( value.trim() === ''){
+      this.openSnackbar('「語彙のURI」を入力してください。');
+    }else{
+      this.closeSnackbar();
+    }
   }
   changeMetaPrefix( value) {
     this.props.editingVocabularyMeta.updataMetaPrefix(value);
@@ -109,10 +144,11 @@ export default
   changeMetaDescription( value) {
     if(this.state.defalutValue=='ja') {
       this.props.editingVocabularyMeta.updataMetaDescription(value);
+      this.setState({metaDescription: value});
     }else {
       this.props.editingVocabularyMeta.updataMetaEnDescription(value);
+      this.setState({metaDescriptionEn: value});
     }
-    this.setState({metaDescription: value});
   }
 
   /**
@@ -133,14 +169,15 @@ export default
   /**
    * Update edits
    */
-  updateVocabulary() {
-    const ret = this.props.editingVocabularyMeta.updateVocabulary();
+  updateMetaData() {
+    
+    const ret = this.props.editingVocabularyMeta.updateMetaData();
     if (ret !== '') {
       this.errorDialogOpen(ret);
+    }else{
+      this.props.close();
     }
   }
-
-
   
   /**
    * radio change
@@ -148,55 +185,39 @@ export default
    */
    handleRadioChange(e){
     this.setState({defalutValue: e.target.value});
-    if( undefined != this.props.editingVocabularyMeta.editingVocabularyMeta
-      && undefined != this.props.editingVocabularyMeta.editingVocabularyMeta[0]){         
-      if (e.target.value=='ja'){ 
-          this.state.metaName = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_name;
-          this.state.metaVersion = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_version;
-          this.state.metaUri = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_uri;
-          this.state.metaPrefix = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_prefix;
-          this.state.metaAuthor = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_author;
-          this.state.metaDescription = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_description;
-      } else{
-          this.state.metaName = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_enname;
-          this.state.metaVersion = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_version;
-          this.state.metaUri = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_uri;
-          this.state.metaPrefix = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_prefix;
-          this.state.metaAuthor = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_author;
-          this.state.metaDescription = this.props.editingVocabularyMeta.editingVocabularyMeta[0].meta_endescription;
-      }
-    } else{
-      console.log("---[handleRadioChange]--not data -", this.props.editingVocabularyMeta.editingVocabularyMeta);
-    }
   }
   
   /**
    * render
    * @return {element}
    */
-  render() {
-        
+  render() {        
     // Firm button disabled condition
-    const isCurrentNodeChanged = true;
-    // const isCurrentNodeChanged =
-    //   this.props.editingVocabularyMeta.isCurrentNodeChanged;
+    const isCurrentNodeChanged =
+      this.props.editingVocabularyMeta.isCurrentNodeChanged;
 
     const disabledTextField = false;
     const bgcolor = disabledTextField?'rgba(0, 0, 0, 0.09)':'rgba(0, 0, 0, 0)'
-
-    const metaName = this.state.metaName ? this.state.metaName : '';
+    let metaName='';
+    let metaDescription='';
+    if(this.state.defalutValue=='ja'){
+      metaName = this.state.metaName ;
+      metaDescription = this.state.metaDescription;
+    }else{
+      metaName = this.state.metaNameEn ;
+      metaDescription = this.state.metaDescriptionEn;
+    }
     const metaVersion = this.state.metaVersion ? this.state.metaVersion : '';
     const metaUri = this.state.metaUri ? this.state.metaUri : '';
     const metaPrefix = this.state.metaPrefix ? this.state.metaPrefix : '';
     const metaAuthor = this.state.metaAuthor ? this.state.metaAuthor : '';
-    const metaDescription = this.state.metaDescription ? this.state.metaDescription : '';
 
     return (
       <div onKeyDown={(e)=>this.handleKeyDown(e)}>
 
       {/* <div> */}
         <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
-          <Box p={1} width="430px" height='520px' style={{ overflowX: 'hidden', overflowY: 'auto'}}>
+          <Box p={1} width="430px" height='100%' padding='20px' style={{ overflowX: 'hidden', overflowY: 'auto'}}>
             <Grid container spacing={2}>
               <Grid item xs={5}>
               </Grid>
@@ -348,18 +369,18 @@ export default
               </Grid>
               { !this.props.submitDisabled &&
               <Grid item xs={4}>
-                <Box mt={1}>
+                <Box mt={2} mb={3}>
                   <Button
                     variant="contained"
                     color="primary"
                     size={'small'}
-                    onClick={()=>this.updateVocabulary()}
+                    onClick={()=>this.updateMetaData()}
                     disabled={!isCurrentNodeChanged}
                   >
                     反映
                   </Button>
                   
-                  <DialogUpdateVocabularyMetaError
+                  <DialogUpdateMetaError
                     onClose={() => this.errorDialogClose()}
                     open={this.state.open}
                     classes={this.props.classes}
@@ -376,6 +397,28 @@ export default
           </Box>
         </Grid>
 
+        <Snackbar
+          anchorOrigin={{
+            vertical: 'top',
+            horizontal: 'center',
+          }}
+          open={this.state.snackOpen}
+          // onClose={() => this.closeSnackbar()}
+          autoHideDuration={3000}
+          message={this.state.message}
+          action={
+            <React.Fragment>
+              <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={() => this.closeSnackbar()}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </React.Fragment>
+          }
+        />
         <DialogApiMetaError
           open={this.props.editingVocabularyMeta.apiErrorDialog.open}
           classes={this.props.classes}
@@ -394,4 +437,5 @@ EditPanelMetaTab.propTypes = {
   classes: PropTypes.object,
   submitDisabled: PropTypes.bool,
   value: PropTypes.bool,
+  close: PropTypes.func,
 };

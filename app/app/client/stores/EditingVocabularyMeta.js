@@ -1,14 +1,8 @@
 /**
  * EditingVocabularyMeta.js COPYRIGHT FUJITSU LIMITED 2021
  */
-import React from 'react';
 import {action, computed, observable} from 'mobx';
 import axios from 'axios';
-
-import editingHistoryStore from './EditingHistory';
-import History from './History';
-import config from '../config/Config';
-import { data } from 'jquery';
 
 /**
  * Vocabulary data management class
@@ -49,7 +43,6 @@ class EditingVocabularyMeta {
           // console.log("getEditingVocabularyMetaDataFromDB response.");
           this.setUpdate();
           this.setEditingVocabularyMetaData(response.data.EditingVocabularyMeta);
-          this.tmpMetaDataClear();
         }).catch((err) => {
           console.log('[Error] message : ' + err.message);
           let errMsg = '';
@@ -97,28 +90,6 @@ class EditingVocabularyMeta {
       dbData.id = Number(this.currentNode.id);
       console.log(dbData.id);
     }
-    if (this.tmpMetaName.list && this.tmpMetaName.list.length > 0) {
-      dbData.meta_name = this.tmpMetaName.list[0];
-      console.log(dbData.meta_name);
-    }
-    if (this.tmpMetaEnName.list && this.tmpMetaEnName.list.length > 0) {
-      dbData.meta_enname = this.tmpMetaEnName.list[0];
-    }
-    if (this.tmpMetaVersion.list && this.tmpMetaVersion.list.length > 0) {
-      dbData.meta_version = this.tmpMetaVersion.list[0];
-    }
-    if (this.tmpMetaPrefix.list && this.tmpMetaPrefix.list.length > 0) {
-      dbData.meta_prefix = this.tmpMetaPrefix.list[0];
-    }
-    if (this.tmpMetaUri.list && this.tmpMetaUri.list.length > 0) {
-      dbData.meta_uri = this.tmpMetaUri.list[0];
-    }
-    if (this.tmpMetaDescription.list && this.tmpMetaDescription.list.length > 0) {
-      dbData.meta_description = this.tmpMetaDescription.list[0];
-    }
-    if (this.tmpMetaAuthor.list && this.tmpMetaAuthor.list.length > 0) {
-      dbData.meta_author = this.tmpMetaAuthor.list[0];
-    }
     return dbData;
   }
 
@@ -128,11 +99,10 @@ class EditingVocabularyMeta {
    * @param {array} dbData - list of editing vocabulary meta
    */
   setEditingVocabularyMetaData(dbData) {
-    // console.log('setEditingVocabularyMetaData');
+    
     const editingVocabularyMeta = [];
 
     dbData.forEach( (data) => {
-      console.log(data);
       
       // If the parameter is string (Set the empty string character)
       if (!data.meta_name) data.meta_name = '';
@@ -148,6 +118,7 @@ class EditingVocabularyMeta {
     });
 
     this.editingVocabularyMeta = editingVocabularyMeta;
+    this.setCurrentNode( this.editingVocabularyMeta[this.editingVocabularyMeta.length - 1] );
   }
 
 
@@ -166,10 +137,35 @@ class EditingVocabularyMeta {
   /**
    * Editing vocabulary meta data currentNode set
    */
-  setCurrentNode(){ 
+  setCurrentNode( data=null ){ 
     // If reading the data
-    if (this.editingVocabularyMeta.length > 0){
-      const current = this.editingVocabularyMeta[0];
+    if( data){
+      this.currentNode = {
+        id: null,
+        meta_name: data.meta_name || '',
+        meta_enname: data.meta_enname || '',
+        meta_version: data.meta_version || '',
+        meta_prefix: data.meta_prefix || '',
+        meta_uri: data.meta_uri || '',
+        meta_description: data.meta_description || '',
+        meta_endescription: data.meta_endescription || '',
+        meta_author: data.meta_author ||'',
+      };
+    }
+    else if( this.currentNode.meta_name !== '' ||
+        this.currentNode.meta_enname !== '' ||
+        this.currentNode.meta_version !== '' ||
+        this.currentNode.meta_prefix !== '' ||
+        this.currentNode.meta_uri !== '' ||
+        this.currentNode.meta_description !== '' ||
+        this.currentNode.meta_endescription  !== '' ||
+        this.currentNode.meta_author  !== '' ){
+
+      // this.currentNode; // As it is
+
+    }
+    else if (this.editingVocabularyMeta.length > 0){
+      const current = this.editingVocabularyMeta[this.editingVocabularyMeta.length -1];
       this.currentNode = current;
     }
     // If not reading the data
@@ -188,133 +184,6 @@ class EditingVocabularyMeta {
     }
   }
 
-
-  /**
-   * Initialization of data being edited
-   */
-  tmpMetaDataClear() {
-    this.tmpMetaName = {id: '', list: []};
-    this.tmpMetaNameInit = true;
-    this.tmpMetaEnName = {id: '', list: []};
-    this.tmpUMetaEnNameInit = true;
-    this.tmpMetaVersion = {id: '', list: []};
-    this.tmpMetaVersionInit = true;
-    this.tmpMetaPrefix = {id: '', list: []};
-    this.tmpMetaPrefixInit = true;
-    this.tmpMetaUri = {id: '', list: []};
-    this.tmpMetaUriInit = true;
-    this.tmpMetaDescription = {id: '', list: []};
-    this.tmpMetaDescriptionInit = true;
-    this.tmpMetaEnDescription = {id: '', list: []};
-    this.tmpMetaEnDescriptionInit = true;
-    this.tmpMetaAuthor = {id: '', list: []};
-    this.tmpMetaAuthorInit = true;
-  }
-
-  /**
-   * Whether data has been edited and is pending
-   * @return {boolean} - true: contain changes, false: not contain changes
-   */
-  @computed get isCurrentNodeChanged() {
-    // MetaName
-    if (this.isMetaNameChanged()) {
-      return true;
-    }
-
-    // MetaEnName
-    if (this.isMetaEnNameChanged()) {
-      return true;
-    }
-
-    // MetaVersion
-    if (this.isMetaVersionChanged()) {
-      return true;
-    }
-
-    // MetaPrefix
-    if (this.isMetaPrefixChanged()) {
-      return true;
-    }
-
-    // MetaUri
-    if (this.isMetaUriChanged()) {
-      return true;
-    }
-
-    // MetaDescription
-    if (this.isMetaDescriptionChanged()) {
-      return true;
-    }
-
-    // MetaEnDescription
-    if (this.isMetaEnDescriptionChanged()) {
-      return true;
-    }
-
-    // MetaAuthor
-    if (this.isMetaAuthorChanged()) {
-      return true;
-    }
-
-    return false;
-  }
-
-  /**
-   * Determine if MetaName is changed
-   * @return {boolean} - true: contain changes, false: not contain changes
-   */
-   isMetaNameChanged() {
-  }
-
-  /**
-   * Determine if MetaEnName is changed
-   * @return {boolean} - true: contain changes, false: not contain changes
-   */
-  isMetaEnNameChanged() {
-  }
-
-  /**
-   * Determine if MetaVersion is changed
-   * @return {boolean} - true: contain changes, false; not contain changes
-   */
-  isMetaVersionChanged() {
-  }
-
-  /**
-   * Determine if MetaPrefix is changed
-   * @return {boolean} - true: contain changes, false: not contain changes
-   */
-  isMetaPrefixChanged() {
-  }
-
-  /**
-   * Determine if MetaUri is changed
-   * @return {boolean} - true: contain changes, false; not contain changes
-   */
-
-  isMetaUriChanged() {
-  }
-
-/**
- * Determine if MetaDescription is changed
- * @return {boolean} - true: contain changes, false; not contain changes
- */
- isMetaDescriptionChanged() {
-}
-
-/**
- * Determine if MetaEnDescription is changed
- * @return {boolean} - true: contain changes, false; not contain changes
- */
- isMetaEnDescriptionChanged() {
-}
-
-/**
- * Determine if MetaAuthor is changed
- * @return {boolean} - true: contain changes, false; not contain changes
- */
- isMetaAuthorChanged() {
-}
 
   // Dialog control on API error ////////////////////////////
   @observable apiErrorDialog = {
@@ -353,21 +222,18 @@ class EditingVocabularyMeta {
    * Updating 
    * @return {string} - error message
    */
-  @action updateVocabulary() {
+  @action updateMetaData() {
+
+    this.setCurrentNode();
+
     const error = this.errorCheck();
     if (error != '') {
       return error;
     }
-
-    this.setCurrentNode();
-
-    const updateTermList = [];
    
     // Add selected vocabulary
     const updateCurrent = this.createDBFormatDataByCurrentNode();
-    
-    updateTermList.push(updateCurrent);
-    this.updateRequest(updateTermList, updateCurrent);
+    this.updateRequest([updateCurrent], updateCurrent);
 
     return '';
   }
@@ -403,191 +269,129 @@ class EditingVocabularyMeta {
    */
   errorCheck() {
     let errorKind = '';
+    // No meta name
+    if (this.currentNode.meta_name.trim() === '') {
+      console.log('[errorCheck] meta_name.');
+      errorKind = 'no_meta_name';
+      return errorKind;
+    }
+
+    // No meta Uri
+    if (this.currentNode.meta_uri.trim() === '') {
+      console.log('[errorCheck] meta_uri.');
+      errorKind = 'no_meta_uri';
+      return errorKind;
+    }
+
+    // Wrong url string
+    // const ret = /https?:\/\/.+?\//.test(this.currentNode.meta_uri.trim());
+    // if ( !ret) {
+    //   console.log('[errorCheck] meta_uri_wrong.');
+    //   errorKind = 'wrong_url_string';
+    //   return errorKind;
+    // }
 
     return errorKind;
   }
 
-  // MetaName //////////////////////
-  @observable tmpMetaName = {
-    id: '',
-    list: [],
-  };
-  tmpMetaNameInit = true;
+  /**
+   * Whether data has been edited and is pending
+   * @return {boolean} - true: contain changes, false: not contain changes
+   */
+   @computed get isCurrentNodeChanged() {
+    const len = this.editingVocabularyMeta.length -1;
+    if(1 > len || undefined == this.editingVocabularyMeta[len]){
+      if(
+        this.currentNode.meta_name != '' ||
+        this.currentNode.meta_enname != '' ||
+        this.currentNode.meta_version != '' ||
+        this.currentNode.meta_prefix != '' ||
+        this.currentNode.meta_uri != '' ||
+        this.currentNode.meta_description != '' ||
+        this.currentNode.meta_endescription != '' ||
+        this.currentNode.meta_author != '' 
+      ){
+        return true;
+      }
+      return false;
+    }
+    else if(
+      this.currentNode.meta_name != this.editingVocabularyMeta[len].meta_name ||
+      this.currentNode.meta_enname != this.editingVocabularyMeta[len].meta_enname ||
+      this.currentNode.meta_version != this.editingVocabularyMeta[len].meta_version ||
+      this.currentNode.meta_prefix != this.editingVocabularyMeta[len].meta_prefix ||
+      this.currentNode.meta_uri != this.editingVocabularyMeta[len].meta_uri ||
+      this.currentNode.meta_description != this.editingVocabularyMeta[len].meta_description ||
+      this.currentNode.meta_endescription != this.editingVocabularyMeta[len].meta_endescription ||
+      this.currentNode.meta_author != this.editingVocabularyMeta[len].meta_author 
+    ){
+      return true;
+    }
+    return false;
+  }
 
   /**
    *  MetaName update event
    * @param  {string} newValue MetaName 
    */
   @action updataMetaName(newValue) {
-    const array = [];
-    if (newValue !== '') {
-      array.push(newValue);
-    }
-    this.tmpMetaName.id = this.currentNode.id;
-    this.tmpMetaName.list = array;
+    this.currentNode.meta_name = newValue;
   }
-
-  // MetaEnName //////////////////////
-  @observable tmpMetaEnName = {
-    id: '',
-    list: [],
-  };
-  tmpMetaEnNameInit = true;
-
 
   /**
    * MetaEnName update event
    * @param  {string} newValue MetaEnName
    */
   @action updataMetaEnName(newValue) {
-    const array = [];
-
-    if (newValue !== '') {
-      array.push(newValue);
-      console.log(array);
-    }
-
-    this.tmpMetaEnName.id = this.currentNode.id;
-    this.tmpMetaEnName.list = array;
+    this.currentNode.meta_enname = newValue;
   }
-
-  // MetaVersion //////////////////////
-  @observable tmpMetaVersion = {
-    id: '',
-    list: [],
-  };
-  tmpMetaVersionInit = true;
 
   /**
    * MetaVersion update event
    * @param  {string} newValue MetaVersion
    */
   @action updataMetaVersion(newValue) {
-    const array = [];
-
-    if (newValue !== '') {
-      array.push(newValue);
-      console.log(array);
-    }
-
-    this.tmpMetaVersion.id = this.currentNode.id;
-    this.tmpMetaVersion.list = array;
+    this.currentNode.meta_version = newValue;
   }
-
-  // MetaPrefix //////////////////////
-  @observable tmpMetaPrefix = {
-    id: '',
-    list: [],
-  };
-  tmpMetaPrefixInit = true;
 
   /**
    * MetaPrefix update event
    * @param  {string} newValue MetaPrefix
    */
   @action updataMetaPrefix(newValue) {
-    const array = [];
-
-    if (newValue !== '') {
-      array.push(newValue);
-      console.log(array);
-    }
-
-    this.tmpMetaPrefix.id = this.currentNode.id;
-    this.tmpMetaPrefix.list = array;
+    this.currentNode.meta_prefix = newValue;
   }
-
-  // MetaUri //////////////////////
-  @observable tmpMetaUri = {
-    id: '',
-    list: [],
-  };
-  tmpMetaUriInit = true;
 
   /**
    * MetaUri update event
    * @param  {string} newValue MetaUri
    */
   @action updataMetaUri(newValue) {
-    const array = [];
-
-    if (newValue !== '') {
-      array.push(newValue);
-      console.log(array);
-    }
-
-    this.tmpMetaUri.id = this.currentNode.id;
-    this.tmpMetaUri.list = array;
+    this.currentNode.meta_uri = newValue;
   }
-
-  // MetaDescription //////////////////////
-  @observable tmpMetaDescription = {
-    id: '',
-    list: [],
-  };
-  tmpMetaDescriptionInit = true;
 
   /**
    * MetaDescription update event
    * @param  {string} newValue MetaDescription
    */
   @action updataMetaDescription(newValue) {
-    const array = [];
-
-    if (newValue !== '') {
-      array.push(newValue);
-      console.log(array);
-    }
-
-    this.tmpMetaDescription.id = this.currentNode.id;
-    this.tmpMetaDescription.list = array;
+    this.currentNode.meta_description = newValue;
   }
-
-  // MetaEnDescription //////////////////////
-  @observable tmpMetaEnDescription = {
-    id: '',
-    list: [],
-  };
-  tmpMetaEnDescriptionInit = true;
-
 
   /**
    * MetaEnDescription update event
    * @param  {string} newValue MetaEnDescription
    */
   @action updataMetaEnDescription(newValue) {
-    const array = [];
-
-    if (newValue !== '') {
-      array.push(newValue);
-      console.log(array);
-    }
-
-    this.tmpMetaEnDescription.id = this.currentNode.id;
-    this.tmpMetaEnDescription.list = array;
+    this.currentNode.meta_endescription = newValue;
   }
-
-  // MetaAuthor //////////////////////
-  @observable tmpMetaAuthor = {
-    id: '',
-    list: [],
-  };
-  tmpMetaAuthorInit = true;
 
   /**
    * MetaAuthor update event
    * @param  {string} newValue MetaAuthor
    */
   @action updataMetaAuthor(newValue) {
-    const array = [];
-
-    if (newValue !== '') {
-      array.push(newValue);
-      console.log(array);
-    }
-
-    this.tmpMetaAuthor.id = this.currentNode.id;
-    this.tmpMetaAuthor.list = array;
+    this.currentNode.meta_author = newValue;
   }
   
 }

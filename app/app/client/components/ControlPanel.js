@@ -346,6 +346,7 @@ export default class ControlPanel extends React.Component {
                 editingVocabularyMeta={this.props.editingVocabularyMeta}
                 submitDisabled={false}
                 value={false}
+                close={() => this.handleEditPopoverClose()}
               />
 
           </Popover>  

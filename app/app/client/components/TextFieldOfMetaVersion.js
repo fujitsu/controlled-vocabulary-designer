@@ -6,16 +6,7 @@ import PropTypes from 'prop-types';
 
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
-// import Autocomplete from '@material-ui/lab/Autocomplete';
-import TextField from '@material-ui/core/TextField';
 import Input from '@material-ui/core/Input';
-import Snackbar from '@material-ui/core/Snackbar';
-import IconButton from '@material-ui/core/IconButton';
-import CloseIcon from '@material-ui/icons/Close';
-
-import $ from 'jquery';
-
-import EditPanelChipForSynonym from './EditPanelChipForSynonym';
 
 import {observer} from 'mobx-react';
 
@@ -25,35 +16,6 @@ import {observer} from 'mobx-react';
  */
 export default
 @observer class TextFieldOfMetaVersion extends React.Component {
-  /**
-   * constructor
-   * @param {object} props
-   */
-  constructor(props) {
-    super(props);
-    this.state = {
-      open: false, 
-      message: '',
-    };
-  }
-
-  
-
-  /**
-   * Warning displaying snackbar events
-   * @param {String} errorMsg - error message
-   */
-  openSnackbar(errorMsg) {
-    this.setState({open: true, message: errorMsg});
-  }
-
-  /**
-   * Warning hiding snackbar event
-   */
-  handleClose() {
-    this.setState({open: false, message: ''});
-  };
-
   /**
    * Meta version update event
    * @param  {object} event - information of event
@@ -93,27 +55,6 @@ export default
             </Box>
           </Grid>
         </form>
-        <Snackbar
-          anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
-          }}
-          open={this.state.open}
-          onClose={() => this.handleClose()}
-          message={this.state.message}
-          action={
-            <React.Fragment>
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={() => this.handleClose()}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </React.Fragment>
-          }
-        />
       </div>
     );
   }
