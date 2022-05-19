@@ -1,5 +1,5 @@
 /**
- * DialogUpdateVocabularyMetaError.js COPYRIGHT FUJITSU LIMITED 2021
+ * DialogUpdateMetaError.js COPYRIGHT FUJITSU LIMITED 2021
  */
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -14,7 +14,7 @@ import CloseIcon from '@material-ui/icons/Close';
  * error dialog
  * @extends React
  */
-export default class DialogUpdateVocabularyMetaError extends React.Component {  
+export default class DialogUpdateMetaError extends React.Component {  
   
   /**
   * constructor
@@ -39,7 +39,19 @@ export default class DialogUpdateVocabularyMetaError extends React.Component {
    */
   getErrorMessage(){
 
-    const editingVocabularyMeta = this.props.editingVocabularyMeta;
+    let errorMsg='';
+    switch (this.props.reason) {
+      case 'no_meta_name':
+        errorMsg = '「語彙の名称」は必須項目です。「語彙の名称」を入力してください。';
+        break;
+      case 'no_meta_uri':
+        errorMsg = '「語彙のURI」は必須項目です。「語彙のURI」を入力してください。';
+        break;
+      case 'wrong_url_string':
+        errorMsg = '「語彙のURI」を正しく入力してください。';
+        break;
+    }  
+    return errorMsg;
 
   }
   
@@ -76,7 +88,7 @@ export default class DialogUpdateVocabularyMetaError extends React.Component {
   }
 }
 
-DialogUpdateVocabularyMetaError.propTypes = {
+DialogUpdateMetaError.propTypes = {
   onClose: PropTypes.func,
   open: PropTypes.bool,
   classes: PropTypes.object,
