@@ -234,20 +234,6 @@ const useStyles = (theme) => ({
     boxShadow: 'none',
   },
 
-  'buttonsNewAdd': {
-    marginTop:'0',
-    marginRight:'8px',
-    borderRadius: '0',
-    boxShadow: 'none',
-  },
-
-  'buttonsDelete': {
-    marginTop:'0',
-    marginRight:'8px',
-    borderRadius: '0',
-    boxShadow: 'none',
-  },
-
   'popoverPanelRoot': {
     backgroundColor: "#66666680",
   },
@@ -410,19 +396,7 @@ const useStyles = (theme) => ({
   'selectTerm': {
     height: '40px',
   },
-  'inputTextWrap': {
-    width: "100%",
-    overflowY: "hidden",
-    overflowX: "scroll",
-    scrollbarWidth: 'thin',
-    '& ::WebkitScrollbar': {
-      width: '8px',
-      height: '8px',
-      backgroundColor: 'red',
-    }
-    
-  },
-  
+
   'inputTextWrap': {
     width: "100%",
     overflowY: "hidden",

@@ -24,6 +24,8 @@ import DialogApiError from './DialogApiError';
 
 import {observer} from 'mobx-react';
 
+import editingHistoryStore from '../stores/EditingHistory';
+
 import SelectOfTerm from './SelectOfTerm';
 import TextFieldOfSynonym from './TextFieldOfSynonym';
 import TextFieldOfPreferredLabel from './TextFieldOfPreferredLabel';
@@ -49,6 +51,22 @@ export default
    */
   constructor(props) {
     super(props);
+    this.tmpData={
+        'ja':{
+          synonym:'',
+          preferredLabel:'',
+          termDescription:'',
+          broaderTerm:'',
+          id:'',
+        },
+        'en':{
+          synonym:'',
+          preferredLabel:'',
+          termDescription:'',
+          broaderTerm:'',
+          id:'',
+        },
+    },
     this.state = {
       disabledFlg: true,
       open: false,
@@ -57,7 +75,6 @@ export default
       prfrrdlblact: false,
       idofuriact: false,
       broadertermact: false,
-      dlgDeleteTermOpen: false,   // dialog for delete term confirm
       termdescriptionact: false, 
       defalutValue: this.props.editingVocabulary.currentNode.language,
     };
@@ -68,6 +85,10 @@ export default
    */
   componentDidMount() {
     // window.addEventListener('keydown', this.handleKeyDown.bind(this));
+  }
+
+  componentWillUnmount() {
+    this.clearTmpLangList();
   }
 
   /**
@@ -103,6 +124,7 @@ export default
    * @param  {bool} value - true:focusin, false:focusout
    */
   changeFocus(target, value) {
+    this.setTmpLangList();
     switch (target) {
       case 'synonym':
         this.setState({synymact: value});
@@ -124,34 +146,6 @@ export default
         break;
     }
   }
-
-  /**
-   * Term delete dialog open
-   */
-   handleTermDelete(){
-    let mess =  '「' + this.props.editingVocabulary.currentNode.term +'」';
-    this.message = mess+"\nを削除します。よろしいですか？";
-    this.setState({dlgDeleteTermOpen: true});  
-  }
-
-  /**
-   * Term delete dialog close
-   */
-  handleDeleteTermClose(){
-    this.message = '';
-    this.setState({dlgDeleteTermOpen: false});
-    
-    this.props.editingVocabulary.deleteVocabulary();
-    this.props.close();
-  }
-
-  /**
-   * Term delete dialog Cancel
-   */
-  handleDeleteTermCancelClose(){
-    this.message = '';
-    this.setState({dlgDeleteTermOpen: false});
-  } 
 
   /**
    * Error dialog open
@@ -186,53 +180,142 @@ export default
    * Update edits
    */
   updateVocabulary() {
-    const ret = this.props.editingVocabulary.updateVocabulary();
+    const baseTerm= this.props.editingVocabulary.currentNode.term;
+    let setLang = false;
+    if( this.props.editingVocabulary.tmpLanguage.list !=this.props.editingVocabulary.currentNode.language){
+      this.props.editingVocabulary.languageSame();
+      setLang = true;
+    }else{
+      this.props.editingVocabulary.languageChange();
+    }
+    this.settingTmpLangList();
+    let ret = this.props.editingVocabulary.updateVocabulary( baseTerm);
     if (ret !== '') {
       this.errorDialogOpen(ret);
     }else{
-      this.props.close();
-    }
-  }
+      if(setLang){
+        this.props.editingVocabulary.languageChange();
+      }else{
+        this.props.editingVocabulary.languageSame();
+      }
+      this.settingTmpLangList();
+      let ret = this.props.editingVocabulary.updateVocabulary( baseTerm);
 
-  /**
-   * Confirm switch
-   * @param  {Boolean} isConfirm - confirm acceptance
-   */
-  toggleConfirm(isConfirm) {
-    // console.log('[toggleConfirm] change to ' + isConfirm);
-    const currentNode = this.props.editingVocabulary.currentNode;
-
-    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
-    if (!isConfirm) {
-      // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
-      if (!currentNode.preferred_label) {
-        this.props.editingVocabulary.
-            tmpPreferredLabel.list.push(currentNode.term);
+      if (ret !== '') {        
+        editingHistoryStore.execUndo(); // undo
+        // this.clearTmpLangList();
+        this.errorDialogOpen(ret);
+      }else{  // success
+        // this.clearTmpLangList();
+        console.log("---[ updateVocabulary() ]---"+baseTerm, )
       }
     }
   }
 
+ 
+
   /**
-   * Fixed term color reflection
-   * @param  {String} color - string of changed color
+   * setting save tmp data
    */
-  seletConfirmColor(color) {
-    // console.log('[seletConfirmColor] change to ');
-    this.props.editingVocabulary.seletConfirmColor(color);
+  settingTmpLangList( setDiffLang = false){
+    const tmpDt = this.getTmpLangList( setDiffLang);
+    if( !tmpDt){
+      return;
+    }
+
+    if(tmpDt.synonym 
+      && ((tmpDt.synonym.length != this.props.editingVocabulary.tmpSynonym.list.length )
+      || (JSON.stringify( tmpDt.synonym) != JSON.stringify(this.props.editingVocabulary.tmpSynonym.list)))){
+      this.props.editingVocabulary.tmpSynonym.list = tmpDt.synonym;
+    }
+    
+    if(tmpDt.preferredLabel 
+      &&  (JSON.stringify( tmpDt.preferredLabel) != JSON.stringify(this.props.editingVocabulary.tmpPreferredLabel.list))){
+      this.props.editingVocabulary.tmpPreferredLabel.list = tmpDt.preferredLabel;
+    }
+    if(tmpDt.termDescription 
+      && (JSON.stringify( tmpDt.termDescription) != JSON.stringify(this.props.editingVocabulary.tmpTermDescription.list))){
+      this.props.editingVocabulary.tmpTermDescription.list = tmpDt.termDescription;
+    }
+    if(tmpDt.broaderTerm 
+      &&  (JSON.stringify( tmpDt.broaderTerm) != JSON.stringify(this.props.editingVocabulary.tmpBroaderTerm.list))){
+      this.props.editingVocabulary.tmpBroaderTerm.list = tmpDt.broaderTerm;
+    }
+    if(tmpDt.id 
+      &&  (JSON.stringify( tmpDt.id) != JSON.stringify(this.props.editingVocabulary.tmpIdofUri.list))){
+      this.props.editingVocabulary.tmpIdofUri.list = tmpDt.id;
+    }
   }
 
+  /**
+   * get save tmp data for the selected language
+   * @return {object} - Tmp data for the selected language
+   */
+  getTmpLangList( setDiffLang = false) {
+    if( !this.props.editingVocabulary.tmpLanguage.list){
+      return null;      
+    }else if( setDiffLang){
+      return this.tmpData[ this.props.editingVocabulary.tmpLanguage.list == 'ja'?'en':'ja' ];
+    }else{
+      return this.tmpData[this.props.editingVocabulary.tmpLanguage.list];
+    }
+  }
 
+  /**
+   * set save tmp data
+   */
+  setTmpLangList() {
+    if( this.props.editingVocabulary.tmpLanguage.list){
+      this.tmpData[ this.props.editingVocabulary.tmpLanguage.list]={
+        synonym: this.props.editingVocabulary.tmpSynonym.list , 
+        preferredLabel: this.props.editingVocabulary.tmpPreferredLabel.list,
+        termDescription: this.props.editingVocabulary.tmpTermDescription.list,
+        broaderTerm: this.props.editingVocabulary.tmpBroaderTerm.list,
+      }
+
+      // id has the same value for ja and en
+      this.tmpData['ja'].id=this.props.editingVocabulary.tmpIdofUri.list;
+      this.tmpData['en'].id=this.props.editingVocabulary.tmpIdofUri.list;
+    }
+  }
+  
+  /**
+   * Clear save tmp data
+   */
+  clearTmpLangList() {
+    this.tmpData={
+      'ja':{
+        synonym:[],
+        preferredLabel:'',
+        termDescription:'',
+        broaderTerm:'',
+        id:'',
+      },
+      'en':{
+        synonym:[],
+        preferredLabel:'',
+        termDescription:'',
+        broaderTerm:'',
+        id:'',
+      },
+    }
+  }
+ 
   /**
    * radio change
    * @param  {object} event - information of key event
    */
    handleRadioChange(e){
     this.setState({defalutValue: e.target.value});
+    
+    this.setTmpLangList();  // save tmp values
+
     if (e.target.value != this.props.editingVocabulary.currentNode.language) {
       this.props.editingVocabulary.languageChange();
     }else {
       this.props.editingVocabulary.languageSame();
     }
+    this.settingTmpLangList();
   }
 
   /**
@@ -240,7 +323,35 @@ export default
    * @param  {String} lang - string of changed lang
    */
    handleTermChange( lang){
+    this.clearTmpLangList();
+    this.props.editingVocabulary.currentNodeClear();
     this.setState({defalutValue: lang});
+  }
+
+  /**
+   * Is there any pending data in the language you haven't selected
+   * @return {boolean} - true:
+   */
+   isCurrentDiffNodeChanged(){
+    const editingVocabulary = this.props.editingVocabulary;
+    if( !editingVocabulary.currentNode.id){
+      return false;
+    }
+
+    const tmpData = this.getTmpLangList( true);
+    if( 1 > tmpData.length){
+      return false;
+    }
+    if( editingVocabulary.isPrfrdLblChanged(true, tmpData.preferredLabel)){
+      return true;
+    }
+    if( editingVocabulary.isBrdrTermChanged(true, tmpData.broaderTerm)){
+      return true;
+    }
+    if( editingVocabulary.isTermDescriptionChanged(true, tmpData.termDescription)){
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -252,7 +363,7 @@ export default
     let fileId = editingVocabulary.selectedFile.id;
     // Change border color disabled
     let disabledColor = true;
-    if ( fileId == 0 && this.props.editingVocabulary.currentNode.id) {
+    if ( fileId == 0 && editingVocabulary.currentNode.id) {
       // Allow each component to operate during editing vocabulary selection and term selection
       disabledColor = false;
     }
@@ -260,10 +371,10 @@ export default
     // Firm button disabled condition
     // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
     const isCurrentNodeChanged =
-      this.props.editingVocabulary.isCurrentNodeChanged;
+      editingVocabulary.isCurrentNodeChanged || this.isCurrentDiffNodeChanged();
     const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
 
-    const confirmed = this.props.editingVocabulary.currentNode.confirm;
+    const confirmed = editingVocabulary.currentNode.confirm;
     let isConfirm = false;
     if (confirmed && confirmed == 1) {
       isConfirm = true;
@@ -511,7 +622,7 @@ export default
             </Grid>
 
             <Grid container>
-              <Grid item xs={5}>
+              <Grid item xs={6}>
               </Grid>
               <Grid item xs={2}>
                 <Button
@@ -531,25 +642,6 @@ export default
                   editingVocabulary={this.props.editingVocabulary}
                   isFromEditPanel={true}
                   reason={this.state.reason}
-                />
-              </Grid>
-              <Grid item>
-                <Button
-                  className={this.props.classes.buttonsDelete}
-                  ml={3}
-                  variant="contained"
-                  color="secondary"
-                  size={'small'}
-                  onClick={(e)=>this.handleTermDelete(e)}
-                >
-                  削除
-                </Button>
-                <DialogOkCancel
-                  onOkClose={() => this.handleDeleteTermClose()}
-                  onCancel={() =>this.handleDeleteTermCancelClose()}  
-                  open={this.state.dlgDeleteTermOpen}
-                  classes={this.props.classes}
-                  message={this.message}
                 />
               </Grid>
             </Grid>

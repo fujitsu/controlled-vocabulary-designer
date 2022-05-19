@@ -150,9 +150,13 @@ class EditingVocabulary {
    * Generate data for DBupdata from currentNode and the data being edited
    * @return {object} - editing vocabulary data
    */
-  createDBFormatDataByCurrentNode() {
+  createDBFormatDataByCurrentNode( targetNode = null) {
+    if( !targetNode){
+      targetNode = this.currentNode;
+    }
+
     const dbData = {
-      term: this.currentNode.term,
+      term: targetNode.term,
       preferred_label: '',
       language: '',
       idofuri: '',
@@ -165,15 +169,15 @@ class EditingVocabulary {
       modified_time: '',
       synonym_candidate: [],
       broader_term_candidate: [],
-      position_x: String(this.currentNode.position_x),
-      position_y: String(this.currentNode.position_y),
-      color1: this.currentNode.color1,
-      color2: this.currentNode.color2,
-      hidden: this.currentNode.hidden,
-      confirm: this.currentNode.confirm,
+      position_x: String(targetNode.position_x),
+      position_y: String(targetNode.position_y),
+      color1: targetNode.color1,
+      color2: targetNode.color2,
+      hidden: targetNode.hidden,
+      confirm: targetNode.confirm,
     };
-    if (this.currentNode.id) {
-      dbData.id = Number(this.currentNode.id);
+    if (targetNode.id) {
+      dbData.id = Number(targetNode.id);
     }
     if (this.tmpPreferredLabel.list && this.tmpPreferredLabel.list.length > 0) {
       dbData.preferred_label = this.tmpPreferredLabel.list[0];
@@ -208,14 +212,14 @@ class EditingVocabulary {
         }
       }
     }
-    if (this.currentNode.synonym_candidate) {
-      this.currentNode.synonym_candidate.forEach((term) => {
+    if (targetNode.synonym_candidate) {
+      targetNode.synonym_candidate.forEach((term) => {
         dbData.synonym_candidate.push(term);
       });
     }
 
-    if (this.currentNode.broader_term_candidate) {
-      this.currentNode.broader_term_candidate.forEach((term) => {
+    if (targetNode.broader_term_candidate) {
+      targetNode.broader_term_candidate.forEach((term) => {
         dbData.broader_term_candidate.push(term);
       });
     }
@@ -1013,6 +1017,35 @@ class EditingVocabulary {
       color2: '',
       confirm: 0,
     };
+    this.currentLangDiffNodeClear();
+
+  }
+  
+  /**
+   * Language diff node information initialization
+   */
+   currentLangDiffNodeClear() {
+
+    this.currentLangDiffNode = {
+      id: null,
+      idofuri: '',
+      uri: '',
+      term: '',
+      language: '',
+      preferred_label: '',
+      hidden: false,
+      broader_term: '',
+      other_voc_syn_uri: '',
+      term_description: '',
+      created_time: '',
+      modified_time: '',
+      position_x: '',
+      position_y: '',
+      locked: null,
+      color1: '',
+      color2: '',
+      confirm: 0,
+    };
   }
 
   /**
@@ -1113,6 +1146,7 @@ class EditingVocabulary {
 
   /**
    * Whether the selected term has been edited and is pending
+   * Do not detect pending languages that are not selected
    * @return {boolean} - true: contain changes, false: not contain changes
    */
   @computed get isCurrentNodeChanged() {
@@ -1226,23 +1260,44 @@ class EditingVocabulary {
    * Determine if the heading has been changed
    * @return {boolean} - true: contain changes, false; not contain changes
    */
-  isPrfrdLblChanged() {
-    if (this.currentNode.preferred_label) {
-      if (this.tmpPreferredLabel.list.length == 1) {
-        const tmpPrfrdLbl = this.tmpPreferredLabel.list[0];
-        if (this.currentNode.preferred_label === tmpPrfrdLbl) {
-          return false;
-        } else if (this.currentLangDiffNode.preferred_label == tmpPrfrdLbl) {
+  isPrfrdLblChanged(isDiff=false, cmpData=null) {
+    let currentNode=null;
+    if (this.currentNode.language == this.tmpLanguage.list) {
+      currentNode = isDiff?this.currentLangDiffNode:this.currentNode;
+    }else{
+      currentNode = isDiff?this.currentNode:this.currentLangDiffNode;
+    }
+
+    if(!currentNode.term){
+      return false;
+    }
+
+    let tmpList=null;
+    if( isDiff && cmpData){
+      tmpList = cmpData;
+    }else{
+      tmpList = this.tmpPreferredLabel.list;
+    }
+
+    if (currentNode.preferred_label) {
+      if (tmpList.length == 1) {
+        const tmpPrfrdLbl = tmpList[0];
+        if (currentNode.preferred_label === tmpPrfrdLbl) {
           return false;
         }else {
           return true;
         }
       } else {
-        // Has changed if not one is being edited
-        return true;
+        
+        if (currentNode.preferred_label === '') {
+          return false;
+        }else {
+          // Has changed if not one is being edited
+          return true;
+        }
       }
     } else {
-      if (this.tmpPreferredLabel.list.length == 0) {
+      if (tmpList.length == 0) {
         return false;
       } else {
         // If it is not set, even one is changed if it is being edited
@@ -1255,29 +1310,43 @@ class EditingVocabulary {
    * Determine if the broader term is changed
    * @return {boolean} - true: contain changes, false: not contain changes
    */
-  isBrdrTermChanged() {
-    if (this.currentNode.broader_term) {
-      if (this.tmpBroaderTerm.list.length == 1) {
-        const tmpBrdrTerm = this.tmpBroaderTerm.list[0];
-        if (this.currentNode.broader_term === tmpBrdrTerm) {
-          return false;
-        } else if(this.currentLangDiffNode.broader_term == tmpBrdrTerm) {
+  isBrdrTermChanged(isDiff=false, cmpData=null) {
+    let currentNode=null;
+    if (this.currentNode.language == this.tmpLanguage.list) {
+      currentNode = isDiff?this.currentLangDiffNode:this.currentNode;
+    }else{
+      currentNode = isDiff?this.currentNode:this.currentLangDiffNode;
+    }
+
+    if(!currentNode.term){
+      return false;
+    }
+
+    let tmpList=null;
+    if( isDiff && cmpData){
+      tmpList = cmpData;
+    }else{
+      tmpList = this.tmpBroaderTerm.list;
+    }
+
+    if (currentNode.broader_term) {
+      if (tmpList.length == 1) {
+        const tmpBrdrTerm = tmpList[0];
+        if (currentNode.broader_term === tmpBrdrTerm) {
           return false;
         }else {
           return true;
         }
       } else {
-        if (this.currentNode.broader_term === '') {
-          return false;
-        } else if(this.currentLangDiffNode.broader_term == '') {
+        if (currentNode.broader_term === '') {
           return false;
         }else {
-        // Has changed if not one is being edited
-        return true;
+          // Has changed if not one is being edited
+          return true;
         }
       }
     } else {
-      if (this.tmpBroaderTerm.list.length == 0) {
+      if (tmpList.length == 0) {
         return false;
       } else {
         // If it is not set, even one is changed if it is being edited
@@ -1291,7 +1360,14 @@ class EditingVocabulary {
    * @return {boolean} - true: contain changes, false: not contain changes
    */
   isSynonymChanged() {
-    if (this.currentSynonym.list.length == 0) {
+    let currentSynonym=null;
+    if (this.currentNode.language == this.tmpLanguage.list) {
+      currentSynonym = this.currentSynonym;
+    }else{
+      currentSynonym = this.currentLangDiffSynonym;
+    }
+    
+    if (currentSynonym.list.length == 0) {
       if (this.tmpSynonym.list.length == 0) {
         return false;
       } else {
@@ -1302,34 +1378,18 @@ class EditingVocabulary {
         return true;
       } else {
         let isAllMatched = true;
-        if (this.tmpLanguage.list[0] != this.currentNode.language){ 
-          this.currentLangDiffSynonym.list.forEach((languageCurrent) => {
-            const find = this.tmpSynonym.list.find((tmp) => tmp == languageCurrent);
-            if (!find) {
-              isAllMatched = false;
-            }
-          });
-          this.tmpSynonym.list.forEach((languageCurrent) => {
-            const find = this.currentLangDiffSynonym.list.find((tmp) => tmp == languageCurrent);
-            if (!find) {
-              isAllMatched = false;
-            }
-          });
-        }
-        else{
-          this.currentSynonym.list.forEach((current) => {
-            const find = this.tmpSynonym.list.find((tmp) => tmp == current);
-            if (!find) {
-              isAllMatched = false;
-            }
-          });
-          this.tmpSynonym.list.forEach((current) => {
-            const find = this.currentSynonym.list.find((tmp) => tmp == current);
-            if (!find) {
-              isAllMatched = false;
-            }
-          });
-        }
+        currentSynonym.list.forEach((current) => {
+          const find = this.tmpSynonym.list.find((tmp) => tmp == current);
+          if (!find) {
+            isAllMatched = false;
+          }
+        });
+        this.tmpSynonym.list.forEach((current) => {
+          const find = currentSynonym.list.find((tmp) => tmp == current);
+          if (!find) {
+            isAllMatched = false;
+          }
+        });
         if (isAllMatched) {
           return false;
         } else {
@@ -1344,23 +1404,45 @@ class EditingVocabulary {
    * @return {boolean} - true: contain changes, false; not contain changes
    */
 
-   isTermDescriptionChanged() {
-    if (this.currentNode.term_description) {
-      if (this.tmpTermDescription.list.length == 1) {
-        const tmpTermDescription = this.tmpTermDescription.list[0];
-        if (this.currentNode.term_description === tmpTermDescription) {
-          return false;
-        } else if(this.currentLangDiffNode.term_description == tmpTermDescription) {
+
+   isTermDescriptionChanged(isDiff=false, cmpData=null) {
+    let currentNode=null;
+    if (this.currentNode.language == this.tmpLanguage.list) {
+      currentNode = isDiff?this.currentLangDiffNode:this.currentNode;
+    }else{
+      currentNode = isDiff?this.currentNode:this.currentLangDiffNode;
+    }
+
+    if(!currentNode.term){
+      return false;
+    }
+
+    let tmpList=null;
+    if( isDiff && cmpData){
+      tmpList = cmpData;
+    }else{
+      tmpList = this.tmpTermDescription.list;
+    }
+
+    if (currentNode.term_description) {
+      if (tmpList.length == 1) {
+        const tmpTermDescription = tmpList[0];
+        if (currentNode.term_description === tmpTermDescription) {
           return false;
         } else {
           return true;
         }
       } else {
-        // Modified if not one is being edited
-        return true;
+        
+        if (currentNode.term_description === '') {
+          return false;
+        }else {
+          // Has changed if not one is being edited
+          return true;
+        }
       }
     } else {
-      if (this.tmpTermDescription.list.length == 0) {
+      if (tmpList.length == 0) {
         return false;
       } else {
         // If it is not set, even one is changed if it is being edited
@@ -1694,8 +1776,12 @@ isOtherVocSynUriChanged() {
 
     if (languageChangeNode.length > 0){
       const synonymList= [];
+      let preferredNode = null;
       languageChangeNode.forEach((synonym) => {
         synonymList.push(synonym.term);
+        if(synonym.term == synonym.preferred_label){
+          preferredNode = synonym;
+        }
       });
       this.tmpSynonym.list = synonymList;
       this.currentLangDiffSynonym.list = synonymList;
@@ -1705,7 +1791,7 @@ isOtherVocSynUriChanged() {
       const termdescription = [];
       const language = [];
     
-      const languageChangeNodeData = languageChangeNode[0];
+      const languageChangeNodeData = preferredNode || languageChangeNode[0];
       this.currentLangDiffNode  = languageChangeNodeData;
 
       if (languageChangeNodeData.preferred_label.length > 0) {
@@ -2466,9 +2552,11 @@ isOtherVocSynUriChanged() {
 
   /**
    * Updating synonyms, preferred label, URI, and broader term
+   * 
+   * @param  {string} setTerm - term you want to set after update
    * @return {string} - error message
    */
-  @action updateVocabulary() {
+  @action updateVocabulary( setTerm=null) {
     const error = this.errorCheck();
     if (error != '') {
       return error;
@@ -2912,64 +3000,9 @@ isOtherVocSynUriChanged() {
     // Save the information before and after the change in the history information
     history.previous = previous;
     history.following = following;
-    this.updateRequest(updateTermList, deleteIdList, updateCurrent, history);
+    this.updateRequest(updateTermList, deleteIdList, updateCurrent, history, null, false, setTerm);
 
     return '';
-  }
-
-
-  /**
-   * Delete Vocabulary
-   * 
-   */
-   @action deleteVocabulary(){
-
-   
-    const target = this.currentNode;  
-
-    if( 1 > this.selectedTermList.length) return;
-    if( !target) return;
-    
-    const previous = [target];
-    const following = [];
-    const updateTermList=[];
-
-    this.editingVocabulary.forEach((obj) => {
-      let pushed=false;
-      let tmpObj={ ...obj };
-
-      // Delete if it is included in the preferred_label
-      if (obj.preferred_label && target.preferred_label && obj.id != target.id 
-        && obj.preferred_label == target.preferred_label){
-        pushed=true;
-        obj.preferred_label =obj.term;
-      }
-
-      // Delete if it is included in the broader_term
-      if (obj.broader_term && obj.broader_term == target.term){
-        pushed=true;
-        obj.broader_term ='';
-      }
-      if(pushed){
-        previous.push(tmpObj);
-        following.push(obj);
-        updateTermList.push(obj);
-      }
-    });
-
-    const history = new History('vocabulary', target.id);
-    history.previous = previous;
-    history.following = following;
-    history.targetId = target.id;
- 
-    editingHistoryStore.addHistory(history);
-
-    this.updateRequest(updateTermList,[target.id], target);
-    
-    
-    this.currentNodeClear();
-    this.tmpDataClear();
-    this.setSelectedTermList(target.term); // Remove target from selected terms
   }
 
   /**
@@ -3511,7 +3544,7 @@ isOtherVocSynUriChanged() {
    * @param  {bool} setCurrent - do setCurrentNodeByTerm() 
    * @param  {object} [history=null] - history information (null: undo/redo requests)
    */
-  updateRequest(updateList, deleteList, current, history = null, oldNode = null, setCurrent=true) {
+  updateRequest(updateList, deleteList, current, history = null, oldNode = null, setCurrent=true , setTerm=null) {
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
 
@@ -3587,6 +3620,10 @@ isOtherVocSynUriChanged() {
               });
             } else {
               idList = deleteList;
+            }
+            
+            if( setTerm){
+              this.setCurrentNodeByTerm( setTerm);
             }
 
             const deleteUrl = '/api/v1/vocabulary/editing_vocabulary';
