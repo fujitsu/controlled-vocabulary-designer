@@ -20,6 +20,7 @@ POSTGREST_BASE_URL = 'http://dbrest:3000/'
 REFERENCE_VOCABULARY = ['reference_vocabulary1',
                         'reference_vocabulary2',
                         'reference_vocabulary3']
+TERM_BLANK_MARK = 'TERM_BLANK_'
 
 
 def delete_vocabulary_term(body, file_type):  # noqa: E501
@@ -163,8 +164,8 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
     """
 
     if file_type == 'editing_vocabulary':
-        for item in body:
-            payload = _create_update_payload(item)
+        for index, item in body:
+            payload = _create_update_payload(item, index)
 
             if 'id' in item:
                 # update data.
@@ -273,10 +274,11 @@ def _create_delete_sql(file_type, id):
     return ret_sql
 
 
-def _create_update_payload(target_data):
+def _create_update_payload(target_data, index):
 
     update_data = {}
-    update_data['term'] = target_data['term']
+    update_data['term'] = target_data['term']\
+        if len(target_data['term']) != 0 else TERM_BLANK_MARK + str(index)
     update_data['preferred_label'] = target_data['preferred_label']
     update_data['language'] = target_data['language']
     update_data['uri'] = target_data['uri']
