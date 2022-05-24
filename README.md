@@ -1,68 +1,55 @@
 # Controlled Vocabulary Designer (CVD)
+CVDは、統制語彙の作成を視覚的なインターフェースでサポートするツールです。<br>
+自然言語処理の計算結果や既存の統制語彙を参照して、同義関係や上下関係を効率的に定義できます。
+さらに、アプリケーションウィンドウで語彙全体を確認しながら直感的に編集することができます。
+作成された統制語彙は、RDFファイルとして出力・保存できます。<br>
+CVDのヘルプページは[こちら](https://fujitsu.github.io/controlled-vocabulary-designer/)
 
-CVD is a GUI support tool for creating controlled vocabulary.
-You can efficiently define synonymous and hierarchical relationships referring to
-outputs of natural language processing and existing controlled vocabulary.
-Moreover, you can see whole vocabulary on the application window and edit them interactively.
-The created controlled vocabulary can be exported as RDF file.
+# システム要件
+- docker : バージョン19.03以上
+- docker-compose : バージョン1.23以上
 
-The help pages is the below which is written in Japanese.  
-https://fujitsu.github.io/controlled-vocabulary-designer/
-
-# Requirement
-
-- docker > 19.03
-- docker-compose > 1.23
-
-# How to setup
-
+# セットアップ方法
 1. docker-compose up -d
-2. Access this URL from your browser.
+2. 作業環境のWEBブラウザで以下にアクセスします。
 
 ```
 http://(hostname):10081/
 ```
 
-# Supported browsers
-
+# サポートブラウザ
 * Google Chrome
 * Microsoft Edge
 * Firefox
 
-# Supported File Format
+# サポートファイル形式
+* 読み込み用ファイル形式
+  * 編集用語彙（語彙を編集するファイル） :  .xlsx, .csv
+  * 参照用語彙（既存の統制語彙語彙ファイル） : .xlsx, .csv
+  * コーパス（用語間が半角スペースで区切られているファイル） : .txt
 
-* upload
-  * editing vocabulary :  .xlsx, .csv format
-    * The vocabulary that you are jsut or going to creating.
-  * reference vocabulary : .xlsx, .csv format
-    * The exsisting vocabulary (e.g. wordnet, DBpedia, other existing controlled vocabulary)
-  * corpus : .txt format
-    * The corpus contained words splitted by space
-
-* download
-  * editing vocabulary : .xlsx, .csv format
-  * cntrolled vocabulary : .n3, .nquads, .nt, .trix, .turtle, .xml, .jsonld format
+* 書き出し用ファイル形式
+  * 編集用語彙（語彙を編集したファイル） : .xlsx, .csv
+  * 統制語彙（語彙を編集したファイル） : .n3, .nquads, .nt, .trix, .turtle, .xml, .jsonld
 
 
-## **Tentative Teatment.** File format conversion
+##  ファイル形式の変換（暫定措置）
+このツールの入出力ファイル形式はcsv（あるいはxlsx）ですが、2021年度にスキーマが変更されました。したがって、ファイルを古い形式（2020年度版）から新しい形式（2021年度版）に変換する必要があります。
+※すべての用語は日本語として扱われます。
 
-While the input/output file format of this tool is csv, the schema was changed in FY2021.
-So you need to convert the file from old(FY2020) to new(FY2021).
-Limitation: All words are treated as Japanese. 
+### 新しいファイル形式を古いファイル形式に変換する方法
+1. 変換する新しいファイルをnew2old.pyと同じディレクトリに置きます。
+2. ```$ python new2old.py [input new format csv] [output old format csv]```<br>
+例) python new2old.py in_new.csv out_old.csv <br>
+※「言語」列の値が"en"の用語は、変換処理によって削除されます。
 
-### How to convert from an newer file format to a older file format
-1. Put the newer file you want to convert in the same directory as new2old.py.
-2. ```$ python new2old.py [input new format csv] [output old format csv]```
-ex) python new2old.py in_new.csv out_old.csv
-The words with "en" in "言語" column are deleted in the conversion process.
+### 古いファイル形式を新しいファイル形式に変換する方法
+1. 変換する古いファイルをold2new.pyと同じディレクトリに置きます。
+2. ```python old2new.py [input old format csv] [output new format csv] [URI prefix]```<br>
+例) python old2new.py in_old.csv out_new.csv http\://myVocab/ <br>
+※変換後、すべての用語の「言語」列の値は"ja"となります。
 
-### How to convert from an older file format to a newer file format
-1. Put the older file you want to convert in the same directory as old_to_new.py.
-2.```python old2new.py [input old format csv] [output new format csv] [URI prefix]```
-ex) python old2new.py in_old.csv out_new.csv http://myVocab/
-All words have "ja" value in "言語" column after the conversion.
-
-## Example of editing vocabulary (FY2021)
+## 編集用語彙のサンプル (2021年度版)
 
 |用語名|代表語|代表語のURI|上位語|同義語候補|上位語候補|品詞|x座標値|y座標値|色1|色2|
 |----|----|----|----|----|----|----|----|----|----|----|
@@ -73,7 +60,7 @@ All words have "ja" value in "言語" column after the conversion.
 |靖子||||||名詞|14.85126593|-1.219740487|black|black|
 |靖樹||||||名詞|7.643998834|-0.408532063|black|black|
 
-## Example of reference vocabulary
+## 参照用語彙のサンプル（2021年度版）
 
 |用語名|代表語|代表語のURI|上位語|
 |----|----|----|----|
@@ -83,9 +70,8 @@ All words have "ja" value in "言語" column after the conversion.
 |ケニギンデルワインガルデン|ケニギンデルワインガルデン|http://cavoc.org/cvo/ns/2/C977|ブドウ|
 
 
-## Example of corpus
-
-Corpus includes set of space-separated terms which is written in one row.
+## コーパスのサンプル
+コーパスでは、文が1行ごとに改行されており、各文では用語間が半角スペースで区切られている。
 
 ```
 データ 連携 を 推進 して いく 上 で 課題 の 1つ と なって いる の が データ の 標準化 で ある
@@ -93,22 +79,18 @@ Corpus includes set of space-separated terms which is written in one row.
 永続 ボリューム の 上 に 構成 され サービス を 終了 させても データ は 揮発 しない
 ```
 
-## Input data creation example
-
-Example of generating editing vocabulary, reference vocabulary and corpus.
-
-[Read More](example-inputdata-creation/README.md)
+## 入力用データの作成サンプル
+入力用データの作成サンプルは下記ページを参照ください。<br>
+[編集語彙、参照語彙、コーパスの作成例](example-inputdata-creation/README.md)
 
 
-# URI Prefix
+# URIプレフィックス
+「Config.js」を使用して、URIプレフィックスの略語を設定することができます。入力したURIに、設定したURIプレフィックスが含まれている場合、対応する略語に自動的に変換されアプリケーションウィンドウ上で確認することができます。設定した略語をアプリケーションウィンドウ上で入力することもできます。いずれの場合も「Config.js」で設定したURIプレフィックスとして認識され、データベースに保存されます。
 
-Use "Config.js" to set each abbreviation of URI Prefixes.
-If the URI that you type on the application window includes the URI Prefix that you set, it is automatically converted to the corresponding abbreviation,
-and you can see the abbreviation on the application window. You can also type the abbreviation that you set on it. In any case, it is recognized as the URI Prefix that you set in "Config.js", and saved in the database.
 
-## Example of Config.js
-
-"origin", which is a URI Prefix is mapped to "equiv".
+## Config.jsのサンプル
+URIプレフィックスである"origin"のバリューは"equiv"のバリューに変換されます。<br>
+以下のサンプルでは、`'http://cavoc.org/'`は`'cavoc:'`に、`'http://example.org/'`は`'ex:'`に変換されます。
 
 ```
 'prefix': [
@@ -125,15 +107,11 @@ and you can see the abbreviation on the application window. You can also type th
 ```
 
 
-# Zoom magnification
+# 用語の座標値のスケール倍率
+編集用語彙の用語の座標値と参照用語彙の用語の座標値のスケールに大きな違いがある場合は、「Config.js」を編集することで参照用語彙の用語の座標値のスケール倍率を調整することができます。
 
-If there is a big difference in magnification between term data for editing and term data for reference, you can adjust it.
-Use "Config.js" to set a default magnification for reference term data.
-
-## Example of Config.js
-
-A default magnification for reference term data is '1'.  
-You can set Positive and Negative numbers.
+## Config.jsのサンプル
+参照用語彙の用語の座標値のスケールのデフォルトの倍率は「1」です。正の数と負の数ともに設定することができます。
 
 ```
 'magnification': [
@@ -156,9 +134,8 @@ You can set Positive and Negative numbers.
     <img src="https://img.shields.io/badge/Flask--white.svg?style=plastic&logo=Flask">
 </div>
 
-# Acknowledgments
+# 謝辞
+本研究テーマは、内閣府総合科学技術・イノベーション会議「戦略的イノベーション創造プログラム（SIP）ビッグデータ・AI を活用したサイバー空間基盤技術」（NEDO）の支援のもと遂行されました。
 
-This work was supported by Council for Science, Technology and Innovation, “Cross-ministerial Strategic Innovation Promotion Program (SIP), Big-data and AI-enabled Cyberspace Technologies”. (funding agency: NEDO)
-
-# Contact
+# 連絡先
 contact-cvd@cs.jp.fujitsu.com
