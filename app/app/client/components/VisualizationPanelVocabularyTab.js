@@ -151,7 +151,7 @@ export default
     // Initialize zoom (0% zoom value)
     this.initSlider = currentZoom;
 
-    cy.minZoom(currentZoom/2);
+    cy.minZoom(currentZoom);
     cy.maxZoom(maxZoom);
 
     const fileId = this.props.editingVocabulary.selectedFile.id;
