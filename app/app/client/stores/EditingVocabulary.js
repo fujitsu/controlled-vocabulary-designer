@@ -1770,9 +1770,8 @@ class EditingVocabulary {
    * @param  {Number} position x or y position
    * @return {Number} - reverse value
    */
-   calcReversePosition(position) {     
-    const ret =  Math.sign(position)*1.0/10000.0*Math.pow(Math.E, 4.0/3.0*Math.log(1.0/2.0*Math.abs(position)));
-    return ret;
+   calcReversePosition(position) {
+    return position / 1000;
   }
 
   /**
