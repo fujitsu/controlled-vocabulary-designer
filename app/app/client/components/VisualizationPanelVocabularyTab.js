@@ -1266,6 +1266,7 @@ export default
     const nodeList = editingVocabulary.termListForVocabulary;
     const edgesList = editingVocabulary.edgesList;
     const disabledDeselectConfirm = editingVocabulary.selectedTermList.length > 0 ? false : true;
+    const disabledBorderConfirm = editingVocabulary.selectedFile.id !== 0 ? true : disabledDeselectConfirm;
     const transformTogle = this.state.transformTogle;
     const anchorEl = this.state.anchorEl;
     const open = Boolean(anchorEl);
@@ -1370,7 +1371,7 @@ export default
                 variant="contained"
                 color="primary"
                 size={'small'}
-                disabled={disabledDeselectConfirm}
+                disabled={disabledBorderConfirm}
                 onClick={(e)=>this.handleBorderColorPopOpen(e)}
               >
                 枠線色変更
