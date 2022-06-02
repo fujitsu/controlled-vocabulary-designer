@@ -1770,8 +1770,12 @@ class EditingVocabulary {
    * @param  {Number} position x or y position
    * @return {Number} - reverse value
    */
-   calcReversePosition(position) {
-    return position / 1000;
+   calcReversePosition(position, isDrag=false) {
+     if(isDrag){
+       return Math.sign(position)*1.0/10000.0*Math.pow(Math.E, 4.0/3.0*Math.log(1.0/2.0*Math.abs(position)));
+     }else{
+       return position / 1000;
+     }
   }
 
   /**
@@ -2091,7 +2095,7 @@ class EditingVocabulary {
    * @param  {object} nodes - cytoscape nodes
    * @return {string} - error message
    */
-  @action updateVocabularys( nodes) {
+  @action updateVocabularys( nodes, isDrag=false) {
     const error = this.errorCheck();
     if (error != '') {
       return error;
@@ -2108,8 +2112,8 @@ class EditingVocabulary {
       for (let node of nodes) {
         const posi = node.position();
         if( item.term === node.data().term){
-          position_x = this.calcReversePosition( posi.x);
-          position_y = this.calcReversePosition( posi.y);
+          position_x = this.calcReversePosition( posi.x, isDrag);
+          position_y = this.calcReversePosition( posi.y, isDrag);
 
           if(( threshold > Math.abs( Number( item.position_x) - position_x))
           || ( threshold > Math.abs( Number( item.position_y) - position_y))){

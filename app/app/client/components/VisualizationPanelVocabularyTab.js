@@ -151,7 +151,7 @@ export default
     // Initialize zoom (0% zoom value)
     this.initSlider = currentZoom;
 
-    cy.minZoom(currentZoom);
+    cy.minZoom(currentZoom / 2);
     cy.maxZoom(maxZoom);
 
     const fileId = this.props.editingVocabulary.selectedFile.id;
@@ -527,7 +527,7 @@ export default
    */
   setUpListeners() {
     this.cy.on('dragfreeon', 'node', (event) => {      
-      this.updateVocabularys();
+      this.updateVocabularys( true);
     });
 
     this.cy.on('click', 'node', (event) => {
@@ -1037,12 +1037,12 @@ export default
   /**
    * Update coordinate transform
    */
-  async updateVocabularys() {
+  async updateVocabularys( isDrag=false) {
     
     const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
     
     this.fitCenterPan = false;
-    const ret = await this.props.editingVocabulary.updateVocabularys( this.cy.nodes());
+    const ret = await this.props.editingVocabulary.updateVocabularys( this.cy.nodes(), isDrag);
     this.fitCenterPan = true;
 
     if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
