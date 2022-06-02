@@ -1768,6 +1768,7 @@ class EditingVocabulary {
   /**
    * Calculate the coordinates of the term from the coordinates of the visualization panel 
    * @param  {Number} position x or y position
+   * @param  {bool}   isDrag true: Calculation for drag , false: other
    * @return {Number} - reverse value
    */
    calcReversePosition(position, isDrag=false) {
