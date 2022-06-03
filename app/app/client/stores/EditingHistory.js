@@ -169,6 +169,9 @@ class EditingHistory {
       case 'confirmColorChanged':
         this.execConfirmColorChanged(type, history);
         break;
+      case 'position':
+        this.execPosition(type, history);
+        break;
       default:
         break;
     }
@@ -407,6 +410,28 @@ class EditingHistory {
     EditingVocabulary.seletConfirmColor(color, true);
   }
 
+  execPosition(type, history) {
+    
+    const EditingVocabulary = editingVocabularyStore;
+    const target = EditingVocabulary.getTargetFileData(EditingVocabulary.selectedFile.id).find((obj) => {
+      return (obj.id == history.targetId);
+    });
+    
+    if (!target) {
+      console.log('target is not found. id: ' + history.targetId);
+      return;
+    }
+
+    let position;
+    if (this.STR_UNDO === type) {
+      position = history.previous;
+    } else { // redo
+      position = history.following;
+    }
+    target.position_x = position.position_x;
+    target.position_y = position.position_y;
+  }
+
   // Display message function /////////////////////////////////////////////
   _undoMessage;
   _redoMessage;
@@ -502,6 +527,9 @@ class EditingHistory {
         break;
       case 'confirmColorChanged':
         result = this.makeConfirmColorChangedMessage(type, history);
+        break;
+      case 'position':
+        result = this.makePositionMessage(type, history);
         break;
       default:
         result = this.STR_HISTORY_NONE;
@@ -687,6 +715,38 @@ class EditingHistory {
 
     return message;
   }
+
+  /**
+   * Create position move undo/redo message
+   * @param  {string} type 'undo' or 'redo' string.
+   * @param  {object} history - information of history
+   * @return {string} - message
+   */
+  makePositionMessage(type, history) {
+    let message = '用語の移動を';
+
+    if (this.STR_UNDO === type) {
+      message += '取り消しました。\n \n';
+    } else { // redo
+      message += 'やり直しました。\n \n'
+    }
+    return message;
+  }
+
+  /**
+   * Digits after the specified decimal point
+   * @param  {number}  num - value
+   * @param  {integer} digit - digits 
+   * @return {number} - calc value
+   */
+  roundNum(num, digit ){
+
+    if( Number(num) === Number.NaN){
+      return '-';
+    }
+    return Math.round( Number(num) * Math.pow( 10, digit ) ) / Math.pow( 10, digit );
+  }
+
 
   /**
    * Create synonym undo/redo message
@@ -1046,6 +1106,14 @@ class EditingHistory {
     targetId : 000,
     previous : "black",
     following : "brown",
+  };
+
+  // case7 : position move
+  history = {
+    action : "position",
+    targetId : 000,
+    previous : { position_x:0.001, position_y: 0.001 },
+    following :{ position_x:0.001, position_y: 0.001 },
   };
   ///////////////////////////////////////////////////////////////////////
  */

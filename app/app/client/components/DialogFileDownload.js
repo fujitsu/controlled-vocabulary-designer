@@ -21,8 +21,6 @@ import Select from '@material-ui/core/Select';
 
 import axios from 'axios';
 
-import DialogApiError from './DialogApiError';
-
 /**
  * File download dialog
  * @extends React
@@ -301,12 +299,6 @@ export default class DialogFileDownload extends React.Component {
             </Button>
           </DialogActions>
         </Dialog>
-        <DialogApiError
-          open={this.props.editingVocabulary.apiErrorDialog.open}
-          classes={this.props.classes}
-          close={() => this.props.editingVocabulary.closeApiErrorDialog()}
-          editingVocabulary={this.props.editingVocabulary}
-        />
       </div>
     );
   }

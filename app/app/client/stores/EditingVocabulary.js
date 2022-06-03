@@ -444,7 +444,7 @@ class EditingVocabulary {
    * @return {string} - source information
    */
   @action getReferenceFromData(term, type) {
-    let str = '( ';
+    let str = '';
 
     if ((0 == this.selectedFile.id) && (this.currentNode.id)) {
       switch (type) {
@@ -512,7 +512,7 @@ class EditingVocabulary {
       }
     }
 
-    str += ')';
+    str += '';
     return str;
   }
 
@@ -1768,11 +1768,15 @@ class EditingVocabulary {
   /**
    * Calculate the coordinates of the term from the coordinates of the visualization panel 
    * @param  {Number} position x or y position
+   * @param  {bool}   isDrag true: Calculation for drag , false: other
    * @return {Number} - reverse value
    */
-   calcReversePosition(position) {     
-    const ret =  Math.sign(position)*1.0/10000.0*Math.pow(Math.E, 4.0/3.0*Math.log(1.0/2.0*Math.abs(position)));
-    return ret;
+   calcReversePosition(position, isDrag=false) {
+     if(isDrag){
+       return Math.sign(position)*1.0/10000.0*Math.pow(Math.E, 4.0/3.0*Math.log(1.0/2.0*Math.abs(position)));
+     }else{
+       return position / 1000;
+     }
   }
 
   /**
@@ -2092,7 +2096,7 @@ class EditingVocabulary {
    * @param  {object} nodes - cytoscape nodes
    * @return {string} - error message
    */
-  @action updateVocabularys( nodes) {
+  @action updateVocabularys( nodes, isDrag=false) {
     const error = this.errorCheck();
     if (error != '') {
       return error;
@@ -2109,8 +2113,8 @@ class EditingVocabulary {
       for (let node of nodes) {
         const posi = node.position();
         if( item.term === node.data().term){
-          position_x = this.calcReversePosition( posi.x);
-          position_y = this.calcReversePosition( posi.y);
+          position_x = this.calcReversePosition( posi.x, isDrag);
+          position_y = this.calcReversePosition( posi.y, isDrag);
 
           if(( threshold > Math.abs( Number( item.position_x) - position_x))
           || ( threshold > Math.abs( Number( item.position_y) - position_y))){
@@ -2124,6 +2128,13 @@ class EditingVocabulary {
       if( !tmpData || position_x === null){
         continue;
       }
+      
+      const history = new History('position', item.id);
+      history.previous = { position_x: Number(item.position_x), position_y: Number(item.position_y)};
+      history.following ={ position_x:             position_x , position_y:             position_y };
+      history.targetId = item.id;
+   
+      editingHistoryStore.addHistory(history);
 
       item.position_x = position_x;
       item.position_y = position_y;

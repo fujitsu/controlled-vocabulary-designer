@@ -20,8 +20,6 @@ import Snackbar from '@material-ui/core/Snackbar';
 import axios from 'axios';
 import $ from 'jquery';
 
-import DialogApiError from './DialogApiError';
-
 /**
  * File selection dialog
  * @extends React
@@ -742,12 +740,6 @@ export default class DialogFileSelecter extends React.Component {
           }}
           open={this.state.uploading}
           message="ファイルアップロード中..."
-        />
-        <DialogApiError
-          open={this.props.editingVocabulary.apiErrorDialog.open}
-          classes={this.props.classes}
-          editingVocabulary={this.props.editingVocabulary}
-          close={() => this.props.editingVocabulary.closeApiErrorDialog()}
         />
       </div>
     );
