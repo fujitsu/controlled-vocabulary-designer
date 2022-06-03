@@ -50,8 +50,12 @@ def vector(txt_preprocessed_file, domain_words_file, domain_text_preprocessed_fi
 
         # Import a list of terms in a field, normalize strings of terms
         domain_words_csv = pd.read_csv(domain_words_file)
-        domain_words = list(domain_words_csv["用語名"])
-        domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words] # normalize term strings to match case
+        domain_words_csv = domain_words_csv.fillna("")
+        try:
+            domain_words = list(domain_words_csv["用語名"])
+        except KeyError:
+            sys.exit("domain_words.csvに「用語名」列が存在しません。「用語名」列を追加した後に再読み込みしてください。")
+        domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words if char != ""] # normalize term strings to match case
         domain_words = list(set(domain_words)) # normalized and lowercase to remove term duplication
 
     # If domain_words_file does not exist and domain _ text _ preprocessed _ file exists, extract field terms from domain _ text _ preprocessed _ file
