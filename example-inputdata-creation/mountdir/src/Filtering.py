@@ -29,8 +29,8 @@ def filt(domain_words_file, domain_text_preprocessed_file, vec):
     if os.path.exists(domain_words_file) is True:
         # Read domain_words data (terms for the field)
         domain_words_csv = pd.read_csv(domain_words_file)
+        domain_words_csv = domain_words_csv.fillna("")
         domain_words = list(domain_words_csv["用語名"])
-        domain_words = list(set(domain_words)) # reduce term duplication by using lowercase letters
 
         return domain_words
 
