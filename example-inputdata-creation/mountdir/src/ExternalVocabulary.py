@@ -6,6 +6,7 @@ ExternalVocabulary.py COPYRIGHT FUJITSU LIMITED 2021
 
 import argparse
 import os
+import sys
 import json
 import datetime
 import inspect
@@ -24,16 +25,7 @@ def location(depth=0):
     return os.path.basename(frame.f_code.co_filename),\
         frame.f_code.co_name, frame.f_lineno
 
-def is_japanese(string):
-    for ch in string:
-        name = unicodedata.name(ch)
-        if "CJK UNIFIED" in name \
-        or "HIRAGANA" in name \
-        or "KATAKANA" in name:
-            return True
-    return False
-
-def wordnet():
+def wordnet(voc_uri):
     # ######### Extract synonyms and broader terms for all wordnet terms ##########
     # Dictionary variable definition
     syn_word = {}  # {key: value} = {synset: headword}
@@ -80,9 +72,14 @@ def wordnet():
         for idx_syn_word_no_dup in range(len(syn_word_no_dup[key])):
             # lang = 'ja' if is_japanese(syn_word_no_dup[key][idx_syn_word_no_dup]) else 'en'
             lang = 'ja'
-            output_all.append([syn_word_no_dup[key][idx_syn_word_no_dup],
-                              syn_word_no_dup[key][0], lang, "",
-                              syn_hyper_pref[key], "", "", ""])
+            if syn_hyper_pref[key] == "":
+                output_all.append([syn_word_no_dup[key][idx_syn_word_no_dup],
+                                  syn_word_no_dup[key][0], lang, voc_uri + syn_word_no_dup[key][0],
+                                  syn_hyper_pref[key], "", "", ""])
+            elif syn_hyper_pref[key] != "":
+                output_all.append([syn_word_no_dup[key][idx_syn_word_no_dup],
+                                  syn_word_no_dup[key][0], lang, voc_uri + syn_word_no_dup[key][0],
+                                  syn_hyper_pref[key], voc_uri + syn_hyper_pref[key], "", ""])
     print(datetime.datetime.now(), "---syn_word_no_dup loop End", location())
 
     return output_all
@@ -92,6 +89,39 @@ def reference_csv(csv_file):
     # Import csv file and extract relationships between terms
     reference_df = pd.read_csv(f'../data/{csv_file}')
     reference_df = reference_df.fillna("")
+    
+    # Check the existence of columns
+    check_list = []
+    if("用語名" not in reference_df.columns):
+        check_list.append("「用語名」列")
+
+    if("代表語" not in reference_df.columns):
+        check_list.append("「代表語」列")
+
+    if("言語" not in reference_df.columns):
+        check_list.append("「言語」列")
+
+    if("代表語のURI" not in reference_df.columns):
+        check_list.append("「代表語のURI」列")
+
+    if("上位語のURI" not in reference_df.columns):
+        check_list.append("「上位語のURI」列")
+
+    if("他語彙体系の同義語のURI" not in reference_df.columns):
+        check_list.append("「他語彙体系の同義語のURI」列")
+
+    if("用語の説明" not in reference_df.columns):
+        check_list.append("「用語の説明」列")
+
+    if check_list != []:
+        print("reference.csvに", end="")
+        for col in check_list:
+            print(col, end="")
+        print("が存在しません。")
+        for col in check_list:
+            print(col, end="")
+        print("を追加した後に再読み込みしてください。")
+        sys.exit(1)
 
     # Make mapping dictionary
     dic_uri_preflabel_ja = {}
@@ -305,10 +335,10 @@ def check_arg(args, config):
 
 def main(args, config):
     output_file = args.output[0]
-
+    voc_uri = config["SanSyogoi"]["WordnetURI"]["uri"]
     mode_switch = config["SanSyogoi"]["ExternalVocabulary"]["Algorithm"]
     if mode_switch == "wordnet":
-        relation = wordnet()
+        relation = wordnet(voc_uri)
     elif mode_switch == "reference.csv":
         relation = reference_csv(mode_switch)
     elif mode_switch == "reference.ttl":
