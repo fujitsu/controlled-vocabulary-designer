@@ -36,8 +36,9 @@ def hypernym(txt_preprocessed_file, domain_words_file):
 
     # Import a list of terms in a field, normalize strings of terms
     domain_words_csv = pd.read_csv(domain_words_file)
+    domain_words_csv = domain_words_csv.fillna("")
     domain_words = list(domain_words_csv["用語名"])
-    domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words] # normalize term strings to match case
+    domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words if char != ""] # normalize term strings to match case
     domain_words = list(set(domain_words)) # normalize term strings and reduce term duplication by using lowercase letters
 
     # All terms
