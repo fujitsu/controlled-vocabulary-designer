@@ -17,14 +17,6 @@ import unicodedata
 import pandas as pd
 import numpy as np
 
-def is_japanese(string):
-    for ch in string:
-        name = unicodedata.name(ch) 
-        if "CJK UNIFIED" in name \
-        or "HIRAGANA" in name \
-        or "KATAKANA" in name:
-            return True
-    return False
 
 def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain_words_file, voc_uri):
     # If domain_words_file exists in the same folder, extract field terms from domain_words_file
@@ -33,8 +25,6 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
         domain_words_csv = pd.read_csv(domain_words_file)
         domain_words_csv = domain_words_csv.fillna("")
         domain_words = list(domain_words_csv["用語名"])
-        domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words] # normalize term strings to match case
-        domain_words = list(set(domain_words)) # normalized and lowercase to remove term duplication
 
     # Check if a column other than the term column exists
     flag_pref_label = True if('代表語' in domain_words_csv.columns) else False
@@ -49,30 +39,6 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
     flag_color2 = True if('色2' in domain_words_csv.columns) else False
     flag_confirmed = True if('確定済み用語' in domain_words_csv.columns) else False
 
-    dic_pref_label = {}
-    dic_lang = {}
-    dic_uri= {}
-    dic_broader= {}
-    dic_other_voc_syn_uri= {}
-    dic_term_description= {}
-    dic_created= {}
-    dic_modified= {}
-    dic_color1= {}
-    dic_color2= {}
-    dic_confirmed= {}
-    for index, row in domain_words_csv.iterrows():
-        dic_pref_label[row["用語名"]] = row["代表語"] if flag_pref_label else ""
-        dic_lang[row["用語名"]] = row["言語"] if flag_lang else ""
-        dic_uri[row["用語名"]] = row["代表語のURI"] if flag_uri else ""
-        dic_broader[row["用語名"]] = row["上位語のURI"] if flag_broader else ""
-        dic_other_voc_syn_uri[row["用語名"]] = row["他語彙体系の同義語のURI"] if flag_other_voc_syn_uri else ""
-        dic_term_description[row["用語名"]] = row["用語の説明"] if flag_term_description else ""
-        dic_created[row["用語名"]] = row["作成日"] if flag_created else ""
-        dic_modified[row["用語名"]] = row["最終更新日"] if flag_modified else ""
-        dic_color1[row["用語名"]] = row["色1"] if flag_color1 else ""
-        dic_color2[row["用語名"]] = row["色2"] if flag_color2 else ""
-        dic_confirmed[row["用語名"]] = row["確定済み用語"] if flag_confirmed else ""
-
     if(flag_uri == False):
         uri = voc_uri
         if(uri[-1] != "/"):
@@ -82,24 +48,23 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
     with open(hensyugoi_file, 'w', newline="", errors='ignore', encoding='utf-8-sig') as f:
         writer = csv.writer(f)
         writer.writerow(header)
-        for word in filter_words:
+        for index, word in enumerate(filter_words):
+            pref_label = domain_words_csv["代表語"][index] if flag_pref_label else word
+            lang = domain_words_csv["言語"][index] if flag_lang else ""
+            uri_pref = domain_words_csv["代表語のURI"][index] if flag_uri else uri + str(idx + 1)
+            broader = domain_words_csv["上位語のURI"][index] if flag_broader else ""
+            other_voc_syn_uri = domain_words_csv["他語彙体系の同義語のURI"][index] if flag_other_voc_syn_uri else ""
+            term_description = domain_words_csv["用語の説明"][index] if flag_term_description else ""
+            created = domain_words_csv["作成日"][index] if flag_created else ""
+            modified = domain_words_csv["最終更新日"][index] if flag_modified else ""
+            color1 = domain_words_csv["色1"][index] if flag_color1 else "black"
+            color2 = domain_words_csv["色2"][index] if flag_color2 else "black"
+            confirmed = domain_words_csv["確定済み用語"][index] if flag_confirmed else 0
             word_normalized = unicodedata.normalize("NFKC", word).lower()
-            pref_label = dic_pref_label[word] if flag_pref_label else word
-            if flag_lang:
-                lang = dic_lang[word]
+            if(word == ""):
+                writer.writerow([word, pref_label, lang, uri_pref, broader, other_voc_syn_uri, term_description, created, modified, "", "", 0, 0, color1, color2, confirmed])
             else:
-                #lang = 'ja' if is_japanese(word) else 'en'
-                lang = 'ja'
-            uri_pref = dic_uri[word] if flag_uri else uri + str(idx + 1)
-            broader = dic_broader[word] if flag_broader else ""
-            other_voc_syn_uri = dic_other_voc_syn_uri[word] if flag_other_voc_syn_uri else ""
-            term_description = dic_term_description[word] if flag_term_description else ""
-            created = dic_created[word] if flag_created else ""
-            modified = dic_modified[word] if flag_modified else ""
-            color1 = dic_color1[word] if flag_color1 else "black"
-            color2 = dic_color2[word] if flag_color2 else "black"
-            confirmed = dic_confirmed[word] if flag_confirmed else 0
-            writer.writerow([word, pref_label, lang, uri_pref, broader, other_voc_syn_uri, term_description, created, modified, ", ".join(syn.item()[word]), ", ".join(hyper.item().get(word_normalized)), vec.item()[word_normalized][0]*tuning, vec.item()[word_normalized][1]*tuning, color1, color2, confirmed])
+                writer.writerow([word, pref_label, lang, uri_pref, broader, other_voc_syn_uri, term_description, created, modified, ", ".join(syn.item()[word]), ", ".join(hyper.item().get(word_normalized)), vec.item()[word_normalized][0]*tuning, vec.item()[word_normalized][1]*tuning, color1, color2, confirmed])
             idx = idx + 1
 
 
