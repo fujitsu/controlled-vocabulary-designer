@@ -37,7 +37,7 @@ import IndeterminateCheckBoxOutlinedIcon from "@material-ui/icons/IndeterminateC
 
 import {observer} from 'mobx-react';
 
-import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
+// import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
 import ColorChartCheckBoxes from './ColorChartCheckBoxes';
 import EditPanelVocabularyTab from './EditPanelVocabularyTab';
 import EditPanelVocabularyNewTab from './EditPanelVocabularyNewTab';
@@ -151,7 +151,7 @@ export default
     // Initialize zoom (0% zoom value)
     this.initSlider = currentZoom;
 
-    cy.minZoom(currentZoom/2);
+    cy.minZoom(currentZoom / 2);
     cy.maxZoom(maxZoom);
 
     const fileId = this.props.editingVocabulary.selectedFile.id;
@@ -527,7 +527,7 @@ export default
    */
   setUpListeners() {
     this.cy.on('dragfreeon', 'node', (event) => {      
-      this.updateVocabularys();
+      this.updateVocabularys( true);
     });
 
     this.cy.on('click', 'node', (event) => {
@@ -1037,12 +1037,12 @@ export default
   /**
    * Update coordinate transform
    */
-  async updateVocabularys() {
+  async updateVocabularys( isDrag=false) {
     
     const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
     
     this.fitCenterPan = false;
-    const ret = await this.props.editingVocabulary.updateVocabularys( this.cy.nodes());
+    const ret = await this.props.editingVocabulary.updateVocabularys( this.cy.nodes(), isDrag);
     this.fitCenterPan = true;
 
     if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
@@ -1233,10 +1233,10 @@ export default
    * Fixed term color reflection
    * @param  {String} color - string of changed color
    */
-   seletConfirmColor(color) {
-    console.log('[seletConfirmColor] change to ', color);
-    this.props.editingVocabulary.seletConfirmColor(color);
-  }
+  //  seletConfirmColor(color) {
+  //   console.log('[seletConfirmColor] change to ', color);
+  //   this.props.editingVocabulary.seletConfirmColor(color);
+  // }
 
   /**
    * Confirm switch
@@ -1266,6 +1266,7 @@ export default
     const nodeList = editingVocabulary.termListForVocabulary;
     const edgesList = editingVocabulary.edgesList;
     const disabledDeselectConfirm = editingVocabulary.selectedTermList.length > 0 ? false : true;
+    const disabledBorderConfirm = editingVocabulary.selectedFile.id !== 0 ? true : disabledDeselectConfirm;
     const transformTogle = this.state.transformTogle;
     const anchorEl = this.state.anchorEl;
     const open = Boolean(anchorEl);
@@ -1281,6 +1282,8 @@ export default
     const idColor = openColor ? "popover-color" : undefined;
     const editButtondisabled = editingVocabulary.currentNode.term ? true : false;
     const editButtonsDisableSwitchByFile  = editingVocabulary.selectedFile.id !== 0 ? true : false;
+
+    const sliderValue = editingVocabulary.getTargetFileData(editingVocabulary.selectedFile.id).length > 0 ? this.state.sliderValue: 0;
 
     // for Confirm Button
     let fileId = editingVocabulary.selectedFile.id;
@@ -1368,7 +1371,7 @@ export default
                 variant="contained"
                 color="primary"
                 size={'small'}
-                disabled={disabledDeselectConfirm}
+                disabled={disabledBorderConfirm}
                 onClick={(e)=>this.handleBorderColorPopOpen(e)}
               >
                 枠線色変更
@@ -1409,7 +1412,7 @@ export default
                   close={()=>this.handleBorderColorPopClose()}
                 />
               </Popover>
-              <ButtonGroup>           
+              {/* <ButtonGroup>            */}
                 <Button
                   className={this.props.classes.buttonsGrp}
                   ml={3}
@@ -1422,7 +1425,7 @@ export default
                   {confirmButtonText}
                 
                 </Button>       
-                <Button
+                {/* <Button
                   className={this.props.classes.buttonsGrp}
                   ml={3}
                   variant="contained"
@@ -1460,7 +1463,7 @@ export default
                   }
                   close={()=>this.handleConfirmColorPopoverClose()}
                 />
-              </Popover>
+              </Popover> */}
             </Box>
           </Grid>
           <Grid item>
@@ -1627,8 +1630,9 @@ export default
             }}
             orientation="vertical"
             key={`slider-${this.state.sliderValue}`}
-            defaultValue={this.state.sliderValue}
-            value={this.state.sliderValue}
+            defaultValue={0}
+            // value={this.state.sliderValue}
+            value={sliderValue}
             aria-labelledby="vertical-slider"
             marks={zoomMarks}
             step={this.sliderStep}
