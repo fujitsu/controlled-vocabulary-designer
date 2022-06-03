@@ -25,6 +25,9 @@
         "reference.csv": {},
         "reference.ttl": {}
     },
+    "WordnetURI": {
+        "uri": "http://sampleWordnet/"
+    },
     "WordEmbedding2": {
         "poincare.epochs": 20
     }
