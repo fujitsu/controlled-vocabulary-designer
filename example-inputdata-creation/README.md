@@ -1,86 +1,93 @@
-# Input data creation example
+# 読み込み用ファイル作成例
+編集用語彙、参照用語彙の作成例です。
 
-Example of generating editing vocabulary, reference vocabulary and corpus.
 
-
-## How to generate
-### In the case of editing vocabulary and corpus
-1. Put domain_words.csv and domain_text.txt in mountdir/data/. (The examples of these files are shown near the bottom of this README.)
+## 作成方法
+### 編集用語彙を作成する場合
+1. domain_words.csvとdomain_text.txtをmountdir/data/に置きます。（domain_words.csvとdomain_text.txtのサンプルは、このREADMEの下部に提示しています。）
     - domain_words.csv
-      - Column "用語名" is required and columns "代表語" through "用語の説明" are optional. It may have columns after column "用語の説明".
-      - In the case of generating an editing vocabulary from zero, it only needs to have column "用語名".
-      - In the case of expanding the editing vocabulary to a format to be read by CVD based on the existing editing vocabulary, the existing editing vocabulary may be used as it is.
-      - If it does not have column "代表語のURI", change setting of URI of mountdir/src/config.json to the URI of the controlled vocabulary. Default settings of URI is "http\://sampleVocab/", and if left at the default, the representative URIs for each term is "http\://sampleVocab/1", "http\://sampleVocab/2", and so on.
+      - 「用語名」列は必須、「代表語」列から「用語の説明」列は任意です。その他の列を含んでいても問題ありません。
+      - 以下の手順2～5のコマンドを実行することで、domain_words.csvについてCVDの読み込みに不足している列を追加し、編集用語彙として作成します。domain_words.csvについてCVDの読み込みに必要な列を含んでいる場合は、その列の値をそのまま使用します。（※ただし、「同義語候補」列、「上位語候補」列、「x座標値」列、「y座標値」列は書き換えます。）
+      -  以下の手順2～5はCVDの読み込みに不足している列を追加するための処理であり、domain_words.csvの内容に不整合（記述ルールに沿って記述されていない個所）が存在するかどうかは検出しません。不整合が存在する場合は別途手動で修正してください。domain_words.csvの記述ルールは、トップフォルダの[README](../README.md)の編集用語彙のサンプルについての記載を参照ください。
+      -  domain_words.csvに「代表語のURI」列を含んでいない場合は、mountdir/src/config.jsonの以下の場所に語彙のURIを記入してください。デフォルトは"http\://sampleVocab/"が設定されています。デフォルトのまま以下の手順2～5のコマンドを実行した場合、各用語のURIは"http\://sampleVocab/1"、"http\://sampleVocab/2"などのように出力されます。
         ```
         {
           "Hensyugoi": {
             "Hensyugoi": {
                 "VectorMagnification": 10,
-                "URI": "http://sampleVocab/"  ← here
+                "URI": "http://sampleVocab/"  ← ココ
             },
           ...
         ```
-      - The character code must be BOM-ed UTF-8.
-    - domain_text.csv
-      - It is text data related to a term to be controlled, and symbols may be included.
+      - domain_words.csvの文字コードはBOM付きUTF-8で作成してください。
+    - domain_text.txt
+      - 作成する統制語彙に関する用語を含んだテキストデータで、記号が含まれていても問題ありません。
 2. ```$ cd example-inputdata-creation```
 3. ```$ docker-compose build --build-arg HOST_USER_ID=$(id -u)```
 4. ```$ docker-compose run python /bin/bash```
-5. ```$ ./Hensyugoi.sh```. The following will be generated.
-   * Hensyugoi.csv (editing vocabulary)
-   * wiki_wakati_preprocessed.txt (corpus)
+5. ```$ ./Hensyugoi.sh```. 以下のファイルが出力されます。
+   * Hensyugoi.csv (編集用語彙)
 
-### In the case of reference vocabulary
-6. Put domain_words.csv and reference.csv(or reference.ttl) in mountdir/data/. (The example of reference.ttl is shown near the bottom of this README. The format of reference.csv is same as domain_words.csv)  
-   Reference.csv and reference.ttl are optional. If you use reference.csv or reference.ttl, set "reference.csv" or "reference.ttl" to "Algorithm" of "ExternalVocabulary" of mountdir/src/config.json. Default settings is "wordnet".
+
+### 参照用語彙を作成する場合
+6. domain_words.csvをmountdir/data/に置きます。また、参照したい既存の語彙がある場合は、ファイル名をreference.csvあるいはreference.ttlとしてmountdir/data/に置きます。（reference.csvとreference.ttlのサンプルは、本READMEの下部に提示しています。）
+    -  Reference.csvあるいはreference.ttlを使用するかどうかは任意ですが、使用する場合はmountdir/src/config.jsonの以下の場所に、"reference.csv"あるいは"reference.ttl"を記入してください。デフォルトでは"wordnet"が設定されています。デフォルトのまま以下の手順7～10のコマンドを実行すると、日本語wordnetを既存の語彙として参照用語彙を作成します。
     ```
     ...
     "SanSyogoi": {
       "ExternalVocabulary": {
-          "Algorithm": "wordnet",  ← here
+          "Algorithm": "wordnet",  ← ココ
           "wordnet": {},
           "reference.csv": {},
           "reference.ttl": {}
       },
     ...
     ```
+    -  また、日本語wordnetを既存の語彙として使用する場合は、mountdir/src/config.jsonの以下の場所に書かれているURIを使用します。これは、参照用語彙に記入するために必要な情報で、wordnet公式のURIではありません。デフォルトでは、"http\://sampleWordnet/"となっていますが、必要に応じて任意のURIに書き換えてください。
+    ```
+    ...
+    "WordnetURI": {
+        "uri": "http://sampleWordnet/"  ← ココ
+    ...
+    ```    
+    -  以下の手順7～10は既存の語彙をCVDの読み込みできる形式に変換するための処理であり、domain_words.csvやreference.csvやreference.ttlの内容に不整合が存在するかどうかは検出しません。不整合が存在する場合は別途手動で修正してください。domain_words.csvやreference.csvの記述ルールは、トップフォルダの[README](../README.md)の編集用語彙のサンプルについての記載を参照ください。reference.ttlの記述ルールは、本READMEのreference.ttlのサンプルを参照ください。
     - domain_words.csv
-      - Column "用語名" is required and columns "代表語" through "用語の説明" are optional. It may have columns after column "用語の説明".
-      - In the case of generating an reference vocabulary, it only needs to have column "用語名".
-      - The character code must be BOM-ed UTF-8.
+      - 「用語名」列は必須、「代表語」列から「用語の説明」列は任意です。その他の列を含んでいても問題ありません。
+      - 参照用語彙を作成する場合は、「用語名」列だけを使用します。
+      - domain_words.csvの文字コードはBOM付きUTF-8で作成してください。
     - reference.csv
-      - It is optional.
-      - If there is a controlled vocabulary (.csv) that you want to refer to, put it in the name of "reference.csv".
-      - Columns "用語名" through "用語の説明" are required.
-      - The character code must be BOM-ed UTF-8.
+      - reference.csvを使用するかどうかは任意です。参照したいcsv形式の既存の語彙がある場合は、ファイル名を"reference.csv"として作成してください。
+      - 「用語名」列から「用語の説明」列は必須です。
+      - reference.csvの文字コードはBOM付きUTF-8で作成してください。
     - reference.ttl
-      - It is optional.
-      - If there is a controlled vocabulary (.ttl) that you want to refer to, put it in the name of "reference.ttl".
-      - As in the example, it should be written primarily using [SKOS](https://www.w3.org/TR/2009/REC-skos-reference-20090818/).
+      - reference.ttlを使用するかどうかは任意です。参照したいturtle形式の既存の語彙がある場合は、ファイル名を"reference.ttl"として作成してください。
+      - 本README下部に提示したサンプルのように、reference.ttlは主に[SKOS](https://www.w3.org/TR/2009/REC-skos-reference-20090818/)を使用して記述されている必要があります。
 7. ```$ cd example-inputdata-creation```
 8. ```$ docker-compose build --build-arg HOST_USER_ID=$(id -u)```
 9. ```$ docker-compose run python /bin/bash```
-10. ```$ ./Sansyougoi.sh```. The following will be generated.
-     * SansyougoiAll.csv (reference vocabulary)
-     * SansyougoiTarget.csv (reference vocabulary)
+10. ```$ ./Sansyougoi.sh```. 以下のファイルが出力されます。
+     * SansyougoiAll.csv (参照用語彙：既存の語彙の情報全てを抽出)
+     * SansyougoiTarget.csv (参照用語彙：既存の語彙の情報のうち、domain_words.csvに記載されている用語についての情報のみを抽出)
 
 
-## Configure
-You can change the settings in 'config.json'.
+
+## configure
+mountdir/src/config.jsonで設定を変更することができます。
 
 |key1(Category)|key2(Phase)|key3(Config)|value type|default value|detail|
 | --- | --- | --- | --- | --- | --- |
-|Hensyugoi|Hensyugoi|VectorMagnification|Number|10|It is the scaling factor for the two-dimensional coordinate values of terms.|
-|Hensyugoi|Hensyugoi|URI|String|http\://sampleVocab/|It is URI of vocabulary.|
-|Hensyugoi|WordEmbedding|Algorithm|String|word2vec|It is the alorithm of word embedding. Select word2vec or fasttext.|
-|Hensyugoi|SynonymExtraction|SimilarityThreshold|Number|0.30|It is threshold filters synonyms.|
-|Hensyugoi|SynonymExtraction|SimilarityLimit|Number|10|It is a threshold of how many top positions are displayed.|
-|Hensyugoi|HypernymExtraction|Algorithm|String|hypernym|It is the algorithm of hypernym extraction. Use wordnet.|
-|SanSyogoi|ExternalVocabulary|Algorithm|String|wordnet|It is the reference vocabulary. Select wordnet or reference.csv or reference.ttl.|
-|SanSyogoi|WordEmbedding2|poincare.epochs|Number|2000|It is the number of iterations (epochs) over the corpus.|
+|Hensyugoi|Hensyugoi|VectorMagnification|Number|10|分散表現モデルによって計算される用語ベクトルの長さの倍率|
+|Hensyugoi|Hensyugoi|URI|String|http\://sampleVocab/|語彙のURI|
+|Hensyugoi|WordEmbedding|Algorithm|String|word2vec|分散表現モデル（word2vecあるいはfasttextを選択）|
+|Hensyugoi|SynonymExtraction|SimilarityThreshold|Number|0.30|分散表現モデルによる用語間の類似度計算の閾値|
+|Hensyugoi|SynonymExtraction|SimilarityLimit|Number|10|分散表現モデルによって計算される類似語上位表示数の閾値|
+|Hensyugoi|HypernymExtraction|Algorithm|String|hypernym|上位語推定アルゴリズム（デフォルトではwordnetを使用）|
+|SanSyogoi|ExternalVocabulary|Algorithm|String|wordnet|既存語彙（wordnetあるいはreference.csvあるいはreference.ttlを選択）|
+|SanSyogoi|WordnetURI|URI|String|http\://sampleWordnet/|既存語彙としてwordnetを選択した際の参照用語彙に記載する語彙のURI|
+|SanSyogoi|WordEmbedding2|poincare.epochs|Number|2000|モデル学習のイテレーション数（エポック数）|
 
 
-## Example of domain_words.csv
+## domain_words.csvのサンプル
 
 ```
 用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明
@@ -95,7 +102,7 @@ store,store,en,http://myVocabulary/2,,http://otherVocabulary/16,
 shop,store,en,http://myVocabulary/2,,http://otherVocabulary/16,
 ```
 
-## Example of domain_text.txt
+## domain_text.txtのサンプル
 
 ```
 <doc id="5" url="https://ja.wikipedia.org/wiki?curid=5" title="アンパサンド">
@@ -126,7 +133,27 @@ SGML、XML、HTMLでは、アンパサンドを使ってSGML実体を参照す�
 </doc>
 ```
 
-## Example of reference.ttl
+## reference.csvのサンプル
+
+```
+用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明
+カイトウメン,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
+Gossypium barbadense,カイトウメン,en,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
+ペルー綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
+シーアイランド綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
+エジプト綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
+スーダン綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
+ワタ,ワタ,ja,http://cavoc.org/cvo/ns/3/C876,,,
+モメン,ワタ,ja,http://cavoc.org/cvo/ns/3/C876,,,
+Cotton,Cotton,en,http://cavoc.org/cvo/ns/3/C876,,,
+Gossypium arboreum,Cotton,en,http://cavoc.org/cvo/ns/3/C876,,,
+Gossypium herbaceum,Cotton,en,http://cavoc.org/cvo/ns/3/C876,,,
+Gossypium hirsutum,Cotton,en,http://cavoc.org/cvo/ns/3/C876,,,
+食用綿実,食用綿実,ja,http://cavoc.org/cvo/ns/3/C1055,http://cavoc.org/cvo/ns/3/C876,,
+Edible cotton,Edible cotton,en,http://cavoc.org/cvo/ns/3/C1055,http://cavoc.org/cvo/ns/3/C876,,
+```
+
+## reference.ttlのサンプル
 
 ```
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
@@ -173,4 +200,3 @@ my:2
 <div align="right">
   <img src="https://img.shields.io/badge/python-3-blue.svg?style=plastic&logo=python">
 </div>
-
