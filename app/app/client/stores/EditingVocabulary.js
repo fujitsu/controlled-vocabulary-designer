@@ -2323,6 +2323,16 @@ isOtherVocSynUriChanged() {
   }
 
   /**
+   * For data with a blank "term name", the prefix of the (unique) term name indicating the blank is returned.
+   * 'TERM_BLANK_' cannot be changed because it is common to the file_controller.py and vocablary_controller.py
+   * 
+   * @return {string} - prefix string
+   */
+   @action getTerm_blank_prefix(){
+    return 'TERM_BLANK_';
+  }
+
+  /**
    * Visualization screen panel creating vocabulary list for vocabulary tab
    * @return {array} - vocabulary list
    */
@@ -2330,30 +2340,32 @@ isOtherVocSynUriChanged() {
     const targetData = this.getTargetFileData(this.selectedFile.id);
 
     const termListForVocabulary = [];
+    const getTerm_blank_prefix = this.getTerm_blank_prefix();
     targetData.forEach((data) => {
-
-      // Editing vocabulary
-      termListForVocabulary.push({
-        data: {
-          id: data.id,
-          term: data.term,
-          language: data.language,
-          preferred_label: data.preferred_label,
-          idofuri: data.idofuri,
-          uri: data.uri,
-          vocabularyColor: data.color1?data.color1:'',
-          other_voc_syn_uri: data.other_voc_syn_uri,
-          term_description: data.term_description,
-          created_time: data.created_time,
-          modified_time: data.modified_time,
-          confirm: data.confirm?data.confirm:'',
-        },
-        position: {
-          x: data.position_x?this.calcPosition(data.position_x):0,
-          y: data.position_y?this.calcPosition(data.position_y):0,
-        },
-        broader_term: data.broader_term,
-      });
+      if(data.term.indexOf( getTerm_blank_prefix)== -1){
+        // Editing vocabulary
+        termListForVocabulary.push({
+          data: {
+            id: data.id,
+            term: data.term,
+            language: data.language,
+            preferred_label: data.preferred_label,
+            idofuri: data.idofuri,
+            uri: data.uri,
+            vocabularyColor: data.color1?data.color1:'',
+            other_voc_syn_uri: data.other_voc_syn_uri,
+            term_description: data.term_description,
+            created_time: data.created_time,
+            modified_time: data.modified_time,
+            confirm: data.confirm?data.confirm:'',
+          },
+          position: {
+            x: data.position_x?this.calcPosition(data.position_x):0,
+            y: data.position_y?this.calcPosition(data.position_y):0,
+          },
+          broader_term: data.broader_term,
+        });
+      }
     });
 
     return termListForVocabulary;
