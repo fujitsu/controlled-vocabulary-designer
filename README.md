@@ -1,94 +1,174 @@
 # Controlled Vocabulary Designer (CVD)
+CVDは、統制語彙の作成を視覚的なインターフェースでサポートするツールです。<br>
+自然言語処理の計算結果や既存の統制語彙を参照して、同義関係や上下関係を効率的に定義できます。
+さらに、アプリケーションウィンドウで語彙全体を確認しながら直感的に編集することができます。
+作成された統制語彙は、RDFファイルとして出力・保存できます。<br>
+CVDのヘルプページは[こちら](https://fujitsu.github.io/controlled-vocabulary-designer/)
 
-CVD is a GUI support tool for creating controlled vocabulary.
-You can efficiently define synonymous and hierarchical relationships referring to
-outputs of natural language processing and existing controlled vocabulary.
-Moreover, you can see whole vocabulary on the application window and edit them interactively.
-The created controlled vocabulary can be exported as RDF file.
+# システム要件
+- docker : バージョン19.03以上
+- docker-compose : バージョン1.23以上
 
-# Requirement
-
-- docker > 19.03
-- docker-compose > 1.23
-
-# How to setup
-
-1. docker-compose up -d
-2. Access this URL from your browser.
+# セットアップ方法
+1. ```docker-compose up -d```
+2. 作業環境のWEBブラウザで以下にアクセスします。
 
 ```
 http://(hostname):10081/
 ```
 
-# Supported browsers
-
+# サポートブラウザ
 * Google Chrome
 * Microsoft Edge
 * Firefox
 
-# Supported File Format
+# サポートファイル形式
+* 読み込み用ファイル形式
+  * 編集用語彙_meta（語彙のメタファイル） : .csv
+  * 編集用語彙（語彙を編集するファイル） : .csv
+  * 参照用語彙（既存の語彙ファイル） : .csv
 
-* upload
-  * editing vocabulary :  .xlsx, .csv format
-    * The vocabulary that you are jsut or going to creating.
-  * reference vocabulary : .xlsx, .csv format
-    * The exsisting vocabulary (e.g. wordnet, DBpedia, other existing controlled vocabulary)
-  * corpus : .txt format
-    * The corpus contained words splitted by space
-
-* download
-  * editing vocabulary : .xlsx, .csv format
-  * cntrolled vocabulary : .n3, .nquads, .nt, .trix, .turtle, .xml, .jsonld format
-
-## Example of editing vocabulary
-
-|用語名|代表語|代表語のURI|上位語|同義語候補|上位語候補|品詞|x座標値|y座標値|色1|色2|
-|----|----|----|----|----|----|----|----|----|----|----|
-|aphros||||||名詞|6.882962381|-0.782237226|black|black|
-|api||||||名詞|-9.651039608|15.05839617|black|black|
-|サメ||||shark, 鮫|selachian, elasmobranch, 板鰓類|名詞|-12.40469425|1.260754069|black|black|
-|サンショウウオ||||salamander, 山椒魚|amphibian, 両生類, 両棲類|名詞|2.755970296|-1.591457808|black|black|
-|靖子||||||名詞|14.85126593|-1.219740487|black|black|
-|靖樹||||||名詞|7.643998834|-0.408532063|black|black|
-
-## Example of reference vocabulary
-
-|用語名|代表語|代表語のURI|上位語|
-|----|----|----|----|
-|タビエ|タイヌビエ|http://cavoc.org/cvo/ns/2/C1312||
-|飼料用アオキ|飼料用アオキ|http://cavoc.org/cvo/ns/2/C1397|アオキ|
-|ブドウ|ブドウ|http://cavoc.org/cvo/ns/2/C950	||
-|ケニギンデルワインガルデン|ケニギンデルワインガルデン|http://cavoc.org/cvo/ns/2/C977|ブドウ|
+* 書き出し用ファイル形式
+  * 編集用語彙（語彙を編集したファイル） : .csv
+  * 統制語彙（語彙を編集したファイル） : .n3, .nquads, .nt, .trix, .turtle, .xml, .jsonld
 
 
-## Example of corpus
-
-Corpus includes set of space-separated terms which is written in one row.
+## 編集用語彙_metaのサンプル
 
 ```
-データ 連携 を 推進 して いく 上 で 課題 の 1つ と なって いる の が データ の 標準化 で ある
-統制 語彙 作成 支援 ツール を 動作 させ た ホスト の 下記 アドレス に Web ブラウザ に よって アクセス する こと で ツール が 利用 可能 で ある
-永続 ボリューム の 上 に 構成 され サービス を 終了 させても データ は 揮発 しない
+語彙の名称,語彙の英語名称,バージョン,接頭語,語彙のURI,語彙の説明,語彙の英語説明,語彙の作成者
+サンプル語彙,sample vocabulary,1.0.0,my,http://myVocabulary/,サンプル用の語彙です,The vocabulary for sample,サンプル太郎
 ```
-
-## Input data creation example
-
-Example of generating editing vocabulary, reference vocabulary and corpus.
-
-[Read More](example-inputdata-creation/README.md)
+-  列の重複無く、「語彙の名称」列から「語彙の作成者」列全てが必須です
+-  「語彙の名称」列から「語彙の作成者」列以外の列を含んでいても問題ありません
 
 
-# URI Prefix
-
-Use "Config.js" to set each abbreviation of URI Prefixes.
-If the URI that you type on the application window includes the URI Prefix that you set, it is automatically converted to the corresponding abbreviation,
-and you can see the abbreviation on the application window. You can also type the abbreviation that you set on it. In any case, it is recognized as the URI Prefix that you set in "Config.js", and saved in the database.
-
-## Example of Config.js
-
-"origin", which is a URI Prefix is mapped to "equiv".
+## 編集用語彙のサンプル
 
 ```
+用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明,作成日,最終更新日,同義語候補,上位語候補,x座標値,y座標値,色1,色2,確定済み用語
+コンビニ,コンビニエンスストア,ja,http://myVocabulary/1,http://myVocabulary/2,,コンビニエンスストアの略称です,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"常駐警備, 警備員, 機械警備, ビルメンテナンス, 運送会社, 運転代行, 貴重品輸送警備, ホームセキュリティ, ガーディアンエンジェルス, 警備保障",,3.779367076,-44.97713738,black,black,0
+コンビニエンスストア,コンビニエンスストア,ja,http://myVocabulary/1,http://myVocabulary/2,,コンビニエンスストアの略称です,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"子育て支援センター, 介護予防, 生涯学習, 高齢者福祉, 母子生活支援施設, 育児支援, 社会的養護, 地域包括支援センター, 海士町中央図書館, 福祉",,16.81118132,-61.70717408,black,black,0
+convenience store,convenience store,en,http://myVocabulary/1,http://myVocabulary/2,,Alias of convenience store,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"郵便物, 速達郵便, 郵便局, 小包, 郵便事業, 配達, 国際郵便, 郵便サービス, 航空郵便, 集配人","デリバリー, デリヴァリー, 持参, 送達, 配信, 配送, 配達, コミュニケイション, 伝達, 通信, メッセイジ, ドキュメント, 一札, 文書, 方策, ご書, 書, 書きもの, 書付, 書付け, 書契, 書札, 書案, 書き物, 記, 記文, テキス, テキスト, 原文, 文, 文章, 本文, 正文, 正本, コレクション, 収集物, 固まり, 群, 蓄積, 集まり, 集合体, 集合物, 集団, 集積物",-7.53980653,-51.30562908,black,black,0
+drug store,convenience store,en,http://myVocabulary/1,http://myVocabulary/2,,Alias of convenience store,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"空き家問題, 空家, 廃屋, 民家, 空き室, アパート, 米軍ハウス, 公営団地, 住宅, 家賃滞納",,-7.911179493,-26.26668782,black,black,0
+the corner shop,convenience store,en,http://myVocabulary/1,http://myVocabulary/2,,Alias of convenience store,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"アムラックス, 銀座三越, モデルルーム, 日産ギャラリー, イセタン, コワーキングスペース, カリモク家具, 自社ビル, ポーゲンポール, 蔦屋家電",,-43.68659491,42.18700014,black,black,0
+店舗,店舗,ja,http://myVocabulary/2,,http://otherVocabulary/16,,2021-04-01T11:40:15Z,2021-04-09T09:22:11Z,"リテラシー, 金融, 人材マネジメント, リテラシ, esg投資, コーポレートファイナンス, アントレプレナーシップ, ソーシャルマーケティング, ニューノーマル, 労働経済学",,7.237030405,-51.76710593,black,black,0
+店,店舗,ja,http://myVocabulary/2,,http://otherVocabulary/16,,2021-04-01T11:40:15Z,2021-04-09T09:22:11Z,"賃貸, 不動産投資, 不動産業, 不動産仲介, 不動産会社, 信託受益権, 不動産開発, 中古マンション, サブリース, プロパティマネジメント","プロパティ, プロパティー, 保有物, 所有, 所有地, 所有物, 持物, 有形の所有物, 財産, 資産, 身代",-47.93248755,34.79784645,black,black,0
+store,store,en,http://myVocabulary/2,,http://otherVocabulary/16,,2021-04-01T11:40:15Z,2021-04-09T09:22:11Z,"生体認識, 生体情報, 生体物質, 細胞, 生体材料, 分子レベル, 遺伝子改変動物, 体内, 細胞分化, 人体","生き物, 有機体, 生体, 生活体, 生物, 生き物, バディ, ししむら, 五体, 体, 体躯, 図体, 御身, 肉体, 肉叢, 肉塊, 肉身, 足手, 身, 身体, 身躯, 身骨, 躯体, 骨身",9.110486157,-80.63532085,black,black,0
+shop,store,en,http://myVocabulary/2,,http://otherVocabulary/16,,2021-04-01T11:40:15Z,2021-04-09T09:22:11Z,"プラットフォーム, web, モバイルアプリケーション, ウェブ, yammer, アプリケーション, opensocial, クラウドプラットフォーム, ホスティングサービス, typepad",,32.98654788,33.62595116,black,black,0
+```
+-  列の重複無く、「用語名」列から「確定済み用語」列全てが必須です
+-  「用語名」列から「確定済み用語」列以外の列を含んでいても問題ありません
+-  「用語名」列
+    -  分野の用語
+    -  重複の無いように一行ごとに記述してください
+    -  基本的に記述必須ですが、以下の3つを全て満たす場合は記述省略可能です
+        -  当該行の「代表語」列が空白
+        -  「用語の説明」列が空白以外
+        -  「代表語のURI」列の値が当該行の「代表語のURI」列と同じでかつ「代表語」が空白以外の行が存在する
+-  「代表語」列
+    -  同義語のうち代表とする用語名
+    -  同義語についてはそれらの行に対して「言語」ごとに同じ値を記述してください
+    -  基本的に記述必須ですが、以下を満たす場合は記述省略可能です
+        -  「代表語のURI」列の値が当該行の「代表語のURI」列と同じでかつ「代表語」が空白以外の行が存在する
+-  「言語」列
+    -  用語の記述言語
+    -  日本語の場合は"ja"、英語の場合は"en"を記述してください
+    -  記述がない場合は、ファイル読み込み時に"ja"として処理されます
+-  「代表語のURI」列
+    -  各代表語に対するユニークなID
+    -  同義語についてはそれらの行に対して同じ値を記述してください
+    -  記述必須
+-  「上位語のURI」列
+    -  上位語に対するユニークなID
+    -  同義語についてはそれらの行に対して同じ値を記述してください
+    -  上下関係が循環しないように記述してください
+    -  上位語が存在する場合のみ記述してください
+-  「他語彙体系の同義語のURI」列
+    -  他の語彙で同義語が存在する場合の、その同義語に対するユニークなID
+    -  同義語についてはそれらの行に対して同じ値を記述してください
+    -  他の語彙で同義語が存在する場合のみ記述してください
+-  「用語の説明」列
+    -  その用語あるいはその同義語についての説明
+    -  同義語についてはそれらの行に対して「言語」ごとに同じ値を記述してください
+    -  各用語について説明書きが必要な場合のみ記述してください
+-  「作成日」列
+    -  その用語あるいはその同義語について最初に記述された日時
+    -  同義語についてはそれらの行に対して同じ値を記述してください
+    -  作成日に関する情報がある場合のみ記述してください
+-  「最終更新日」列
+    -  その用語あるいはその同義語についての情報が更新された日時
+    -  同義語についてはそれらの行に対して同じ値を記述してください
+    -  最終更新日に関する情報がある場合のみ記述してください
+-  「同義語候補」列
+    -  その用語に対するAIによる同義語推定結果
+    -  編集用語彙作成手順に従って再計算することが可能です
+    -  同義語のAI推薦結果がある場合のみ記述してください
+-  「上位語候補」列
+    -  その用語に対するAIによる上位語推定結果
+    -  編集用語彙作成手順に従って再計算することが可能です
+    -  上位語のAI推薦結果がある場合のみ記述してください
+-  「x座標値」列
+    -  その用語に対するCVDにおける可視化画面表示位置のx座標値
+    -  編集用語彙作成手順に従って再計算することが可能です
+    -  記述がない場合や数値以外の値が記述されている場合は、ファイル読み込み時に"0"として処理されます
+-  「y座標値」列
+    -  その用語に対するCVDにおける可視化画面表示位置のy座標値
+    -  編集用語彙作成手順に従って再計算することが可能です
+    -  記述がない場合や数値以外の値が記述されている場合は、ファイル読み込み時に"0"として処理されます
+-  「色1」列
+    -  その用語のCVDにおける枠線色
+    -  デフォルトは"black"
+    -  "black"、"red"、"orange"、"green"、"blue"、"purple"以外の値が記述されている場合は、ファイル読み込み時に"black"として処理されます
+-  「色2」列
+    -  その用語のCVDにおける背景色
+    -  デフォルトは"black"
+    -  "black"、"red"、"orange"、"green"、"blue"、"purple"以外の値が記述されている場合は、ファイル読み込み時に"black"として処理されます
+-  「確定済み用語」列
+    -  その用語のCVDにおける編集確定フラグ
+    -  "0"：未確定、"1"：確定済み
+    -  デフォルトは"0"
+    -  "0"と"1"以外の値が記述されている場合は、ファイル読み込み時に"0"として処理されます
+
+
+## 参照用語彙のサンプル
+
+```
+用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明,作成日,最終更新日,x座標値,y座標値
+カイトウメン,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,3.779367076,-44.97713738
+Gossypium barbadense,カイトウメン,en,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,16.81118132,-61.70717408
+ペルー綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,-7.53980653,-51.30562908
+シーアイランド綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,-7.911179493,-26.26668782
+エジプト綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,-43.68659491,42.18700014
+スーダン綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,7.237030405,-51.76710593
+ワタ,ワタ,ja,http://cavoc.org/cvo/ns/3/C876,,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,-47.93248755,34.79784645
+モメン,ワタ,ja,http://cavoc.org/cvo/ns/3/C876,,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,9.110486157,-80.63532085
+Cotton,Cotton,en,http://cavoc.org/cvo/ns/3/C876,,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,63.98654788,-13.62595116
+Gossypium arboreum,Cotton,en,http://cavoc.org/cvo/ns/3/C876,,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,84.94554788,-65.64325116
+Gossypium herbaceum,Cotton,en,http://cavoc.org/cvo/ns/3/C876,,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,22.86783788,-30.67687116
+Gossypium hirsutum,Cotton,en,http://cavoc.org/cvo/ns/3/C876,,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,-52.98788,-42.625
+食用綿実,食用綿実,ja,http://cavoc.org/cvo/ns/3/C1055,http://cavoc.org/cvo/ns/3/C876,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,91.99742788,-43.65986116
+Edible cotton,Edible cotton,en,http://cavoc.org/cvo/ns/3/C1055,http://cavoc.org/cvo/ns/3/C876,,,2017-10-02T12:02:48Z,2021-07-14T12:43:45Z,56.98865788,-77.97631116
+```
+-  列の重複無く、「用語名」列から「y座標値」列全てが必須です
+-  「用語名」列から「y座標値」列以外の列を含んでいても問題ありません
+-  各列の説明は、編集用語彙のものと同じです
+
+
+## 読み込み用ファイルの作成方法
+読み込み用ファイルの作成方法は[こちら](example-inputdata-creation/README.md)を参照ください。
+
+
+# URIプレフィックス
+app/app/client/config/Config.jsを使用して、URIプレフィックスの略語を設定することができます。入力したURIに、設定したURIプレフィックスが含まれている場合、対応する略語に自動的に変換されアプリケーションウィンドウ上で確認することができます。また、設定した略語をアプリケーションウィンドウ上で入力することもできます。いずれの場合もapp/app/client/config/Config.jsで設定したURIプレフィックスとして認識され、データベースに保存されます。
+
+
+## URIプレフィックスの略語の設定の例（app/app/client/config/Config.js）
+URIプレフィックスである"origin"のバリューは"equiv"のバリューに変換されます。<br>
+以下のサンプルでは、`'http://cavoc.org/'`は`'cavoc:'`に、`'http://example.org/'`は`'ex:'`に変換されます。
+
+```
+...
 'prefix': [
   {
     'origin': 'http://cavoc.org/',
@@ -99,28 +179,29 @@ and you can see the abbreviation on the application window. You can also type th
     'equiv': 'ex:',
   },
 ],
-
+...
 ```
 
 
-# Zoom magnification
+# 用語の座標値のスケール倍率
+編集用語彙の用語の座標値と参照用語彙の用語の座標値のスケールに大きな違いがある場合は、app/app/client/config/Config.jsを編集することで参照用語彙の用語の座標値のスケール倍率を調整することができます。
 
-If there is a big difference in magnification between term data for editing and term data for reference, you can adjust it.
-Use "Config.js" to set a default magnification for reference term data.
-
-## Example of Config.js
-
-A default magnification for reference term data is '1'.  
-You can set Positive and Negative numbers.
+## 用語の座標値のスケール倍率の設定の例（app/app/client/config/Config.js）
+参照用語彙の用語の座標値のスケールのデフォルトの倍率は「1」です。正の数と負の数ともに設定することができます。
 
 ```
+...
 'magnification': [
   {
     'reference': 1,
   },
 ],
-
+...
 ```
+
+# 削除方法
+1. ```docker-compose down```
+2. ```docker volume rm controlled-vocabulary-designer-db-data```
 
 <div align="right">
     <img src="https://img.shields.io/badge/nginx-1.19.3-color.svg?style=plastic&logo=nginx">
@@ -134,9 +215,8 @@ You can set Positive and Negative numbers.
     <img src="https://img.shields.io/badge/Flask--white.svg?style=plastic&logo=Flask">
 </div>
 
-# Acknowledgments
+# 謝辞
+本研究テーマは、内閣府総合科学技術・イノベーション会議「戦略的イノベーション創造プログラム（SIP）ビッグデータ・AI を活用したサイバー空間基盤技術」（NEDO）の支援のもと遂行されました。
 
-This work was supported by Council for Science, Technology and Innovation, “Cross-ministerial Strategic Innovation Promotion Program (SIP), Big-data and AI-enabled Cyberspace Technologies”. (funding agency: NEDO)
-
-# Contact
-labs-cvd-contact@dl.jp.fujitsu.com
+# 連絡先
+contact-cvd@cs.jp.fujitsu.com
