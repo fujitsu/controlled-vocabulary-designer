@@ -44,7 +44,7 @@ WORK_PATH = '/tmp/work/'
 MAX_FILE_CNT = 5
 DEF_WORK_MEM = '65536'
 UPD_WORK_MEM = '524288'
-
+TERM_BLANK_MARK = 'TERM_BLANK_'
 
 def location(depth=0):
     frame = inspect.currentframe().f_back
@@ -558,7 +558,9 @@ def _make_bulk_data_editing_vocabulary(data_frame):
 
     for index, item in data_frame.iterrows():
         insert_data = {}
-        insert_data['term'] = item['用語名']
+        if '用語名' in item:
+            insert_data['term'] = \
+            item['用語名'] if pd.notnull(item['用語名']) else TERM_BLANK_MARK + str(index)
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
@@ -907,14 +909,6 @@ def _check_synonymous_relationship(df):
     paylist = []
     preferredlist = []
 
-    # format check
-    exec_res, status_code = _check_trem_format_synonymous_relationship(df)
-    if not status_code == 200:
-        print(datetime.datetime.now(),
-              '[Error] _check_trem_format_synonymous_relationship failed ',
-              location())
-        return ErrorResponse(0, 'Data Format Error.'), 400
-
     # 1-1 Extraction of synonymous relationship
     # sort
     payload_s = df.sort_values('代表語')
@@ -993,17 +987,6 @@ def _check_trem_format_reference_vocabulary(payload):
     for item in payload:
         wk_preferred_label =\
             item['term'] if pd.notnull(item['term']) else None
-        if wk_preferred_label is None:
-            return ErrorResponse(0, 'Data Format Error.'), 400
-    return SuccessResponse('request is success.'), 200
-
-
-# Check trem format Synonymous Relationship
-def _check_trem_format_synonymous_relationship(payload_s):
-    # An item that does not contain a key term is considered an error.
-    for index, item in payload_s.iterrows():
-        wk_preferred_label =\
-            item['用語名'] if pd.notnull(item['用語名']) else None
         if wk_preferred_label is None:
             return ErrorResponse(0, 'Data Format Error.'), 400
     return SuccessResponse('request is success.'), 200
@@ -1399,6 +1382,8 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # get uri and term
     namelx = namelpl.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
+        if TERM_BLANK_MARK in str(name[0]):
+            continue
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
         nameb = [rdflib.URIRef(str(name[1])), rtype, rtype]
         namel.append(nameb)
@@ -1420,6 +1405,8 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # get uri and term
     namelx = namelal.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
+        if TERM_BLANK_MARK in str(name[0]):
+            continue
         # print('altLabel:' + str(name[0])+' '+str(name[1]))
         nameb = [
             rdflib.URIRef(str(name[1])),
@@ -1434,6 +1421,8 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # get uri and broader_term
     namelx = namelbt.loc[:, ['broader_term', 'term', 'uri']].values
     for name in namelx:
+        if TERM_BLANK_MARK in str(name[1]):
+            continue
         _add_check_term(name_bt, name[0], name[1], name[2])
 
     for namebt in name_bt:
@@ -1528,6 +1517,8 @@ def _download_file_ev_serialize(pl_simple, p_format):
     # print("--- printing "+p_format+" ---")
     df_org = df_json.copy()
     # delete word "[","]"
+    df_org['term'] =\
+            df_org['term'].str.replace(TERM_BLANK_MARK+'\d+', '',regex=True) 
     df_org['synonym_candidate'] =\
         df_org['synonym_candidate'].astype("string")
     df_org['broader_term_candidate'] =\
