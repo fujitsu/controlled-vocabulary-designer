@@ -756,7 +756,7 @@ def _exec_get_postgrest(target_table):
 
 def _add_check_term(namel, bterm, term, puri):  #
     blflg = True
-    wkname = [bterm, term, puri]
+    wkname = [puri, bterm]
     for name in namel:
         if name[0] == bterm and name[1] == term:
             blflg = False
@@ -1318,58 +1318,58 @@ def _download_file_make(pl_simple, pl_simple_meta):
     name_nw = []
 
     # JSON convert to pandas.DataFrame
+    #nm = pd.json_normalize(pl_simple)
+    #nm_meta = pd.json_normalize(pl_simple_meta)
+
+    # JSON convert to pandas.DataFrame
     nm = pd.json_normalize(pl_simple)
     nm_meta = pd.json_normalize(pl_simple_meta)
 
+    g.bind(nm_meta["meta_prefix"][0], nm_meta["meta_uri"][0])
+
     # replace nan with ""
-    nm["other_voc_syn_uri"] = nm["other_voc_syn_uri"].replace(np.nan, "")
-    nm["term_description"] = nm["term_description"].replace(np.nan, "")
-    nm["created_time"] = nm["created_time"].replace(np.nan, "")
-    nm["modified_time"] = nm["modified_time"].replace(np.nan, "")
+    nm = nm.replace(np.nan, "")
 
     # create meta
     namelx = nm_meta.loc[:, ['meta_name', 'meta_enname', 'meta_version', 'meta_prefix', 'meta_uri',  'meta_description', 'meta_endescription', 'meta_author']].values
     for name in namelx:
-        g.bind(str(name[3]), str(name[4]))
-        nameb = [rdflib.Literal(str(name[3])), rtype, rtype]
-        namel.append(nameb)
-        nameb = [rdflib.Literal(str(name[3])), rtype, sconceptscheme]
+        nameb = [rdflib.URIRef(str(name[4])), rtype, sconceptscheme]
         namel.append(nameb)
         m_prefix = str(name[3])
+        m_uri = rdflib.URIRef(str(name[4]))
         if(str(name[0]) != ""):
-            nameb = [rdflib.Literal(str(name[3])), title, rdflib.Literal(str(name[0]), lang='ja')]
+            nameb = [m_uri, title, rdflib.Literal(str(name[0]), lang='ja')]
             namel.append(nameb)
         if(str(name[1]) != ""):
-            nameb = [rdflib.Literal(str(name[3])), title, rdflib.Literal(str(name[1]), lang='en')]
+            nameb = [m_uri, title, rdflib.Literal(str(name[1]), lang='en')]
             namel.append(nameb)
         if(str(name[2]) != ""):
-            nameb = [rdflib.Literal(str(name[3])), hasVersion, rdflib.Literal(str(name[2]))]
+            nameb = [m_uri, hasVersion, rdflib.Literal(str(name[2]))]
             namel.append(nameb)
         if(str(name[5]) != ""):
-            nameb = [rdflib.Literal(str(name[3])), description, rdflib.Literal(str(name[5]), lang='ja')]
+            nameb = [m_uri, description, rdflib.Literal(str(name[5]), lang='ja')]
             namel.append(nameb)
         if(str(name[6]) != ""):
-            nameb = [rdflib.Literal(str(name[3])), description, rdflib.Literal(str(name[6]), lang='en')]
+            nameb = [m_uri, description, rdflib.Literal(str(name[6]), lang='en')]
             namel.append(nameb)
         if(str(name[7]) != ""):
-            nameb = [rdflib.Literal(str(name[3])), creator, rdflib.Literal(str(name[7]))]
+            nameb = [m_uri, creator, rdflib.Literal(str(name[7]))]
             namel.append(nameb)
 
     # create type links for OtherVocabulary info
-    nameoi = nm.query('term == preferred_label and other_voc_syn_uri != ""')
-    namelx = nameoi.loc[:, ['other_voc_syn_uri']].values
+    nameoi = nm.query('other_voc_syn_uri != ""')
+    namelx = nameoi.loc[:, ['other_voc_syn_uri']].values.tolist()
+    namelx = set(sum(namelx, []))
     for name in namelx:
-        nameb = [rdflib.URIRef(str(name[0])[:(str(name[0]).rfind('/') + 1)]), rtype, rtype]
-        namel.append(nameb)
-        nameb = [rdflib.URIRef(str(name[0])[:(str(name[0]).rfind('/') + 1)]), rtype, sconceptscheme]
+        nameb = [rdflib.URIRef(str(name)[:(str(name).rfind('/') + 1)]), rtype, sconceptscheme]
         namel.append(nameb)
 
+
     # create exactMatch and inscheme for OtherVocabulary link
-    nameou = nm.query('term == preferred_label and other_voc_syn_uri != ""')
-    namelx = nameou.loc[:, ['other_voc_syn_uri', 'uri']].values
+    nameou = nm.query('other_voc_syn_uri != ""')
+    namelx = nameou.loc[:, ['other_voc_syn_uri', 'uri']].values.tolist()
+    namelx = list(map(list, set(map(tuple, namelx))))
     for name in namelx:
-        nameb = [rdflib.URIRef(str(name[0])), rtype, rtype]
-        namel.append(nameb)
         nameb = [rdflib.URIRef(str(name[0])), rtype, scon]
         namel.append(nameb)
         nameb = [rdflib.URIRef(str(name[0])), exactMatch, rdflib.URIRef(str(name[1]))]
@@ -1385,12 +1385,6 @@ def _download_file_make(pl_simple, pl_simple_meta):
         if TERM_BLANK_MARK in str(name[0]):
             continue
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
-        nameb = [rdflib.URIRef(str(name[1])), rtype, rtype]
-        namel.append(nameb)
-        nameb = [rdflib.URIRef(str(name[1])), rtype, scon]
-        namel.append(nameb)
-        nameb = [rdflib.URIRef(str(name[1])), sinscheme, rdflib.Literal(m_prefix)]
-        namel.append(nameb)
         nameb = [
             rdflib.URIRef(str(name[1])),
             plabel,
@@ -1425,50 +1419,36 @@ def _download_file_make(pl_simple, pl_simple_meta):
             continue
         _add_check_term(name_bt, name[0], name[1], name[2])
 
+    name_bt = list(map(list, set(map(tuple, name_bt))))
     for namebt in name_bt:
-        # print('namebt:', str(namebt[0]),
-        #       str(namebt[1]), str(namebt[2]))
-        # query prefLabel
-        wkquery =\
-            'term == preferred_label and uri == "' + str(namebt[0]) + '"'
-        # print(wkquery)
-        namelpl = nm.query(wkquery)
-        # get uri and term
-        namelx = namelpl.loc[:, ['term', 'uri']].values
-        for name in namelx:
-            nameb = [
-                rdflib.URIRef(str(namebt[2])),
-                broader,
-                rdflib.URIRef(str(name[1]))
-            ]
-            namel.append(nameb)
-            # print('add broader:'+str(name[0])+' '+str(name[1]))
+        nameb = [
+            rdflib.URIRef(str(namebt[0])),
+            broader,
+            rdflib.URIRef(str(namebt[1]))
+        ]
+        namel.append(nameb)
 
     # print("--- printing narrower ---")
     # create narrower links
-    for namenw in name_nw:
-        # query prefLabel
-        wkquery =\
-            'term == preferred_label and uri != "" and broader_term == "' +\
-            str(namenw[2]) + '"'
-        # print(wkquery)
-        namelpl = nm.query(wkquery)
-        # get uri and term
-        namelx = namelpl.loc[:, ['term', 'uri']].values
-        for name in namelx:
-            nameb = [
-                rdflib.URIRef(str(namenw[2])),
-                narrower,
-                rdflib.URIRef(str(name[1]))
-            ]
-            namel.append(nameb)
-            # print('add narrower:'+str(name[0])+' '+str(name[1]))
+    for namenw in name_bt:
+        nameb = [
+            rdflib.URIRef(str(namenw[1])),
+            narrower,
+            rdflib.URIRef(str(namenw[0]))
+        ]
+        namel.append(nameb)
+
 
     # create other links
     namelpl = nm.query('uri != ""')
     # get language, uri, othervoc_syn_uri, term_description, created and modified
-    namelx = namelpl.loc[:, ['language', 'uri', 'other_voc_syn_uri', 'term_description', 'created_time', 'modified_time']].values
+    namelx = namelpl.loc[:, ['language', 'uri', 'other_voc_syn_uri', 'term_description', 'created_time', 'modified_time']].values.tolist()
+    namelx = list(map(list, set(map(tuple, namelx))))
     for name in namelx:
+        nameb = [rdflib.URIRef(str(name[1])), rtype, scon]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[1])), sinscheme, m_uri]
+        namel.append(nameb)
         if(str(name[2]) != ""):
             nameb = [rdflib.URIRef(str(name[1])), exactMatch, rdflib.URIRef(str(name[2]))]
             namel.append(nameb)
@@ -1481,7 +1461,9 @@ def _download_file_make(pl_simple, pl_simple_meta):
         if(str(name[5]) != ""):
             nameb = [rdflib.URIRef(str(name[1])), modified, rdflib.Literal(str(name[5]))]
             namel.append(nameb)
-          
+
+    namel = list(map(list, set(map(tuple, namel))))
+              
     # Add List to Graph
     for name in namel:
         g.add((name[0], name[1], name[2]))
