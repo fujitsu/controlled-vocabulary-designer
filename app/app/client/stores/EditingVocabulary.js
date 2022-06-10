@@ -1694,8 +1694,12 @@ isOtherVocSynUriChanged() {
 
     if (languageChangeNode.length > 0){
       const synonymList= [];
+      let preferredNode = null;
       languageChangeNode.forEach((synonym) => {
         synonymList.push(synonym.term);
+        if(synonym.term == synonym.preferred_label){
+          preferredNode = synonym;
+        }
       });
       this.tmpSynonym.list = synonymList;
       this.currentLangDiffSynonym.list = synonymList;
@@ -1705,7 +1709,7 @@ isOtherVocSynUriChanged() {
       const termdescription = [];
       const language = [];
     
-      const languageChangeNodeData = languageChangeNode[0];
+      const languageChangeNodeData = preferredNode || languageChangeNode[0];
       this.currentLangDiffNode  = languageChangeNodeData;
 
       if (languageChangeNodeData.preferred_label.length > 0) {
@@ -2478,9 +2482,11 @@ isOtherVocSynUriChanged() {
 
   /**
    * Updating synonyms, preferred label, URI, and broader term
+   * 
+   * @param  {string} setTerm - term you want to set after update
    * @return {string} - error message
    */
-  @action updateVocabulary() {
+  @action updateVocabulary( setTerm=null) {
     const error = this.errorCheck();
     if (error != '') {
       return error;
@@ -2573,7 +2579,8 @@ isOtherVocSynUriChanged() {
         console.log('delete synonym: ' + deleteSynonymList);
       }
     } else{ // language data different from the selected term
-      this.currentLangDiffSynonym.list.filter((i) =>
+      deleteSynonymList =
+        this.currentLangDiffSynonym.list.filter((i) =>
           this.tmpSynonym.list.indexOf(i) == -1);
       if (deleteSynonymList.length > 0) {
         console.log('delete synonym: ' + deleteSynonymList);
@@ -2603,8 +2610,8 @@ isOtherVocSynUriChanged() {
     const nextSynonymList = this.tmpSynonym.list;
 
     // If the list of synonyms to update is the current list of synonyms
-    if (nextSynonymList == this.currentSynonym.list) {
-      // synonym list in different language ​​with the same uri
+    if (this.currentNode.language == this.tmpLanguage.list[0]) {
+      // synonym list in different language with the same uri
       const nextLangDiffSynonymList = this.editingVocabulary.filter((data) => data.uri==this.currentNode.uri && 
                                                                     data.language != this.currentNode.language);
       
@@ -2625,14 +2632,15 @@ isOtherVocSynUriChanged() {
         // Updated uri of broader term
         const nextfUriofBrdTrm = this.editingVocabulary.find((data) => data.term == this.tmpBroaderTerm.list[0]);
         if(nextfUriofBrdTrm) { // if not new broader term
-          // preferred label in different language ​​with the same uri
+          // preferred label in different language with the same uri
           const nextLangDiffBrdTrm = this.editingVocabulary.find((data) => data.uri == nextfUriofBrdTrm.uri && 
                                                                   data.language != this.currentNode.language);          
           nextLangDiffSynonymList.forEach((synonym) => {
             let objLangDiffSynonym = this.editingVocabulary.find( (data) =>
               data.term === synonym.term);
             previous.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
-            objLangDiffSynonym.broader_term = nextLangDiffBrdTrm.preferred_label;
+            if(nextLangDiffBrdTrm && nextLangDiffBrdTrm.preferred_label)
+              objLangDiffSynonym.broader_term = nextLangDiffBrdTrm.preferred_label;
             updateTermList.push(objLangDiffSynonym);
             following.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
           });
@@ -2648,7 +2656,7 @@ isOtherVocSynUriChanged() {
         }
       }
     } else { // If the list of synonyms to update is the list of synonyms when switching with a language radio button
-      // synonym list in different language ​​with the same uri 
+      // synonym list in different language with the same uri 
       const nextLangDiffSynonymList = this.editingVocabulary.filter((data) => data.uri==this.currentNode.uri && 
                                                                     data.language == this.currentNode.language);
       // Updated id of uri and uri
@@ -2668,14 +2676,15 @@ isOtherVocSynUriChanged() {
         // Updated uri of broader term
         const nextfUriofBrdTrm = this.editingVocabulary.find((data) => data.term == this.tmpBroaderTerm.list[0]);
         if(nextfUriofBrdTrm) { // if not new broader term
-          // preferred label in different language ​​with the same uri
+          // preferred label in different language with the same uri
           const nextLangDiffBrdTrm = this.editingVocabulary.find((data) => data.uri == nextfUriofBrdTrm.uri && 
                                                                   data.language == this.currentNode.language);
           nextLangDiffSynonymList.forEach((synonym) => {
             let objLangDiffSynonym = this.editingVocabulary.find( (data) =>
               data.term === synonym.term);
             previous.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
-            objLangDiffSynonym.broader_term = nextLangDiffBrdTrm.preferred_label;
+            if(nextLangDiffBrdTrm && nextLangDiffBrdTrm.preferred_label)
+              objLangDiffSynonym.broader_term = nextLangDiffBrdTrm.preferred_label;
             updateTermList.push(objLangDiffSynonym);
             following.push(this.makeVocabularyHistoryData(objLangDiffSynonym));
           });
@@ -2924,7 +2933,8 @@ isOtherVocSynUriChanged() {
     // Save the information before and after the change in the history information
     history.previous = previous;
     history.following = following;
-    this.updateRequest(updateTermList, deleteIdList, updateCurrent, history);
+    
+    this.updateRequest(updateTermList, deleteIdList, updateCurrent, history, setTerm);
 
     return '';
   }
@@ -3519,11 +3529,10 @@ isOtherVocSynUriChanged() {
    * @param  {array} deleteList - deleted vocabulary list
    * @param  {object} current - vocabulary data to be updated
    * @param  {object} history - history data 
-   * @param  {object} oldNode - vocabulary old data to be updated
+   * @param  {string} oldNodeTerm - vocabulary old data to be updated
    * @param  {bool} setCurrent - do setCurrentNodeByTerm() 
-   * @param  {object} [history=null] - history information (null: undo/redo requests)
    */
-  updateRequest(updateList, deleteList, current, history = null, oldNode = null, setCurrent=true) {
+  updateRequest(updateList, deleteList, current, history = null, oldNodeTerm = null, setCurrent=true) {
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
 
@@ -3618,7 +3627,7 @@ isOtherVocSynUriChanged() {
                   this.setEditingVocabularyData(response.data);
                   // Reselect to reset tmp information
                   this.setCurrentNodeByTerm(
-                      current.term, current.id, null, oldNode?false:true);
+                      current.term, current.id, null, oldNodeTerm?false:true);
 
                   if (history) {
                     if (!history.targetId) {
@@ -3632,8 +3641,8 @@ isOtherVocSynUriChanged() {
                     editingHistoryStore.addHistory(history);
 
                   }
-                  if( oldNode){
-                    this.setCurrentNodeByTerm( oldNode.term, oldNode.id, null, true);
+                  if( oldNodeTerm && (!this.currentNode.term || (this.currentNode.term && this.currentNode.term != oldNodeTerm))){
+                    this.setCurrentNodeByTerm( oldNodeTerm,'', null, true);
                   }
                 }).catch((err) => {
                   console.log('[Error] message : ' + err.message);
@@ -3667,7 +3676,7 @@ isOtherVocSynUriChanged() {
 
             // Reselect to reset tmp information
             if( setCurrent){
-              this.setCurrentNodeByTerm(current.term, current.id, null, oldNode?false:true);
+              this.setCurrentNodeByTerm(current.term, current.id, null, oldNodeTerm?false:true);
             }
 
             if (history) {
@@ -3681,8 +3690,8 @@ isOtherVocSynUriChanged() {
               }
               editingHistoryStore.addHistory(history);
             }
-            if( oldNode){
-              this.setCurrentNodeByTerm( oldNode.term, oldNode.id, null, true);
+            if( oldNodeTerm && (!this.currentNode.term || (this.currentNode.term && this.currentNode.term != oldNodeTerm))){
+              this.setCurrentNodeByTerm( oldNodeTerm, '', null, true);
             }
           }
         }).catch((err) => {

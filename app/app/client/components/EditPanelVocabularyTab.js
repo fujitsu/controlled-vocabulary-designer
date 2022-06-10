@@ -67,7 +67,8 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    // window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    // tmp data reset
+    this.props.editingVocabulary.languageSame();
   }
 
   /**
@@ -186,7 +187,8 @@ export default
    * Update edits
    */
   updateVocabulary() {
-    const ret = this.props.editingVocabulary.updateVocabulary();
+    const baseTerm= this.props.editingVocabulary.currentNode.term;
+    const ret = this.props.editingVocabulary.updateVocabulary( baseTerm);
     if (ret !== '') {
       this.errorDialogOpen(ret);
     }else{

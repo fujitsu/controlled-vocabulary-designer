@@ -73,7 +73,7 @@ class EditingHistory {
    * @param {object} history - information of history
    */
   @action addHistory(history) {
-    console.log('[addHistory] history :' + JSON.stringify(history) );
+    //console.log('[addHistory] history :' + JSON.stringify(history) );
 
     if (this.undoPointer == null) {
       this.undoStack.push(history);
@@ -87,8 +87,8 @@ class EditingHistory {
       this.undoPointer = this.undoStack.length;
     }
 
-    console.log('[addHistory] undoPointer :' + this.undoPointer );
-    console.log('[addHistory] undoStack.length :' + this.undoStack.length );
+    // console.log('[addHistory] undoPointer :' + this.undoPointer );
+    // console.log('[addHistory] undoStack.length :' + this.undoStack.length );
   }
 
   /**
@@ -117,8 +117,8 @@ class EditingHistory {
       this.execHistory(this.STR_UNDO);
       this.movePointer(this.STR_UNDO);
     }
-    console.log('[execUndo] undoPointer :' + this.undoPointer );
-    console.log('[execUndo] undoStack.length :' + this.undoStack.length );
+    // console.log('[execUndo] undoPointer :' + this.undoPointer );
+    // console.log('[execUndo] undoStack.length :' + this.undoStack.length );
   }
 
   /**
@@ -130,8 +130,8 @@ class EditingHistory {
       this.execHistory(this.STR_REDO);
       this.movePointer(this.STR_REDO);
     }
-    console.log('[execRedo] undoPointer :' + this.undoPointer );
-    console.log('[execRedo] undoStack.length :' + this.undoStack.length );
+    // console.log('[execRedo] undoPointer :' + this.undoPointer );
+    // console.log('[execRedo] undoStack.length :' + this.undoStack.length );
   }
 
   /**
@@ -142,13 +142,13 @@ class EditingHistory {
     const history = this.getHistoryByType(type);
 
     if (null == history) {
-      console.log(
-          '[execHistory] ' +
-          type +
-          ' is not possible( pointer:' +
-          this.undoPointer +
-          ' ).',
-      );
+      // console.log(
+      //     '[execHistory] ' +
+      //     type +
+      //     ' is not possible( pointer:' +
+      //     this.undoPointer +
+      //     ' ).',
+      // );
       return;
     }
 
@@ -244,9 +244,9 @@ class EditingHistory {
     }
 
     if (req === EditingVocabulary.currentNode.hidden) {
-      console.log(
-          '[execHidden] currentNode is already Hidden flag is ' + req + '.',
-      );
+      // console.log(
+      //     '[execHidden] currentNode is already Hidden flag is ' + req + '.',
+      // );
     } else {
       EditingVocabulary.changeHidden(true);
     }
@@ -275,13 +275,13 @@ class EditingHistory {
         this.getIndexById(history.following, 'id', i.id) != -1);
       const delSynList = history.following.filter((i) =>
         this.getIndexById(history.previous, 'id', i.id) == -1);
-      console.log(
-          '[execVocabulary] addSynList :' + JSON.stringify(addSynList),
-      );
-      console.log('[execVocabulary] upSynList :' + JSON.stringify(upSynList) );
-      console.log(
-          '[execVocabulary] delSynList :' + JSON.stringify(delSynList),
-      );
+      // console.log(
+      //     '[execVocabulary] addSynList :' + JSON.stringify(addSynList),
+      // );
+      // console.log('[execVocabulary] upSynList :' + JSON.stringify(upSynList) );
+      // console.log(
+      //     '[execVocabulary] delSynList :' + JSON.stringify(delSynList),
+      // );
       addSynList.forEach((data) =>{
         const addData =
             EditingVocabulary.createFromReferenceVocabulary(
@@ -320,13 +320,13 @@ class EditingHistory {
         this.getIndexById(history.previous, 'id', i.id) != -1);
       const delSynList = history.previous.filter((i) =>
         this.getIndexById(history.following, 'id', i.id) == -1);
-      console.log(
-          '[execVocabulary] addSynList :' + JSON.stringify(addSynList),
-      );
-      console.log('[execVocabulary] upSynList :' + JSON.stringify(upSynList) );
-      console.log(
-          '[execVocabulary] delSynList :' + JSON.stringify(delSynList),
-      );
+      // console.log(
+      //     '[execVocabulary] addSynList :' + JSON.stringify(addSynList),
+      // );
+      // console.log('[execVocabulary] upSynList :' + JSON.stringify(upSynList) );
+      // console.log(
+      //     '[execVocabulary] delSynList :' + JSON.stringify(delSynList),
+      // );
       addSynList.forEach((data) =>{
         const addData = EditingVocabulary.createFromReferenceVocabulary(
             data.term,
@@ -359,13 +359,13 @@ class EditingHistory {
       });
     }
 
-    console.log(
-        '[makeSynonymMessage] updateList :' + JSON.stringify(updateList),
-    );
-    console.log(
-        '[makeSynonymMessage] deleteList :' + JSON.stringify(deleteList),
-    );
-    EditingVocabulary.updateRequest(updateList, deleteList, currentData, null, oldNode);
+    // console.log(
+    //     '[makeSynonymMessage] updateList :' + JSON.stringify(updateList),
+    // );
+    // console.log(
+    //     '[makeSynonymMessage] deleteList :' + JSON.stringify(deleteList),
+    // );
+    EditingVocabulary.updateRequest(updateList, deleteList, currentData, null, oldNode.term);
   }
 
   /**
