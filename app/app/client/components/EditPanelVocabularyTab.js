@@ -68,6 +68,7 @@ export default
    */
   componentDidMount() {
     // tmp data reset
+    this.props.editingVocabulary.languageChange();
     this.props.editingVocabulary.languageSame();
   }
 

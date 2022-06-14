@@ -10,8 +10,6 @@
  import Autocomplete from '@material-ui/lab/Autocomplete';
  import Snackbar from '@material-ui/core/Snackbar';
  
- import $ from 'jquery';
-
  import {observer} from 'mobx-react';
  
  import EditPanelChipForOneChip from './EditPanelChipForOneChip';
@@ -32,10 +30,6 @@
    * Key event registration
    */
    componentDidMount() {
-    $('#text-field-of-term_description-input').focusin(() =>
-      this.props.change('TermDescription', true));
-    $('#text-field-of-term_description-input').focusout(() =>
-      this.props.change('TermDescription', false));
   }
 
   /**
@@ -69,6 +63,8 @@ return (
               freeSolo
               disabled={this.props.disabled}
               value={tmpTermDescription}
+              onFocus={(e)=>this.props.change('TermDescription', true)}
+              onBlur={(e)=>this.props.change('TermDescription', false)}
               onChange={(event, newValue) => this.onChange(event, newValue)}
               classes={
                 {
