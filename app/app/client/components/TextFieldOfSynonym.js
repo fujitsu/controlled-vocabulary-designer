@@ -12,8 +12,6 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
-import $ from 'jquery';
-
 import EditPanelChipForSynonym from './EditPanelChipForSynonym';
 
 import {observer} from 'mobx-react';
@@ -37,10 +35,6 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    $('#text-field-of-synonym-input').focusin(() =>
-      this.props.change('synonym', true));
-    $('#text-field-of-synonym-input').focusout(() =>
-      this.props.change('synonym', false));
   }
 
   /**
@@ -116,6 +110,8 @@ export default
                 freeSolo
                 disabled={this.props.disabled}
                 value={synonym}
+                onFocus={(e)=>this.props.change('synonym', true)}
+                onBlur={(e)=>this.props.change('synonym', false)}
                 onChange={(event, newValue) => this.onChange(event, newValue)}
                 classes={
                   {
