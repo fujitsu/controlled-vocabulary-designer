@@ -589,6 +589,12 @@ class EditingHistory {
       data.id === history.targetId);
     const followingTarget = history.following.find((data) =>
       data.id === history.targetId);
+
+    const previousLangDiffTarget = history.previous.find((data) =>
+      data.id === history.targetLangDiffId);
+    const followingLangDiffTarget = history.following.find((data) =>
+      data.id === history.targetLangDiffId);
+
     if (!previousTarget && followingTarget) {
       // If the change deletes the edited vocabulary
       if (this.STR_UNDO === type) {
@@ -616,6 +622,13 @@ class EditingHistory {
             previousTarget.preferred_label,
             followingTarget.preferred_label,
         );
+    if( previousLangDiffTarget && followingLangDiffTarget){
+      message += this.makePreferredLabelMessage(
+            type,
+            previousLangDiffTarget.preferred_label,
+            followingLangDiffTarget.preferred_label,
+        );
+    }
     message +=
         this.makeUriMessage(type, previousTarget.uri, followingTarget.uri);
     message +=
@@ -624,8 +637,23 @@ class EditingHistory {
             previousTarget.broader_term,
             followingTarget.broader_term,
         );
-    message +=
-        this.makeTermDescriptionMessage(type, previousTarget.term_description, followingTarget.term_description);
+    if( previousLangDiffTarget && followingLangDiffTarget){
+      message += this.makeBroaderTermMessage(
+            type,
+            previousLangDiffTarget.broader_term,
+            followingLangDiffTarget.broader_term,
+        );
+    }
+    message += this.makeTermDescriptionMessage(
+          type, 
+          previousTarget.term_description, 
+          followingTarget.term_description);
+    if( previousLangDiffTarget && followingLangDiffTarget){
+      message += this.makeTermDescriptionMessage(
+            type, 
+            previousLangDiffTarget.term_description, 
+            followingLangDiffTarget.term_description);
+    }
 
     return message;
   }
