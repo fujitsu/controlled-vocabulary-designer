@@ -12,8 +12,6 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
-import $ from 'jquery';
-
 import {observer} from 'mobx-react';
 
 import EditPanelChipForOneChip from './EditPanelChipForOneChip';
@@ -37,10 +35,6 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    $('#text-field-of-id-input').focusin(() =>
-      this.props.change('Id', true));
-    $('#text-field-of-id-input').focusout(() =>
-      this.props.change('Id', false));
   }
 
   /**
@@ -119,6 +113,8 @@ export default
                 freeSolo
                 disabled={this.props.disabled}
                 value={id}
+                onFocus={(e)=>this.props.change('Id', true)}
+                onBlur={(e)=>this.props.change('Id', false)}
                 onChange={(event, newValue) => this.onChange(event, newValue)}
                 classes={
                   {
