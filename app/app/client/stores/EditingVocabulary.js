@@ -733,6 +733,51 @@ class EditingVocabulary {
   }
 
   /**
+   * Is there a broadterm in the diff language
+   * @param {object} node node
+   * @return {bool} exist=targetNode / nothing=false
+   */
+  isExistDiffBroaderTerm( node){
+    const termListForVocabulary = this.termListForVocabulary;
+    let broaderTermObj=false;
+    termListForVocabulary.forEach((item) => {
+      if( item.data.term == node.broader_term && 
+          item.data.term == item.data.preferred_label ){
+            broaderTermObj = item;
+      }
+    })
+    if( !broaderTermObj) return false;
+
+    let ret = false;
+    termListForVocabulary.forEach((item) => {
+      if( item.data.uri == broaderTermObj.data.uri && 
+          item.data.term == item.data.preferred_label &&
+          item.data.language != node.data.language){
+            ret = true;
+      }
+    })
+    return ret;
+  }
+
+  /**
+   * Is there a preferredterm in the diff language
+   * @param {object} node node
+   * @return {bool} exist=targetNode / nothing=false
+   */
+  isExistDiffPreferredTerm( node){
+    const termListForVocabulary = this.termListForVocabulary;
+    let ret=false;
+    termListForVocabulary.forEach((item) => {
+      if( item.data.uri == node.data.uri && 
+          item.data.term == item.data.preferred_label &&
+          item.data.language != node.data.language){
+            ret =true;
+      }
+    })
+    return ret;
+  }
+
+  /**
    * edgesList generation computed
    * @return {array} EdgesList for the visualization screen panel vocabulary tab
    */
@@ -745,11 +790,13 @@ class EditingVocabulary {
     termListForVocabulary.forEach((node) => {
       // Broader term edge data
       if (node.broader_term) {
+        // Is there a broadterm in the diff language
+        let langDiffBroaderNode = node.data.language=='ja'?false:this.isExistDiffBroaderTerm(node);
         if (!node.data.preferred_label) {
           // A vocabulary without a preferred label is an independent vocabulay without synonyms and so is mapped as a broader term
           const sourceId =
             this.getNodeIdByTerm(termListForVocabulary, node.broader_term);
-          if ( '' != sourceId ) {
+          if ( '' != sourceId && !langDiffBroaderNode) {
             broaderTermEdges.push({
               data: {
                 type: 'broader_term',
@@ -766,7 +813,7 @@ class EditingVocabulary {
           if (node.data.term == node.data.preferred_label) {
             const sourceId =
               this.getNodeIdByTerm(termListForVocabulary, node.broader_term);
-            if ( '' != sourceId ) {
+            if ( '' != sourceId && !langDiffBroaderNode ) {
               broaderTermEdges.push({
                 data: {
                   type: 'broader_term',
@@ -787,7 +834,7 @@ class EditingVocabulary {
         // Extract vocabulary with same preferred term (= Synonym)
         const synonymList =
             termListForVocabulary.filter( (data) =>
-              data.data.preferred_label == node.data.preferred_label );
+              data.data.uri == node.data.uri );
         if (undefined != synonymList) {
           synonymList.forEach( (synonym) => {
             if (synonym.data.id != node.data.id) {
@@ -798,7 +845,9 @@ class EditingVocabulary {
                       edge, synonym.data.id, node.data.id) == true);
               if (undefined == find) {
                 // Do not create edges for non-preferred terms (synonymous)
-                if (node.data.term === node.data.preferred_label) {
+                
+                let langDiffPreferredNode = node.data.language=='ja'?false:this.isExistDiffPreferredTerm(node);
+                if (node.data.term === node.data.preferred_label && !langDiffPreferredNode) {
                   synonymEdges.push({
                     data: {
                       type: 'synonym',
