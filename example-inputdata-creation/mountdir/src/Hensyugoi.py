@@ -43,6 +43,18 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
         uri = voc_uri
         if(uri[-1] != "/"):
             uri = uri + "/"
+
+    dic_preflabel_uri = {}
+    suf = 1
+    for word in domain_words_csv["代表語"]:
+        if word not in dic_preflabel_uri.keys():
+            dic_preflabel_uri[word] = uri + str(suf)
+            suf = suf + 1
+
+    col_uri = []
+    for word in domain_words_csv['代表語']:
+        col_uri.append(dic_preflabel_uri[word])
+
     idx = 0
     header = ['用語名', '代表語', '言語', '代表語のURI', '上位語のURI', '他語彙体系の同義語のURI', '用語の説明', '作成日', '最終更新日', '同義語候補', '上位語候補', 'x座標値', 'y座標値', '色1', '色2', '確定済み用語']
     with open(hensyugoi_file, 'w', newline="", errors='ignore', encoding='utf-8-sig') as f:
@@ -51,7 +63,7 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
         for index, word in enumerate(filter_words):
             pref_label = domain_words_csv["代表語"][index] if flag_pref_label else word
             lang = domain_words_csv["言語"][index] if flag_lang else "ja"
-            uri_pref = domain_words_csv["代表語のURI"][index] if flag_uri else uri + str(idx + 1)
+            uri_pref = domain_words_csv["代表語のURI"][index] if flag_uri else col_uri[index]
             broader = domain_words_csv["上位語のURI"][index] if flag_broader else ""
             other_voc_syn_uri = domain_words_csv["他語彙体系の同義語のURI"][index] if flag_other_voc_syn_uri else ""
             term_description = domain_words_csv["用語の説明"][index] if flag_term_description else ""
