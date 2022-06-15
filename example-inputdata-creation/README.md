@@ -49,7 +49,9 @@ mountdir/data/に、SansyougoiAll.csv、SansyougoiTarget.csvというファイ�
 ・SansyougoiTarget.csv：既存の語彙の情報のうち、domain_words.csvに記載されている用語についての情報のみを抽出したファイル
 
 -  上記1～4のコマンドは既存の語彙をCVDの読み込みできる形式に変換するための処理であり、domain_words.csvやreference.csvやreference.ttlの内容に不整合が存在するかどうかは検出しません。不整合が存在する場合は別途手動で修正が必要です（domain_words.csvやreference.csvの記述ルールは、トップフォルダの[README](../README.md)の「編集用語彙のサンプル」についての項を参照ください。reference.ttlの記述ルールは、このREADMEのreference.ttlのサンプルを参照ください）。
--  Reference.csvあるいはreference.ttlを使用するかどうかは任意ですが、使用する場合はmountdir/src/config.jsonの以下の箇所に、"reference.csv"あるいは"reference.ttl"を記入してください。
+-  reference.csvあるいはreference.ttlを使用するかどうかは任意ですが、使用する場合はmountdir/src/config.jsonの以下の箇所に、"reference.csv"あるいは"reference.ttl"を記入してください。
+-  reference.csvを使用する場合は、「作成日」列、「最終更新日」列、「x座標値」列、「y座標値」列のうちreference.csvに含まれない列をreference.csvに追加し、参照用語彙として作成します。reference.csvにもともと含まれている列については、その列の値をそのまま使用します（※「x座標値」列、「y座標値」列は書き換えられます）。
+-  reference.ttlを使用する場合は、reference.ttlの内容をもとに参照用語彙を作成します。
 ```
 ...
 "SanSyogoi": {
@@ -81,7 +83,7 @@ mountdir/data/に、SansyougoiAll.csv、SansyougoiTarget.csvというファイ�
 ### reference.csv
 - 既存の語彙の情報が記述されたCSVファイルです。
 - reference.csvを使用するかどうかは任意です。参照したいcsv形式の既存の語彙がある場合は、ファイル名を"reference.csv"として作成してください。
-- 「用語名」列から「用語の説明」列は必須です。
+- 「用語名」列から「用語の説明」列は必須です。また、独自の列が含まれていても問題ありません。
 - 列名の重複がないことを確認してください。
 - reference.csvの文字コードはBOM付きUTF-8で作成してください。
 
