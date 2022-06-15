@@ -50,7 +50,7 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
         writer.writerow(header)
         for index, word in enumerate(filter_words):
             pref_label = domain_words_csv["代表語"][index] if flag_pref_label else word
-            lang = domain_words_csv["言語"][index] if flag_lang else ""
+            lang = domain_words_csv["言語"][index] if flag_lang else "ja"
             uri_pref = domain_words_csv["代表語のURI"][index] if flag_uri else uri + str(idx + 1)
             broader = domain_words_csv["上位語のURI"][index] if flag_broader else ""
             other_voc_syn_uri = domain_words_csv["他語彙体系の同義語のURI"][index] if flag_other_voc_syn_uri else ""
