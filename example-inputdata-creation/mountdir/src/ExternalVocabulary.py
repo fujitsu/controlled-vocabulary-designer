@@ -335,7 +335,7 @@ def check_arg(args, config):
 
 def main(args, config):
     output_file = args.output[0]
-    voc_uri = config["SanSyogoi"]["WordnetURI"]["uri"]
+    voc_uri = config["SanSyogoi"]["WordnetURI"]["URI"]
     mode_switch = config["SanSyogoi"]["ExternalVocabulary"]["Algorithm"]
     if mode_switch == "wordnet":
         relation = wordnet(voc_uri)
