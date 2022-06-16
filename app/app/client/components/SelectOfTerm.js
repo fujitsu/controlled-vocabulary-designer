@@ -10,6 +10,7 @@
  import Grid from '@material-ui/core/Grid';
  
  import {observer} from 'mobx-react';
+ import DialogOkCancel from './DialogOkCancel';
  
  /**
  * Vocabulary select component
@@ -23,9 +24,12 @@
     */
    constructor(props) {
      super(props);
+     this.message='編集中のデータを破棄して用語選択を実行します。\n\nよろしいですか？';
+     this.changeTerm='';
      this.state = {
        tabIndex: this.props.editingVocabulary.currentNode.id ? this.props.editingVocabulary.currentNode.id : '', 
        open: false,
+       dlgConfirmOpen: false,
      };
    }
  
@@ -40,6 +44,38 @@
    handleOpen = () => {
      this.setState({ open: true });
    };
+
+   /**
+    * Discard the data being edited and change the term
+    */
+   handleConfirmClose(){
+     
+    const targetTerm = this.props.editingVocabulary.sortedNodeList;
+    for (let i = 0; i < targetTerm.length; i++) {
+      if (targetTerm[i].term == this.changeTerm ) {
+        this.setState({tabIndex: i});
+        this.props.change( targetTerm[i].language);
+        break;
+      }
+    }
+
+    this.props.editingVocabulary.setCurrentNodeByTerm( this.changeTerm );
+    this.props.editingVocabulary.deselectTermList();
+    if( this.props.editingVocabulary.currentNode.id){
+     this.props.editingVocabulary.setSelectedTermList( this.changeTerm );
+    }
+
+    this.setState({ dlgConfirmOpen: false });
+
+   }
+
+   /**
+    * Close the confirmation dialog for discarding the data being edited
+    */
+   handleConfirmCancelClose(){
+    this.setState({ dlgConfirmOpen: false });
+   }  
+
    /**
     * Vocabulary selection event
     * @param  {object} event - information of selected vocabulary
@@ -48,20 +84,13 @@
      if (event.keyCode == 32) {
        return;
      }
-     const targetTerm = this.props.editingVocabulary.sortedNodeList;
-     const currentTerm = event.target.textContent;
-     for (let i = 0; i < targetTerm.length; i++) {
-       if (targetTerm[i].term == currentTerm) {
-         this.setState({tabIndex: i});
-         this.props.change( targetTerm[i].language);
-         break;
-       }
-     }
 
-     this.props.editingVocabulary.setCurrentNodeByTerm( currentTerm);
-     this.props.editingVocabulary.deselectTermList();
-     if( this.props.editingVocabulary.currentNode.id){
-      this.props.editingVocabulary.setSelectedTermList( currentTerm);
+     this.changeTerm = event.target.textContent;
+     if(  this.props.editingVocabulary.currentNode.term != event.target.textContent 
+       && this.props.editingVocabulary.isCurrentNodeChanged){
+       this.setState({ dlgConfirmOpen: true });
+     }else{
+       this.handleConfirmClose();
      }
    }
  
@@ -91,6 +120,13 @@
             </Select>
           </FormControl>
          </Grid>
+         <DialogOkCancel
+            onOkClose={() => this.handleConfirmClose()}
+            onCancel={() =>this.handleConfirmCancelClose()}  
+            open={this.state.dlgConfirmOpen}
+            classes={this.props.classes}
+            message={this.message}
+         />
        </form>
      );
    }
