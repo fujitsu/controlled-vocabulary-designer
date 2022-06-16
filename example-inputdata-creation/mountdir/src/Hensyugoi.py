@@ -46,14 +46,21 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
 
     dic_preflabel_uri = {}
     suf = 1
-    for word in domain_words_csv["代表語"]:
-        if word not in dic_preflabel_uri.keys():
-            dic_preflabel_uri[word] = uri + str(suf)
-            suf = suf + 1
-
     col_uri = []
-    for word in domain_words_csv['代表語']:
-        col_uri.append(dic_preflabel_uri[word])
+    if flag_pref_label:
+        for word in domain_words_csv["代表語"]:
+            if word not in dic_preflabel_uri.keys():
+                dic_preflabel_uri[word] = uri + str(suf)
+                suf = suf + 1
+        for word in domain_words_csv['代表語']:
+            col_uri.append(dic_preflabel_uri[word])
+    else:
+        for word in domain_words_csv["用語名"]:
+            if word not in dic_preflabel_uri.keys():
+                dic_preflabel_uri[word] = uri + str(suf)
+                suf = suf + 1
+        for word in domain_words_csv['用語名']:
+            col_uri.append(dic_preflabel_uri[word])
 
     idx = 0
     header = ['用語名', '代表語', '言語', '代表語のURI', '上位語のURI', '他語彙体系の同義語のURI', '用語の説明', '作成日', '最終更新日', '同義語候補', '上位語候補', 'x座標値', 'y座標値', '色1', '色2', '確定済み用語']
