@@ -1815,7 +1815,9 @@ isOtherVocSynUriChanged() {
    * Display language data same from the selected term
    */
   @action languageSame() {
+    const ret = this.centerMoveDisabled(true);
     this.setCurrentNodeByTerm(this.currentNode.term, this.currentNode.id, null, true); 
+    this.centerMoveDisabled( ret);
   }
 
   /**
@@ -2440,7 +2442,43 @@ isOtherVocSynUriChanged() {
       }
     });
 
-    return termListForVocabulary;
+    // add other vocabulary data  
+    const otherVocSynonymUri = [];
+    targetData.forEach((data) => {
+
+      const findNode = otherVocSynonymUri.find((item) => { 
+        return item.data.term == data.other_voc_syn_uri 
+      })
+      if( !findNode && data.other_voc_syn_uri
+        && ((data.other_voc_syn_uri.indexOf("http://") != -1) 
+        || (data.other_voc_syn_uri.indexOf("https://") != -1))){
+        // Editing vocabulary
+        otherVocSynonymUri.push({
+          data: {
+            id: data.id * -1,
+            term: data.other_voc_syn_uri,
+            language: data.language,
+            preferred_label: data.preferred_label,
+            idofuri: data.idofuri,
+            uri: data.uri,
+            vocabularyColor: '',
+            other_voc_syn_uri: data.other_voc_syn_uri,
+            term_description: '',
+            created_time: '',
+            modified_time: '',
+            confirm:'',
+          },
+          position: {
+            x: data.position_x?this.calcPosition(data.position_x):0,
+            y: data.position_y?this.calcPosition(data.position_y):0,
+          },
+          broader_term: '',
+        });
+      }
+    });
+
+
+    return termListForVocabulary.concat(otherVocSynonymUri);
   }
 
   /**
@@ -2555,10 +2593,6 @@ isOtherVocSynUriChanged() {
    * @return {string} - error message
    */
   @action updateVocabulary( setTerm=null) {
-    const error = this.errorCheck();
-    if (error != '') {
-      return error;
-    }
 
     if (!this.currentNode.id) {
       // When a term is not selected, if a term is entered in the title field, select the term
@@ -2567,6 +2601,10 @@ isOtherVocSynUriChanged() {
       } else {
         return '';
       }
+    }
+    const error = this.errorCheck();
+    if (error != '') {
+      return error;
     }
 
     const updateTermList = [];
@@ -3887,6 +3925,7 @@ isOtherVocSynUriChanged() {
    */
   errorCheck() {
     let errorKind = '';
+    if( !this.currentNode.id) return errorKind;
 
     // Multiple selection check /////////////////////////////////////////
 
