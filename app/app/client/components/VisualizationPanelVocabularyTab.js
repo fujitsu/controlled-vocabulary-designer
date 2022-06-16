@@ -536,8 +536,12 @@ export default
       if( event.target.hasClass('eh-handle')){ 
         return;
       }
-
       const target = event.target.data();
+      // other vocabulary node
+      if(target.term == target.other_voc_syn_uri){ 
+        return;
+      }
+
       let isAddTerm=false;
       const withKey = event.originalEvent.ctrlKey|| event.originalEvent.shiftKey;
       this.fitCenterPan = false;
@@ -680,6 +684,14 @@ export default
 
     this.cy.removeListener('ehshow');
     this.cy.on('ehshow', (event, sourceNode) => {
+
+      // other vocabulary node
+      const dt = sourceNode.data();
+      if(dt.term == dt.other_voc_syn_uri){ 
+        this.hideHandlePostion();
+        return;
+      }
+
       const cy = this.cy;
       
       let handles = cy.elements('.eh-handle');
