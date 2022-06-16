@@ -47,14 +47,14 @@ def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain
     dic_preflabel_uri = {}
     suf = 1
     col_uri = []
-    if flag_pref_label:
+    if flag_pref_label == True and flag_uri == False:
         for word in domain_words_csv["代表語"]:
             if word not in dic_preflabel_uri.keys():
                 dic_preflabel_uri[word] = uri + str(suf)
                 suf = suf + 1
         for word in domain_words_csv['代表語']:
             col_uri.append(dic_preflabel_uri[word])
-    else:
+    elif flag_pref_label == False and flag_uri == False:
         for word in domain_words_csv["用語名"]:
             if word not in dic_preflabel_uri.keys():
                 dic_preflabel_uri[word] = uri + str(suf)
