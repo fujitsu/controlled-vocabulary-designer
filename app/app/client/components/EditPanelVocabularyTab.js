@@ -11,12 +11,6 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import FormLabel from '@material-ui/core/FormLabel';
-import Dialog from '@material-ui/core/Dialog';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import TextField from '@material-ui/core/TextField'; 
-import CreateIcon from '@material-ui/icons/Create';
 import Typography from '@material-ui/core/Typography';
 import Chip from '@material-ui/core/Chip';
 
@@ -418,23 +412,17 @@ export default
             </Grid>
 
             <Grid container spacing={2} className={this.props.classes.editPanelVocVerticalGap}>
-              <Grid item xs={5}>
+              <Grid item xs={2}>
                 <Box mt={1}>
                   代表語のURI
-                    <CreateIcon
-                      onClick={()=>this.disabledToggle()}
-                      disabled={disabledTextField}
-                    />
                 </Box>
               </Grid>
-              <Grid item xs={7}>
+              <Grid item xs={10}>
                 <Box>
                   <TextFieldOfUri
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
                     uri={this.props.editingVocabulary.currentNode.uri}
-                    disabled={disabledTextField}
-                    disabledFlg={this.state.disabledFlg}
                   />
                 </Box>
               </Grid>
