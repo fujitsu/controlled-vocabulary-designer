@@ -4,6 +4,8 @@
 import {action, computed, observable} from 'mobx';
 import axios from 'axios';
 
+import editingVocabularyStore from './EditingVocabulary';
+
 /**
  * Vocabulary data management class
  */
@@ -222,7 +224,7 @@ class EditingVocabularyMeta {
    * Updating 
    * @return {string} - error message
    */
-  @action updateMetaData() {
+  @action updateMetaData( datas=null) {
 
     this.setCurrentNode();
 
@@ -235,7 +237,63 @@ class EditingVocabularyMeta {
     const updateCurrent = this.createDBFormatDataByCurrentNode();
     this.updateRequest([updateCurrent], updateCurrent);
 
+    // all uri over write 
+    this.updateVocabularys( datas );
+
     return '';
+  }
+
+
+  /**
+   * Updating uri values etc. to DB 
+   * @param  {object} datas - react datas (EditingVocabulary.editingVocabulary) 
+   */
+  @action updateVocabularys( datas=null ) {
+    if( !datas) return;
+    
+    let updateTermList=[];
+    const metaUri = this.currentNode.meta_uri.replace(new RegExp('\/$'), '');
+    datas.forEach((data) =>{
+      const uri = metaUri + '/' + data.uri.substring(data.uri.lastIndexOf('/')+1);
+      
+      const dbData = {
+        term: data.term,
+        preferred_label: data.preferred_label,
+        language:data.language,
+        uri: uri,
+        broader_term: data.broader_term,
+        other_voc_syn_uri: data.other_voc_syn_uri,
+        term_description: data.term_description,
+        created_time: data.created_time,
+        modified_time: data.modified_time,
+        synonym_candidate: [],
+        broader_term_candidate: [],
+        position_x: String( data.position_x),
+        position_y: String( data.position_y),
+        color1: data.color1,
+        color2: data.color2,
+        hidden: data.hidden,
+        confirm: data.confirm,
+      };
+      if (data.id) {
+        dbData.id = Number(data.id);
+      }
+      if (data.synonym_candidate) {
+        data.synonym_candidate.forEach((term) => {
+          dbData.synonym_candidate.push(term);
+        });
+      }
+      if (data.broader_term_candidate) {
+        data.broader_term_candidate.forEach((term) => {
+          dbData.broader_term_candidate.push(term);
+        });
+      }
+      updateTermList.push(dbData);      
+    });
+
+    if( updateTermList.length > 0){
+      editingVocabularyStore.updateRequest(updateTermList, [], updateTermList[0], null, null, false);
+    }
   }
 
   /**
