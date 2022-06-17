@@ -171,7 +171,7 @@ export default
    */
   updateMetaData() {
     
-    const ret = this.props.editingVocabularyMeta.updateMetaData();
+    const ret = this.props.editingVocabularyMeta.updateMetaData(this.props.editingVocabulary.editingVocabulary);
     if (ret !== '') {
       this.errorDialogOpen(ret);
     }else{
