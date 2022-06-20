@@ -11,7 +11,7 @@ import editingVocabularyStore from './EditingVocabulary';
  */
 class EditingVocabularyMeta {
   // Editing vocabulary meta
-  @observable editingVocabularyMeta = [];
+  @observable editingVocabularyMeta = null;
 
 
   updated = false;
@@ -119,8 +119,8 @@ class EditingVocabularyMeta {
       editingVocabularyMeta.push(data);
     });
 
-    this.editingVocabularyMeta = editingVocabularyMeta;
-    this.setCurrentNode( this.editingVocabularyMeta[this.editingVocabularyMeta.length - 1] );
+    this.editingVocabularyMeta = editingVocabularyMeta[ editingVocabularyMeta.length -1];
+    this.setCurrentNode( this.editingVocabularyMeta );
   }
 
 
@@ -166,12 +166,11 @@ class EditingVocabularyMeta {
       // this.currentNode; // As it is
 
     }
-    else if (this.editingVocabularyMeta.length > 0){
-      const current = this.editingVocabularyMeta[this.editingVocabularyMeta.length -1];
-      this.currentNode = current;
+    else if (this.editingVocabularyMeta){
+      this.currentNode = this.editingVocabularyMeta;
     }
     // If not reading the data
-    else if (this.editingVocabularyMeta.length == 0){
+    else if ( !this.editingVocabularyMeta){
       this.currentNode = {
         id: null,
         meta_name: '',
@@ -238,7 +237,7 @@ class EditingVocabularyMeta {
     this.updateRequest([updateCurrent], updateCurrent);
 
     // all uri over write 
-    this.updateVocabularys( datas );
+    this.updateVocabularysUriFromMeta( datas );
 
     return '';
   }
@@ -248,8 +247,9 @@ class EditingVocabularyMeta {
    * Updating uri values etc. to DB 
    * @param  {object} datas - react datas (EditingVocabulary.editingVocabulary) 
    */
-  @action updateVocabularys( datas=null ) {
+  @action updateVocabularysUriFromMeta( datas=null ) {
     if( !datas) return;
+    if( this.currentNode.meta_uri == this.editingVocabularyMeta.meta_uri) return;
     
     let updateTermList=[];
     const metaUri = this.currentNode.meta_uri.replace(new RegExp('\/$'), '');
@@ -357,8 +357,7 @@ class EditingVocabularyMeta {
    * @return {boolean} - true: contain changes, false: not contain changes
    */
    @computed get isCurrentNodeChanged() {
-    const len = this.editingVocabularyMeta.length -1;
-    if(1 > len || undefined == this.editingVocabularyMeta[len]){
+    if( !this.editingVocabularyMeta){
       if(
         this.currentNode.meta_name != '' ||
         this.currentNode.meta_enname != '' ||
@@ -374,14 +373,14 @@ class EditingVocabularyMeta {
       return false;
     }
     else if(
-      this.currentNode.meta_name != this.editingVocabularyMeta[len].meta_name ||
-      this.currentNode.meta_enname != this.editingVocabularyMeta[len].meta_enname ||
-      this.currentNode.meta_version != this.editingVocabularyMeta[len].meta_version ||
-      this.currentNode.meta_prefix != this.editingVocabularyMeta[len].meta_prefix ||
-      this.currentNode.meta_uri != this.editingVocabularyMeta[len].meta_uri ||
-      this.currentNode.meta_description != this.editingVocabularyMeta[len].meta_description ||
-      this.currentNode.meta_endescription != this.editingVocabularyMeta[len].meta_endescription ||
-      this.currentNode.meta_author != this.editingVocabularyMeta[len].meta_author 
+      this.currentNode.meta_name != this.editingVocabularyMeta.meta_name ||
+      this.currentNode.meta_enname != this.editingVocabularyMeta.meta_enname ||
+      this.currentNode.meta_version != this.editingVocabularyMeta.meta_version ||
+      this.currentNode.meta_prefix != this.editingVocabularyMeta.meta_prefix ||
+      this.currentNode.meta_uri != this.editingVocabularyMeta.meta_uri ||
+      this.currentNode.meta_description != this.editingVocabularyMeta.meta_description ||
+      this.currentNode.meta_endescription != this.editingVocabularyMeta.meta_endescription ||
+      this.currentNode.meta_author != this.editingVocabularyMeta.meta_author 
     ){
       return true;
     }
