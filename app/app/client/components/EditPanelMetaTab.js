@@ -62,17 +62,16 @@ export default
    */
   componentDidMount() { 
     this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
-    const len = this.props.editingVocabularyMeta.editingVocabularyMeta.length - 1; 
-    if( undefined != this.props.editingVocabularyMeta.editingVocabularyMeta[len] ){          
+    if( undefined != this.props.editingVocabularyMeta.editingVocabularyMeta ){          
         this.setState({
-          metaName: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_name,
-          metaNameEn: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_enname,
-          metaVersion: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_version,
-          metaUri: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_uri,
-          metaPrefix: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_prefix,
-          metaAuthor: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_author,
-          metaDescription: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_description,
-          metaDescriptionEn: this.props.editingVocabularyMeta.editingVocabularyMeta[len].meta_endescription,
+          metaName: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_name,
+          metaNameEn: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_enname,
+          metaVersion: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_version,
+          metaUri: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_uri,
+          metaPrefix: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_prefix,
+          metaAuthor: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_author,
+          metaDescription: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_description,
+          metaDescriptionEn: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_endescription,
         });
     } 
   }
