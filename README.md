@@ -10,7 +10,7 @@ CVDのヘルプページは[こちら](https://fujitsu.github.io/controlled-voca
 - docker-compose : バージョン1.23以上
 
 # セットアップ方法
-1. docker-compose up -d
+1. ```docker-compose up -d```
 2. 作業環境のWEBブラウザで以下にアクセスします。
 
 ```
