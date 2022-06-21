@@ -613,7 +613,14 @@ export default
     this.cy.removeListener('ehcomplete');
     this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       
+      // You need to remove addedgede as Cytoscape will draw a line.
       addedEdge.remove();
+
+      // other vocabulary node
+      if(targetNode.data().term == targetNode.data().other_voc_syn_uri){ 
+        event.stopPropagation()
+        return false;
+      }
 
       this.synonymSource = sourceNode.data();
       this.synonymTarget = targetNode.data();
