@@ -864,7 +864,7 @@ class EditingVocabulary {
       }
     });
 
-    return broaderTermEdges.concat(synonymEdges);
+    return [...broaderTermEdges, ...synonymEdges];
   }
 
   /**
@@ -2719,9 +2719,10 @@ isOtherVocSynUriChanged() {
     const nextSynonymList = this.tmpSynonym.list;
 
     // If the list of synonyms to update is the current list of synonyms
+    let nextLangDiffSynonymList = [];
     if (this.currentNode.language == this.tmpLanguage.list[0]) {
       // synonym list in different language with the same uri
-      const nextLangDiffSynonymList = this.editingVocabulary.filter((data) => data.uri==this.currentNode.uri && 
+      nextLangDiffSynonymList = this.editingVocabulary.filter((data) => data.uri==this.currentNode.uri && 
                                                                     data.language != this.currentNode.language);
       let oldBroader_term = null;
       // Updated broader term
@@ -2769,7 +2770,7 @@ isOtherVocSynUriChanged() {
       }
     } else { // If the list of synonyms to update is the list of synonyms when switching with a language radio button
       // synonym list in different language with the same uri 
-      const nextLangDiffSynonymList = this.editingVocabulary.filter((data) => data.uri==this.currentNode.uri && 
+      nextLangDiffSynonymList = this.editingVocabulary.filter((data) => data.uri==this.currentNode.uri && 
                                                                     data.language == this.currentNode.language);
 
       let oldBroader_term = null;
@@ -2817,6 +2818,11 @@ isOtherVocSynUriChanged() {
         });
       }
     }
+
+    // update date to language diff synonym data
+    nextLangDiffSynonymList.forEach((synonym) => {
+      updateTermList.push( synonym);
+    })
 
     this.updateVocabularyForSynonym(
         deleteSynonymList,
@@ -3198,6 +3204,20 @@ isOtherVocSynUriChanged() {
       }
       updateTermList.push( dbData);
     }
+
+    updateTermList.forEach((item) => {
+      // synonym list
+      const objSynonym = this.editingVocabulary.filter((data) =>data.uri == item.uri);
+
+      // Add if not in the array
+      objSynonym.forEach(( obj) => {
+        const findObj = updateTermList.find((item2) =>obj.id == item2.id);
+        if( !findObj){          
+          updateTermList.push(obj);
+        }   
+      });  
+    });
+
     if( updateTermList.length > 0){
       this.updateRequest(updateTermList, [], updateTermList[0], null, null, false);
     }
