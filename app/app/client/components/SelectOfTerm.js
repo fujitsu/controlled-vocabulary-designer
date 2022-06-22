@@ -95,7 +95,9 @@
    }
  
    render() {
-     const sortedNodeList = this.props.editingVocabulary.sortedNodeList;
+    
+    const blankPrefix = this.props.editingVocabulary.getTerm_blank_prefix();
+    const sortedNodeList  = this.props.editingVocabulary.sortedNodeList.filter((d)=>(d.term).indexOf(blankPrefix) == -1);
      const currentId = this.props.editingVocabulary.currentNode.id ? this.props.editingVocabulary.currentNode.id : '';
      return (
        <form noValidate autoComplete="off">
