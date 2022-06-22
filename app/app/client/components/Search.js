@@ -147,14 +147,14 @@ export default class Search extends React.Component {
    * @return {element}
    */
   render() {
-    // const targetFileData = this.props.editingVocabulary.getTargetFileData(this.props.editingVocabulary.selectedFile.id);
     const initValue = this.state.values || [];
-    // const selectData = targetFileData.map((d) => ({
-    const selectData = this.props.editingVocabulary.sortedNodeList.map((d) => ({
-      
+    
+    let selectData = this.props.editingVocabulary.sortedNodeList.map((d) => ({      
       value: d.term,
       label: d.term
     }));
+    const blankPrefix = this.props.editingVocabulary.getTerm_blank_prefix();
+    selectData = selectData.filter((d)=>(d.value).indexOf(blankPrefix) == -1);
 
     const customStyles = {
       control: (provided) => ({
