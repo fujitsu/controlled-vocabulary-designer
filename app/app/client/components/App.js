@@ -310,7 +310,7 @@ const useStyles = (theme) => ({
     float: 'right',
   },
   'fileDialogPaper':{
-    height: '600px',
+    height: '500px',
     paddingBottom: '30px',
     overflow: 'hidden',
   },
