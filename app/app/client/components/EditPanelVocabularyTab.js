@@ -11,8 +11,6 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
-import Typography from '@material-ui/core/Typography';
-import Chip from '@material-ui/core/Chip';
 
 import DialogApiError from './DialogApiError';
 
@@ -26,7 +24,6 @@ import TextFieldOfUri from './TextFieldOfUri';
 import TextFieldOfBroaderTerm from './TextFieldOfBroaderTerm';
 import TextFieldOfSubordinateTerm from './TextFieldOfSubordinateTerm';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
-import DialogOkCancel from './DialogOkCancel';
 import TextFieldOfTermDescription from './TextFieldOfTermDescription'; 
 import TextFieldOfOtherVocSynUri from './TextFieldOfOtherVocSynUri'; 
 
@@ -51,7 +48,6 @@ export default
       prfrrdlblact: false,
       idofuriact: false,
       broadertermact: false,
-      dlgDeleteTermOpen: false,   // dialog for delete term confirm
       termdescriptionact: false, 
       defalutValue: this.props.editingVocabulary.currentNode.language,
     };
@@ -120,34 +116,6 @@ export default
         break;
     }
   }
-
-  /**
-   * Term delete dialog open
-   */
-   handleTermDelete(){
-    let mess =  '「' + this.props.editingVocabulary.currentNode.term +'」';
-    this.message = mess+"\nを削除します。よろしいですか？";
-    this.setState({dlgDeleteTermOpen: true});  
-  }
-
-  /**
-   * Term delete dialog close
-   */
-  handleDeleteTermClose(){
-    this.message = '';
-    this.setState({dlgDeleteTermOpen: false});
-    
-    this.props.editingVocabulary.deleteVocabulary();
-    this.props.close();
-  }
-
-  /**
-   * Term delete dialog Cancel
-   */
-  handleDeleteTermCancelClose(){
-    this.message = '';
-    this.setState({dlgDeleteTermOpen: false});
-  } 
 
   /**
    * Error dialog open
@@ -286,36 +254,6 @@ export default
                     editingVocabulary={this.props.editingVocabulary}
                     change={(lang)=>this.handleTermChange( lang)}
                   />
-                </Box>
-              </Grid>
-            </Grid>
-
-            <Grid container className={this.props.classes.editPanelVocUsageGap}>
-              <Grid item xs={4}>
-              </Grid>
-              <Grid item xs={4} style={{textAlign: 'right'}}>
-                <Typography variant="caption">
-                  既存の設定：
-                  <Chip
-                    size="small" 
-                    label="　"
-                    onDelete={()=>{}}
-                    style={{backgroundColor: '#bbdefb'}}
-                  />
-
-                </Typography>
-              </Grid>
-              <Grid item xs={4} style={{textAlign: 'right'}}>
-                <Box mr={0}>
-                  <Typography variant="caption">
-                    新規の設定：
-                    <Chip
-                      size="small" 
-                      label="　"
-                      onDelete={()=>{}}
-                      style={{backgroundColor: '#ffcdd2'}}
-                    />
-                  </Typography>
                 </Box>
               </Grid>
             </Grid>
@@ -501,10 +439,8 @@ export default
               </Grid>
             </Grid>
 
-            <Grid container>
-              <Grid item xs={5}>
-              </Grid>
-              <Grid item xs={2}>
+            <Grid container justifyContent="center"  justify="center">
+              <Grid item>
                 <Button
                   className={this.props.classes.buttonPrimary}
                   variant="contained"
@@ -522,25 +458,6 @@ export default
                   editingVocabulary={this.props.editingVocabulary}
                   isFromEditPanel={true}
                   reason={this.state.reason}
-                />
-              </Grid>
-              <Grid item>
-                <Button
-                  className={this.props.classes.buttonsDelete}
-                  ml={3}
-                  variant="contained"
-                  color="secondary"
-                  size={'small'}
-                  onClick={(e)=>this.handleTermDelete(e)}
-                >
-                  削除
-                </Button>
-                <DialogOkCancel
-                  onOkClose={() => this.handleDeleteTermClose()}
-                  onCancel={() =>this.handleDeleteTermCancelClose()}  
-                  open={this.state.dlgDeleteTermOpen}
-                  classes={this.props.classes}
-                  message={this.message}
                 />
               </Grid>
             </Grid>

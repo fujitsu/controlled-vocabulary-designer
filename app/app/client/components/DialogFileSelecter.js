@@ -16,18 +16,12 @@ import InputAdornment from '@material-ui/core/InputAdornment';
 import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import Snackbar from '@material-ui/core/Snackbar';
-import Stepper from "@material-ui/core/Stepper";
-import Step from "@material-ui/core/Step";
-import StepLabel from "@material-ui/core/StepLabel";
-import Typography from "@material-ui/core/Typography";
-import SettingsIcon from "@material-ui/icons/Settings";
-import InsertDriveFileOutlinedIcon from "@material-ui/icons/InsertDriveFileOutlined";
-
 
 import axios from 'axios';
 import $ from 'jquery';
 
 import DialogApiError from './DialogApiError';
+import DialogOkCancel from './DialogOkCancel';
 import EditPanelMetaTab from './EditPanelMetaTab';
 import DialogUpdateMetaError from './DialogUpdateMetaError';
 import DialogApiMetaError from './DialogApiMetaError';
@@ -46,14 +40,10 @@ export default class DialogFileSelecter extends React.Component {
     this.state = {
       uploading: false,
       open: false,
+      errOpen: false,
       reason: '',
       activeStep: 0,
       files: [
-        {
-          name: '',
-          size: '',
-          file: {},
-        },
         {
           name: '',
           size: '',
@@ -183,18 +173,6 @@ export default class DialogFileSelecter extends React.Component {
         console.log('[setUploadRequestBody] ' +
           fileInfo.name + ' is already uploaded(not upload).');
       } else {
-        formData.append('example_phrases', fileInfo.file);
-      }
-    }
-    if (undefined != this.state.files[5].file.name) {
-      const fileInfo = this.state.files[5];
-      if (this.isSameFile(
-          fileInfo.file,
-          localStorage.getItem('fileName5'),
-          localStorage.getItem('fileSize5'))) {
-        console.log('[setUploadRequestBody] ' +
-          fileInfo.name + ' is already uploaded(not upload).');
-      } else {
         formData.append('editing_vocabulary_meta', fileInfo.file);
       }
     }
@@ -202,10 +180,23 @@ export default class DialogFileSelecter extends React.Component {
   }
 
   /**
+   * Closes error messages where "editing vocabulary file" is not specified 
+   */
+  handleErrCancel(){   
+    this.setState({errOpen: false});
+  }
+  
+  /**
    * File upload run
    * @param  {object} e - information of event
    */
   fileUpload(e) {
+
+    if ( !this.state.files[0].name  ) {      
+      this.setState({errOpen: true});
+      return false;
+    }
+
     console.log('file upload start.');
     this.uploadingStart();
     const requestBody = this.setUploadRequestBody();
@@ -235,10 +226,9 @@ export default class DialogFileSelecter extends React.Component {
           if (undefined != this.state.files[3].file.name) {
             this.props.editingVocabulary.getReferenceVocabularyDataFromDB('3');
           }
-          if (undefined != this.state.files[5].file.name) {
+          if (undefined != this.state.files[4].file.name) {
             this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
           }
-          //this.handleNext();
         }).catch((err) => {
           console.log('error callback.');
           this.uploadingEnd();
@@ -389,9 +379,6 @@ export default class DialogFileSelecter extends React.Component {
         $('#referenceVocaburary3').val('');
         break;
       case 4:
-        $('#exampleSentences').val('');
-        break;
-      case 5:
         $('#editingVocabularyMeta').val('');
         break;
       default:
@@ -471,7 +458,7 @@ export default class DialogFileSelecter extends React.Component {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Box component="span" display="inline">
-              編集用語彙
+              編集用語彙<span style={{color: 'red'}}>*</span>
               </Box>
             </Grid>
             <Grid item xs={6}>
@@ -544,14 +531,14 @@ export default class DialogFileSelecter extends React.Component {
                   display="inline"
                   style={{fontSize: '0.75em'}}
                 >
-                  {this.state.files[5].size}
+                  {this.state.files[4].size}
                 </Box>
               </Box>
             </Grid>
           </Grid>
 
           <Input
-            value={this.state.files[5].name}
+            value={this.state.files[4].name}
             type="text"
             readOnly
             startAdornment={
@@ -575,7 +562,7 @@ export default class DialogFileSelecter extends React.Component {
               style={{display: 'none'}}
               id="editingVocabularyMeta"
               type="file"
-              onChange={(e) => this.setFileInfo(e, 5)}
+              onChange={(e) => this.setFileInfo(e, 4)}
               accept=".xlsx,.csv"
             />
             参照
@@ -584,7 +571,7 @@ export default class DialogFileSelecter extends React.Component {
             variant="contained"
             value=""
             component="label"
-            onClick={() => this.delFileInfo(5)}
+            onClick={() => this.delFileInfo(4)}
             disableElevation
             size="small"
           >
@@ -781,68 +768,6 @@ export default class DialogFileSelecter extends React.Component {
           </Button>
         </Box>
 
-        <Box component="div" display="block">
-
-          <Grid container spacing={2}>
-            <Grid item xs={6}>
-              <Box component="span" display="inline">
-              分かち書き済みテキスト
-              </Box>
-            </Grid>
-            <Grid item xs={6}>
-              <Box textAlign="right">
-                <Box
-                  component="span"
-                  display="inline"
-                  style={{fontSize: '0.75em'}}
-                >
-                  {this.state.files[4].size}
-                </Box>
-              </Box>
-            </Grid>
-          </Grid>
-
-          <Input
-            value={this.state.files[4].name}
-            type="text"
-            readOnly
-            startAdornment={
-              <InputAdornment position="start">
-                <InsertDriveFileIcon />
-              </InputAdornment>
-            }
-            style={
-              {marginBottom: '25px', marginRight: '15px', width: '300px'}
-            }
-          />
-          <Button
-            variant="contained"
-            value=""
-            component="label"
-            disableElevation
-            style={{marginRight: '5px'}}
-            size="small"
-          >
-            <input
-              style={{display: 'none'}}
-              id="exampleSentences"
-              type="file"
-              onChange={(e) => this.setFileInfo(e, 4)}
-              accept=".txt"
-            />
-          参照
-          </Button>
-          <Button
-            variant="contained"
-            value=""
-            component="label"
-            onClick={() => this.delFileInfo(4)}
-            disableElevation
-            size="small"
-          >
-            Clear
-          </Button>
-        </Box>
       </>);
     
 
@@ -880,20 +805,6 @@ export default class DialogFileSelecter extends React.Component {
                 value={true}
               />}
           </DialogContent>
-
-
-          <Stepper activeStep={this.state.activeStep} classes={{root:this.props.classes.fileDialogStepperRoot}}>
-            <Step key="file-read" {...stepProps}>
-              <StepLabel {...labelProps}>
-                <InsertDriveFileOutlinedIcon />
-              </StepLabel>
-            </Step>
-            <Step key="meta-settings" {...stepProps}>
-              <StepLabel {...labelProps}>
-                <SettingsIcon />
-              </StepLabel>
-            </Step>
-          </Stepper>
 
           <Grid container justify="center" spacing={1} style={{ marginBottom: '-20px'}}>
 
@@ -937,6 +848,13 @@ export default class DialogFileSelecter extends React.Component {
           }}
           open={this.state.uploading}
           message="ファイルアップロード中..."
+        />
+        <DialogOkCancel
+          onCancel={()=>this.handleErrCancel()}
+          open={this.state.errOpen}
+          buttonsDisable={2}
+          classes={this.props.classes}
+          message="編集用語彙ファイルを指定してください。"
         />
         <DialogApiError
           open={this.props.editingVocabulary.apiErrorDialog.open}
