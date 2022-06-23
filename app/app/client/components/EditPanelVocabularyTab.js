@@ -290,36 +290,6 @@ export default
               </Grid>
             </Grid>
 
-            <Grid container className={this.props.classes.editPanelVocUsageGap}>
-              <Grid item xs={4}>
-              </Grid>
-              <Grid item xs={4} style={{textAlign: 'right'}}>
-                <Typography variant="caption">
-                  既存の設定：
-                  <Chip
-                    size="small" 
-                    label="　"
-                    onDelete={()=>{}}
-                    style={{backgroundColor: '#bbdefb'}}
-                  />
-
-                </Typography>
-              </Grid>
-              <Grid item xs={4} style={{textAlign: 'right'}}>
-                <Box mr={0}>
-                  <Typography variant="caption">
-                    新規の設定：
-                    <Chip
-                      size="small" 
-                      label="　"
-                      onDelete={()=>{}}
-                      style={{backgroundColor: '#ffcdd2'}}
-                    />
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-
             <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
               {/* <Box border={1} p={1} width="430px" height='400px' style={{ overflowX: 'hidden', overflowY: 'auto'}}> */}
                 <Grid container spacing={2}>
