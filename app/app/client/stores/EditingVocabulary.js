@@ -3062,61 +3062,6 @@ isOtherVocSynUriChanged() {
     return '';
   }
 
-
-  /**
-   * Delete Vocabulary
-   * 
-   */
-   @action deleteVocabulary(){
-
-   
-    const target = this.currentNode;  
-
-    if( 1 > this.selectedTermList.length) return;
-    if( !target) return;
-    
-    const previous = [target];
-    const following = [];
-    const updateTermList=[];
-
-    this.editingVocabulary.forEach((obj) => {
-      let pushed=false;
-      let tmpObj={ ...obj };
-
-      // Delete if it is included in the preferred_label
-      if (obj.preferred_label && target.preferred_label && obj.id != target.id 
-        && obj.preferred_label == target.preferred_label){
-        pushed=true;
-        obj.preferred_label =obj.term;
-      }
-
-      // Delete if it is included in the broader_term
-      if (obj.broader_term && obj.broader_term == target.term){
-        pushed=true;
-        obj.broader_term ='';
-      }
-      if(pushed){
-        previous.push(tmpObj);
-        following.push(obj);
-        updateTermList.push(obj);
-      }
-    });
-
-    const history = new History('vocabulary', target.id);
-    history.previous = previous;
-    history.following = following;
-    history.targetId = target.id;
- 
-    editingHistoryStore.addHistory(history);
-
-    this.updateRequest(updateTermList,[target.id], target);
-    
-    
-    this.currentNodeClear();
-    this.tmpDataClear();
-    this.setSelectedTermList(target.term); // Remove target from selected terms
-  }
-
   /**
    * Updating coordinate values etc. to DB 
    * @param  {object} nodes - cytoscape nodes
