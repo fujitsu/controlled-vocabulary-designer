@@ -10,6 +10,7 @@ CVDのヘルプページは[こちら](https://fujitsu.github.io/controlled-voca
 - docker-compose : バージョン1.23以上
 
 # セットアップ方法
+0. proxy環境下で使用されるときは HTTP_PROXY, HTTPS_PROXYを環境変数に設定してください。
 1. ```docker-compose up -d```
 2. 作業環境のWEBブラウザで以下にアクセスします。
 
