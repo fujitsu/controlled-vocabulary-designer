@@ -29,12 +29,12 @@ services:
       context: .
       dockerfile: ./app/Dockerfile
       args:
-      - PROXY=${HTTP_PROXY}
+      - SPROXY=${HTTPS_PROXY}
     environment:
     - http_proxy=${HTTP_PROXY}
-    - https_proxy=${HTTP_PROXY}
+    - https_proxy=${HTTPS_PROXY}
     - HTTP_PROXY=${HTTP_PROXY}
-    - HTTPS_PROXY=${HTTP_PROXY}
+    - HTTPS_PROXY=${HTTPS_PROXY}
     volumes:
       - /usr/src/app
     tty: true
@@ -50,6 +50,7 @@ services:
       dockerfile: ./api/Dockerfile
       args:
       - PROXY=${HTTP_PROXY}
+      - SPROXY=${HTTPS_PROXY}
     environment:
     - http_proxy=
     - https_proxy=
