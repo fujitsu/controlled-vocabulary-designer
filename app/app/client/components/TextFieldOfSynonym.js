@@ -12,8 +12,6 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
-import $ from 'jquery';
-
 import EditPanelChipForSynonym from './EditPanelChipForSynonym';
 
 import {observer} from 'mobx-react';
@@ -37,10 +35,6 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    $('#text-field-of-synonym-input').focusin(() =>
-      this.props.change('synonym', true));
-    $('#text-field-of-synonym-input').focusout(() =>
-      this.props.change('synonym', false));
   }
 
   /**
@@ -93,6 +87,14 @@ export default
    */
   render() {
     const synonym = this.props.editingVocabulary.tmpSynonym.list;
+    let currentSynonym;
+    // synonym on the selected term
+    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+      currentSynonym = this.props.editingVocabulary.currentSynonym.list;
+    } else { // synonym when switching with the  language radio button in the selected term
+      currentSynonym = this.props.editingVocabulary.currentLangDiffSynonym.list; 
+    }
+
     /* eslint-disable no-unused-vars */
     // object for rendering
     const length = this.props.editingVocabulary.tmpSynonym.list.length;
@@ -108,6 +110,8 @@ export default
                 freeSolo
                 disabled={this.props.disabled}
                 value={synonym}
+                onFocus={(e)=>this.props.change('synonym', true)}
+                onBlur={(e)=>this.props.change('synonym', false)}
                 onChange={(event, newValue) => this.onChange(event, newValue)}
                 classes={
                   {
@@ -159,7 +163,7 @@ export default
                       key={index}
                       {...getTagProps({index})}
                       label={option}
-                      synonym={this.props.editingVocabulary.currentSynonym.list}
+                      synonym={currentSynonym}
                     />
                   ));
                 }}

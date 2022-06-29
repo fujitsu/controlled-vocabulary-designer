@@ -406,6 +406,10 @@ components:
           type: string
           description: editing_vocabulary is xlsx file
           format: binary
+        editing_vocabulary_meta:
+          type: string
+          description: editing_vocabulary_meta is xlsx file
+          format: binary
         reference_vocabulary1:
           type: string
           description: reference_vocabulary1 is xlsx file
@@ -443,6 +447,8 @@ components:
           type: string
         preferred_label:
           type: string
+        language:
+          type: string
         uri:
           type: string
         broader_term:
@@ -451,6 +457,14 @@ components:
           type: array
           items:
             type: string
+        other_voc_syn_uri:
+          type: string
+        term_description:
+          type: string
+        created_time:
+          type: string
+        modified_time:
+          type: string
         synonym_candidate:
           type: array
           items:
@@ -459,8 +473,6 @@ components:
           type: array
           items:
             type: string
-        part_of_speech:
-          type: string
         postion_x:
           type: string
         postion_y:
@@ -473,16 +485,52 @@ components:
         id: 1
         term: os
         preferred_label: os
+        language: ja
         uri: http://test/0/os
-        broader_term: ソフトウェア
+        broader_term: http://myVocab/3
         synonym: オペレーティングシステム
+        other_voc_syn_uri: http://otherVocab/16
+        term_description: 用語の説明です
+        created_time: "2021-04-02T12:43:02Z"
+        modified_time: "2021-04-08T16:07:59Z"
         synonym_candidate: 基本ソフト
         broader_term_candidate: プログラム
-        part_of_speech: 名詞
         postion_x: "100"
         postion_y: "100"
         color1: black
         color2: black
+    EditingVocabularyMeta:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        meta_name:
+          type: string
+        meta_enname:
+          type: string
+        meta_version:
+          type: string
+        meta_prefix:
+          type: string
+        meta_uri:
+          type: string
+        meta_description:
+          type: string
+        meta_endescription:
+          type: string
+        meta_author:
+          type: string
+      example:
+        id: 1
+        meta_name: 名称
+        meta_enname: name
+        meta_version: 1.0.0
+        meta_prefix: my
+        meta_uri: http://myVocab/
+        meta_description: テスト用の語彙です
+        meta_endescription: The vocabulary for test
+        meta_author: Yasutaka Moriwaki
     ReferenceVocabulary:
       type: object
       properties:
@@ -493,16 +541,37 @@ components:
           type: string
         preferred_label:
           type: string
+        language:
+          type: string
         uri:
           type: string
         broader_term:
+          type: string
+        other_voc_syn_uri:
+          type: string
+        term_description:
+          type: string
+        created_time:
+          type: string
+        modified_time:
+          type: string
+        postion_x:
+          type: string
+        postion_y:
           type: string
       example:
         id: 1
         term: linux
         preferred_label: linux
+        language: en
         uri: http://test/8/linux
-        broader_term: os
+        broader_term: http://myVocab/3
+        other_voc_syn_uri: http://otherVocab/16
+        term_description: 用語の説明です
+        created_time: "2021-04-02T12:43:02Z"
+        modified_time: "2021-04-08T16:07:59Z"
+        postion_x: "100"
+        postion_y: "100"
     GetAllSuccessResponse:
       type: object
       properties:
@@ -510,6 +579,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/EditingVocabulary'
+        EditingVocabularyMeta:
+          type: array
+          items:
+            $ref: '#/components/schemas/EditingVocabularyMeta'
         ReferenceVocabulary:
           type: array
           items:
@@ -519,22 +592,43 @@ components:
         - id: 1
           term: os
           preferred_label: os
+          language: ja
           uri: http://test/0/os
-          broader_term: ソフトウェア
+          broader_term: http://myVocab/3
           synonym: オペレーティングシステム
+          other_voc_syn_uri: http://otherVocab/16
+          term_description: 用語の説明です
+          created_time: "2021-04-02T12:43:02Z"
+          modified_time: "2021-04-08T16:07:59Z"
           synonym_candidate: 基本ソフト
           broader_term_candidate: プログラム
-          part_of_speech: 名詞
           postion_x: "100"
           postion_y: "100"
           color1: black
           color2: black
+        EditingVocabularyMeta:
+        - id: 1
+          meta_name: 名称
+          meta_enname: name
+          meta_version: 1.0.0
+          meta_prefix: my
+          meta_uri: http://myVocab/
+          meta_description: テスト用の語彙です
+          meta_endescription: The vocabulary for test
+          meta_author: Yasutaka Moriwaki
         ReferenceVocabulary:
         - id: 1
           term: linux
           preferred_label: linux
+          language: en
           uri: http://test/8/linux
-          broader_term: os
+          broader_term: http://myVocab/3
+          other_voc_syn_uri: http://otherVocab/16
+          term_description: 用語の説明です
+          created_time: "2021-04-02T12:43:02Z"
+          modified_time: "2021-04-08T16:07:59Z"
+          postion_x: "100"
+          postion_y: "100"
     SearchSuccessResponse:
       type: object
       properties:
