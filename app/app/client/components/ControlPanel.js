@@ -17,7 +17,6 @@ import CloseIcon from '@material-ui/icons/Close';
 import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import Popover from "@material-ui/core/Popover";
 
 import DialogFileSelecter from './DialogFileSelecter';
 import DialogFileDownload from './DialogFileDownload';
