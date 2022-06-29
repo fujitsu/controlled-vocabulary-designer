@@ -12,8 +12,6 @@ import RadioGroup from '@material-ui/core/RadioGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormControl from '@material-ui/core/FormControl';
 
-import DialogApiError from './DialogApiError';
-
 import {observer} from 'mobx-react';
 
 import SelectOfTerm from './SelectOfTerm';
@@ -463,13 +461,6 @@ export default
             </Grid>
           </Box>
         </Grid>
-
-        <DialogApiError
-          open={this.props.editingVocabulary.apiErrorDialog.open}
-          classes={this.props.classes}
-          editingVocabulary={this.props.editingVocabulary}
-          close={() => this.props.editingVocabulary.closeApiErrorDialog()}
-        />
       </div>
     );
   }
