@@ -10,12 +10,14 @@ export default class History {
    * constructor
    * @param {string} action - operation content
    * @param {number} [targetId=null] - investigate ID
+   * @param {number} [targetLangDiffId=null] - diff language investigate ID
    * @param {object} [previous=null] - content before change
    * @param {ObjectorBoolorString} [following=null] - changed content
    */
-  constructor(action, targetId = null, previous = null, following = null) {
+  constructor(action, targetId = null, targetLangDiffId = null, previous = null, following = null) {
     this._action = action;
     this._targetId = targetId;
+    this._targetLangDiffId = targetLangDiffId;
     this._previous = previous;
     this._following = following;
   }
@@ -50,6 +52,22 @@ export default class History {
    */
   set targetId(targetId) {
     this._targetId = targetId;
+  }
+
+  /**
+   * Get targetLangDiffId
+   * @return {number} targetLangDiffId
+   */
+   get targetLangDiffId() {
+    return this._targetLangDiffId;
+  }
+
+  /**
+   * Set targetLangDiffId
+   * @param  {number} targetLangDiffId targetLangDiffId
+   */
+  set targetLangDiffId(targetLangDiffId) {
+    this._targetLangDiffId = targetLangDiffId;
   }
 
   /**
