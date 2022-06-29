@@ -31,7 +31,7 @@ def sansyougoi(relations_file, vec_file, input_file):
 
     # Adds 2D coordinate information to variables for file output
     for idx in range(len(output_all)):
-        if output_all[idx][3] != "":
+        if output_all[idx][4] != "":
             output_all[idx].append(vec.item()[output_all[idx][0]][0])
             output_all[idx].append(vec.item()[output_all[idx][0]][1])
         else:
@@ -40,9 +40,10 @@ def sansyougoi(relations_file, vec_file, input_file):
     print(datetime.datetime.now(), "---output_all loop End:", idx, location())
 
     # ######### File output (all wordnet terms) ##########
-    # xlsx
-    header = ["用語名", "代表語", "代表語のURI", "上位語", "品詞", "x座標値", "y座標値"]
+    # csv
+    header = ["用語名", "代表語", "言語", "代表語のURI", "上位語", "上位語のURI", "他語彙体系の同義語のURI", "用語の説明", "x座標値", "y座標値"]
     df1 = pd.DataFrame(output_all, columns=header)
+    df1.drop(columns=['上位語'], inplace=True)
     # df1.to_excel(output_file_xlsx_all, index=False)
 
     '''
@@ -55,27 +56,32 @@ def sansyougoi(relations_file, vec_file, input_file):
     '''
 
     # ######### File output (terms relating to the terms of the field) ##########
-    # Read and normalize tag data (terms for the field)
-    tag_file = pd.read_csv(input_file, header=None)
-    tag = list(tag_file[0])
+    # Read and normalize domain_words data (terms for the field)
+    domain_words_csv = pd.read_csv(input_file)
+    try:
+        domain_words = list(domain_words_csv["用語名"])
+    except KeyError:
+        sys.exit("domain_words.csvに「用語名」列が存在しません。「用語名」列を追加した後に再読み込みしてください。")
     # normalize term strings to match case
-    tag = list(set(tag))
+    domain_words = list(set(domain_words))
 
-    # If there is a term name that is the same as the term name of the tag, extract the preferred label
+    # If there is a term name that is the same as the term name of the domain_words, extract the preferred label
     pref_target = []
     for idx_output in range(len(output_all)):
-        if output_all[idx_output][0] in tag:
+        if output_all[idx_output][0] in domain_words:
             pref_target.append(output_all[idx_output][1])
 
     # Extracts only the terms with preferred labels or broader terms
     output_target = []
     for idx_output in range(len(output_all)):
-        if output_all[idx_output][1] in tag or\
-           output_all[idx_output][3] in tag:
+        if output_all[idx_output][0] in domain_words or\
+           output_all[idx_output][1] in domain_words or\
+           output_all[idx_output][4] in domain_words:
             output_target.append(output_all[idx_output])
 
-    # xlsx
+    # csv
     df2 = pd.DataFrame(output_target, columns=header)
+    df2.drop(columns=['上位語'], inplace=True)
     # df2.to_excel(output_file_xlsx_target, index=False)
     return df1, df2
 
@@ -89,7 +95,7 @@ def check_arg(args, config):
                enumerate(args.input))):
         print("invalid input file type")
         return False
-    endslist = [".xlsx", ".xlsx"]
+    endslist = [".csv", ".csv"]
     if not len(args.output) == len(endslist):
         print("invalid output file(s)")
         return False
@@ -109,8 +115,8 @@ def main(args, config):
 
     df1, df2 = sansyougoi(relations_file, vec_file, input_file)
 
-    df1.to_excel(output_file, index=False)
-    df2.to_excel(output_file_target, index=False)
+    df1.to_csv(output_file, index=False, encoding='utf-8-sig')
+    df2.to_csv(output_file_target, index=False, encoding='utf-8-sig')
     # with open(output_file, 'w') as f:
     #    json.dump(vec, f, indent=2, ensure_ascii=False)
 
@@ -121,7 +127,7 @@ if __name__ == '__main__':
         description='''
 example:
   $ python3 ./Sansyougoi.py -c config.json -i ExternalVocabulary.json
-    WordEmbedding2.npy tag.csv -o SansyougoiAll.xlsx SansyougoiTarget.xlsx
+    WordEmbedding2.npy domain_words.csv -o SansyougoiAll.csv SansyougoiTarget.csv
 ''',
         add_help=True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -149,3 +155,4 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
+

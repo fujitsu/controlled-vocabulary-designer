@@ -20,19 +20,22 @@ import numpy as np
 from gensim.models import KeyedVectors
 from jsonpointer import resolve_pointer
 
-def synonymous(domain_word_file, domain_text_preprocessed_file, domain_added_model_file, syn_threshold=0.95, syn_limit=10):
+def synonymous(domain_words_file, domain_text_preprocessed_file, domain_added_model_file, syn_threshold=0.95, syn_limit=10):
 
-    # Returns only field terms if domain _ word _ file exists in the same folder
-    if os.path.exists(domain_word_file) is True:
-        # Read and normalize tag data (terms for the field)
-        tag_file = pd.read_csv(domain_word_file, header=None)
-        tag = list(tag_file[0])
-        tag_no_normalized = list(set(tag))
-        tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalize term strings to match case
-        tag = list(set(tag)) # normalized and lowercase to remove term duplication
-        target_words = tag
+    # Returns only field terms if domain_words_file exists in the same folder
+    if os.path.exists(domain_words_file) is True:
+        # Read and normalize domain_words data (terms for the field)
+        domain_words_csv = pd.read_csv(domain_words_file)
+        domain_words_csv = domain_words_csv.fillna("")
+        domain_words = list(domain_words_csv["用語名"])
+        domain_words_no_normalized = list(set(domain_words))
+        if "" in domain_words_no_normalized:
+            domain_words_no_normalized.remove("")
+        domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words if char != ""] # normalize term strings to match case
+        domain_words = list(set(domain_words)) # normalized and lowercase to remove term duplication
+        target_words = domain_words
 
-    # If domain _ word _ file is not present and domain _ text _ preprocessed _ file is present, returns all text data terms in the field
+    # If domain_words_file is not present and domain _ text _ preprocessed _ file is present, returns all text data terms in the field
     elif os.path.exists(domain_text_preprocessed_file) is True:
         with open(domain_text_preprocessed_file, encoding="utf_8") as f:
             txt = f.read()
@@ -48,7 +51,7 @@ def synonymous(domain_word_file, domain_text_preprocessed_file, domain_added_mod
             words.remove("")
         target_words = words
 
-    # If neither domain _ word _ file nor domain _ text _ preprocessed _ file exists, returns all terms learned by word embedding
+    # If neither domain_words_file nor domain _ text _ preprocessed _ file exists, returns all terms learned by word embedding
     else:
         model = KeyedVectors.load(domain_added_model_file)
         target_words = model.wv.index2word
@@ -62,8 +65,8 @@ def synonymous(domain_word_file, domain_text_preprocessed_file, domain_added_mod
         syn_normalized[word] = [x[0] for x in results]
 
     con_sim = {} # {key：value} = {(term, term):cos sim}
-    for w1 in tag_no_normalized:
-        for w2 in tag_no_normalized:
+    for w1 in domain_words_no_normalized:
+        for w2 in domain_words_no_normalized:
             try:
                 con_sim[w1, w2] = model.similarity(unicodedata.normalize("NFKC", w1).lower(), unicodedata.normalize("NFKC", w2).lower())
             except KeyError:
@@ -73,7 +76,7 @@ def synonymous(domain_word_file, domain_text_preprocessed_file, domain_added_mod
     con_sim_sorted = sorted(con_sim.items(), key=lambda x:x[1], reverse=True)
 
     syn = {} # {key: value} = {term name: synonym}
-    for word in tag_no_normalized:
+    for word in domain_words_no_normalized:
         res = []
         for comb in con_sim_sorted:
             if comb[0][0] == word:
@@ -103,14 +106,14 @@ def check_arg(args, config):
     return True
 
 def main(args, config):
-    domain_word_file = args.input[0]
+    domain_words_file = args.input[0]
     domain_text_preprocessed_file = args.input[1]
     domain_added_model_file = args.input[2]
     output_file = args.output[0]
     syn_threshold = resolve_pointer(config, "/Hensyugoi/SynonymExtraction/SimilarityThreshold", 0.95)
     syn_limit = resolve_pointer(config, "/Hensyugoi/SynonymExtraction/SimilarityLimit", 10)
 
-    syn = synonymous(domain_word_file, domain_text_preprocessed_file, domain_added_model_file,
+    syn = synonymous(domain_words_file, domain_text_preprocessed_file, domain_added_model_file,
                      syn_threshold=syn_threshold, syn_limit=syn_limit)
 
     np.save(output_file, syn, allow_pickle = True)
@@ -123,7 +126,7 @@ if __name__ == '__main__':
         description =
 '''
 example:
-  $ python3 ./SynonymExtraction.py -c config.json -i tag.csv domain_wakati_preprocessed.txt WordEmbedding.model -o SynonymExtraction.npy
+  $ python3 ./SynonymExtraction.py -c config.json -i domain_words.csv domain_wakati_preprocessed.txt WordEmbedding.model -o SynonymExtraction.npy
 ''',
         add_help = True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -146,3 +149,4 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
+
