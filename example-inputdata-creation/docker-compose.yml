@@ -7,11 +7,12 @@ services:
       args:
         - "MS_UID=${MS_UID}"
         - "PROXY=${HTTP_PROXY}"
+        - "SPROXY=${HTTPS_PROXY}"
     environment:
     - http_proxy=${HTTP_PROXY}
-    - https_proxy=${HTTP_PROXY}
+    - https_proxy=${HTTPS_PROXY}
     - HTTP_PROXY=${HTTP_PROXY}
-    - HTTPS_PROXY=${HTTP_PROXY}
+    - HTTPS_PROXY=${HTTPS_PROXY}
     restart: always
     volumes:
     - ./mountdir:/mountdir
