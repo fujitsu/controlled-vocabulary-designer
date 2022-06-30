@@ -164,7 +164,7 @@ export default class Search extends React.Component {
       color: d.confirm?'#BBBBBB':'inherit',
       bgcolor: bgColors[d.color1],
     }));
-    const blankPrefix = this.props.editingVocabulary.getTerm_blank_prefix();
+    const blankPrefix = this.props.editingVocabulary.getTermBlankPrefix();
     selectData = selectData.filter((d)=>(d.value).indexOf(blankPrefix) == -1);
 
     const customStyles = {
