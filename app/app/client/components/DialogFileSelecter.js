@@ -332,8 +332,11 @@ export default class DialogFileSelecter extends React.Component {
     this.state.files.forEach((file, index) => {
       if (file.name != '') {
         localStorage.setItem('fileName' + index, file.name);
+        localStorage.setItem('sFileName' + index, file.name);
         localStorage.setItem('fileSize' + index, file.size);
       }
+      // Send to VisualizationPanel.js 
+      this.props.onReadFileChange();
     });
   }
 
@@ -880,6 +883,7 @@ DialogFileSelecter.propTypes = {
   classes: PropTypes.object,
   editingVocabulary: PropTypes.object,
   editingVocabularyMeta: PropTypes.object,
+  onReadFileChange : PropTypes.func,
   onClose: PropTypes.func,
   open: PropTypes.bool,
   close: PropTypes.bool,
