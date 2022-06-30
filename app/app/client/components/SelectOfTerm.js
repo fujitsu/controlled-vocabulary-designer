@@ -96,7 +96,7 @@
  
    render() {
     
-    const blankPrefix = this.props.editingVocabulary.getTerm_blank_prefix();
+    const blankPrefix = this.props.editingVocabulary.getTermBlankPrefix();
     const sortedNodeList  = this.props.editingVocabulary.sortedNodeList.filter((d)=>(d.term).indexOf(blankPrefix) == -1);
      const currentId = this.props.editingVocabulary.currentNode.id ? this.props.editingVocabulary.currentNode.id : '';
      return (

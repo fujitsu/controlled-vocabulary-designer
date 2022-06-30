@@ -2406,8 +2406,20 @@ isOtherVocSynUriChanged() {
    * 
    * @return {string} - prefix string
    */
-   @action getTerm_blank_prefix(){
+   @action getTermBlankPrefix(){
     return 'TERM_BLANK_';
+  }
+  /**
+   * Whether the term contains a prefix indicating a blank
+   * 
+   * @return {bool} - true=is blank term / false=not blank term
+   */
+   @action isBlankTerm( term){
+    const blankPrefix = this.getTermBlankPrefix();
+    if(term.indexOf( blankPrefix) != -1){
+      return true;
+    }
+    return false;
   }
 
   /**
@@ -2418,9 +2430,9 @@ isOtherVocSynUriChanged() {
     const targetData = this.getTargetFileData(this.selectedFile.id);
 
     const termListForVocabulary = [];
-    const getTerm_blank_prefix = this.getTerm_blank_prefix();
+    const blankPrefix = this.getTermBlankPrefix();
     targetData.forEach((data) => {
-      if(data.term.indexOf( getTerm_blank_prefix)== -1){
+      if(data.term.indexOf( blankPrefix)== -1){
         // Editing vocabulary
         termListForVocabulary.push({
           data: {
