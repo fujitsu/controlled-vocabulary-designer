@@ -228,6 +228,7 @@ export default class DialogFileSelecter extends React.Component {
           if (undefined != this.state.files[4].file.name) {
             this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
           }
+          this.handleNext();
         }).catch((err) => {
           console.log('error callback.');
           this.uploadingEnd();
@@ -298,7 +299,6 @@ export default class DialogFileSelecter extends React.Component {
               errMsg,
           );
         });
-    this.handleNext();
   }
 
   /**
