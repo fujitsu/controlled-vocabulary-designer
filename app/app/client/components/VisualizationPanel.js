@@ -72,7 +72,7 @@ export default class VisualizationPanel extends React.Component {
     const sansyouName3 = this.props.sansyouName3; 
 
     return(
-      <div className={this.props.classes.root}>
+      <div style={{position:'fixed', top:'30px'}}>
         <Tabs
           value={this.state.value}
           onChange={(event, newValue) => this.selectTab(event, newValue)}

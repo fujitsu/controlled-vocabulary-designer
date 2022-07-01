@@ -66,6 +66,13 @@ const useStyles = (theme) => ({
     backgroundColor: '#E3E3E3',
   },
 
+  'topMenu': {
+    position:'fixed', 
+    top:'0px', 
+    backgroundColor:'white', 
+    width:'100vw',
+  },
+
   'autocompleteInputRoot': {
     overflowX: 'scroll',
     flexWrap: 'nowrap',
@@ -84,7 +91,7 @@ const useStyles = (theme) => ({
   'sliderDivRoot': {
     height: '400px',  
     width: '50px',
-    position: 'absolute',
+    position: 'fixed',
     left: '15px',
     bottom: '15px',
     zIndex: 1,
@@ -530,7 +537,7 @@ class App extends React.Component {
    */
   render() {
     return (
-      <div className={this.props.classes.root}>
+      <div>
         <Grid container>
           <Grid item xs={12}>
             <ControlPanel
