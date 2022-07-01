@@ -225,13 +225,13 @@ class EditingVocabularyMeta {
    */
   @action updateMetaData( datas=null) {
 
-    this.setCurrentNode();
-
     const error = this.errorCheck();
     if (error != '') {
       return error;
     }
    
+    this.setCurrentNode();
+
     // Add selected vocabulary
     const updateCurrent = this.createDBFormatDataByCurrentNode();
     this.updateRequest([updateCurrent], updateCurrent);
