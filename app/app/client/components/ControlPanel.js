@@ -231,7 +231,10 @@ export default class ControlPanel extends React.Component {
     const leftPostion = (window.innerWidth - 480) / 2;
 
     return (
-      <div onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
+      <div 
+        onKeyDown={(e)=>this.handleKeyDown.bind(e)}
+        className={this.props.classes.topMenu}
+      >
         <Box>
           <Button
             aria-controls="customized-menu"
