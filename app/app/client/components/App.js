@@ -12,8 +12,10 @@ import Box from '@material-ui/core/Box';
 import ControlPanel from './ControlPanel';
 import VisualizationPanel from './VisualizationPanel';
 import DialogApiErrorWrap from './DialogApiErrorWrap';
+import DialogApiMetaError from './DialogApiMetaError';
 
 import editingVocabularyStore from '../stores/EditingVocabulary';
+import editingVocabularyMetaStore from '../stores/EditingVocabularyMeta';
 
 const useStyles = (theme) => ({
   '@global': {
@@ -22,6 +24,35 @@ const useStyles = (theme) => ({
       overflowY: 'hidden !important',
       margin:'0 !important',
       padding:0,
+    },
+    
+    '.inputTextWrap': {
+      width: "100%",
+      overflowY: "hidden",
+      overflowX: "scroll",
+      scrollbarWidth: 'thin',      
+    },
+    '.inputTextMultiWrap':{
+      backgroundColor: 'white',  
+      borderRadius: 0,
+      padding: 0,
+      width: "100%",
+      height: '5em',
+      overflowY: 'scroll',
+      overflowX: 'scroll',  
+    },
+    '.inputTextMultiWrap>textarea':{
+      overflowY: 'scroll',  
+
+    },
+    
+    '.inputTextWrap::-webkit-scrollbar, .inputTextMultiWrap::-webkit-scrollbar, .inputTextMultiWrap>textarea::-webkit-scrollbar': {
+      width: '5px',
+      height: '5px',
+      backgroundColor: '#eee', /* or add it to the track */
+    },
+    '.inputTextWrap::-webkit-scrollbar-thumb, .inputTextMultiWrap::-webkit-scrollbar-thumb, .inputTextMultiWrap>textarea::-webkit-scrollbar-thumb': {
+      background: '#ccc',
     },
   },
 
@@ -124,6 +155,11 @@ const useStyles = (theme) => ({
   'muiDialogTitle': {
     margin: 0,
     padding: theme.spacing(2),
+  },
+
+  'stepButton': {
+    margin: '0 10px 0 10px',
+    borderRadius: 0,
   },
 
   'muiDialogTitleCloseButton': {
@@ -272,6 +308,23 @@ const useStyles = (theme) => ({
     backgroundColor: 'white',
     float: 'right',
   },
+  'fileDialogPaper':{
+    height: '500px',
+    paddingBottom: '30px',
+    overflow: 'hidden',
+  },
+  
+  'fileDialogTitle':{
+    position: 'relative',
+    justifyContent: 'flex-end',
+    padding: '0px 24px',
+    minHeight:'30px',
+  },
+
+  'uploading': {
+    zIndex: theme.zIndex.drawer + 1,
+    color: '#fff',
+  },
 
   'selectFileFormat': {
     'width': '120px',
@@ -321,10 +374,99 @@ const useStyles = (theme) => ({
     width: '100%',
   },
 
+  'textInp':{
+    backgroundColor: 'white',  
+    borderRadius: 0,
+    padding: 0,
+    height: 'auto',
+    flexWrap: 'nowrap',
+    overflowY: 'hidden',
+    overflowX: 'scroll',
+
+    '& input':{
+    },
+    '& fieldset':{
+    },
+
+  },
+
+  'textInp':{
+    backgroundColor: 'white',  
+    borderRadius: 0,
+    padding: 0,
+    height: 'auto',
+    flexWrap: 'nowrap',
+    overflowY: 'hidden',
+    overflowX: 'scroll',
+
+    '& input':{
+    },
+    '& fieldset':{
+    },
+
+  },
+
   'selectTerm': {
     height: '40px',
   },
+  'inputTextWrap': {
+    width: "100%",
+    overflowY: "hidden",
+    overflowX: "scroll",
+    scrollbarWidth: 'thin',
+    '& ::WebkitScrollbar': {
+      width: '8px',
+      height: '8px',
+      backgroundColor: 'red',
+    }
+    
+  },
   
+  'inputTextWrap': {
+    width: "100%",
+    overflowY: "hidden",
+    overflowX: "scroll",
+    scrollbarWidth: 'thin',
+    '& ::WebkitScrollbar': {
+      width: '8px',
+      height: '8px',
+      backgroundColor: 'red',
+    }
+    
+  },
+  
+  'inputTextWrap::-webkit-scrollbar': {
+    width: '8px',
+    height: '8px',
+  },
+
+  'inputText': {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    width: "100%",
+    padding: "2px 4px",
+    minWidth: "15vw",
+    backgroundColor: 'red',
+  },
+  'inputTextItem': {
+    position: "relative",
+    display: "inline-block",
+    backgroundCplor: "red"
+  },
+  'inputTextDummy': {
+    position: "relative",
+    display: "inline-block",
+    overflow: "hidden",
+    minWidth: "1em",
+    padding: "3px 5px",
+    whiteSpace: "nowrap",
+    opacity: "0",
+  },  
+  'fileDialogStepperRoot':{
+    padding: "24px 24px 10px 24px ",
+
+  }
 });
 
 /**
@@ -356,7 +498,7 @@ class App extends React.Component {
     await editingVocabularyStore.getReferenceVocabularyDataFromDB('1');
     await editingVocabularyStore.getReferenceVocabularyDataFromDB('2');
     await editingVocabularyStore.getReferenceVocabularyDataFromDB('3');
-
+    await editingVocabularyMetaStore.getEditingVocabularyMetaDataFromDB();
     await this.readFileChack();
   }
 
@@ -394,6 +536,7 @@ class App extends React.Component {
             <ControlPanel
               classes={this.props.classes}
               editingVocabulary={editingVocabularyStore}
+              editingVocabularyMeta={editingVocabularyMetaStore}
               onReadFileChange = {() => this.onReadFileChange()}
             />
           </Grid>
@@ -419,6 +562,13 @@ class App extends React.Component {
             />
           </Box>
         </Grid>
+        <DialogApiMetaError
+          open={editingVocabularyMetaStore.apiErrorDialog.open}
+          classes={this.props.classes}
+          close={() => editingVocabularyMetaStore.closeApiErrorDialog()}
+          editingVocabulary={editingVocabularyStore}
+          editingVocabularyMeta={editingVocabularyMetaStore}
+        />
       </div>
     );
   }

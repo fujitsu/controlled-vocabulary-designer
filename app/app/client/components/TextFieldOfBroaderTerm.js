@@ -12,8 +12,6 @@ import Snackbar from '@material-ui/core/Snackbar';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
 
-import $ from 'jquery';
-
 import {observer} from 'mobx-react';
 
 import EditPanelChipForOneChip from './EditPanelChipForOneChip';
@@ -37,10 +35,6 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    $('#text-field-of-broader_term-input').focusin(() =>
-      this.props.change('broaderTerm', true));
-    $('#text-field-of-broader_term-input').focusout(() =>
-      this.props.change('broaderTerm', false));
   }
 
   /**
@@ -126,8 +120,16 @@ export default
    */
   render() {
     const broaderTerm = this.props.editingVocabulary.tmpBroaderTerm.list;
-    const currentBroaderTerm =
+    let currentBroaderTerm;
+    // broader term on the selected term
+    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+      currentBroaderTerm =
         this.props.editingVocabulary.currentNode.broader_term;
+    } else { // broader term when switching with the  language radio button in the selected term
+      currentBroaderTerm =
+        this.props.editingVocabulary.currentLangDiffNode.broader_term;
+    }
+    
     /* eslint-disable no-unused-vars */
     // object for rendering
     const length = this.props.editingVocabulary.tmpBroaderTerm.list.length;
@@ -143,6 +145,8 @@ export default
                 freeSolo
                 disabled={this.props.disabled}
                 value={broaderTerm}
+                onFocus={(e)=>this.props.change('broaderTerm', true)}
+                onBlur={(e)=>this.props.change('broaderTerm', false)}
                 onChange={(event, newValue) => this.onChange(event, newValue)}
                 classes={
                   {

@@ -8,6 +8,8 @@ import Chip from '@material-ui/core/Chip';
 
 import {observer} from 'mobx-react';
 
+import editingVocabularyStore from '../stores/EditingVocabulary';
+
 /**
  * Synonym chip component for edit operations panel
  * @extends React
@@ -27,12 +29,17 @@ export default
       // Chips added by completion
       chipColor = '#ffcdd2';
     }
+    const disp = editingVocabularyStore.isBlankTerm(this.props.label);
 
     return (
-      <Chip
-        style={{backgroundColor: chipColor}}
-        {...this.props}
-      />
+      <>
+      { !disp && 
+        <Chip
+          style={{backgroundColor: chipColor}}
+          {...this.props}
+        />
+      }
+      </>
     );
   }
 }

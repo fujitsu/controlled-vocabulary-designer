@@ -17,7 +17,7 @@ class EditingVocabulary(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, uri: str=None, broader_term: str=None, synonym: List[str]=None, synonym_candidate: List[str]=None, broader_term_candidate: List[str]=None, part_of_speech: str=None, postion_x: str=None, postion_y: str=None, color1: str=None, color2: str=None):  # noqa: E501
+    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, language: str=None, uri: str=None, broader_term: str=None, synonym: List[str]=None, other_voc_syn_uri: str=None, term_description: str=None, created_time: str=None, modified_time: str=None, synonym_candidate: List[str]=None, broader_term_candidate: List[str]=None, postion_x: str=None, postion_y: str=None, color1: str=None, color2: str=None):  # noqa: E501
         """EditingVocabulary - a model defined in Swagger
 
         :param id: The id of this EditingVocabulary.  # noqa: E501
@@ -26,18 +26,26 @@ class EditingVocabulary(Model):
         :type term: str
         :param preferred_label: The preferred_label of this EditingVocabulary.  # noqa: E501
         :type preferred_label: str
+        :param language: The language of this EditingVocabulary.  # noqa: E501
+        :type language: str
         :param uri: The uri of this EditingVocabulary.  # noqa: E501
         :type uri: str
         :param broader_term: The broader_term of this EditingVocabulary.  # noqa: E501
         :type broader_term: str
         :param synonym: The synonym of this EditingVocabulary.  # noqa: E501
         :type synonym: List[str]
+        :param other_voc_syn_uri: The other_voc_syn_uri of this EditingVocabulary.  # noqa: E501
+        :type other_voc_syn_uri: str
+        :param term_description: The term_description of this EditingVocabulary.  # noqa: E501
+        :type term_description: str
+        :param created_time: The created_time of this EditingVocabulary.  # noqa: E501
+        :type created_time: str
+        :param modified_time: The modified_time of this EditingVocabulary.  # noqa: E501
+        :type modified_time: str
         :param synonym_candidate: The synonym_candidate of this EditingVocabulary.  # noqa: E501
         :type synonym_candidate: List[str]
         :param broader_term_candidate: The broader_term_candidate of this EditingVocabulary.  # noqa: E501
         :type broader_term_candidate: List[str]
-        :param part_of_speech: The part_of_speech of this EditingVocabulary.  # noqa: E501
-        :type part_of_speech: str
         :param postion_x: The postion_x of this EditingVocabulary.  # noqa: E501
         :type postion_x: str
         :param postion_y: The postion_y of this EditingVocabulary.  # noqa: E501
@@ -51,12 +59,16 @@ class EditingVocabulary(Model):
             'id': int,
             'term': str,
             'preferred_label': str,
+            'language': str,
             'uri': str,
             'broader_term': str,
             'synonym': List[str],
+            'other_voc_syn_uri': str,
+            'term_description': str,
+            'created_time': str,
+            'modified_time': str,
             'synonym_candidate': List[str],
             'broader_term_candidate': List[str],
-            'part_of_speech': str,
             'postion_x': str,
             'postion_y': str,
             'color1': str,
@@ -67,12 +79,16 @@ class EditingVocabulary(Model):
             'id': 'id',
             'term': 'term',
             'preferred_label': 'preferred_label',
+            'language': 'language',
             'uri': 'uri',
             'broader_term': 'broader_term',
             'synonym': 'synonym',
+            'other_voc_syn_uri': 'other_voc_syn_uri',
+            'term_description': 'term_description',
+            'created_time': 'created_time',
+            'modified_time': 'modified_time',
             'synonym_candidate': 'synonym_candidate',
             'broader_term_candidate': 'broader_term_candidate',
-            'part_of_speech': 'part_of_speech',
             'postion_x': 'postion_x',
             'postion_y': 'postion_y',
             'color1': 'color1',
@@ -81,12 +97,16 @@ class EditingVocabulary(Model):
         self._id = id
         self._term = term
         self._preferred_label = preferred_label
+        self._language = language
         self._uri = uri
         self._broader_term = broader_term
         self._synonym = synonym
+        self._other_voc_syn_uri = other_voc_syn_uri
+        self._term_description = term_description
+        self._created_time = created_time
+        self._modified_time = modified_time
         self._synonym_candidate = synonym_candidate
         self._broader_term_candidate = broader_term_candidate
-        self._part_of_speech = part_of_speech
         self._postion_x = postion_x
         self._postion_y = postion_y
         self._color1 = color1
@@ -167,6 +187,27 @@ class EditingVocabulary(Model):
         self._preferred_label = preferred_label
 
     @property
+    def language(self) -> str:
+        """Gets the language of this EditingVocabulary.
+
+
+        :return: The language of this EditingVocabulary.
+        :rtype: str
+        """
+        return self._language
+
+    @language.setter
+    def language(self, language: str):
+        """Sets the language of this EditingVocabulary.
+
+
+        :param language: The language of this EditingVocabulary.
+        :type language: str
+        """
+
+        self._language = language
+
+    @property
     def uri(self) -> str:
         """Gets the uri of this EditingVocabulary.
 
@@ -230,6 +271,90 @@ class EditingVocabulary(Model):
         self._synonym = synonym
 
     @property
+    def other_voc_syn_uri(self) -> str:
+        """Gets the other_voc_syn_uri of this EditingVocabulary.
+
+
+        :return: The other_voc_syn_uri of this EditingVocabulary.
+        :rtype: str
+        """
+        return self._other_voc_syn_uri
+
+    @other_voc_syn_uri.setter
+    def other_voc_syn_uri(self, other_voc_syn_uri: str):
+        """Sets the other_voc_syn_uri of this EditingVocabulary.
+
+
+        :param other_voc_syn_uri: The other_voc_syn_uri of this EditingVocabulary.
+        :type other_voc_syn_uri: str
+        """
+
+        self._other_voc_syn_uri = other_voc_syn_uri
+
+    @property
+    def term_description(self) -> str:
+        """Gets the term_description of this EditingVocabulary.
+
+
+        :return: The term_description of this EditingVocabulary.
+        :rtype: str
+        """
+        return self._term_description
+
+    @term_description.setter
+    def term_description(self, term_description: str):
+        """Sets the term_description of this EditingVocabulary.
+
+
+        :param term_description: The term_description of this EditingVocabulary.
+        :type term_description: str
+        """
+
+        self._term_description = term_description
+
+    @property
+    def created_time(self) -> str:
+        """Gets the created_time of this EditingVocabulary.
+
+
+        :return: The created_time of this EditingVocabulary.
+        :rtype: str
+        """
+        return self._created_time
+
+    @created_time.setter
+    def created_time(self, created_time: str):
+        """Sets the created_time of this EditingVocabulary.
+
+
+        :param created_time: The created_time of this EditingVocabulary.
+        :type created_time: str
+        """
+
+        self._created_time = created_time
+
+    @property
+    def modified_time(self) -> str:
+        """Gets the modified_time of this EditingVocabulary.
+
+
+        :return: The modified_time of this EditingVocabulary.
+        :rtype: str
+        """
+        return self._modified_time
+
+    @modified_time.setter
+    def modified_time(self, modified_time: str):
+        """Sets the modified_time of this EditingVocabulary.
+
+
+        :param modified_time: The modified_time of this EditingVocabulary.
+        :type modified_time: str
+        """
+
+        self._modified_time = modified_time
+
+    @property
     def synonym_candidate(self) -> List[str]:
         """Gets the synonym_candidate of this EditingVocabulary.
 
@@ -270,27 +395,6 @@ class EditingVocabulary(Model):
         """
 
         self._broader_term_candidate = broader_term_candidate
-
-    @property
-    def part_of_speech(self) -> str:
-        """Gets the part_of_speech of this EditingVocabulary.
-
-
-        :return: The part_of_speech of this EditingVocabulary.
-        :rtype: str
-        """
-        return self._part_of_speech
-
-    @part_of_speech.setter
-    def part_of_speech(self, part_of_speech: str):
-        """Sets the part_of_speech of this EditingVocabulary.
-
-
-        :param part_of_speech: The part_of_speech of this EditingVocabulary.
-        :type part_of_speech: str
-        """
-
-        self._part_of_speech = part_of_speech
 
     @property
     def postion_x(self) -> str:
@@ -375,3 +479,4 @@ class EditingVocabulary(Model):
         """
 
         self._color2 = color2
+        

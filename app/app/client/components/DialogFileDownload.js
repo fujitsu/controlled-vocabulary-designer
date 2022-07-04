@@ -70,6 +70,16 @@ export default class DialogFileDownload extends React.Component {
       } else {
         fileName = 'hensyuugoi' + '.' + fileFormat;
       }
+    } else if (this.props.fileType == 'editing_vocabulary_meta') {
+      // For editing_vocabulary_meta, set the file name for editing_vocabulary_meta
+      fileFormat = this.editingVocabularyMetaFormat[0].format;
+      contentType = this.editingVocabularyMetaFormat[0].type;
+      if ( localStorage.getItem('fileName5') ) {
+        fileName =
+        this.deleteFormat(localStorage.getItem('fileName5')) + '.' + fileFormat;
+      } else {
+        fileName = 'hensyuugoi_meta' + '.' + fileFormat;
+      }
     } else if (this.props.fileType == 'controlled_vocabulary') {
       // For controlled vocabulary, set the file name for reference vocabulary 1
       fileFormat = this.controlledVocabularyFormat[0].format;
@@ -157,6 +167,9 @@ export default class DialogFileDownload extends React.Component {
             if (fileType == 'editing_vocabulary') {
               fileName = 'hensyuugoi';
             }
+            if (fileType == 'editing_vocabulary_meta') {
+              fileName = 'hensyuugoi_meta';
+            }
             if (fileType == 'controlled_vocabulary') {
               fileName = 'touseigoi';
             }
@@ -232,6 +245,9 @@ export default class DialogFileDownload extends React.Component {
     if (this.props.fileType == 'editing_vocabulary') {
       fileType = this.editingVocabularyFormat;
     }
+    if (this.props.fileType == 'editing_vocabulary_meta') {
+      fileType = this.editingVocabularyMetaFormat;
+    }
     if (this.props.fileType == 'controlled_vocabulary') {
       fileType = this.controlledVocabularyFormat;
     }
@@ -304,6 +320,16 @@ export default class DialogFileDownload extends React.Component {
   }
 
   editingVocabularyFormat = [
+    {
+      format: 'csv',
+      type: 'text/csv',
+    },
+    {
+      format: 'xlsx',
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    },
+  ];
+  editingVocabularyMetaFormat = [
     {
       format: 'csv',
       type: 'text/csv',

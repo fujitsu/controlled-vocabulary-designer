@@ -27,7 +27,7 @@ from sklearn.metrics import pairwise_distances
 from sklearn.manifold import TSNE
 
 
-def vector(txt_preprocessed_file, domain_word_file, domain_text_preprocessed_file, algorithm):
+def vector(txt_preprocessed_file, domain_words_file, domain_text_preprocessed_file, algorithm):
 
     ########## word2vec ##########
     os.environ['PYTHONHASHSEED'] = '0' # If you want to get the same result on the same input, set the workers = 1 argument of Word2Vec () and add "PYTHONHASHSEED = 0" on the command line (For python3.X)
@@ -45,16 +45,20 @@ def vector(txt_preprocessed_file, domain_word_file, domain_text_preprocessed_fil
     v_word2vec = model.wv[vocab] # vectors for all terms
 
     ########## Import a list of terms in the field and adds terms that do not exist as vectors to the word2vec model, expressed as the average of the vectors of the divided terms ##########
-    # If domain _ word _ file exists in the same folder, extract field terms from domain _ word _ file
-    if os.path.exists(domain_word_file) is True:
+    # If domain_words_file exists in the same folder, extract field terms from domain_words_file
+    if os.path.exists(domain_words_file) is True:
 
         # Import a list of terms in a field, normalize strings of terms
-        tag_file = pd.read_csv(domain_word_file, header=None)
-        tag = list(tag_file[0])
-        tag = [(unicodedata.normalize("NFKC", char)).lower() for char in tag] # normalize term strings to match case
-        tag = list(set(tag)) # normalized and lowercase to remove term duplication
+        domain_words_csv = pd.read_csv(domain_words_file)
+        domain_words_csv = domain_words_csv.fillna("")
+        try:
+            domain_words = list(domain_words_csv["用語名"])
+        except KeyError:
+            sys.exit("domain_words.csvに「用語名」列が存在しません。「用語名」列を追加した後に再読み込みしてください。")
+        domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words if char != ""] # normalize term strings to match case
+        domain_words = list(set(domain_words)) # normalized and lowercase to remove term duplication
 
-    # If domain _ word _ file does not exist and domain _ text _ preprocessed _ file exists, extract field terms from domain _ text _ preprocessed _ file
+    # If domain_words_file does not exist and domain _ text _ preprocessed _ file exists, extract field terms from domain _ text _ preprocessed _ file
     elif os.path.exists(domain_text_preprocessed_file) is True:
         with open(domain_text_preprocessed_file, encoding="utf_8") as f:
             txt = f.read()
@@ -68,43 +72,43 @@ def vector(txt_preprocessed_file, domain_word_file, domain_text_preprocessed_fil
         words = set(words_pre2) # delete duplicates
         if "" in words:
             words.remove("")
-        tag = words
+        domain_words = words
 
     # Extracts terms that exist in the term list of the field but do not exist as vectors for word embedding
-    tag_only = list(set(tag) & (set(tag) ^ set(vocab)))
+    domain_words_only = list(set(domain_words) & (set(domain_words) ^ set(vocab)))
 
     vocab_matched = {} # {key: value} = {First matching term in the learned model: number of characters matched}
     combination = {} # {key: value} = {Field terms: terms for multiple learned models that when combined become field terms}
     combination_buffer = [] # a list of terms in a field that stores terms from multiple learned models that, when combined, become terms in the field
 
     count = 0
-    for str_tag in tag_only:
-        print("tag_only search:" + str(count) + "/" + str(len(tag_only)))
+    for str_domain_words in domain_words_only:
+        print("domain_words_only search:" + str(count) + "/" + str(len(domain_words_only)))
         count += 1
-        str_tag_loop = str_tag # str _ tag minus matching strings into str _ tag _ loop
+        str_domain_words_loop = str_domain_words # str_domain_words minus matching strings into str_domain_words_loop
         combination_buffer = []
-        while len(str_tag_loop) > 0: # The length of str _ tag is greater than zero, excluding the matching string. That is, it does not match.
+        while len(str_domain_words_loop) > 0: # The length of str_domain_words is greater than zero, excluding the matching string. That is, it does not match.
             vocab_matched = {}
             for str_vocab in vocab:
                 try:
-                    match_obj=re.match(str_vocab, str_tag_loop) # Find matching terms from the beginning of the learned model
+                    match_obj=re.match(str_vocab, str_domain_words_loop) # Find matching terms from the beginning of the learned model
                     vocab_matched[str_vocab] = match_obj.end() - match_obj.start() # Stores the first matching term and the number of characters matched
                 except AttributeError:
                     pass
             try:
                 combination_buffer.append(max(vocab_matched, key=vocab_matched.get))
-                str_tag_loop = str_tag_loop[max(vocab_matched.values()):] # Field term string with matching characters removed from beginning
+                str_domain_words_loop = str_domain_words_loop[max(vocab_matched.values()):] # Field term string with matching characters removed from beginning
             except ValueError: # If there is no matching term in the learned model
                 combination_buffer.append("")
-                str_tag_loop = str_tag_loop[1:] # Delete the first character of the field term string
-        combination[str_tag] = combination_buffer
+                str_domain_words_loop = str_domain_words_loop[1:] # Delete the first character of the field term string
+        combination[str_domain_words] = combination_buffer
 
     with open("combination.pkl", "wb") as f:
         pickle.dump(combination, f) # save
 
     # Add field terms and their vectors to word2vec's base model
     model.wv[""] = np.zeros(np.shape(v_word2vec)[1])
-    v_word2vec_tag_only = {}
+    v_word2vec_domain_words_only = {}
 
     count = 0
     for key in combination:
@@ -116,8 +120,8 @@ def vector(txt_preprocessed_file, domain_word_file, domain_text_preprocessed_fil
         if len(set(combination[key])) == 1 and list(set(combination[key]))[0] is "":
             model.wv[key] = model.wv[""]
         else:
-            v_word2vec_tag_only[key] = np.array(list((map(lambda x: x/len(combination[key]), v_sum))))
-            model.wv[key] = v_word2vec_tag_only[key]
+            v_word2vec_domain_words_only[key] = np.array(list((map(lambda x: x/len(combination[key]), v_sum))))
+            model.wv[key] = v_word2vec_domain_words_only[key]
 
     # Update the term names and vectors contained in the model
     vocab = model.wv.index2word # all terms
@@ -173,13 +177,13 @@ def check_arg(args, config):
 
 def main(args, config):
     txt_preprocessed_file = args.input[0]
-    domain_word_file = args.input[1]
+    domain_words_file = args.input[1]
     domain_text_preprocessed_file = args.input[2]
     output_file = args.output[0]
     output_file_model = args.output[1]
 
     algorithm = resolve_pointer(config, "/Hensyugoi/WordEmbedding/Algorithm")
-    vec, model = vector(txt_preprocessed_file, domain_word_file, domain_text_preprocessed_file, algorithm)
+    vec, model = vector(txt_preprocessed_file, domain_words_file, domain_text_preprocessed_file, algorithm)
 
     np.save(output_file, vec)
     model.save(output_file_model)
@@ -193,7 +197,7 @@ if __name__ == '__main__':
         description =
 '''
 example:
-  $ python3 ./WordEmbedding.py -c config.json -i wiki_wakati_preprocessed.txt tag.csv domain_wakati_preprocessed.txt -o WordEmbedding.npy WordEmbedding.model
+  $ python3 ./WordEmbedding.py -c config.json -i domain_text_wakati_preprocessed.txt domain_words.csv domain_wakati_preprocessed.txt -o WordEmbedding.npy WordEmbedding.model
 ''',
         add_help = True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -216,3 +220,4 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
+

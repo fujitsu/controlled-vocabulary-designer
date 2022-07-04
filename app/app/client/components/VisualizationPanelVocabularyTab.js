@@ -536,8 +536,12 @@ export default
       if( event.target.hasClass('eh-handle')){ 
         return;
       }
-
       const target = event.target.data();
+      // other vocabulary node
+      if(target.term == target.other_voc_syn_uri){ 
+        return;
+      }
+
       let isAddTerm=false;
       const withKey = event.originalEvent.ctrlKey|| event.originalEvent.shiftKey;
       this.fitCenterPan = false;
@@ -609,7 +613,14 @@ export default
     this.cy.removeListener('ehcomplete');
     this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       
+      // You need to remove addedgede as Cytoscape will draw a line.
       addedEdge.remove();
+
+      // other vocabulary node
+      if(targetNode.data().term == targetNode.data().other_voc_syn_uri){ 
+        event.stopPropagation()
+        return false;
+      }
 
       this.synonymSource = sourceNode.data();
       this.synonymTarget = targetNode.data();
@@ -680,6 +691,14 @@ export default
 
     this.cy.removeListener('ehshow');
     this.cy.on('ehshow', (event, sourceNode) => {
+
+      // other vocabulary node
+      const dt = sourceNode.data();
+      if(dt.term == dt.other_voc_syn_uri){ 
+        this.hideHandlePostion();
+        return;
+      }
+
       const cy = this.cy;
       
       let handles = cy.elements('.eh-handle');
