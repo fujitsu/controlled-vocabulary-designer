@@ -139,4 +139,3 @@
    editingVocabulary: PropTypes.object,
    change:  PropTypes.func,
  };
-  
