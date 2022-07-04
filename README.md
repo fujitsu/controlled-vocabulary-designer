@@ -165,30 +165,6 @@ Edible cotton,Edible cotton,en,http://cavoc.org/cvo/ns/3/C1055,http://cavoc.org/
 読み込み用ファイルの作成方法は[こちら](example-inputdata-creation/README.md)を参照ください。
 
 
-# URIプレフィックス
-app/app/client/config/Config.jsを使用して、URIプレフィックスの略語を設定することができます。入力したURIに設定したURIプレフィックスが含まれている場合、設定された略語に自動的に変換されCVD上で確認することができます。また、設定した略語をCVD上で入力することもできます。いずれの場合もapp/app/client/config/Config.jsに設定したURIプレフィックスとして認識され、データベースに保存されます。
-
-
-## URIプレフィックスの略語の設定の例（app/app/client/config/Config.js）
-URIプレフィックスである"origin"のバリューは"equiv"のバリューに変換されます。<br>
-以下のサンプルでは、`'http://cavoc.org/'`は`'cavoc:'`に、`'http://example.org/'`は`'ex:'`に変換されます。
-
-```
-...
-'prefix': [
-  {
-    'origin': 'http://cavoc.org/',
-    'equiv': 'cavoc:',
-  },
-  {
-    'origin': 'http://example.org/',
-    'equiv': 'ex:',
-  },
-],
-...
-```
-
-
 # 用語の座標値のスケール倍率
 編集用語彙の用語の座標値と参照用語彙の用語の座標値のスケールに大きな違いがある場合は、app/app/client/config/Config.jsを編集することで参照用語彙の用語の座標値のスケール倍率（x座標値やy座標値に掛ける値のこと）を調整することができます。
 
