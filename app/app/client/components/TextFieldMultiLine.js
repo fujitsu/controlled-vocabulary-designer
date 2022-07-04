@@ -69,4 +69,3 @@
    change: PropTypes.func,
    disabled: PropTypes.bool,
  };
- 
