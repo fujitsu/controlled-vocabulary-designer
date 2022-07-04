@@ -157,13 +157,15 @@ export default class Search extends React.Component {
       'green':'#CCFFCC',
       'purple':'#FF66FF',
     }
-    const selectData = this.props.editingVocabulary.sortedNodeList.map((d) => ({
+    let selectData = this.props.editingVocabulary.sortedNodeList.map((d) => ({
       value: d.term,
       label: d.term,
       fontweight: d.term==this.props.editingVocabulary.currentNode.term?'bold':'default',
       color: d.confirm?'#BBBBBB':'inherit',
       bgcolor: bgColors[d.color1],
     }));
+    const blankPrefix = this.props.editingVocabulary.getTermBlankPrefix();
+    selectData = selectData.filter((d)=>(d.value).indexOf(blankPrefix) == -1);
 
     const customStyles = {
       menu: (provided) => ({

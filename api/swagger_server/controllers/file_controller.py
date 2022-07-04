@@ -5,6 +5,7 @@ file_controller.py COPYRIGHT FUJITSU LIMITED 2021
 
 import json
 import pandas as pd
+import numpy as np
 import pathlib
 import requests
 import rdflib
@@ -43,7 +44,7 @@ WORK_PATH = '/tmp/work/'
 MAX_FILE_CNT = 5
 DEF_WORK_MEM = '65536'
 UPD_WORK_MEM = '524288'
-
+TERM_BLANK_MARK = 'TERM_BLANK_'
 
 def location(depth=0):
     frame = inspect.currentframe().f_back
@@ -56,9 +57,9 @@ def download_file(file_type, out_format):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify for editing_vocabulary or controlled_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary file.   &#x27;controlled_vocabulary&#x27; get controlled vocabulary file.
+    :param file_type: Specify for editing_vocabulary or editing_vovabulary_meta or controlled_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary file.  &#x27;editing_vocabulary_meta&#x27; get editing vocabulary meta file. &#x27;controlled_vocabulary&#x27; get controlled vocabulary file.
     :type file_type: str
-    :param out_format: Specify the file format.   when editing_vocabulary, format is csv or xlsx.   when controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld.
+    :param out_format: Specify the file format.   when editing_vocabulary and editing_vovabulary_meta, format is csv or xlsx.   when controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld.
     :type out_format: str
 
     :rtype: str
@@ -66,35 +67,66 @@ def download_file(file_type, out_format):  # noqa: E501
     print('file_type:'+file_type+' out_format:'+out_format)
 
     editing_vocabulary = []
-
-    exec_sql = _create_select_sql('editing_vocabulary')
-    exec_res, status_code = _exec_get_postgrest(exec_sql)
-    if not status_code == 200:
-        return ErrorResponse(0, exec_res.message), status_code
-
-    editing_vocabulary = exec_res['result']
-    if len(editing_vocabulary) <= 0:
-        return ErrorResponse(0, 'Download file not found.'), 404
+    editing_vocabulary_meta = []
 
     if file_type == 'editing_vocabulary':
+        exec_sql = _create_select_sql(file_type)
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res.message), status_code
+
+        editing_vocabulary = exec_res['result']
+        if len(editing_vocabulary) <= 0:
+            return ErrorResponse(0, 'Download file not found.'), 404
         # json to csv or xlsx
         ret_serialize =\
             _download_file_ev_serialize(editing_vocabulary, out_format)
-    elif file_type == 'controlled_vocabulary':
+        
+    if file_type == 'controlled_vocabulary':
+        exec_sql = _create_select_sql('editing_vocabulary')
+        exec_sql_meta = _create_select_sql('editing_vocabulary_meta')
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        exec_res_meta, status_code_meta = _exec_get_postgrest(exec_sql_meta)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res.message), status_code
+        if not status_code_meta == 200:
+            return ErrorResponse(0, exec_res_meta.message), status_code_meta
+
+        editing_vocabulary = exec_res['result']
+        editing_vocabulary_meta = exec_res_meta['result']
+        if len(editing_vocabulary) <= 0:
+            return ErrorResponse(0, 'Download file not found.'), 404
+        if len(editing_vocabulary_meta) <= 0:
+            return ErrorResponse(0, 'Download file not found.'), 404
         # Graph
-        ret_graph = _download_file_make(editing_vocabulary)
+        ret_graph = _download_file_make(editing_vocabulary, editing_vocabulary_meta)
         ret_serialize = _download_file_serialize(ret_graph, out_format)
+
+    if file_type == 'editing_vocabulary_meta':
+        exec_sql = _create_select_sql(file_type)
+        exec_res, status_code = _exec_get_postgrest(exec_sql)
+        if not status_code == 200:
+            return ErrorResponse(0, exec_res.message), status_code
+
+        editing_vocabulary_meta = exec_res['result']
+        if len(editing_vocabulary_meta) <= 0:
+            return ErrorResponse(0, 'Download file not found.'), 404
+         # json to csv or xlsx
+        ret_serialize =\
+            _download_meta_file_ev_serialize(editing_vocabulary_meta, out_format)
 
     return ret_serialize
 
 
-def upload_file(editing_vocabulary=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None, example_phrases=None):  # noqa: E501
+def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None, example_phrases=None):  # noqa: E501
     """Upload the file to the server
 
     Uploads the file selected by the client to the server.     When &#x27;editing_vocabulary&#x27; uploaded, its check integrity.    # noqa: E501
 
     :param editing_vocabulary:
     :type editing_vocabulary: strstr
+    :param editing_vocabulary_meta:
+    :type editing_vocabulary_meta: strstr
     :param reference_vocabulary1:
     :type reference_vocabulary1: strstr
     :param reference_vocabulary2:
@@ -127,7 +159,7 @@ def upload_file(editing_vocabulary=None, reference_vocabulary1=None, reference_v
                   location())
             return exec_res, status_code
 
-        _repair_broader_term(df)
+        # _repair_broader_term(df)
 
         exec_res, status_code = _check_synonymous_relationship(df)
         if not status_code == 200:
@@ -144,6 +176,31 @@ def upload_file(editing_vocabulary=None, reference_vocabulary1=None, reference_v
             print(datetime.datetime.now(),
                   '[Error] failed _exec_insert_postgrest', location())
             return exec_res, status_code
+    
+    if editing_vocabulary_meta is not None:
+        allow_extension, r_ext =\
+            _check_extensions(editing_vocabulary_meta,
+                              VOCABULARY_ALLOWED_EXTENSIONS)
+        if not allow_extension:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_extensions', location())
+            return ErrorResponse(0, 'Data Format Error.'), 400
+
+        # Check Synonymous Relationship
+        df = _read_file_strage(editing_vocabulary_meta, r_ext)
+
+        # Check columns
+        exec_res, status_code = _check_columns_meta(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_columns_meta',
+                  location())
+            return exec_res, status_code
+
+        payload = _make_bulk_data_editing_vocabulary_meta(df)
+
+        exec_res, status_code =\
+            _exec_insert_postgrest(payload, 'editing_vocabulary_meta')
 
     if reference_vocabulary1 is not None:
         allow_extension, r_ext =\
@@ -463,15 +520,27 @@ def _make_bulk_data_reference_vocabulary(excel_data, r_extension):
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
+        if '言語' in item:
+            insert_data['language'] =\
+                item['言語'] if pd.notnull(item['言語']) else None
         if '代表語のURI' in item:
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
-        if '上位語' in item:
+        if '上位語のURI' in item:
             insert_data['broader_term'] =\
-                item['上位語'] if pd.notnull(item['上位語']) else None
-        if '品詞' in item:
-            insert_data['part_of_speech'] =\
-                item['品詞'] if pd.notnull(item['品詞']) else None
+                item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+        if '他語彙体系の同義語のURI' in item:
+            insert_data['other_voc_syn_uri'] =\
+                item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+        if '用語の説明' in item:
+            insert_data['term_description'] =\
+                item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+        if '作成日' in item:
+            insert_data['created_time'] =\
+                item['作成日'] if pd.notnull(item['作成日']) else None
+        if '最終更新日' in item:
+            insert_data['modified_time'] =\
+                item['最終更新日'] if pd.notnull(item['最終更新日']) else None
         if 'x座標値' in item:
             insert_data['position_x'] =\
                 item['x座標値'] if pd.notnull(item['x座標値']) else None
@@ -489,16 +558,33 @@ def _make_bulk_data_editing_vocabulary(data_frame):
 
     for index, item in data_frame.iterrows():
         insert_data = {}
-        insert_data['term'] = item['用語名']
+        if '用語名' in item:
+            insert_data['term'] = \
+            item['用語名'] if pd.notnull(item['用語名']) else TERM_BLANK_MARK + str(index)
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
+        if '言語' in item:
+            insert_data['language'] =\
+                item['言語'] if pd.notnull(item['言語']) else None
         if '代表語のURI' in item:
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
-        if '上位語' in item:
+        if '上位語のURI' in item:
             insert_data['broader_term'] =\
-                item['上位語'] if pd.notnull(item['上位語']) else None
+                item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+        if '他語彙体系の同義語のURI' in item:
+            insert_data['other_voc_syn_uri'] =\
+                item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+        if '用語の説明' in item:
+            insert_data['term_description'] =\
+                item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+        if '作成日' in item:
+            insert_data['created_time'] =\
+                item['作成日'] if pd.notnull(item['作成日']) else None
+        if '最終更新日' in item:
+            insert_data['modified_time'] =\
+                item['最終更新日'] if pd.notnull(item['最終更新日']) else None
         if '同義語候補' in item:
             insert_data['synonym_candidate'] =\
                 [x.strip() for x in item['同義語候補'].split(',')]\
@@ -507,9 +593,6 @@ def _make_bulk_data_editing_vocabulary(data_frame):
             insert_data['broader_term_candidate'] =\
                 [x.strip() for x in item['上位語候補'].split(',')]\
                 if pd.notnull(item['上位語候補']) else []
-        if '品詞' in item:
-            insert_data['part_of_speech'] =\
-                item['品詞'] if pd.notnull(item['品詞']) else None
         if 'x座標値' in item:
             insert_data['position_x'] =\
                 item['x座標値'] if pd.notnull(item['x座標値']) else None
@@ -531,6 +614,37 @@ def _make_bulk_data_editing_vocabulary(data_frame):
 
     return payload
 
+def _make_bulk_data_editing_vocabulary_meta(data_frame):
+
+    payload = []
+
+    for index, item in data_frame.iterrows():
+        insert_data = {}
+        insert_data['meta_name'] = item['語彙の名称']
+        if '語彙の英語名称' in item:
+            insert_data['meta_enname'] =\
+                item['語彙の英語名称'] if pd.notnull(item['語彙の英語名称']) else None
+        if 'バージョン' in item:
+            insert_data['meta_version'] =\
+                item['バージョン'] if pd.notnull(item['バージョン']) else None
+        if '接頭語' in item:
+            insert_data['meta_prefix'] =\
+                item['接頭語'] if pd.notnull(item['接頭語']) else None
+        if '語彙のURI' in item:
+            insert_data['meta_uri'] =\
+                item['語彙のURI'] if pd.notnull(item['語彙のURI']) else None
+        if '語彙の説明' in item:
+            insert_data['meta_description'] =\
+                item['語彙の説明'] if pd.notnull(item['語彙の説明']) else None
+        if '語彙の英語説明' in item:
+            insert_data['meta_endescription'] =\
+                item['語彙の英語説明'] if pd.notnull(item['語彙の英語説明']) else None
+        if '語彙の作成者' in item:
+            insert_data['meta_author'] =\
+                item['語彙の作成者'] if pd.notnull(item['語彙の作成者']) else None
+        payload.append(insert_data)
+
+    return payload
 
 def _copy_file_example_phrases(text_data):
 
@@ -617,6 +731,9 @@ def _create_select_sql(file_type, term=None):
         if term is not None:
             ret_sql = ret_sql + '?term=eq.' + term
 
+    elif file_type == 'editing_vocabulary_meta':
+        ret_sql = 'editing_vocabulary_meta'
+
     return ret_sql
 
 
@@ -639,7 +756,7 @@ def _exec_get_postgrest(target_table):
 
 def _add_check_term(namel, bterm, term, puri):  #
     blflg = True
-    wkname = [bterm, term, puri]
+    wkname = [puri, bterm]
     for name in namel:
         if name[0] == bterm and name[1] == term:
             blflg = False
@@ -660,17 +777,21 @@ def _read_file_strage(file_strage, r_extension):
 
 # check column
 def _check_columns(data_frame):
-    # columns = '用語名 代表語 代表語のURI 上位語 同義語候補 上位語候補 品詞 x座標値 y座標値 色1 色2'
+    # columns = '用語名 代表語 言語 代表語のURI 上位語のURI 他語彙体系の同義語のURI 用語の説明 作成日 最終更新日 同義語候補 上位語候補 x座標値 y座標値 色1 色2'
     # ins_f = lambda x:columns not in x
     for index, item in data_frame.iterrows():
         # if any(map(ins_f, item)):
         if ('用語名' not in item
          or '代表語' not in item
+         or '言語' not in item
          or '代表語のURI' not in item
-         or '上位語' not in item
+         or '上位語のURI' not in item
+         or '他語彙体系の同義語のURI' not in item
+         or '用語の説明' not in item
+         or '作成日' not in item
+         or '最終更新日' not in item
          or '同義語候補' not in item
          or '上位語候補' not in item
-         or '品詞' not in item
          or 'x座標値' not in item
          or 'y座標値' not in item
          or '色1' not in item
@@ -678,6 +799,21 @@ def _check_columns(data_frame):
             return ErrorResponse(0, 'Data Format Error.'), 400
     return SuccessResponse('request is success.'), 200
 
+# check column meta
+def _check_columns_meta(data_frame):
+    # columns = '語彙の名称 語彙の英語名称 バージョン 接頭語 語彙のURI 語彙の説明 語彙の英語説明 語彙の作成者'
+    for index, item in data_frame.iterrows():
+        # if any(map(ins_f, item)):
+        if ('語彙の名称' not in item
+         or '語彙の英語名称' not in item
+         or 'バージョン' not in item
+         or '接頭語' not in item
+         or '語彙のURI' not in item
+         or '語彙の説明' not in item
+         or '語彙の英語説明' not in item
+         or '語彙の作成者' not in item):
+            return ErrorResponse(0, 'Data Format Error. meta file columns'), 400
+    return SuccessResponse('request is success.'), 200
 
 def _make_row_data_frame(term, col):
     """Make row data
@@ -722,6 +858,25 @@ def _make_row_data_frame(term, col):
             0,
         ]
         return row
+    elif col == 15:
+        row = [
+            term,
+            term,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            'black',
+            'black',
+            0,
+        ]
+        return row
     else:
         return None
 
@@ -736,7 +891,7 @@ def _repair_broader_term(df):
 
     """
     for index, item in df.iterrows():
-        broader_term = item['上位語'] if pd.notnull(item['上位語']) else None
+        broader_term = item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
         if broader_term is not None:
             resdf = df.query('用語名 == @broader_term')
             if len(resdf) == 0:
@@ -753,14 +908,6 @@ def _check_synonymous_relationship(df):
     group_uri = ''
     paylist = []
     preferredlist = []
-
-    # format check
-    exec_res, status_code = _check_trem_format_synonymous_relationship(df)
-    if not status_code == 200:
-        print(datetime.datetime.now(),
-              '[Error] _check_trem_format_synonymous_relationship failed ',
-              location())
-        return ErrorResponse(0, 'Data Format Error.'), 400
 
     # 1-1 Extraction of synonymous relationship
     # sort
@@ -845,17 +992,6 @@ def _check_trem_format_reference_vocabulary(payload):
     return SuccessResponse('request is success.'), 200
 
 
-# Check trem format Synonymous Relationship
-def _check_trem_format_synonymous_relationship(payload_s):
-    # An item that does not contain a key term is considered an error.
-    for index, item in payload_s.iterrows():
-        wk_preferred_label =\
-            item['用語名'] if pd.notnull(item['用語名']) else None
-        if wk_preferred_label is None:
-            return ErrorResponse(0, 'Data Format Error.'), 400
-    return SuccessResponse('request is success.'), 200
-
-
 # Check Synonymous Relationship phase 2 reazon 0
 def _check_synonymous_relationship_2_0(paylist):
     # 2-0 Check preferred labels within synonymous terms
@@ -893,14 +1029,21 @@ def _check_synonymous_relationship_3_1(preferredlist):
         wk_preferred =\
             name['preferred_label']\
             if pd.notnull(name['preferred_label']) else None
+        wk_language =\
+            name['language']\
+            if pd.notnull(name['language']) else None
         for nameb in preferredlist:
             wk_group_uri1b =\
                 nameb['uri'] if pd.notnull(nameb['uri']) else None
             wk_preferred1b =\
                 nameb['preferred_label']\
                 if pd.notnull(nameb['preferred_label']) else None
+            wk_language1b =\
+                nameb['language']\
+                if pd.notnull(nameb['language']) else None
             if wk_group_uri is not None and\
                     wk_group_uri == wk_group_uri1b and\
+                    wk_language == wk_language1b and\
                     wk_preferred != wk_preferred1b:
                 for name_er in preferredlist:
                     if wk_group_uri == name_er['uri']:
@@ -997,7 +1140,7 @@ def _chk_broader_term(payload_s, looplist, key_preferred):
     ret_flg = 1
     for index2, item2 in name_p2.iterrows():
         wk_broader_term =\
-            str(item2['上位語']) if pd.notnull(item2['上位語']) else None
+            str(item2['上位語のURI']) if pd.notnull(item2['上位語のURI']) else None
         if wk_broader_term is None:
             return 0
         else:
@@ -1027,7 +1170,7 @@ def _chk_preferred_group(payload_s, preferredlist, looplist, key_preferred):
             return 0
         else:
             wk_preferred = item2['代表語'] if pd.notnull(item2['代表語']) else None
-            # Loop check
+            # 循環チェック
             for loopitem in looplist:
                 if loopitem == wk_preferred:
                     return 2
@@ -1088,10 +1231,20 @@ def _add_list(paylist, item, preferred_group, group_uri):
         item['用語名'] if pd.notnull(item['用語名']) else None
     insert_data['preferred_label'] =\
         item['代表語'] if pd.notnull(item['代表語']) else None
+    insert_data['language'] =\
+        item['言語'] if pd.notnull(item['言語']) else None
     insert_data['uri'] =\
         item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
     insert_data['broader_term'] =\
-        item['上位語'] if pd.notnull(item['上位語']) else None
+        item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+    insert_data['other_voc_syn_uri'] =\
+        item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+    insert_data['term_description'] =\
+        item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+    insert_data['created_time'] =\
+        item['作成日'] if pd.notnull(item['作成日']) else None
+    insert_data['modified_time'] =\
+        item['最終更新日'] if pd.notnull(item['最終更新日']) else None
 
     insert_data['preferred_group'] = preferred_group
     insert_data['group_uri'] = group_uri
@@ -1113,27 +1266,50 @@ def _add_preferred_list(paylist, item):
         item['用語名'] if pd.notnull(item['用語名']) else None
     insert_data['preferred_label'] =\
         item['代表語'] if pd.notnull(item['代表語']) else None
+    insert_data['language'] =\
+        item['言語'] if pd.notnull(item['言語']) else None
     insert_data['uri'] =\
         item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
     insert_data['broader_term'] =\
-        item['上位語'] if pd.notnull(item['上位語']) else None
+        item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
+    insert_data['other_voc_syn_uri'] =\
+        item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+    insert_data['term_description'] =\
+        item['用語の説明'] if pd.notnull(item['用語の説明']) else None
+    insert_data['created_time'] =\
+        item['作成日'] if pd.notnull(item['作成日']) else None
+    insert_data['modified_time'] =\
+        item['最終更新日'] if pd.notnull(item['最終更新日']) else None
+
     paylist.append(insert_data)
 
     return True
 
 
-def _download_file_make(pl_simple):
+def _download_file_make(pl_simple, pl_simple_meta):
     g = rdflib.ConjunctiveGraph()
     g.bind("skos", rdflib.namespace.SKOS)
+    g.bind("dct", rdflib.namespace.DCTERMS)
+    g.bind("rdf", rdflib.namespace.RDF)
 
     # make triples
     # Base
     rtype = rdflib.namespace.RDF.type  # Type
     scon = rdflib.namespace.SKOS.Concept  # Concept
+    sinscheme = rdflib.namespace.SKOS.inScheme  # inScheme
+    sconceptscheme = rdflib.namespace.SKOS.ConceptScheme  # ConceptScheme
     plabel = rdflib.namespace.SKOS.prefLabel  # prefLabel
     alabel = rdflib.namespace.SKOS.altLabel  # altLabel
     broader = rdflib.namespace.SKOS.broader  # broader
     narrower = rdflib.namespace.SKOS.narrower  # narrower
+    exactMatch = rdflib.namespace.SKOS.exactMatch  # exactMatch
+    title = rdflib.namespace.DCTERMS.title # title
+    hasVersion = rdflib.namespace.DCTERMS.hasVersion # hasVersion
+    description = rdflib.namespace.DCTERMS.description # description
+    creator = rdflib.namespace.DCTERMS.creator # creator
+    created = rdflib.namespace.DCTERMS.created # created
+    modified = rdflib.namespace.DCTERMS.modified # modified
+
     # add List
     namel = []
     # broader
@@ -1142,20 +1318,77 @@ def _download_file_make(pl_simple):
     name_nw = []
 
     # JSON convert to pandas.DataFrame
+    #nm = pd.json_normalize(pl_simple)
+    #nm_meta = pd.json_normalize(pl_simple_meta)
+
+    # JSON convert to pandas.DataFrame
     nm = pd.json_normalize(pl_simple)
+    nm_meta = pd.json_normalize(pl_simple_meta)
+
+    g.bind(nm_meta["meta_prefix"][0], nm_meta["meta_uri"][0])
+
+    # replace nan with ""
+    nm = nm.replace(np.nan, "")
+
+    # create meta
+    namelx = nm_meta.loc[:, ['meta_name', 'meta_enname', 'meta_version', 'meta_prefix', 'meta_uri',  'meta_description', 'meta_endescription', 'meta_author']].values
+    for name in namelx:
+        nameb = [rdflib.URIRef(str(name[4])), rtype, sconceptscheme]
+        namel.append(nameb)
+        m_prefix = str(name[3])
+        m_uri = rdflib.URIRef(str(name[4]))
+        if(str(name[0]) != ""):
+            nameb = [m_uri, title, rdflib.Literal(str(name[0]), lang='ja')]
+            namel.append(nameb)
+        if(str(name[1]) != ""):
+            nameb = [m_uri, title, rdflib.Literal(str(name[1]), lang='en')]
+            namel.append(nameb)
+        if(str(name[2]) != ""):
+            nameb = [m_uri, hasVersion, rdflib.Literal(str(name[2]))]
+            namel.append(nameb)
+        if(str(name[5]) != ""):
+            nameb = [m_uri, description, rdflib.Literal(str(name[5]), lang='ja')]
+            namel.append(nameb)
+        if(str(name[6]) != ""):
+            nameb = [m_uri, description, rdflib.Literal(str(name[6]), lang='en')]
+            namel.append(nameb)
+        if(str(name[7]) != ""):
+            nameb = [m_uri, creator, rdflib.Literal(str(name[7]))]
+            namel.append(nameb)
+
+    # create type links for OtherVocabulary info
+    nameoi = nm.query('other_voc_syn_uri != ""')
+    namelx = nameoi.loc[:, ['other_voc_syn_uri']].values.tolist()
+    namelx = set(sum(namelx, []))
+    for name in namelx:
+        nameb = [rdflib.URIRef(str(name)[:(str(name).rfind('/') + 1)]), rtype, sconceptscheme]
+        namel.append(nameb)
+
+
+    # create exactMatch and inscheme for OtherVocabulary link
+    nameou = nm.query('other_voc_syn_uri != ""')
+    namelx = nameou.loc[:, ['other_voc_syn_uri', 'uri']].values.tolist()
+    namelx = list(map(list, set(map(tuple, namelx))))
+    for name in namelx:
+        nameb = [rdflib.URIRef(str(name[0])), rtype, scon]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[0])), exactMatch, rdflib.URIRef(str(name[1]))]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[0])), sinscheme, rdflib.URIRef(str(name[0])[:(str(name[0]).rfind('/') + 1)])]
+        namel.append(nameb)
 
     # JSON query Get Concept, prefLabel and narrower base
     namelpl = nm.query('term == preferred_label and uri != ""')
     # get uri and term
-    namelx = namelpl.loc[:, ['term', 'uri']].values
+    namelx = namelpl.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
+        if TERM_BLANK_MARK in str(name[0]):
+            continue
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
-        nameb = [rdflib.URIRef(str(name[1])), rtype, scon]
-        namel.append(nameb)
         nameb = [
             rdflib.URIRef(str(name[1])),
             plabel,
-            rdflib.Literal(str(name[0]))
+            rdflib.Literal(str(name[0]), lang=name[2])
         ]
         namel.append(nameb)
         # narrower
@@ -1164,13 +1397,15 @@ def _download_file_make(pl_simple):
     # query altLabel
     namelal = nm.query('term != preferred_label and uri != ""')
     # get uri and term
-    namelx = namelal.loc[:, ['term', 'uri']].values
+    namelx = namelal.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
+        if TERM_BLANK_MARK in str(name[0]):
+            continue
         # print('altLabel:' + str(name[0])+' '+str(name[1]))
         nameb = [
             rdflib.URIRef(str(name[1])),
             alabel,
-            rdflib.Literal(str(name[0]))
+            rdflib.Literal(str(name[0]), lang=name[2])
         ]
         namel.append(nameb)
 
@@ -1180,46 +1415,55 @@ def _download_file_make(pl_simple):
     # get uri and broader_term
     namelx = namelbt.loc[:, ['broader_term', 'term', 'uri']].values
     for name in namelx:
+        if TERM_BLANK_MARK in str(name[1]):
+            continue
         _add_check_term(name_bt, name[0], name[1], name[2])
 
+    name_bt = list(map(list, set(map(tuple, name_bt))))
     for namebt in name_bt:
-        # print('namebt:', str(namebt[0]),
-        #       str(namebt[1]), str(namebt[2]))
-        # query prefLabel
-        wkquery =\
-            'term == preferred_label and term == "' + str(namebt[0]) + '"'
-        # print(wkquery)
-        namelpl = nm.query(wkquery)
-        # get uri and term
-        namelx = namelpl.loc[:, ['term', 'uri']].values
-        for name in namelx:
-            nameb = [
-                rdflib.URIRef(str(namebt[2])),
-                broader,
-                rdflib.URIRef(str(name[1]))
-            ]
-            namel.append(nameb)
-            # print('add broader:'+str(name[0])+' '+str(name[1]))
+        nameb = [
+            rdflib.URIRef(str(namebt[0])),
+            broader,
+            rdflib.URIRef(str(namebt[1]))
+        ]
+        namel.append(nameb)
 
     # print("--- printing narrower ---")
     # create narrower links
-    for namenw in name_nw:
-        # query prefLabel
-        wkquery =\
-            'term == preferred_label and uri != "" and broader_term == "' +\
-            str(namenw[0]) + '"'
-        # print(wkquery)
-        namelpl = nm.query(wkquery)
-        # get uri and term
-        namelx = namelpl.loc[:, ['term', 'uri']].values
-        for name in namelx:
-            nameb = [
-                rdflib.URIRef(str(namenw[2])),
-                narrower,
-                rdflib.URIRef(str(name[1]))
-            ]
+    for namenw in name_bt:
+        nameb = [
+            rdflib.URIRef(str(namenw[1])),
+            narrower,
+            rdflib.URIRef(str(namenw[0]))
+        ]
+        namel.append(nameb)
+
+
+    # create other links
+    namelpl = nm.query('uri != ""')
+    # get language, uri, othervoc_syn_uri, term_description, created and modified
+    namelx = namelpl.loc[:, ['language', 'uri', 'other_voc_syn_uri', 'term_description', 'created_time', 'modified_time']].values.tolist()
+    namelx = list(map(list, set(map(tuple, namelx))))
+    for name in namelx:
+        nameb = [rdflib.URIRef(str(name[1])), rtype, scon]
+        namel.append(nameb)
+        nameb = [rdflib.URIRef(str(name[1])), sinscheme, m_uri]
+        namel.append(nameb)
+        if(str(name[2]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), exactMatch, rdflib.URIRef(str(name[2]))]
             namel.append(nameb)
-            # print('add narrower:'+str(name[0])+' '+str(name[1]))
+        if(str(name[3]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), description, rdflib.Literal(str(name[3]), lang=name[0])]
+            namel.append(nameb)
+        if(str(name[4]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), created, rdflib.Literal(str(name[4]))]
+            namel.append(nameb)
+        if(str(name[5]) != ""):
+            nameb = [rdflib.URIRef(str(name[1])), modified, rdflib.Literal(str(name[5]))]
+            namel.append(nameb)
+
+    namel = list(map(list, set(map(tuple, namel))))
+              
     # Add List to Graph
     for name in namel:
         g.add((name[0], name[1], name[2]))
@@ -1255,6 +1499,8 @@ def _download_file_ev_serialize(pl_simple, p_format):
     # print("--- printing "+p_format+" ---")
     df_org = df_json.copy()
     # delete word "[","]"
+    df_org['term'] =\
+            df_org['term'].str.replace(TERM_BLANK_MARK+'\d+', '',regex=True) 
     df_org['synonym_candidate'] =\
         df_org['synonym_candidate'].astype("string")
     df_org['broader_term_candidate'] =\
@@ -1273,19 +1519,74 @@ def _download_file_ev_serialize(pl_simple, p_format):
         df_org['broader_term_candidate'].str.replace('\'', '')
     # delete columns id hidden
     df_org.drop(columns=['id', 'hidden'], inplace=True)
+    # make dictionary {preferred_label: uri}
+    dic_preflabel_uri = dict(zip(df_org['preferred_label'], df_org['uri']))
+    # if broader_term is label, convert label into uri
+    col_broader_uri = []
+    for broader_term in list(df_org['broader_term']):
+        if broader_term in list(df_org['uri']):
+            col_broader_uri.append(broader_term)
+        elif broader_term in list(df_org['preferred_label']):
+            col_broader_uri.append(dic_preflabel_uri[broader_term])
+        else:
+            col_broader_uri.append(np.nan)
+    df_org.loc[:, 'broader_term'] = col_broader_uri
     # header change
     df_org = df_org.rename(columns={'term': '用語名',
                                     'preferred_label': '代表語',
+                                    'language': '言語',
                                     'uri': '代表語のURI',
-                                    'broader_term': '上位語',
+                                    'broader_term': '上位語のURI',
+                                    'other_voc_syn_uri': '他語彙体系の同義語のURI',
+                                    'term_description': '用語の説明',
+                                    'created_time': '作成日',
+                                    'modified_time': '最終更新日',
                                     'broader_term_candidate': '上位語候補',
                                     'synonym_candidate': '同義語候補',
-                                    'part_of_speech': '品詞',
                                     'position_x': 'x座標値',
                                     'position_y': 'y座標値',
                                     'color1': '色1',
                                     'color2': '色2',
                                     'confirm': '確定済み用語'})
+
+    if p_format == 'csv':
+        with tempfile.TemporaryFile("w+") as f:
+            # encoding='utf-8', index=False
+            df_org.to_csv(f, encoding='utf-8', index=False)
+            f.seek(0)
+            response = make_response()
+            response.data = f.read()
+            response.headers['Content-Type'] = 'text/csv'
+            response.headers['Content-Disposition'] =\
+                'attachment; filename=test_sample.csv'
+            return response
+    elif p_format == 'xlsx':
+        downloadFileName = 'temp_excel.xlsx'
+        df_org.to_excel(downloadFileName, encoding='utf-8', index=False)
+        response = make_response()
+        response.data = open(downloadFileName, "rb").read()
+        response.headers['Content-Disposition'] = 'attachment;'
+        response.mimetype = XLSX_MIMETYPE
+        os.remove(downloadFileName)
+        return response
+
+def _download_meta_file_ev_serialize(pl_simple, p_format):
+    # format is csv or xlsx
+    df_json = []
+    df_json = pd.json_normalize(pl_simple)
+    # print("--- printing "+p_format+" ---")
+    df_org = df_json.copy()
+    # delete columns id
+    df_org.drop(columns=['id'], inplace=True)
+    # header change
+    df_org = df_org.rename(columns={'meta_name': '語彙の名称',
+                                    'meta_enname': '語彙の英語名称',
+                                    'meta_version': 'バージョン',
+                                    'meta_prefix': '接頭語',
+                                    'meta_uri': '語彙のURI',
+                                    'meta_description': '語彙の説明',
+                                    'meta_endescription': '語彙の英語説明',
+                                    'meta_author': '語彙の作成者'})
 
     if p_format == 'csv':
         with tempfile.TemporaryFile("w+") as f:

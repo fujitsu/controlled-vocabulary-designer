@@ -51,12 +51,16 @@ export default class DialogOkCancel extends React.Component {
             {renderTexts()}
           </DialogContent>
           <DialogActions>
+            { 2 > (this.props.buttonsDisable || 0) &&
             <Button onClick={() => this.props.onOkClose()} color="primary">
             OK
             </Button>
+            }
+            { 1 > (this.props.buttonsDisable || 0) &&
             <Button onClick={() => this.props.onCancel()} color="primary">
             Cancel
             </Button>
+            }
           </DialogActions>
         </Dialog>
       </div>
@@ -68,6 +72,7 @@ DialogOkCancel.propTypes = {
   onOkClose: PropTypes.func,  
   onCancel: PropTypes.func,  
   open: PropTypes.bool,
+  buttonsDisable: PropTypes.number,// 2=[OK and CANCEL is disable] / 1=[CANCEL is disable] / 0 or unset=[buttons enable]
   classes: PropTypes.object,
   message: PropTypes.string,
 };

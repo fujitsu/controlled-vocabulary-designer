@@ -10,6 +10,7 @@ from typing import List, Dict  # noqa: F401
 
 from swagger_server.models.base_model_ import Model
 from swagger_server.models.editing_vocabulary import EditingVocabulary  # noqa: F401,E501
+from swagger_server.models.editing_vocabulary_meta import EditingVocabularyMeta  # noqa: F401,E501
 from swagger_server.models.reference_vocabulary import ReferenceVocabulary  # noqa: F401,E501
 from swagger_server import util
 
@@ -19,24 +20,29 @@ class GetAllSuccessResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, editing_vocabulary: List[EditingVocabulary]=None, reference_vocabulary: List[ReferenceVocabulary]=None):  # noqa: E501
+    def __init__(self, editing_vocabulary: List[EditingVocabulary]=None, editing_vocabulary_meta: List[EditingVocabularyMeta]=None, reference_vocabulary: List[ReferenceVocabulary]=None):  # noqa: E501
         """GetAllSuccessResponse - a model defined in Swagger
 
         :param editing_vocabulary: The editing_vocabulary of this GetAllSuccessResponse.  # noqa: E501
         :type editing_vocabulary: List[EditingVocabulary]
+        :param editing_vocabulary_meta: The editing_vocabulary_meta of this GetAllSuccessResponse.  # noqa: E501
+        :type editing_vocabulary_meta: List[EditingVocabularyMeta]
         :param reference_vocabulary: The reference_vocabulary of this GetAllSuccessResponse.  # noqa: E501
         :type reference_vocabulary: List[ReferenceVocabulary]
         """
         self.swagger_types = {
             'editing_vocabulary': List[EditingVocabulary],
+            'editing_vocabulary_meta': List[EditingVocabularyMeta],
             'reference_vocabulary': List[ReferenceVocabulary]
         }
 
         self.attribute_map = {
             'editing_vocabulary': 'EditingVocabulary',
+            'editing_vocabulary_meta': 'EditingVocabularyMeta',
             'reference_vocabulary': 'ReferenceVocabulary'
         }
         self._editing_vocabulary = editing_vocabulary
+        self._editing_vocabulary_meta = editing_vocabulary_meta
         self._reference_vocabulary = reference_vocabulary
 
     @classmethod
@@ -70,6 +76,27 @@ class GetAllSuccessResponse(Model):
         """
 
         self._editing_vocabulary = editing_vocabulary
+    
+    @property
+    def editing_vocabulary_meta(self) -> List[EditingVocabularyMeta]:
+        """Gets the editing_vocabulary_meta of this GetAllSuccessResponse.
+
+
+        :return: The editing_vocabulary_meta of this GetAllSuccessResponse.
+        :rtype: List[EditingVocabularyMeta]
+        """
+        return self._editing_vocabulary_meta
+
+    @editing_vocabulary_meta.setter
+    def editing_vocabulary_meta(self, editing_vocabulary_meta: List[EditingVocabularyMeta]):
+        """Sets the editing_vocabulary_meta of this GetAllSuccessResponse.
+
+
+        :param editing_vocabulary_meta: The editing_vocabulary_meta of this GetAllSuccessResponse.
+        :type editing_vocabulary_meta: List[EditingVocabularyMeta]
+        """
+
+        self._editing_vocabulary_meta = editing_vocabulary_meta
 
     @property
     def reference_vocabulary(self) -> List[ReferenceVocabulary]:
