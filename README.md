@@ -164,13 +164,6 @@ Edible cotton,Edible cotton,en,http://cavoc.org/cvo/ns/3/C1055,http://cavoc.org/
 ## 読み込み用ファイルの作成方法
 読み込み用ファイルの作成方法は[こちら](example-inputdata-creation/README.md)を参照ください。
 
-
-# 用語の座標値のスケール倍率
-編集用語彙の用語の座標値と参照用語彙の用語の座標値のスケールに大きな違いがある場合は、app/app/client/config/Config.jsを編集することで参照用語彙の用語の座標値のスケール倍率（x座標値やy座標値に掛ける値のこと）を調整することができます。
-
-## 用語の座標値のスケール倍率の設定の例（app/app/client/config/Config.js）
-参照用語彙の用語の座標値のスケールのデフォルトの倍率は「1」です。正の数と負の数ともに設定することができます。
-
 ```
 ...
 'magnification': [
