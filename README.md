@@ -164,15 +164,6 @@ Edible cotton,Edible cotton,en,http://cavoc.org/cvo/ns/3/C1055,http://cavoc.org/
 ## 読み込み用ファイルの作成方法
 読み込み用ファイルの作成方法は[こちら](example-inputdata-creation/README.md)を参照ください。
 
-```
-...
-'magnification': [
-  {
-    'reference': 1,
-  },
-],
-...
-```
 
 # 削除方法
 Linuxマシンのターミナル上で以下のコマンドを実行します。<br>
