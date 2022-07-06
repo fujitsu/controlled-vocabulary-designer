@@ -1170,7 +1170,7 @@ def _chk_preferred_group(payload_s, preferredlist, looplist, key_preferred):
             return 0
         else:
             wk_preferred = item2['代表語'] if pd.notnull(item2['代表語']) else None
-            # 循環チェック
+            # Loop check
             for loopitem in looplist:
                 if loopitem == wk_preferred:
                     return 2
@@ -1329,6 +1329,22 @@ def _download_file_make(pl_simple, pl_simple_meta):
 
     # replace nan with ""
     nm = nm.replace(np.nan, "")
+
+    dic_preflabel_uri = {}
+    for index, row in nm.iterrows():
+        dic_preflabel_uri[row['preferred_label']] = row['uri']
+
+    # replace label with URI
+    col_broader_uri = []
+    for broader_term in nm['broader_term']:
+        if broader_term in dic_preflabel_uri.keys():
+            col_broader_uri.append(dic_preflabel_uri[broader_term])
+        elif broader_term != "":
+            col_broader_uri.append(broader_term)
+        else:
+            col_broader_uri.append("")
+
+    nm.loc[:, "broader_term"] = col_broader_uri
 
     # create meta
     namelx = nm_meta.loc[:, ['meta_name', 'meta_enname', 'meta_version', 'meta_prefix', 'meta_uri',  'meta_description', 'meta_endescription', 'meta_author']].values
