@@ -900,7 +900,7 @@ class EditingVocabulary {
    * @return {array} - list of related term
    */
   @action getCandidateTermList(type) {
-    const list = [];
+    let list = [];
     if ((0 == this.selectedFile.id) && (this.currentNode.id)) {
       const referenceVocabularyList = [
         this.referenceVocabulary1,
@@ -990,6 +990,10 @@ class EditingVocabulary {
           break;
       }
     }
+    list = list.filter((term)=>{
+      return this.editingVocabulary.find( (data) => data.term === term)?true:false;
+    })
+
     return list.sort((a, b) => {
       const lowerA = a.toString().toLowerCase();
       const lowerB = b.toString().toLowerCase();
