@@ -84,7 +84,7 @@ def synonymous(domain_words_file, domain_text_preprocessed_file, domain_added_mo
                     res.append(comb[0][1])
         if word in res:
             res.remove(word)
-        syn[word] = res + syn_normalized[unicodedata.normalize("NFKC", word).lower()]
+        syn[word] = res
 
     return syn
 
