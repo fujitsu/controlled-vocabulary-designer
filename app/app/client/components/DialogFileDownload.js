@@ -56,29 +56,25 @@ export default class DialogFileDownload extends React.Component {
    */
   initFilesInfo() {
     let fileName = '';
-    let fileFormat = '';
-    let contentType = '';
+    let fileFormat = 'csv';
+    let contentType = 'text/csv';
 
     // Set as the initial value if the input filename exists in the local storage.
     if (this.props.fileType == 'editing_vocabulary') {
       // For editing vocabulary, set the file name of the editing vocabulary
-      fileFormat = this.editingVocabularyFormat[0].format;
-      contentType = this.editingVocabularyFormat[0].type;
       if ( localStorage.getItem('fileName0') ) {
         fileName =
-        this.deleteFormat(localStorage.getItem('fileName0')) + '.' + fileFormat;
+        this.deleteFormat(localStorage.getItem('fileName0')) ;
       } else {
-        fileName = 'hensyuugoi' + '.' + fileFormat;
+        fileName = 'hensyuugoi';
       }
     } else if (this.props.fileType == 'editing_vocabulary_meta') {
       // For editing_vocabulary_meta, set the file name for editing_vocabulary_meta
-      fileFormat = this.editingVocabularyMetaFormat[0].format;
-      contentType = this.editingVocabularyMetaFormat[0].type;
       if ( localStorage.getItem('fileName5') ) {
         fileName =
-        this.deleteFormat(localStorage.getItem('fileName5')) + '.' + fileFormat;
+        this.deleteFormat(localStorage.getItem('fileName5')) ;
       } else {
-        fileName = 'hensyuugoi_meta' + '.' + fileFormat;
+        fileName = 'hensyuugoi_meta';
       }
     } else if (this.props.fileType == 'controlled_vocabulary') {
       // For controlled vocabulary, set the file name for reference vocabulary 1
@@ -105,16 +101,25 @@ export default class DialogFileDownload extends React.Component {
    * @return {string} - filename
    */
   deleteFormat(fileName) {
-    const formatFiles =
-     this.editingVocabularyFormat.concat(this.controlledVocabularyFormat);
     let checkFileName = fileName;
-    formatFiles.forEach((format) => {
+    this.getFormatFiles().forEach((format) => {
       // If the file name already contains an extension, delete it.
       if (fileName.endsWith('.' + format.format)) {
         checkFileName = fileName.replace('.' + format.format, '');
       }
     });
     return checkFileName;
+  }
+  /**
+   * returns an object in file format
+   * @returns object array
+   */
+  getFormatFiles(){
+    return [...this.controlledVocabularyFormat,
+    {
+      format: 'csv',
+      type: 'text/csv',
+    }];
   }
 
   /**
@@ -130,13 +135,11 @@ export default class DialogFileDownload extends React.Component {
    * @param  {object} e - information of event
    */
   changeFileFormat(e) {
-    const formatFiles =
-      this.editingVocabularyFormat.concat(this.controlledVocabularyFormat);
     let contentType = '';
 
     // Get the contentType from a list
     contentType =
-      formatFiles.find((data) => data.format == e.target.value).type;
+    this.controlledVocabularyFormat.find((data) => data.format == e.target.value).type;
 
     this.setState({
       fileName: this.deleteFormat(this.state.fileName) + '.' + e.target.value,
@@ -156,9 +159,6 @@ export default class DialogFileDownload extends React.Component {
     axios
         .get(url)
         .then((response) => {
-          const formatFiles =
-            this.editingVocabularyFormat
-                .concat(this.controlledVocabularyFormat);
           let fileName = this.state.fileName;
           let noneFormatFlg = true; // True if there is no extension
 
@@ -176,7 +176,7 @@ export default class DialogFileDownload extends React.Component {
           }
 
           // Add if extension has been manually cleared
-          formatFiles.forEach((format) => {
+          this.getFormatFiles().forEach((format) => {
             if (fileName.endsWith('.' + format.format)) {
               noneFormatFlg = false;
             }
@@ -241,16 +241,6 @@ export default class DialogFileDownload extends React.Component {
    * @return {element}
    */
   render() {
-    let fileType = [];
-    if (this.props.fileType == 'editing_vocabulary') {
-      fileType = this.editingVocabularyFormat;
-    }
-    if (this.props.fileType == 'editing_vocabulary_meta') {
-      fileType = this.editingVocabularyMetaFormat;
-    }
-    if (this.props.fileType == 'controlled_vocabulary') {
-      fileType = this.controlledVocabularyFormat;
-    }
     return (
       <div>
         <Dialog
@@ -281,14 +271,14 @@ export default class DialogFileDownload extends React.Component {
                     <InsertDriveFileIcon />
                   </InputAdornment>
                 }
-                style={{margin: '15px 15px 25px 0px', width: '300px'}}
+                style={{margin: '15px 0px 25px 0px', width: '300px'}}
               />
-
               <FormControl
                 variant="outlined"
                 className={this.props.classes.formControl}
               >
-                <InputLabel htmlFor="file-download"></InputLabel>
+              { this.props.fileType == 'controlled_vocabulary'?
+                <><InputLabel htmlFor="file-download"></InputLabel>
                 <Select
                   native
                   value={this.state.fileFormat}
@@ -299,10 +289,13 @@ export default class DialogFileDownload extends React.Component {
                     id: 'file-download',
                   }}
                 >
-                  {fileType.map((item, i) => (
+                  {this.controlledVocabularyFormat.map((item, i) => (
                     <option key={i} value={item.format}>{item.format}</option>
                   ))}
-                </Select>
+                </Select></>
+              :
+              <p style={{fontSize:'1.1em'}}>.csv</p>
+              }
               </FormControl>
             </Box>
           </DialogContent>
@@ -319,26 +312,6 @@ export default class DialogFileDownload extends React.Component {
     );
   }
 
-  editingVocabularyFormat = [
-    {
-      format: 'csv',
-      type: 'text/csv',
-    },
-    {
-      format: 'xlsx',
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    },
-  ];
-  editingVocabularyMetaFormat = [
-    {
-      format: 'csv',
-      type: 'text/csv',
-    },
-    {
-      format: 'xlsx',
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    },
-  ];
   controlledVocabularyFormat = [
     {
       format: 'n3',
