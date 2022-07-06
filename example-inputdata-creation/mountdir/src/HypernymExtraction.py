@@ -38,6 +38,9 @@ def hypernym(txt_preprocessed_file, domain_words_file):
     domain_words_csv = pd.read_csv(domain_words_file)
     domain_words_csv = domain_words_csv.fillna("")
     domain_words = list(domain_words_csv["用語名"])
+    domain_words_no_normalized = list(set(domain_words))
+    if "" in domain_words_no_normalized:
+        domain_words_no_normalized.remove("")
     domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words if char != ""] # normalize term strings to match case
     domain_words = list(set(domain_words)) # normalize term strings and reduce term duplication by using lowercase letters
 
@@ -46,13 +49,13 @@ def hypernym(txt_preprocessed_file, domain_words_file):
 
     ########## Extract broader term ##########
     hyper = {} # broader term dictionary ({keys: value} = {term name: broader termx multiple}) for return values
-    for word in words:
+    for word in domain_words_no_normalized:
         try:
             synsets = wn.synsets(word,lang='jpn') # Don't forget lang = "jpn" for Japanese
             hypers_a_word = [] # list containing all the broader term for word
             for synset in synsets:
                 for hypernym in synset.hypernyms():
-                    hypers_a_word.append(hypernym.lemma_names("jpn"))
+                    hypers_a_word.append([lemma for lemma in hypernym.lemma_names("jpn") if lemma in domain_words_no_normalized])
             hyper[word] = list(itertools.chain.from_iterable(hypers_a_word)) # convert a two-dimensional array to a one-dimensional array
         except ValueError:
             hyper[word] = []
