@@ -1165,8 +1165,6 @@ class EditingVocabulary {
     this.tmpModifiedTimeInit = true;
     this.tmpBorderColor =
         {id: this.currentNode.id, color: this.currentNode.color1};
-    this.tmpVocabularycolor =
-        {id: this.currentNode.id, color: this.currentNode.color2};
   }
 
   /**
@@ -1933,341 +1931,29 @@ isOtherVocSynUriChanged() {
     }
   }
 
-  @observable tmpVocabularycolor = {id: '', color: ''};
-
-  /**
-   * Vocabulary tab color selection event
-   * @param  {string} id - target vocabulary id
-   * @param  {string} color - selected color
-   */
-  @action selectTmpVocabularycolor(id, color) {
-    if ( (this.tmpVocabularycolor.id !== '') &&
-        (this.tmpVocabularycolor.color != color) ) {
-      this.tmpVocabularycolor = {id: id, color: color};
-    }
-  }
-
-  sortData = [
-    {key: 'ascend', value: '昇順'},
-    {key: 'descend', value: '降順'},
-  ];
-
-  @observable currentSort = {key: 'ascend', value: '昇順'};
-
-  /**
-   * Sort switching
-   * @param {string} orderKey 'ascend' or 'descend'
-   */
-  @action changeSort(orderKey) {
-    this.currentSort = this.sortData.find((obj) => {
-      return (obj.key == orderKey);
-    });
-  }
 
   /**
    * Returns a sorted list of vocabulary lists by sort specification
    * @return {array} - sort list
    */
   @computed get sortedNodeList() {
-    let targetData;
-    // Temporary processing. Needs correction when repairing homotopic 
-    // -------------------------- 
-    // if (this.currentVisualTab.id === 0) {
-    //   const editingVocabulary = this.editingVocabulary;
-    //   let referenceVocabulary = [];
-    //   switch (this.homotopicFile.id) {
-    //     case 1: referenceVocabulary = this.referenceVocabulary1; break;
-    //     case 2: referenceVocabulary = this.referenceVocabulary2; break;
-    //     case 3: referenceVocabulary = this.referenceVocabulary3; break;
-    //     default: break;
-    //   }
+    const targetData = this.getTargetFileData(this.selectedFile.id);
 
-    //   // only the editing vocabulary is displayed. 
-    //   targetData = editingVocabulary
-    // } else {
-      targetData = this.getTargetFileData(this.selectedFile.id);
-    // }
-
-    if (this.currentSort.key == 'ascend') {
-      return targetData.slice().sort((a, b) => {
-        const lowerA = a.term.toString().toLowerCase();
-        const lowerB = b.term.toString().toLowerCase();
-        if (lowerA > lowerB) {
-          return 1;
-        } else {
-          return -1;
-        }
-      });
-    } else {
-      // descend
-      return targetData.slice().sort((a, b) => {
-        const lowerA = a.term.toString().toLowerCase();
-        const lowerB = b.term.toString().toLowerCase();
-        if (lowerA < lowerB) {
-          return 1;
-        } else {
-          return -1;
-        }
-      });
-    }
-  }
-
-  // Visualization screen selection tab information ///////////////////////////////////////////////////
-  @observable currentVisualTab = {id: 0};
-  // id = 0 : Related terms tab
-  // id = 1 : Vocabulary tab
-
-  /**
-   * Table visualization screen selection tab update
-   * @param {number} id index
-   */
-  @action selectCurrentVisualTab(id) {
-    console.log('[selectCurrentVisualTab] id: ' + id);
-    this.currentVisualTab.id = id;
-  }
-
-  // Homotopic display selection file switching ///////////////////////////////////////////////////
-  @observable homotopicFile = {id: 1, name: '参照用語彙1'};
-  // @observable homotopicFile = {id: 0, name: '--------'};
-
-  /**
-   * Display vocabulary data selection
-   * @param {number} id index
-   */
-  @action selectHomotopicFile(id) {
-    console.log('[selectHomotopicFile] id: ' + id);
-
-    if (this.homotopicFile.id == id) return;
-    switch (id) {
-      // case 0:
-      //   this.homotopicFile = {id: 0, name: '--------'};
-      //   break;
-      case 1:
-        this.homotopicFile = {id: 1, name: '参照用語彙1'};
-        break;
-      case 2:
-        this.homotopicFile = {id: 2, name: '参照用語彙2'};
-        break;
-      case 3:
-        this.homotopicFile = {id: 3, name: '参照用語彙3'};
-        break;
-      default:
-        break;
-    }
-    this.currentNodeClear();
-    this.tmpDataClear();
+    return targetData.slice().sort((a, b) => {
+      const lowerA = a.term.toString().toLowerCase();
+      const lowerB = b.term.toString().toLowerCase();
+      if (lowerA > lowerB) {
+        return 1;
+      } else {
+        return -1;
+      }
+    });
   }
 
   // //////////////////////////////////////////////////////
 
   // node display MAX number
   DISP_NODE_MAX = 100;
-
-  // Data for controlling graph contraction of visualization screen panel related term tab
-  @observable tmpRelationWordMinZoom = {thinOut: false, value: -1};
-
-  /**
-   * Initialize min zoom factor
-   * @param  {number} zoom - magnification
-   */
-  @action initRelationWordMinZoom(zoom) {
-    if (zoom == -1) {
-      this.tmpRelationWordMinZoom = {thinOut: false, value: -1};
-      // console.log('[RelationWordTab] reset tmpRelationWordMinZoom');
-      return;
-    }
-
-    if (this.tmpRelationWordMinZoom.value == -1) {
-      this.tmpRelationWordMinZoom = {thinOut: false, value: zoom};
-      return;
-    }
-  }
-
-  /**
-   * Minimum zoom magnification update
-   * @param  {number} zoom - zoom magnification
-   */
-  @action updateRelationWordMinZoom(zoom) {
-    const before = this.tmpRelationWordMinZoom.thinOut;
-    if (this.tmpRelationWordMinZoom.value > zoom) {
-      this.tmpRelationWordMinZoom.thinOut = true;
-    } else {
-      this.tmpRelationWordMinZoom.thinOut = false;
-    }
-    if ( true == before && false == this.tmpRelationWordMinZoom.thinOut ) {
-      this.currentNodeClear();
-    }
-  }
-
-  /**
-   * Generate vocabulary list for visualization screen panel related terms tab
-   * @return {array} - generate vocabulary list
-   */
-  @computed get termListForRelationWord() {
-    // Combine reference vocabulary data specified on the related terms tab into a list
-    const editingVocabulary = this.editingVocabulary;
-    let referenceVocabulary = [];
-    switch (this.homotopicFile.id) {
-      case 1: referenceVocabulary = this.referenceVocabulary1; break;
-      case 2: referenceVocabulary = this.referenceVocabulary2; break;
-      case 3: referenceVocabulary = this.referenceVocabulary3; break;
-      default: break;
-    }
-
-    // Add only terms that are not in the editing vocabulary
-    const margeData = [];
-    referenceVocabulary.forEach((merge) => {
-      const find = editingVocabulary.find((data) => data.term === merge.term);
-      if (!find) {
-        margeData.push(merge);
-      }
-    });
-
-    // Related terms all terms of the editorial and reference terms displayed on the screen
-    const targetData = [
-      ...editingVocabulary,
-      ...margeData,
-    ];
-
-    const termListForRelationWord = [];
-
-    // Because related terms have a mix of editing and reference terms, you cannot use the ID for each of the potentially duplicate terms, so issue a unique ID
-    let idCounter = 0;
-
-    targetData.forEach((data) => {
-      // Extracts reference vocabulary data for homotopic display
-      const find = referenceVocabulary.find(
-          (refere) => data.term === refere.term);
-
-      const nodeData = this.createNodeDataForRelation(data, find, idCounter);
-      if (nodeData) {
-        termListForRelationWord.push(nodeData);
-        idCounter += 1;
-      }
-    });
-
-    // Since the node that was listed later has priority, the descending sort order is selected
-    if (this.tmpRelationWordMinZoom.thinOut) {
-      // Weeding sort
-      termListForRelationWord.sort((a, b) => {
-        if (a.randomId > b.randomId) return -1;
-        if (a.randomId < b.randomId) return 1;
-        return 0;
-      });
-      const currentIndex =
-        termListForRelationWord.findIndex((element) =>
-          this.isCurrentNode(element));
-      if (-1 != currentIndex) {
-        this.moveAt(
-            termListForRelationWord,
-            currentIndex,
-            (termListForRelationWord.length - 1),
-        );
-      }
-    } else {
-      // Sort by origin
-      termListForRelationWord.sort((a, b) => {
-        if (a.distance > b.distance) return -1;
-        if (a.distance < b.distance) return 1;
-        return 0;
-      });
-      const currentIndex =
-        termListForRelationWord.findIndex((element) =>
-          this.isCurrentNode(element));
-      if (-1 != currentIndex) {
-        this.moveAt(
-            termListForRelationWord,
-            currentIndex,
-            (termListForRelationWord.length - 1),
-        );
-      }
-
-      // termListForRelationWord =
-      //  termListForRelationWord.slice(
-      //      (termListForRelationWord.length - this.DISP_NODE_MAX),
-      //      termListForRelationWord.length,
-      //  );
-    }
-
-    return termListForRelationWord;
-  }
-
-  /**
-   * Create nodedata for related terms tab
-   * @param {object} data editing or reference vocabulary
-   * @param {object} refer reference vocabulary
-   * @param {Number} idCounter id
-   * @return {object} cytoscape node object
-   */
-  createNodeDataForRelation(data, refer, idCounter) {
-    // Do not list data that does not have coordinate information
-    // if (!data || !data.position_x) return null;
-    if (!data) return null;
-
-    const randomId =
-      Math.floor(Math.random() * Math.floor(1000000000000000));
-    const position =
-      this.calcPositionValueForHomotopic(data, refer);
-
-    return {
-      data: {
-        id: idCounter,
-        term: data.term,
-        hidden: (data.hidden)?data.hidden:false,
-        relationTermColor: (data.color1)?data.color1:'black',
-        confirm: data.confirm,
-        // has_position: (!data.position_x || data.position_y !== null),
-      },
-      position: {
-        x: position.x,
-        y: position.y,
-      },
-      locked: true,
-      // Random number for filter
-      randomId: randomId,
-      distance: Math.sqrt(
-          Math.pow(Math.abs(position.x), 2) +
-          Math.pow(Math.abs(position.y), 2),
-      ),
-    };
-  }
-
-  /**
-   * Related terms tab coordinate value calculation
-   * @param  {object} relationTerm - editing vocabulary data or reference vocabulary data
-   * @param  {object} refer - reference vocabulary data with the same term as relationTerm
-   * @return {object} - related term coordinate value
-   */
-  calcPositionValueForHomotopic(relationTerm, refer) {
-    const position = {x: null, y: null};
-    const editingVocabFile = this.editingVocabulary;
-    const magForRef = config.magnification[0].reference;
-
-    const edit = editingVocabFile.find(
-        (edit) => relationTerm.term === edit.term);
-
-    if (edit && refer) {
-      // Calculates line coordinates for common editing and reference terms
-      position.x =
-      this.calcPositionByHomotopic(edit.position_x);
-      position.y =
-      this.calcPositionByHomotopic(edit.position_y);
-    } else if (edit) {
-      // For terms in editing vocabulary only
-      position.x =
-        this.calcPositionByHomotopic(edit.position_x);
-      position.y =
-        this.calcPositionByHomotopic(edit.position_y);
-    } else if (refer) {
-      // For reference terms only
-      position.x =
-      this.calcPositionByHomotopic(0);
-      position.y =
-      this.calcPositionByHomotopic(0);
-    }
-    position.y *= -1;
-    return position;
-  }
 
   /**
    * Adjust coordinate values to display related terms
@@ -2293,16 +1979,6 @@ isOtherVocSynUriChanged() {
      }else{
        return position / 1000;
      }
-  }
-
-  /**
-   * [calcPositionByHomotopic description]
-   * @param  {Number} a vec0 - coordinate value
-   * @return {Number} - coordinate value
-   */
-  calcPositionByHomotopic(a) {
-    const value = a;
-    return this.calcPosition(value);
   }
 
   /**
@@ -2411,99 +2087,6 @@ isOtherVocSynUriChanged() {
     if (element.data.id === this.currentNode.id) return true;
     return false;
   }
-
-  /**
-   * Move elements at index to at
-   * @param  {array} array - list
-   * @param  {number} index - source element index
-   * @param  {number} at - destination element index
-   * @return {array} - update list
-   */
-  moveAt(array, index, at) {
-    if (index === at || index > array.length -1 || at > array.length - 1) {
-      return array;
-    }
-
-    const value = array[index];
-    const tail = array.slice(index + 1);
-
-    array.splice(index);
-
-    Array.prototype.push.apply(array, tail);
-
-    array.splice(at, 0, value);
-
-    return array;
-  }
-
-  // Hidden filter //////////////////////////////////////////////////
-
-  /**
-   * Hidden filter switching
-   * @param  {Boolean} [isHistory=false] - request by undo/redo?
-   */
-  @action changeHidden(isHistory = false) {
-    if (!(this.currentNode.id)) return;
-
-    const requestBody = [];
-
-    const updateCurrent = {...this.currentNode};
-    const history = new History(
-        'hidden',
-        updateCurrent.id,
-        updateCurrent.hidden,
-        !(updateCurrent.hidden),
-    );
-    updateCurrent.hidden = !(updateCurrent.hidden);
-
-    requestBody.push(updateCurrent);
-    const url = '/api/v1/vocabulary/editing_vocabulary/' + updateCurrent.term;
-    axios
-        .post(url,
-            requestBody,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-        )
-        .then((response) => {
-          console.log('request url:' + url + ' come response.');
-          this.broaderUriToBroaderTerm = false;
-          this.setEditingVocabularyData(response.data);
-          // Reselect to reset tmp information
-          this.setCurrentNodeByTerm(updateCurrent.term,
-              updateCurrent.id, null, true);
-          if (!(isHistory)) {
-            editingHistoryStore.addHistory(history);
-          }
-        }).catch((err) => {
-          console.log('[Error] message : ' + err.message);
-          let errMsg = '';
-          let errCode = -1;
-          // If there is a response
-          if (err.response) {
-            errCode = err.response.status;
-            switch (errCode) {
-              case 400:
-              case 404:
-                // For errors defined in the API
-                if (err.response.data.message) {
-                  errMsg = err.response.data.message;
-                } else {
-                  errMsg = '不明なエラー発生';
-                }
-                break;
-              default:
-                errMsg = '不明なエラー発生';
-                break;
-            }
-          } else {
-            errMsg = err.message;
-          }
-          this.openApiErrorDialog('表示/非表示情報変更エラー', errCode, errMsg);
-        });
-  };
 
   // Vocabulary data update //////////////////////////////////////////////////
 
