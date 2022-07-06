@@ -1332,7 +1332,8 @@ def _download_file_make(pl_simple, pl_simple_meta):
 
     dic_preflabel_uri = {}
     for index, row in nm.iterrows():
-        dic_preflabel_uri[row['preferred_label']] = row['uri']
+        if row['preferred_label'] != "":
+            dic_preflabel_uri[row['preferred_label']] = row['uri']
 
     # replace label with URI
     col_broader_uri = []
