@@ -157,9 +157,6 @@ class EditingHistory {
       case 'color2':
         this.execChangeColor(type, history);
         break;
-      case 'hidden':
-        this.execHidden(type, history);
-        break;
       case 'vocabulary':
         this.execVocabulary(type, history);
         break;
@@ -225,33 +222,6 @@ class EditingHistory {
         break;
       default:
         break;
-    }
-  }
-
-  /**
-   * Invisible change undo/redo execution
-   * @param  {string} type 'undo' or 'redo' string.
-   * @param  {object} history - information of history
-   */
-  execHidden(type, history) {
-    const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
-
-    const EditingVocabulary = editingVocabularyStore;
-    EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
-
-    let req;
-    if (this.STR_UNDO === type) {
-      req = history.previous;
-    } else { // redo
-      req = history.following;
-    }
-
-    if (req === EditingVocabulary.currentNode.hidden) {
-      // console.log(
-      //     '[execHidden] currentNode is already Hidden flag is ' + req + '.',
-      // );
-    } else {
-      EditingVocabulary.changeHidden(true);
     }
   }
 
@@ -520,9 +490,6 @@ class EditingHistory {
       case 'color2':
         result = this.makeColorMessage(type, history);
         break;
-      case 'hidden':
-        result = this.makeHiddenMessage(type, history);
-        break;
       case 'vocabulary':
         result = this.makeVocabularyMessage(type, history);
         break;
@@ -564,43 +531,6 @@ class EditingHistory {
       message += '"' + history.following + '"から"' + history.previous + '"';
     } else { // redo
       message += '"' + history.previous + '"から"' + history.following + '"';
-    }
-
-    return message;
-  }
-
-  /**
-   * Create hidden undo/redo message
-   * @param  {string} type 'undo' or 'redo' string.
-   * @param  {object} history - information of history
-   * @return {string} - message
-   */
-  makeHiddenMessage(type, history) {
-    let message =
-        '「' +
-        this.getTermFromEditingVocabulary(history.targetId) +
-        '」の情報を変更しました。\n';
-
-    if (history.action === 'hidden') {
-      message += '非表示フィルター\n　';
-    } else {
-      // do nothing.
-    }
-
-    if (this.STR_UNDO === type) {
-      message +=
-        '"' +
-        this.convHiddenStr(history.following) +
-        '"から"' +
-        this.convHiddenStr(history.previous) +
-        '"';
-    } else { // redo
-      message +=
-        '"' +
-        this.convHiddenStr(history.previous) +
-        '"から"' +
-        this.convHiddenStr(history.following) +
-        '"';
     }
 
     return message;
@@ -1075,32 +1005,6 @@ class EditingHistory {
   }
 
   /**
-   * Hidden flag converting strings by value
-   * @param  {bool} check - hidden flag
-   * @return {string} - string
-   */
-  convHiddenStr(check) {
-    if (check) {
-      return '非表示';
-    } else {
-      return '表示';
-    }
-  }
-
-  /**
-   * String conversion by part of speech flag value
-   * @param  {bool} check - flag of part of speech
-   * @return {string} - string
-   */
-  convPosStr(check) {
-    if (check) {
-      return '表示';
-    } else {
-      return '非表示';
-    }
-  }
-
-  /**
   // Hstory data sample //////////////////////////////////////////
   // case1 : Color information change history data sample
   history = {
@@ -1110,38 +1014,7 @@ class EditingHistory {
     following : "brown",
   };
 
-  // case2 : Related terms tab vocabulary hidden change history data sample
-  history = {
-    action : "hidden",
-    targetId : 000,
-    previous : false,
-    following : true,
-  };
-
-  // case3 : Sample part of speech filter change history data on the related terms tab
-  history = {
-    action : "part_of_speech",
-    previous : {
-      Noun : { value: true, name: "名詞" },
-      Verb : { value: true, name: "動詞" },
-      Adjective : { value: true, name: "形容詞" },
-      Adverb : { value: true, name: "副詞" },
-      Adnominal : { value: true, name: "連体詞" },
-      Interjection : { value: true, name: "感動詞" },
-      Other : { value: true, name: "その他" },
-    },
-    following : {
-      Noun : { value: true, name: "名詞" },
-      Verb : { value: true, name: "動詞" },
-      Adjective : { value: true, name: "形容詞" },
-      Adverb : { value: true, name: "副詞" },
-      Adnominal : { value: true, name: "連体詞" },
-      Interjection : { value: true, name: "感動詞" },
-      Other : { value: true, name: "その他" },
-    },
-  };
-
-  // case4 : Sample synonyms, preferred labels, URIs, and broader terms change history data for vocabulary tabs
+  // case2 : Sample synonyms, preferred labels, URIs, and broader terms change history data for vocabulary tabs
   history = {
     action : "vocabulary",
     targetId : 0,
@@ -1165,7 +1038,7 @@ class EditingHistory {
     ],
   };
 
-  // case5 : Term confirmation switching
+  // case3 : Term confirmation switching
   history = {
     action : "confirmChanged",
     targetId : 000,
@@ -1173,7 +1046,7 @@ class EditingHistory {
     following : true or false,
   };
 
-  // case6 : Term color confirmation switching
+  // case4 : Term color confirmation switching
   history = {
     action : "confirmColorChanged",
     targetId : 000,
@@ -1181,7 +1054,7 @@ class EditingHistory {
     following : "brown",
   };
 
-  // case7 : position move
+  // case5 : position move
   history = {
     action : "position",
     targetId : 000,
