@@ -15,8 +15,6 @@ tags:
   description: File operation
 - name: vocabulary
   description: Vocabulary data operation
-- name: example
-  description: Example data operation
 paths:
   /upload:
     post:
@@ -360,45 +358,6 @@ paths:
       x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
       x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
       x-codegen-request-body-name: body
-  /example/{term}:
-    get:
-      tags:
-      - example
-      summary: Get example phrases
-      operationId: get_example_phrases
-      parameters:
-      - name: term
-        in: path
-        description: Get example phrases
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      - name: index
-        in: query
-        description: Get example phrases
-        required: true
-        style: form
-        explode: false
-        schema:
-          type: integer
-          format: int64
-      responses:
-        "200":
-          description: Success
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/SearchSuccessResponse'
-        "404":
-          description: "Not Found  \nex. Request term is empty.\n"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-swagger-router-controller: swagger_server.controllers.example_controller
-      x-openapi-router-controller: swagger_server.controllers.example_controller
 components:
   schemas:
     Upload:
@@ -424,21 +383,6 @@ components:
           type: string
           description: reference_vocabulary3 is xlsx file
           format: binary
-        example_phrases:
-          type: string
-          description: example_phrases is txt file
-          format: binary
-    ExamplePhrases:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-        phrase:
-          type: string
-      example:
-        id: 1
-        phrase: 括弧内の数字は在籍車両の車番を示す
     EditingVocabulary:
       type: object
       properties:
@@ -631,23 +575,6 @@ components:
           modified_time: "2021-04-08T16:07:59Z"
           postion_x: "100"
           postion_y: "100"
-    SearchSuccessResponse:
-      type: object
-      properties:
-        AllResultCount:
-          type: integer
-          description: Number of search results
-          format: int64
-        ExamplePhrases:
-          type: array
-          description: Search results data(MAX100)
-          items:
-            $ref: '#/components/schemas/ExamplePhrases'
-      example:
-        AllResultCount: 0
-        ExamplePhrases:
-        - id: 1
-          phrase: 括弧内の数字は在籍車両の車番を示す
     SuccessResponse:
       type: object
       properties:

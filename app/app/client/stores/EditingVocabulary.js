@@ -24,25 +24,6 @@ class EditingVocabulary {
   // Reference vocabulary 3
   @observable referenceVocabulary3 = [];
 
-  // Example sentence search results
-  @observable exampleResult = {
-    data: {
-      AllResultCount: 0,
-      ExamplePhrases: {
-        id: 1,
-        phrase: '',
-      },
-    },
-  };
-  // Array for displaying example sentence data
-  @observable examplePhrases = [];
-  // Array for storing example sentence data
-  @observable examplePhrasesCopy = [];
-  // For example sentence retrieval term storage
-  @observable searchTerm = '';
-  // Example sentence index
-  @observable dispNowIndex = 0;
-
   // Array for selected term on Visual vocabulary Tab
   @observable selectedTermList = [];
 
@@ -562,21 +543,6 @@ class EditingVocabulary {
           }
           this.openApiErrorDialog('参照用語彙データ取得エラー', errCode, errMsg);
         });
-  }
-
-  /**
-   * Index value update of the displayed example sentence
-   * @param {string} mode 'next' or 'prev' string.
-   */
-  @action changeDispNowIndex(mode) {
-    switch (mode) {
-      case 'next':
-        this.dispNowIndex += 1;
-        break;
-      case 'prev':
-        this.dispNowIndex -= 1;
-        break;
-    }
   }
 
   /**
