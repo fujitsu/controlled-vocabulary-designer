@@ -70,9 +70,9 @@ export default class DialogFileDownload extends React.Component {
       }
     } else if (this.props.fileType == 'editing_vocabulary_meta') {
       // For editing_vocabulary_meta, set the file name for editing_vocabulary_meta
-      if ( localStorage.getItem('fileName5') ) {
+      if ( localStorage.getItem('fileName4') ) {
         fileName =
-        this.deleteFormat(localStorage.getItem('fileName5')) ;
+        this.deleteFormat(localStorage.getItem('fileName4')) ;
       } else {
         fileName = 'hensyuugoi_meta';
       }
