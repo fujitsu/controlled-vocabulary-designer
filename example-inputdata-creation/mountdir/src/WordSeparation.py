@@ -6,21 +6,16 @@ WordSeparation.py COPYRIGHT FUJITSU LIMITED 2021
 
 import argparse
 import os
-import sys
-import traceback
 import json
 
-import os
 import re
 import string
-import regex
 import MeCab
 import unicodedata
-import itertools
 import numpy as np
 from bs4 import BeautifulSoup
 
-def part_of_speech(txt_file, txt_preprocessed_file):
+def word_separation(txt_file, txt_preprocessed_file):
 
     ########## Cleaning ##########
     # Remove HTML and XML tags
@@ -37,7 +32,6 @@ def part_of_speech(txt_file, txt_preprocessed_file):
 
 
     ########## Word separation ##########
-    pos = {} # dictionary {keys: value} = {term: part of speech name}
     word = [] # terms in text (duplicates OK)
     tagger = MeCab.Tagger("")
     tagger.parse("")
@@ -49,7 +43,6 @@ def part_of_speech(txt_file, txt_preprocessed_file):
         count += 1
         while node:
             word.append(node.surface)
-            pos[node.surface] = node.feature.split(",")[0]
             node = node.next
 
     m = map(str, word)
@@ -73,33 +66,6 @@ def part_of_speech(txt_file, txt_preprocessed_file):
         f.write(txt_wakati_preprocessed)
 
 
-    ########## Storing terms in terms from preprocessed text ##########
-    txt_splited_newline = txt_wakati_preprocessed.split('\n')
-    words_pre1 = []
-    words_pre2 = []
-    words = []
-    for i in range(len(txt_splited_newline)):
-        words_pre1.append(txt_splited_newline[i].split(" "))
-
-    words_pre2 = list(itertools.chain.from_iterable(words_pre1)) # Convert a two-dimensional array to a one-dimensional array
-
-    # Delete duplicates
-    words = set(words_pre2)
-    if "" in words:
-        words.remove("")
-
-
-    ########## Only strings which were not removed by the preprocessing are finally put into the dictionary {Term: Part of speech}  ##########
-    remove_list = [] # Enumerate punctuations removed in preprocessing
-    for key in pos.keys():
-        if key not in words:
-            remove_list.append(key)
-
-    for rem in remove_list:
-        pos.pop(rem)
-
-    return pos
-
 def check_arg(args, config):
     endslist = [".txt"]
     if not len(args.input) == len(endslist):
@@ -108,7 +74,7 @@ def check_arg(args, config):
     if not all(map(lambda x: x[1].endswith(endslist[x[0]]), enumerate(args.input))):
         print("invalid input file type")
         return False
-    endslist = [".txt", ".npy"]
+    endslist = [".txt"]
     if not len(args.output) == len(endslist):
         print("invalid output file(s)")
         return False
@@ -120,11 +86,8 @@ def check_arg(args, config):
 def main(args, config):
     txt_file = args.input[0]
     txt_preprocessed_file = args.output[0]
-    output_file = args.output[1]
 
-    pos = part_of_speech(txt_file, txt_preprocessed_file)
-
-    np.save(output_file, pos)
+    word_separation(txt_file, txt_preprocessed_file)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
@@ -132,7 +95,7 @@ if __name__ == '__main__':
         description =
 '''
 example:
-  $ python3 ./WordSeparation.py -c config.json -i domain_text.txt domain_text_wakati_preprocessed.txt -o WordSeparation.npy
+  $ python3 ./WordSeparation.py -c config.json -i domain_text.txt domain_text_wakati_preprocessed.txt
 ''',
         add_help = True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -155,4 +118,3 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
-

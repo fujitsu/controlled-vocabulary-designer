@@ -7,7 +7,7 @@ echo
 
 PHASE="WordSeparation"
 echo ${PHASE}
-python3 ./${PHASE}.py -c config.json -i ../data/domain_text.txt -o ../data/domain_text_wakati_preprocessed.txt WordSeparation.npy || TEST_OK=NG
+python3 ./${PHASE}.py -c config.json -i ../data/domain_text.txt -o ../data/domain_text_wakati_preprocessed.txt || TEST_OK=NG
 if [ "${TEST_OK}" != "OK" ]; then
     echo "${PHASE} Failed"
     exit 1
@@ -47,7 +47,7 @@ fi
 
 PHASE="Hensyugoi"
 echo ${PHASE}
-python3 ./${PHASE}.py -c config.json -i WordSeparation.npy WordEmbedding.npy SynonymExtraction.npy HypernymExtraction.npy Filtering.npy ../data/domain_words.csv -o ../data/Hensyugoi.csv || TEST_OK=NG
+python3 ./${PHASE}.py -c config.json -i WordEmbedding.npy SynonymExtraction.npy HypernymExtraction.npy Filtering.npy ../data/domain_words.csv -o ../data/Hensyugoi.csv || TEST_OK=NG
 if [ "${TEST_OK}" != "OK" ]; then
     echo "${PHASE} Failed"
     exit 1
@@ -55,4 +55,3 @@ fi
 
 echo Hensyugoi.sh successfully finished.
 exit 0
-
