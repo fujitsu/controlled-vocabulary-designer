@@ -30,7 +30,6 @@ REFERENCE_VOCABULARY = ['reference_vocabulary1',
                         'reference_vocabulary2',
                         'reference_vocabulary3']
 VOCABULARY_ALLOWED_EXTENSIONS = ['.xls', '.xlsx', '.csv']
-PHRASES_ALLOWED_EXTENSIONS = ['.txt']
 VOCABULARY_ALLOWED_EXTENSIONS_XLS = ['.xls', '.xlsx']
 VOCABULARY_ALLOWED_EXTENSIONS_CSV = ['.csv']
 REFERENCE_FORMAT = ['n3', 'nt', 'turtle', 'xml', 'nquads', 'trix']
@@ -118,7 +117,7 @@ def download_file(file_type, out_format):  # noqa: E501
     return ret_serialize
 
 
-def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None, example_phrases=None):  # noqa: E501
+def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None):  # noqa: E501
     """Upload the file to the server
 
     Uploads the file selected by the client to the server.     When &#x27;editing_vocabulary&#x27; uploaded, its check integrity.    # noqa: E501
@@ -133,8 +132,6 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
     :type reference_vocabulary2: strstr
     :param reference_vocabulary3:
     :type reference_vocabulary3: strstr
-    :param example_phrases:
-    :type example_phrases: strstr
 
     :rtype: SuccessResponse
     """
@@ -285,185 +282,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   location())
             return exec_res, status_code
 
-    if example_phrases is not None:
-        allow_extension, r_ext =\
-            _check_extensions(example_phrases,
-                              PHRASES_ALLOWED_EXTENSIONS)
-        if not allow_extension:
-            print(datetime.datetime.now(),
-                  '[Error] failed _check_extensions', location())
-            return ErrorResponse(0, 'Data Format Error.'), 400
-
-        # exec_res, status_code = _copy_file_example_phrases(example_phrases)
-        # if not status_code == 200:
-        #    _file_delete(example_phrases)
-        #    return exec_res, status_code
-
-        exec_res, status_code = _insert_example_phrases(example_phrases)
-        if not status_code == 200:
-            print(datetime.datetime.now(),
-                  '[Error] failed _insert_example_phrases', location())
-            _file_delete(example_phrases)
-            return exec_res, status_code
-
     return SuccessResponse('request is success.')
-
-
-def _file_copy(file):
-    print(datetime.datetime.now(), '[_file_copy] start. file:',
-          pathlib.Path(file.filename), location())
-    filename = file.filename
-    try:
-        file.save(os.path.join(WORK_PATH, filename))
-    except Exception as e:
-        print(datetime.datetime.now(),
-              '[_file_copy] Exception:', e, location())
-        return False
-    print(datetime.datetime.now(), '[_file_copy] end.', location())
-    return True
-
-
-def _file_delete(file):
-    print(datetime.datetime.now(), '[_file_delete] start file:',
-          pathlib.Path(file.filename), location())
-    filename = file.filename
-    try:
-        os.remove(os.path.join(WORK_PATH, filename))
-    except Exception as e:
-        print(datetime.datetime.now(),
-              '[_file_delete] Exception:', e, location())
-        return False
-
-    print(datetime.datetime.now(), '[_file_delete] end.', location())
-    return True
-
-
-def _truncate_example_phrases(cur):
-    print(datetime.datetime.now(),
-          '[_truncate_example_phrases] start', location())
-    cur.execute("truncate table example_phrases;")
-    print(datetime.datetime.now(),
-          '[_truncate_example_phrases] end', location())
-
-
-def _drop_example_phrases(conn, cur):
-    print(datetime.datetime.now(),
-          '[_drop_example_phrases] start', location())
-    cur.execute("DROP INDEX IF EXISTS pgroonga_example_sentences_index;")
-    print(datetime.datetime.now(),
-          '[_drop_example_phrases] end', location())
-
-    conn.commit()
-
-
-def _copy_example_phrases(conn, cur, file_name):
-    wk_command = "COPY example_phrases(phrase) FROM '"
-    wk_command += WORK_PATH + file_name + "';"
-    print(datetime.datetime.now(),
-          '[_copy_example_phrases] start', wk_command, location())
-    cur.execute(wk_command)
-    print(datetime.datetime.now(),
-          '[_copy_example_phrases] end', location())
-    conn.commit()
-
-
-def _bulk_insert_example_phrases(conn, cur, text_data):
-    print(datetime.datetime.now(),
-          '[_bulk_insert_example_phrases] start', location())
-    raw_list = []
-    totalcounta = 0
-    counta = 0
-
-    query = "INSERT INTO example_phrases (phrase) VALUES %s"
-    for line in text_data:
-        line = line.decode(encoding='utf-8')
-        line = line.strip()
-        line = line.replace(' ', '')
-
-        insert_data = []
-        insert_data.append(line)
-        raw_list.append(insert_data)
-
-        counta = counta + 1
-        totalcounta = totalcounta + 1
-
-        if counta == SPLIT_COUNT:
-            print(datetime.datetime.now(),
-                  '[_bulk_insert_example_phrases] insert phrases',
-                  totalcounta, location())
-            tuples_list = [tuple(ls) for ls in raw_list]
-            extras.execute_values(cur, query, tuples_list)
-            conn.commit()
-            raw_list = []
-            counta = 0
-
-    if not counta == 0:
-        print(datetime.datetime.now(),
-              '[_bulk_insert_example_phrases] insert phrases',
-              totalcounta, location())
-        tuples_list = [tuple(ls) for ls in raw_list]
-        extras.execute_values(cur, query, tuples_list)
-        conn.commit()
-
-    print(datetime.datetime.now(),
-          '[_bulk_insert_example_phrases] end', location())
-
-
-def _simple_insert_example_phrases(conn, cur, text_data):
-    print(datetime.datetime.now(),
-          '[_simple_insert_example_phrases] start', location())
-    totalcounta = 0
-    counta = 0
-    query = ""
-    phrases = []
-    EXAMPLE_SPLIT_COUNT = 100000
-
-    for line in text_data:
-        line = line.decode(encoding='utf-8')
-        line = line.strip()
-        line = line.replace(' ', '')
-        phrases.append(line)
-
-        counta = counta + 1
-        totalcounta = totalcounta + 1
-
-        if counta == EXAMPLE_SPLIT_COUNT:
-            print(datetime.datetime.now(),
-                  '[_simple_insert_example_phrases] insert phrases',
-                  totalcounta, location())
-            query = "INSERT INTO example_phrases (phrase) VALUES ('" + \
-                    ("'),('".join(phrases)) + "');"
-            cur.execute(query)
-            conn.commit()
-            phrases = []
-            counta = 0
-
-    if not counta == 0:
-        print(datetime.datetime.now(),
-              '[_simple_insert_example_phrases] insert phrases',
-              totalcounta, location())
-        query = "INSERT INTO example_phrases (phrase) VALUES ('" + \
-                ("'),('".join(phrases)) + "');"
-        cur.execute(query)
-        conn.commit()
-
-    print(datetime.datetime.now(),
-          '[_simple_insert_example_phrases] end', location())
-
-
-def _create_index_example_phrases(conn, cur):
-    wk_command = "CREATE INDEX"\
-                 " pgroonga_example_sentences_index"\
-                 " ON example_phrases USING pgroonga (phrase);"
-    print(datetime.datetime.now(),
-          '[_create_index_example_phrases] start', ' command:',
-          wk_command, location())
-    cur.execute(wk_command)
-    print(datetime.datetime.now(),
-          '[_create_index_example_phrases] end', location())
-
-    conn.commit()
-
 
 def _check_extensions(file, extensions):
     suffix = pathlib.Path(file.filename).suffix
@@ -645,68 +464,6 @@ def _make_bulk_data_editing_vocabulary_meta(data_frame):
         payload.append(insert_data)
 
     return payload
-
-def _copy_file_example_phrases(text_data):
-
-    copy_res = _file_copy(text_data)
-    if not copy_res:
-        return ErrorResponse(0, 'Save File Error.'), 400
-
-    try:
-
-        with psycopg2.connect(DB_CONNECT) as conn:
-            with conn.cursor() as cur:
-
-                # DB Truncate Table
-                _truncate_example_phrases(cur)
-
-                # DROP INDEX
-                _drop_example_phrases(conn, cur)
-
-                # DB file copy
-                _copy_example_phrases(conn, cur, text_data.filename)
-
-                # CREATE INDEX
-                _create_index_example_phrases(conn, cur)
-
-    except Exception as e:
-        print(datetime.datetime.now(),
-              '[_copy_file_example_phrases] Exception:', e, location())
-        _file_delete(text_data)
-        return ErrorResponse(0, 'Copy File Error.'), 400
-
-    delete_res = _file_delete(text_data)
-    if not delete_res:
-        return ErrorResponse(0, 'Delete File Error.'), 400
-
-    return SuccessResponse('request is success.'), 200
-
-
-def _insert_example_phrases(text_data):
-
-    with psycopg2.connect(DB_CONNECT) as conn:
-        with conn.cursor() as cur:
-
-            # DB Truncate Table
-            _truncate_example_phrases(cur)
-
-            # DROP INDEX
-            _drop_example_phrases(conn, cur)
-
-            # ###################################
-
-            # bulk insert
-            # _bulk_insert_example_phrases(conn, cur, text_data)
-
-            # insert
-            _simple_insert_example_phrases(conn, cur, text_data)
-
-            # ###################################
-
-            # CREATE INDEX
-            _create_index_example_phrases(conn, cur)
-
-    return SuccessResponse('request is success.'), 200
 
 
 def split_list(list, split_num):
