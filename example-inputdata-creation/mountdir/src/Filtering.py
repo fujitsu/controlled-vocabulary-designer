@@ -6,21 +6,12 @@ Filtering.py COPYRIGHT FUJITSU LIMITED 2021
 
 import argparse
 import os
-import sys
-import traceback
 import json
 
-import os
 import re
-import logging
-import unicodedata
 import numpy as np
 import pandas as pd
-import multiprocessing
 import itertools
-from gensim.models import word2vec
-from gensim.models import KeyedVectors
-from sklearn.metrics import pairwise_distances
 
 
 def filt(domain_words_file, domain_text_preprocessed_file, vec):
@@ -115,4 +106,3 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
-

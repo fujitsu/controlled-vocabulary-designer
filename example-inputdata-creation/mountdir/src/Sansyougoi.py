@@ -9,8 +9,6 @@ import os
 import json
 import datetime
 import inspect
-
-import unicodedata
 import pandas as pd
 import numpy as np
 
@@ -44,7 +42,6 @@ def sansyougoi(relations_file, vec_file, input_file):
     header = ["用語名", "代表語", "言語", "代表語のURI", "上位語", "上位語のURI", "他語彙体系の同義語のURI", "用語の説明", "x座標値", "y座標値"]
     df1 = pd.DataFrame(output_all, columns=header)
     df1.drop(columns=['上位語'], inplace=True)
-    # df1.to_excel(output_file_xlsx_all, index=False)
 
     '''
     # csv
@@ -82,7 +79,6 @@ def sansyougoi(relations_file, vec_file, input_file):
     # csv
     df2 = pd.DataFrame(output_target, columns=header)
     df2.drop(columns=['上位語'], inplace=True)
-    # df2.to_excel(output_file_xlsx_target, index=False)
     return df1, df2
 
 
@@ -155,4 +151,3 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
-
