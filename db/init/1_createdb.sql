@@ -65,11 +65,6 @@ CREATE TABLE IF NOT EXISTS reference_vocabulary_3 (
   "position_y" text
 );
 
-CREATE TABLE IF NOT EXISTS example_phrases (
-  "id" serial PRIMARY KEY,
-  "phrase" text NOT NULL
-);
-
 CREATE TABLE IF NOT EXISTS editing_vocabulary_meta (
   "id" serial PRIMARY KEY,
   "meta_name" text,
@@ -82,22 +77,4 @@ CREATE TABLE IF NOT EXISTS editing_vocabulary_meta (
   "meta_author" text
 );
 
-/* install plugin pgroonga */
-CREATE EXTENSION pgroonga;
 
-/* create example_phrases table INDEX */
-CREATE INDEX pgroonga_example_sentences_index
-  ON example_phrases
-  USING pgroonga (phrase);
-
-/* create example_search_count_func */
-CREATE OR REPLACE FUNCTION example_search_count_func("PGroonga" text)
-  RETURNS int8 AS $$
-  SELECT COUNT(*) FROM example_phrases WHERE phrase &@ "PGroonga";
-$$ LANGUAGE SQL IMMUTABLE;
-
-/* create example_search_func */
-CREATE OR REPLACE FUNCTION example_search_func("PGroonga" text, index int)
-  RETURNS TABLE (id integer, phrase text, score double precision) AS $$
-  SELECT *, pgroonga_score(tableoid, ctid) AS score FROM example_phrases WHERE phrase &@ "PGroonga" LIMIT 100 OFFSET index;
-$$ LANGUAGE SQL IMMUTABLE;
