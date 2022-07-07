@@ -19,7 +19,6 @@ CVDのヘルプページは[こちら](https://fujitsu.github.io/controlled-voca
 # サポートブラウザ
 * Google Chrome
 * Microsoft Edge
-* Firefox
 
 # サポートファイル形式
 * 読み込み用ファイル形式
