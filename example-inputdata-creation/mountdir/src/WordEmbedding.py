@@ -8,22 +8,17 @@ import copy
 import argparse
 import os
 import sys
-import traceback
 import json
 from jsonpointer import resolve_pointer
-import os
 import re
 import pandas as pd
 import pickle
 import logging
-import itertools
 import numpy as np
 import unicodedata
 import multiprocessing
 from gensim.models import word2vec
-from gensim.models import KeyedVectors
 from gensim.models.fasttext import FastText
-from sklearn.metrics import pairwise_distances
 from sklearn.manifold import TSNE
 
 
@@ -57,22 +52,6 @@ def vector(txt_preprocessed_file, domain_words_file, domain_text_preprocessed_fi
             sys.exit("domain_words.csvに「用語名」列が存在しません。「用語名」列を追加した後に再読み込みしてください。")
         domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words if char != ""] # normalize term strings to match case
         domain_words = list(set(domain_words)) # normalized and lowercase to remove term duplication
-
-    # If domain_words_file does not exist and domain _ text _ preprocessed _ file exists, extract field terms from domain _ text _ preprocessed _ file
-    elif os.path.exists(domain_text_preprocessed_file) is True:
-        with open(domain_text_preprocessed_file, encoding="utf_8") as f:
-            txt = f.read()
-        txt_splited_newline = txt.split('\n')
-        words_pre1 = []
-        words_pre2 = []
-        words = []
-        for i in range(len(txt_splited_newline)):
-            words_pre1.append(txt_splited_newline[i].split(" "))
-        words_pre2 = list(itertools.chain.from_iterable(words_pre1)) # convert a two-dimensional array to a one-dimensional array
-        words = set(words_pre2) # delete duplicates
-        if "" in words:
-            words.remove("")
-        domain_words = words
 
     # Extracts terms that exist in the term list of the field but do not exist as vectors for word embedding
     domain_words_only = list(set(domain_words) & (set(domain_words) ^ set(vocab)))
@@ -126,12 +105,6 @@ def vector(txt_preprocessed_file, domain_words_file, domain_text_preprocessed_fi
     # Update the term names and vectors contained in the model
     vocab = model.wv.index2word # all terms
     v_word2vec = model.wv[vocab] # vectors for all terms
-
-    ########## t-sne ##########
-    #distance_matrix = pairwise_distances(v_word2vec, v_word2vec, metric='cosine', n_jobs=-1)
-    #distance_matrix = pairwise_distances_chunked(v_word2vec, v_word2vec, metric='cosine', n_jobs=-1)
-    #tsne = TSNE(metric="precomputed", n_jobs=multiprocessing.cpu_count(), n_components=2)
-    #v_tsne = tsne.fit_transform(distance_matrix)
 
     # Vector normalization
     model_normalized = copy.deepcopy(model)
@@ -220,4 +193,3 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
-
