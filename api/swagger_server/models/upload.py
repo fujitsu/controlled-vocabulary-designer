@@ -17,7 +17,7 @@ class Upload(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, editing_vocabulary: str=None, editing_vocabulary_meta: str=None, reference_vocabulary1: str=None, reference_vocabulary2: str=None, reference_vocabulary3: str=None, example_phrases: str=None):  # noqa: E501
+    def __init__(self, editing_vocabulary: str=None, editing_vocabulary_meta: str=None, reference_vocabulary1: str=None, reference_vocabulary2: str=None, reference_vocabulary3: str=None):  # noqa: E501
         """Upload - a model defined in Swagger
 
         :param editing_vocabulary: The editing_vocabulary of this Upload.  # noqa: E501
@@ -30,8 +30,6 @@ class Upload(Model):
         :type reference_vocabulary2: str
         :param reference_vocabulary3: The reference_vocabulary3 of this Upload.  # noqa: E501
         :type reference_vocabulary3: str
-        :param example_phrases: The example_phrases of this Upload.  # noqa: E501
-        :type example_phrases: str
         """
         self.swagger_types = {
             'editing_vocabulary': str,
@@ -39,7 +37,6 @@ class Upload(Model):
             'reference_vocabulary1': str,
             'reference_vocabulary2': str,
             'reference_vocabulary3': str,
-            'example_phrases': str
         }
 
         self.attribute_map = {
@@ -48,14 +45,12 @@ class Upload(Model):
             'reference_vocabulary1': 'reference_vocabulary1',
             'reference_vocabulary2': 'reference_vocabulary2',
             'reference_vocabulary3': 'reference_vocabulary3',
-            'example_phrases': 'example_phrases'
         }
         self._editing_vocabulary = editing_vocabulary
         self._editing_vocabulary_meta = editing_vocabulary_meta
         self._reference_vocabulary1 = reference_vocabulary1
         self._reference_vocabulary2 = reference_vocabulary2
         self._reference_vocabulary3 = reference_vocabulary3
-        self._example_phrases = example_phrases
 
     @classmethod
     def from_dict(cls, dikt) -> 'Upload':
@@ -183,25 +178,3 @@ class Upload(Model):
 
         self._reference_vocabulary3 = reference_vocabulary3
 
-    @property
-    def example_phrases(self) -> str:
-        """Gets the example_phrases of this Upload.
-
-        example_phrases is txt file  # noqa: E501
-
-        :return: The example_phrases of this Upload.
-        :rtype: str
-        """
-        return self._example_phrases
-
-    @example_phrases.setter
-    def example_phrases(self, example_phrases: str):
-        """Sets the example_phrases of this Upload.
-
-        example_phrases is txt file  # noqa: E501
-
-        :param example_phrases: The example_phrases of this Upload.
-        :type example_phrases: str
-        """
-
-        self._example_phrases = example_phrases

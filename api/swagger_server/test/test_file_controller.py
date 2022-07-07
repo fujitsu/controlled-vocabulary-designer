@@ -38,8 +38,7 @@ class TestFileController(BaseTestCase):
         data = dict(editing_vocabulary='editing_vocabulary_example',
                     reference_vocabulary1='reference_vocabulary1_example',
                     reference_vocabulary2='reference_vocabulary2_example',
-                    reference_vocabulary3='reference_vocabulary3_example',
-                    example_phrases='example_phrases_example')
+                    reference_vocabulary3='reference_vocabulary3_example')
         response = self.client.open(
             '/upload',
             method='POST',
