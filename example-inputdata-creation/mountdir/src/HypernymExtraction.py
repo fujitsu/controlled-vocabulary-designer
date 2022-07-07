@@ -7,18 +7,14 @@ HypernymExtraction.py COPYRIGHT FUJITSU LIMITED 2021
 import argparse
 import os
 import sys
-import traceback
 import json
 
-import os
-import sys
 import csv
 import itertools
 import unicodedata
 import pandas as pd
 import numpy as np
 from nltk.corpus import wordnet as wn
-import subprocess
 import codecs
 
 def hypernym(txt_preprocessed_file, domain_words_file):
@@ -141,4 +137,3 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
-

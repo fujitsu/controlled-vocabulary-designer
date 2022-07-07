@@ -12,7 +12,6 @@ import datetime
 import inspect
 import pandas as pd
 
-import unicodedata
 from nltk.corpus import wordnet as wn
 from rdflib import Graph
 from rdflib import Literal
@@ -382,4 +381,3 @@ example:
 
     print("finish: " + os.path.basename(__file__))
     exit(0)
-
