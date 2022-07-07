@@ -82,19 +82,6 @@ CREATE TABLE IF NOT EXISTS editing_vocabulary_meta (
   "meta_author" text
 );
 
-CREATE TABLE IF NOT EXISTS part_of_speech_filter (
-  "noun" boolean NOT NULL,
-  "verb" boolean NOT NULL,
-  "adjective" boolean NOT NULL,
-  "adverb" boolean NOT NULL,
-  "adnominal" boolean NOT NULL,
-  "interjection" boolean NOT NULL,
-  "other" boolean NOT NULL
-);
-
-/* insert part_of_speech_filter record. */
-INSERT INTO part_of_speech_filter VALUES (TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE);
-
 /* install plugin pgroonga */
 CREATE EXTENSION pgroonga;
 
