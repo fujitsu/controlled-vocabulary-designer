@@ -64,7 +64,6 @@ services:
 
   # DB(PostgreSQL)
   db:
-    image: postgres
     container_name: db
     build:
       context: .
