@@ -9,7 +9,6 @@ import _ from 'lodash'
 
 import editingHistoryStore from './EditingHistory';
 import History from './History';
-import config from '../config/Config';
 
 /**
  * Vocabulary data management class
