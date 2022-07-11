@@ -2163,25 +2163,6 @@ isOtherVocSynUriChanged() {
       }   
     }
 
-    // List of synonyms added in the update
-    let addSynonymList = [];
-    // language data same from the selected term
-    if (this.currentNode.language == this.tmpLanguage.list[0]) {
-      addSynonymList =
-        this.tmpSynonym.list.filter((i) =>
-          this.currentSynonym.list.indexOf(i) == -1);
-      if (addSynonymList.length > 0) {
-        console.log('add synonym: ' + addSynonymList);
-      }
-    } else{ // language data different from the selected term
-      addSynonymList =
-        this.tmpSynonym.list.filter((i) =>
-          this.currentLangDiffSynonym.list.indexOf(i) == -1);
-      if (addSynonymList.length > 0) {
-        console.log('add synonym: ' + addSynonymList);
-      }
-    }
-
     // Updated synonym list
     const nextSynonymList = this.tmpSynonym.list;
 
@@ -3778,6 +3759,11 @@ isOtherVocSynUriChanged() {
    * @param  {string} newValue - broader term
    */
   @action updataBroaderTerm(newValue) {
+    
+    newValue = newValue.filter((term) => {
+      return this.editingVocabulary.find((d)=>{ return d.term == term });
+    });
+
     const array = [];
     if (this.currentNode.term) {
       newValue.forEach((term) => {
@@ -3940,6 +3926,11 @@ isOtherVocSynUriChanged() {
    * @param  {string} newValue - synonym
    */
   @action updataSynonym(newValue) {
+
+    newValue = newValue.filter((term) => {
+      return this.editingVocabulary.find((d)=>{ return d.term == term });
+    });
+
     const array = [];
     // Add synonyms received from component to the list
     newValue.forEach((synonym) => {
@@ -4111,6 +4102,11 @@ isOtherVocSynUriChanged() {
    * @param  {array} newValue - preferred label (string)
    */
   @action updataPreferredLabel(newValue) {
+
+    newValue = newValue.filter((term) => {
+      return this.editingVocabulary.find((d)=>{ return d.term == term });
+    });
+
     if (this.currentNode.id) {
       const array = [];
 
@@ -4343,23 +4339,18 @@ isOtherVocSynUriChanged() {
   @action updataTermDescription(newValue) {
     const array = [];
 
-    // Add term description received from component to list
-//    if (newValue !== '') {
-//      array.push(newValue);
-//    }
-
-  if (this.currentNode.term) {
-    newValue.forEach((term) => {
-      array.push(term);
-    });
-  } else {
-    if (this.tmpPreferredLabel.list.length > 0) {
-      // Do not add terms that are not selected and have no title to the term description
+    if (this.currentNode.term) {
       newValue.forEach((term) => {
         array.push(term);
       });
+    } else {
+      if (this.tmpPreferredLabel.list.length > 0) {
+        // Do not add terms that are not selected and have no title to the term description
+        newValue.forEach((term) => {
+          array.push(term);
+        });
+      }
     }
-  }
     this.tmpTermDescription.id = this.currentNode.id;
     this.tmpTermDescription.list = array;
   }
