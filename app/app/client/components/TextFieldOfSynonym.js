@@ -58,6 +58,18 @@ export default
    * @param  {array} newValue - list of broader terms
    */
   onChange(event, newValue) {
+    const inputText = event.target.value;
+    const find = this.props.editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    if( inputText != undefined && !find){
+      const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
+                       '既存の用語を記入してください。';
+      const innerText = errorMsg.split('¥n').map((line, key) =>
+        <span key={key}>{line}<br /></span>);
+      this.openSnackbar(innerText);
+
+      return false;
+    }
+    
     if (this.props.editingVocabulary.isRelationSynonym(newValue)) {
       const currentTerm = this.props.editingVocabulary.currentNode.term;
       const errorMsg = '下位語テキストボックスに、 \"' + currentTerm +

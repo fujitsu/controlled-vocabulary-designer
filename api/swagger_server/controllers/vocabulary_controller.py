@@ -174,12 +174,6 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
                 exec_res, status_code = _exec_update_postgrest(payload, update_sql)
                 if not status_code == 200:
                     return exec_res, status_code
-            else:
-                # add data.
-                exec_res, status_code = \
-                    _exec_insert_postgrest(payload, 'editing_vocabulary')
-                if not status_code == 200:
-                    return exec_res, status_code
             index = index + 1
 
         editing_vocabulary = []
