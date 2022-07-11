@@ -1914,12 +1914,12 @@ isOtherVocSynUriChanged() {
 
   /**
    * For data with a blank "term name", the prefix of the (unique) term name indicating the blank is returned.
-   * 'TERM_BLANK_' cannot be changed because it is common to the file_controller.py and vocablary_controller.py
+   * '_TERM_BLANK_' cannot be changed because it is common to the file_controller.py and vocablary_controller.py
    * 
    * @return {string} - prefix string
    */
    @action getTermBlankPrefix(){
-    return 'TERM_BLANK_';
+    return '_TERM_BLANK_';
   }
   /**
    * Whether the term contains a prefix indicating a blank
