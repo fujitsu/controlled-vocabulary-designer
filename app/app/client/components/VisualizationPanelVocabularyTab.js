@@ -309,8 +309,9 @@ export default
         }]
       })
 
+      const dispNodeMax = this.props.editingVocabulary.DISP_NODE_MAX;
       sortArr.sort((a, b)=> { return a.distance - b.distance; });
-      if( sortArr.length > 100 ) sortArr.splice( 100);
+      if( sortArr.length > dispNodeMax ) sortArr.splice( dispNodeMax);
 
       // 100 visibleNodesInView
       let nodesInViewLimit100 = [];

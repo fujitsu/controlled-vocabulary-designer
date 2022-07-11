@@ -119,7 +119,7 @@ const useStyles = (theme) => ({
     height: '8px !important',  
   },
 
-  sliderMark:{
+  'sliderMark':{
     backgroundColor: grey[400],
     marginLeft:'-4px !important',
     width: '8px !important',
@@ -128,13 +128,6 @@ const useStyles = (theme) => ({
 
   'displayNone': {
     display: 'none',
-  },
-
-  'textField': {
-    margin: 0,
-    width: '100%',
-    overflowX: 'scroll',
-    flexWrap: 'nowrap',
   },
 
   'searchRoot': {
@@ -233,20 +226,6 @@ const useStyles = (theme) => ({
     boxShadow: 'none',
   },
 
-  'buttonsNewAdd': {
-    marginTop:'0',
-    marginRight:'8px',
-    borderRadius: '0',
-    boxShadow: 'none',
-  },
-
-  'buttonsDelete': {
-    marginTop:'0',
-    marginRight:'8px',
-    borderRadius: '0',
-    boxShadow: 'none',
-  },
-
   'popoverPanelRoot': {
     backgroundColor: "#66666680",
   },
@@ -292,22 +271,6 @@ const useStyles = (theme) => ({
     marginTop: '10px',
   },
 
-  'editPanelVocUsageGap': {
-    marginTop: '10px',
-    marginBottom: '2px',
-  },
-
-
-  'fileSelecter': {
-    zIndex: 1,
-    marginTop: '15px',
-    paddingLeft: '10px',
-    paddingRight: '10px',
-    paddingBottom: '0px',
-    paddingTop: '0px',
-    backgroundColor: 'white',
-    float: 'right',
-  },
   'fileDialogPaper':{
     height: '500px',
     paddingBottom: '30px',
@@ -319,11 +282,6 @@ const useStyles = (theme) => ({
     justifyContent: 'flex-end',
     padding: '0px 24px',
     minHeight:'30px',
-  },
-
-  'uploading': {
-    zIndex: theme.zIndex.drawer + 1,
-    color: '#fff',
   },
 
   'selectFileFormat': {
@@ -374,70 +332,8 @@ const useStyles = (theme) => ({
     width: '100%',
   },
 
-  'textInp':{
-    backgroundColor: 'white',  
-    borderRadius: 0,
-    padding: 0,
-    height: 'auto',
-    flexWrap: 'nowrap',
-    overflowY: 'hidden',
-    overflowX: 'scroll',
-
-    '& input':{
-    },
-    '& fieldset':{
-    },
-
-  },
-
-  'textInp':{
-    backgroundColor: 'white',  
-    borderRadius: 0,
-    padding: 0,
-    height: 'auto',
-    flexWrap: 'nowrap',
-    overflowY: 'hidden',
-    overflowX: 'scroll',
-
-    '& input':{
-    },
-    '& fieldset':{
-    },
-
-  },
-
   'selectTerm': {
     height: '40px',
-  },
-  'inputTextWrap': {
-    width: "100%",
-    overflowY: "hidden",
-    overflowX: "scroll",
-    scrollbarWidth: 'thin',
-    '& ::WebkitScrollbar': {
-      width: '8px',
-      height: '8px',
-      backgroundColor: 'red',
-    }
-    
-  },
-  
-  'inputTextWrap': {
-    width: "100%",
-    overflowY: "hidden",
-    overflowX: "scroll",
-    scrollbarWidth: 'thin',
-    '& ::WebkitScrollbar': {
-      width: '8px',
-      height: '8px',
-      backgroundColor: 'red',
-    }
-    
-  },
-  
-  'inputTextWrap::-webkit-scrollbar': {
-    width: '8px',
-    height: '8px',
   },
 
   'inputText': {
@@ -463,10 +359,6 @@ const useStyles = (theme) => ({
     whiteSpace: "nowrap",
     opacity: "0",
   },  
-  'fileDialogStepperRoot':{
-    padding: "24px 24px 10px 24px ",
-
-  }
 });
 
 /**

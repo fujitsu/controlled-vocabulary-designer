@@ -39,7 +39,7 @@
        <div>
          <form noValidate autoComplete="off">
            <Grid item xs={12}>
-            {/* [ inputTextWrap ] - declared a global class to take advantage of WebKit's CSS extensions */}
+            {/* [ inputTextMultiWrap ] - declared a global class to take advantage of WebKit's CSS extensions */}
              <Box border={1} className='inputTextMultiWrap'>
                <div className={this.props.classes.inputTextItem}>
                  <div className={this.props.classes.inputTextDummy}>
