@@ -20,7 +20,7 @@ POSTGREST_BASE_URL = 'http://dbrest:3000/'
 REFERENCE_VOCABULARY = ['reference_vocabulary1',
                         'reference_vocabulary2',
                         'reference_vocabulary3']
-TERM_BLANK_MARK = 'TERM_BLANK_'
+TERM_BLANK_MARK = '_TERM_BLANK_'
 
 def delete_vocabulary_term(body, file_type):  # noqa: E501
     """Delete editing vocabulary term

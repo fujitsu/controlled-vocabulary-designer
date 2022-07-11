@@ -43,7 +43,7 @@ WORK_PATH = '/tmp/work/'
 MAX_FILE_CNT = 5
 DEF_WORK_MEM = '65536'
 UPD_WORK_MEM = '524288'
-TERM_BLANK_MARK = 'TERM_BLANK_'
+TERM_BLANK_MARK = '_TERM_BLANK_'
 
 def location(depth=0):
     frame = inspect.currentframe().f_back
