@@ -13,21 +13,6 @@ class EditingVocabularyMeta {
   // Editing vocabulary meta
   @observable editingVocabularyMeta = null;
 
-
-  updated = false;
-  /**
-   * Set vocabulary update flags for editing
-   */
-  setUpdate() {
-    this.updated = true;
-  }
-  /**
-   * Delete vocabulary update flags for editing
-   */
-  clearUpdate() {
-    this.updated = false;
-  }
-
   /**
    * Get editing vocabulary meta data
    */
@@ -42,8 +27,6 @@ class EditingVocabularyMeta {
             },
         )
         .then((response) => {
-          // console.log("getEditingVocabularyMetaDataFromDB response.");
-          this.setUpdate();
           this.setEditingVocabularyMetaData(response.data.EditingVocabularyMeta);
         }).catch((err) => {
           console.log('[Error] message : ' + err.message);
