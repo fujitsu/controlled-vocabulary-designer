@@ -22,39 +22,6 @@ REFERENCE_VOCABULARY = ['reference_vocabulary1',
                         'reference_vocabulary3']
 TERM_BLANK_MARK = '_TERM_BLANK_'
 
-def delete_vocabulary_term(body, file_type):  # noqa: E501
-    """Delete editing vocabulary term
-     # noqa: E501
-    :param body: Specify the term id to request.
-    :type body: List[]
-    :param file_type: Specify only editing_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.
-    :type file_type: str
-    :rtype: List[EditingVocabulary]
-    """
-
-    print('[delete_vocabulary_term] file_type :', file_type, ', body :', body)
-
-    if not file_type == 'editing_vocabulary':
-        print('[post_vocabulary_term] error. invalid param', file_type)
-        return ErrorResponse(0, 'Invalid parameter.'), 400
-
-    for id in body:
-        delete_sql = _create_delete_sql(file_type, id)
-        print('[delete_vocabulary_term] delete_sql :', delete_sql)
-        exec_res, status_code = _exec_delete_postgrest(delete_sql)
-        if not status_code == 200:
-            return exec_res, status_code
-
-    editing_vocabulary = []
-    exec_res, status_code = _exec_get_postgrest('editing_vocabulary')
-    if not status_code == 200:
-        return ErrorResponse(0, exec_res['message']), status_code
-
-    editing_vocabulary = exec_res['result']
-
-    return editing_vocabulary, 200
-
-
 def get_vocabulary_data(file_type):  # noqa: E501
     """Get vocabulary data by type
 
@@ -174,6 +141,10 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
                 exec_res, status_code = _exec_update_postgrest(payload, update_sql)
                 if not status_code == 200:
                     return exec_res, status_code
+            else:
+                # not exist data.
+                print('[post_vocabulary_term] invalid data id ', file_type)
+                return ErrorResponse(0, 'Invalid  data id.'), 400
             index = index + 1
 
         editing_vocabulary = []
@@ -196,11 +167,9 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
                 if not status_code == 200:
                     return exec_res, status_code
             else:
-                # add data.
-                exec_res, status_code = \
-                    _exec_insert_postgrest(payload, 'editing_vocabulary_meta')
-                if not status_code == 200:
-                    return exec_res, status_code
+                # not exist data.
+                print('[post_vocabulary_meta_term] invalid data id ', file_type)
+                return ErrorResponse(0, 'Invalid data id.'), 400
 
         editing_vocabulary_meta = []
         exec_res, status_code = _exec_get_postgrest('editing_vocabulary_meta')
@@ -211,7 +180,7 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
 
         return editing_vocabulary_meta, 200
     else:
-        print('[post_vocabulary_term] invalid param ', file_type)
+        print('[post_vocabulary_meta_term] invalid param ', file_type)
         return ErrorResponse(0, 'Invalid parameter.'), 400
 
 def _create_select_sql(file_type, term=None):
@@ -348,35 +317,3 @@ def _exec_update_postgrest(payload, url):
     return response_data, 200
 
 
-def _exec_insert_postgrest(payload, url):
-
-    response_data = {}
-
-    psg_res = requests.post(POSTGREST_BASE_URL + url,
-                            headers=HEADER,
-                            data=json.dumps(payload))
-    try:
-        psg_res.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print('[_exec_insert_postgrest] error code:', end="")
-        print(psg_res.status_code, ', reason:', psg_res.reason)
-        response_data['message'] = psg_res.reason
-        return response_data, psg_res.status_code
-
-    return response_data, 200
-
-
-def _exec_delete_postgrest(url):
-
-    response_data = {}
-
-    psg_res = requests.delete(POSTGREST_BASE_URL + url)
-    try:
-        psg_res.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print('[_exec_delete_postgrest] error code:', end="")
-        print(psg_res.status_code, ', reason:', psg_res.reason)
-        response_data['message'] = psg_res.reason
-        return response_data, psg_res.status_code
-
-    return response_data, 200
