@@ -58,6 +58,18 @@ export default
    * @param  {array} newValue - broader term list
    */
   onChange(event, newValue) {
+    const inputText = event.target.value;
+    const find = this.props.editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    if( inputText != undefined && !find){
+      const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
+                       '既存の用語を記入してください。';
+      const innerText = errorMsg.split('¥n').map((line, key) =>
+        <span key={key}>{line}<br /></span>);
+      this.openSnackbar(innerText);
+
+      return false;
+    }
+
     if (newValue.length > 1) {
       // More than one broader term selected
       const errorMsg = '上位語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
@@ -192,23 +204,6 @@ export default
                           }
                         </Box>
                       </Box>
-                      {/* <Box
-                        component="span"
-                        display="block"
-                        style={{fontSize: '16px'}}
-                      >
-                        {option}
-                      </Box>
-                      <Box
-                        component="span"
-                        display="block"
-                        style={{fontSize: '10px'}}
-                      >
-                        {this.props.editingVocabulary.getReferenceFromData(
-                            option,
-                            'broader_term',
-                        )}
-                      </Box> */}
                     </div>
                   </React.Fragment>
                 )}

@@ -6,19 +6,15 @@ Hensyugoi.py COPYRIGHT FUJITSU LIMITED 2021
 
 import argparse
 import os
-import sys
-import traceback
 import json
 
-import os
 import csv
-import codecs
 import unicodedata
 import pandas as pd
 import numpy as np
 
 
-def hensyugoi(tuning, hensyugoi_file, pos, vec, syn, hyper, filter_words, domain_words_file, voc_uri):
+def hensyugoi(tuning, hensyugoi_file, vec, syn, hyper, filter_words, domain_words_file, voc_uri):
     # If domain_words_file exists in the same folder, extract field terms from domain_words_file
     if os.path.exists(domain_words_file) is True:
         # Import a list of terms in a field, normalize strings of terms
@@ -103,7 +99,7 @@ def check_arg(args, config):
         if item not in config["Hensyugoi"]["Hensyugoi"].keys():
             print("missing config value: " + item)
             return False
-    endslist = [".npy", ".npy", ".npy", ".npy", ".npy", ".csv"]
+    endslist = [".npy", ".npy", ".npy", ".npy", ".csv"]
     if not len(args.input) == len(endslist):
         print("invalid input file(s)")
         return False
@@ -120,15 +116,13 @@ def check_arg(args, config):
     return True
 
 def main(args, config):
-    pos_file = args.input[0]
-    vec_file = args.input[1]
-    syn_file = args.input[2]
-    hyper_file = args.input[3]
-    filterddata_file = args.input[4]
-    domain_words_file = args.input[5]
+    vec_file = args.input[0]
+    syn_file = args.input[1]
+    hyper_file = args.input[2]
+    filterddata_file = args.input[3]
+    domain_words_file = args.input[4]
     output_file = args.output[0]
 
-    pos = np.load(file=pos_file, allow_pickle = True)
     vec = np.load(file=vec_file, allow_pickle = True)
     syn = np.load(file=syn_file, allow_pickle = True)
     hyper = np.load(file=hyper_file, allow_pickle = True)
@@ -136,7 +130,7 @@ def main(args, config):
 
     tuning = config["Hensyugoi"]["Hensyugoi"]["VectorMagnification"]
     voc_uri = config["Hensyugoi"]["Hensyugoi"]["URI"]
-    hensyugoi(tuning, output_file, pos, vec, syn, hyper, filterddata, domain_words_file, voc_uri)
+    hensyugoi(tuning, output_file, vec, syn, hyper, filterddata, domain_words_file, voc_uri)
 
     #with open(output_file, 'w') as f:
     #    json.dump(vec, f, indent=2, ensure_ascii=False)
@@ -147,7 +141,7 @@ if __name__ == '__main__':
         description =
 '''
 example:
-  $ python3 ./Hensyugoi.py -c config.json -i WordSeparation.npy WordEmbedding.npy SynonymExtraction.npy HypernymExtraction.npy Filtering.npy -o Hensyugoi.csv
+  $ python3 ./Hensyugoi.py -c config.json -i WordEmbedding.npy SynonymExtraction.npy HypernymExtraction.npy Filtering.npy -o Hensyugoi.csv
 ''',
         add_help = True,
         formatter_class=argparse.RawTextHelpFormatter
@@ -170,4 +164,3 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
-

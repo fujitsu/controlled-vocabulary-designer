@@ -7,13 +7,9 @@ SynonymExtraction.py COPYRIGHT FUJITSU LIMITED 2021
 import argparse
 import os
 import sys
-import traceback
 import json
 
-import os
-import sys
 import csv
-import itertools
 import unicodedata
 import pandas as pd
 import numpy as np
@@ -34,27 +30,6 @@ def synonymous(domain_words_file, domain_text_preprocessed_file, domain_added_mo
         domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words if char != ""] # normalize term strings to match case
         domain_words = list(set(domain_words)) # normalized and lowercase to remove term duplication
         target_words = domain_words
-
-    # If domain_words_file is not present and domain _ text _ preprocessed _ file is present, returns all text data terms in the field
-    elif os.path.exists(domain_text_preprocessed_file) is True:
-        with open(domain_text_preprocessed_file, encoding="utf_8") as f:
-            txt = f.read()
-        txt_splited_newline = txt.split('\n')
-        words_pre1 = []
-        words_pre2 = []
-        words = []
-        for i in range(len(txt_splited_newline)):
-            words_pre1.append(txt_splited_newline[i].split(" "))
-        words_pre2 = list(itertools.chain.from_iterable(words_pre1)) # convert a two-dimensional array to a one-dimensional array
-        words = set(words_pre2) # delete duplicates
-        if "" in words:
-            words.remove("")
-        target_words = words
-
-    # If neither domain_words_file nor domain _ text _ preprocessed _ file exists, returns all terms learned by word embedding
-    else:
-        model = KeyedVectors.load(domain_added_model_file)
-        target_words = model.wv.index2word
 
     # For all the terms that are the target of synonym extraction, up to the n-most similarity learned in the model is extracted.
     syn_normalized = {} # {key: value} = {term name: synonym}
@@ -84,7 +59,7 @@ def synonymous(domain_words_file, domain_text_preprocessed_file, domain_added_mo
                     res.append(comb[0][1])
         if word in res:
             res.remove(word)
-        syn[word] = res + syn_normalized[unicodedata.normalize("NFKC", word).lower()]
+        syn[word] = res
 
     return syn
 
@@ -149,4 +124,3 @@ example:
 
     print ("finish: " + os.path.basename(__file__))
     exit(0)
-
