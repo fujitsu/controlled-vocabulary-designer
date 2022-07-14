@@ -2043,7 +2043,6 @@ isOtherVocSynUriChanged() {
     }
 
     const updateTermList = [];
-    const deleteIdList = [];
     let history = null;
     const previous = [];
     const following = [];
@@ -2104,7 +2103,6 @@ isOtherVocSynUriChanged() {
           strNextBrdrTrm,
           updateCurrent,
           updateTermList,
-          deleteIdList,
           previous,
           following,
       );
@@ -2245,7 +2243,6 @@ isOtherVocSynUriChanged() {
         nextSynonymList,
         updateCurrent,
         updateTermList,
-        deleteIdList,
         previous,
         following,
     );
@@ -2268,7 +2265,6 @@ isOtherVocSynUriChanged() {
         nextPrfrdLbl,
         updateCurrent,
         updateTermList,
-        deleteIdList,
         previous,
         following,
     );
@@ -2473,7 +2469,7 @@ isOtherVocSynUriChanged() {
     history.previous = previous;
     history.following = following;
 
-    this.updateRequest(updateTermList, deleteIdList, updateCurrent, history, setTerm);
+    this.updateRequest(updateTermList, updateCurrent, history, setTerm);
 
     return '';
   }
@@ -2587,7 +2583,7 @@ isOtherVocSynUriChanged() {
     });
 
     if( updateTermList.length > 0){
-      this.updateRequest(updateTermList, [], updateTermList[0], null, null, false);
+      this.updateRequest(updateTermList, updateTermList[0], null, null, false);
     }
     
     return '';
@@ -2626,7 +2622,6 @@ isOtherVocSynUriChanged() {
    * @param  {String}   strNextBrdrTrm - updated broader term (IN)
    * @param  {Object}   updateCurrent - updated vocabulary information (IN)
    * @param  {Array}    updateTermList - list of terms to be updated (IN/OUT)
-   * @param  {Array}    deleteIdList - Id list to be deleted (IN/OUT)
    * @param  {Array}    previous - pre-update history information list (IN/OUT)
    * @param  {Array}    following - updated history information list (IN/OUT)
    */
@@ -2635,7 +2630,6 @@ isOtherVocSynUriChanged() {
       strNextBrdrTrm,
       updateCurrent,
       updateTermList,
-      deleteIdList,
       previous,
       following,
   ) {
@@ -2701,7 +2695,6 @@ isOtherVocSynUriChanged() {
    * @param  {Array}    nextSynonymList - synonyms after update (IN)
    * @param  {Object}   updateCurrent - updated vocabulary information (IN)
    * @param  {Array}    updateTermList - updated vocabulary list (IN/OUT)  
-   * @param  {Array}    deleteIdList - id list to be deleted (IN/OUT)
    * @param  {Array}    previous - pre-update history information list (IN/OUT)
    * @param  {Array}    following - update history information list (IN/OUT)       
    */
@@ -2710,7 +2703,6 @@ isOtherVocSynUriChanged() {
       nextSynonymList,
       updateCurrent,
       updateTermList,
-      deleteIdList,
       previous,
       following,
   ) {
@@ -2881,12 +2873,6 @@ isOtherVocSynUriChanged() {
       const objDelSynonym = this.editingVocabulary.find( (data) =>
         data.term === synonym);
       if (objDelSynonym) {
-        if (this.isAddedVocabulary(objDelSynonym)) {
-          if (deleteIdList.indexOf(objDelSynonym.id) == -1) {
-            deleteIdList.push(objDelSynonym.id);
-          }
-        }
-
         if (objDelSynonym.term !== objDelSynonym.preferred_label) {
           previous.push(this.makeVocabularyHistoryData(objDelSynonym));
           // Removed synonyms were words belonging to the editing vocabulary (preferred label), so remove the association with the editing vocabulary
@@ -2918,7 +2904,6 @@ isOtherVocSynUriChanged() {
    * @param  {String}   nextPrfrdLbl - updated preferred label (IN)
    * @param  {Object}   updateCurrent - updated vocabulary information (IN)
    * @param  {Array}    updateTermList - updated vocabulary list (IN/OUT)
-   * @param  {Array}    deleteIdList - id list to be deleted (IN/OUT)
    * @param  {Array}    previous - pre-update history information list (IN/OUT)
    * @param  {Array}    following - update history information list (IN/OUT)   
    */
@@ -2927,25 +2912,9 @@ isOtherVocSynUriChanged() {
       nextPrfrdLbl,
       updateCurrent,
       updateTermList,
-      deleteIdList,
       previous,
       following,
   ) {
-    // Delete the old preferred label if it becomes an unrelated term
-    if (nextPrfrdLbl !== prevPrfrdLbl) {
-      if (prevPrfrdLbl) {
-        const target = this.editingVocabulary.find( (data) =>
-          data.term === prevPrfrdLbl);
-        if (target) {
-          if (this.isAddedVocabulary(target)) {
-            if (deleteIdList.indexOf(target.id) == -1) {
-              deleteIdList.push(target.id);
-            }
-          }
-        }
-      }
-    }
-
     // * undefined  Synonymous preferred label: Modified
     //  => Need to update other terms (Update terms with current as a broader term)
     if (!prevPrfrdLbl) {
@@ -3031,13 +3000,12 @@ isOtherVocSynUriChanged() {
   /**
    * Execute vocabulary data update
    * @param  {array} updateList - updated vocabulary list
-   * @param  {array} deleteList - deleted vocabulary list
    * @param  {object} current - vocabulary data to be updated
    * @param  {object} history - history data 
    * @param  {string} oldNodeTerm - vocabulary old data to be updated
    * @param  {bool} setCurrent - do setCurrentNodeByTerm() 
    */
-  updateRequest(updateList, deleteList, current, history = null, oldNodeTerm = null, setCurrent=true) {
+  updateRequest(updateList, current, history = null, oldNodeTerm = null, setCurrent=true) {
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
 
@@ -3066,13 +3034,7 @@ isOtherVocSynUriChanged() {
 
     // updating created_time and modified_time
     requestBody.forEach((data) => {
-      if(editingVocabularyTerm.includes(data.term)) {
-        data.modified_time = dateNow;
-      }
-      else {
-        data.created_time = dateNow;
-        data.modified_time = dateNow;
-      }
+      data.modified_time = dateNow;
     });
 
     axios
@@ -3085,116 +3047,26 @@ isOtherVocSynUriChanged() {
             },
         )
         .then((response) => {
-          // console.log("request url:" + url + " come response.");
+          this.setEditingVocabularyData(response.data);
 
-          // Run the delete API if there are vocabulary terms to delete
-          let idList = [];
-          if (deleteList.length > 0) {
-            // Manual update requests
-            if (history) {
-              this.setEditingVocabularyData(response.data);
+          // Reselect to reset tmp information
+          if( setCurrent){
+            this.setCurrentNodeByTerm(current.term, current.id, null, oldNodeTerm?false:true);
+          }
 
-              deleteList.forEach((id) => {
-                let isRelated;
-                const objDeleteTerm = this.editingVocabulary.find((data) =>
-                  data.id == id);
-                if (objDeleteTerm) {
-                  isRelated = this.editingVocabulary.find((obj) =>
-                    this.isRelatedObj(obj, objDeleteTerm.term) );
-                }
-
-                if (!isRelated && !objDeleteTerm.preferred_label) {
-                    idList.push(id);
-                    // If there is a vocabulary to be deleted in the changed list, delete it.
-                    history.following = history.following.filter((data) =>
-                      data.id != id);
-                  }
-              });
-            } else {
-              idList = deleteList;
-            }
-
-            const deleteUrl = '/api/v1/vocabulary/editing_vocabulary';
-            requestBody = idList;
-            // requestBody = deleteList;
-            axios
-                .post(deleteUrl,
-                    requestBody,
-                    {
-                      headers: {
-                        'Content-Type': 'application/json',
-                      },
-                    },
-                )
-                .then((response) => {
-                  this.setEditingVocabularyData(response.data);
-                  // Reselect to reset tmp information
-                  this.setCurrentNodeByTerm(
-                      current.term, current.id, null, oldNodeTerm?false:true);
-
-                  if (history) {
-                    if (!history.targetId) {
-                      history.targetId = this.currentNode.id;
-                      const find = history.following.find((data) =>
-                        data.term === current.term);
-                      if (find) {
-                        find.id = this.currentNode.id;
-                      }
-                    }
-                    editingHistoryStore.addHistory(history);
-
-                  }
-                  if( oldNodeTerm && (!this.currentNode.term || (this.currentNode.term && this.currentNode.term != oldNodeTerm))){
-                    this.setCurrentNodeByTerm( oldNodeTerm,'', null, true);
-                  }
-                }).catch((err) => {
-                  console.log('[Error] message : ' + err.message);
-                  let errMsg = '';
-                  let errCode = -1;
-                  // If there is a response
-                  if (err.response) {
-                    errCode = err.response.status;
-                    switch (errCode) {
-                      case 400:
-                      case 404:
-                        // For errors defined in the API
-                        if (err.response.data.message) {
-                          errMsg = err.response.data.message;
-                        } else {
-                          errMsg = '不明なエラー発生';
-                        }
-                        break;
-                      default:
-                        errMsg = '不明なエラー発生';
-                        break;
-                    }
-                  } else {
-                    errMsg = err.message;
-                  }
-                  this.openApiErrorDialog('語彙データ削除エラー', errCode, errMsg);
-                });
-          } else {
-            this.setEditingVocabularyData(response.data);
-
-            // Reselect to reset tmp information
-            if( setCurrent){
-              this.setCurrentNodeByTerm(current.term, current.id, null, oldNodeTerm?false:true);
-            }
-
-            if (history) {
-              if (!history.targetId) {
-                history.targetId = this.currentNode.id;
-                const find = history.following.find((data) =>
-                  data.term === current.term);
-                if (find) {
-                  find.id = this.currentNode.id;
-                }
+          if (history) {
+            if (!history.targetId) {
+              history.targetId = this.currentNode.id;
+              const find = history.following.find((data) =>
+                data.term === current.term);
+              if (find) {
+                find.id = this.currentNode.id;
               }
-              editingHistoryStore.addHistory(history);
             }
-            if( oldNodeTerm && (!this.currentNode.term || (this.currentNode.term && this.currentNode.term != oldNodeTerm))){
-              this.setCurrentNodeByTerm( oldNodeTerm, '', null, true);
-            }
+            editingHistoryStore.addHistory(history);
+          }
+          if( oldNodeTerm && (!this.currentNode.term || (this.currentNode.term && this.currentNode.term != oldNodeTerm))){
+            this.setCurrentNodeByTerm( oldNodeTerm, '', null, true);
           }
         }).catch((err) => {
           console.log('[Error] message : ' + err.message);

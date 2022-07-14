@@ -239,35 +239,10 @@ class EditingHistory {
     }
 
     const updateList = [];
-    const deleteList = [];
 
     if (this.STR_UNDO === type) {
-      const addSynList = history.previous.filter((i) =>
-        this.getIndexById(history.following, 'id', i.id) == -1);
       const upSynList = history.previous.filter((i) =>
         this.getIndexById(history.following, 'id', i.id) != -1);
-      const delSynList = history.following.filter((i) =>
-        this.getIndexById(history.previous, 'id', i.id) == -1);
-      // console.log(
-      //     '[execVocabulary] addSynList :' + JSON.stringify(addSynList),
-      // );
-      // console.log('[execVocabulary] upSynList :' + JSON.stringify(upSynList) );
-      // console.log(
-      //     '[execVocabulary] delSynList :' + JSON.stringify(delSynList),
-      // );
-      addSynList.forEach((data) =>{
-        const addData =
-            EditingVocabulary.createFromReferenceVocabulary(
-                data.term,
-                data.preferred_label,
-                data.uri,
-                data.broader_term,
-                data.term_description,
-            );
-        // addData.position_x = data.position_x;
-        // addData.position_y = data.position_y;
-        updateList.push(addData);
-      });
       upSynList.forEach((data) => {
         const target =
             EditingVocabulary.editingVocabulary.find((i) => i.id == data.id);
@@ -279,39 +254,9 @@ class EditingHistory {
           updateList.push(target);
         }
       });
-      delSynList.forEach((data) => {
-        const target = EditingVocabulary.editingVocabulary.find((i) =>
-          i.term == data.term);
-        if (target) {
-          deleteList.push(target.id);
-        }
-      });
     } else { // redo
-      const addSynList = history.following.filter((i) =>
-        this.getIndexById(history.previous, 'id', i.id) == -1);
       const upSynList = history.following.filter((i) =>
         this.getIndexById(history.previous, 'id', i.id) != -1);
-      const delSynList = history.previous.filter((i) =>
-        this.getIndexById(history.following, 'id', i.id) == -1);
-      // console.log(
-      //     '[execVocabulary] addSynList :' + JSON.stringify(addSynList),
-      // );
-      // console.log('[execVocabulary] upSynList :' + JSON.stringify(upSynList) );
-      // console.log(
-      //     '[execVocabulary] delSynList :' + JSON.stringify(delSynList),
-      // );
-      addSynList.forEach((data) =>{
-        const addData = EditingVocabulary.createFromReferenceVocabulary(
-            data.term,
-            data.preferred_label,
-            data.uri,
-            data.broader_term,
-            data.term_description,
-        );
-        // addData.position_x = data.position_x;
-        // addData.position_y = data.position_y;
-        updateList.push(addData);
-      });
       upSynList.forEach((data) => {
         const target = EditingVocabulary.editingVocabulary.find((i) =>
           i.id == data.id);
@@ -323,22 +268,8 @@ class EditingHistory {
           updateList.push(target);
         }
       });
-      delSynList.forEach((data) => {
-        const target = EditingVocabulary.editingVocabulary.find((i) =>
-          i.term == data.term);
-        if (target) {
-          deleteList.push(target.id);
-        }
-      });
     }
-
-    // console.log(
-    //     '[makeSynonymMessage] updateList :' + JSON.stringify(updateList),
-    // );
-    // console.log(
-    //     '[makeSynonymMessage] deleteList :' + JSON.stringify(deleteList),
-    // );
-    EditingVocabulary.updateRequest(updateList, deleteList, currentData, null, oldNode.term);
+    EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.term);
   }
 
   /**
