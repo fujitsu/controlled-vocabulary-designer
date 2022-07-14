@@ -9,7 +9,6 @@ import _ from 'lodash'
 
 import editingHistoryStore from './EditingHistory';
 import History from './History';
-import config from '../config/Config';
 
 /**
  * Vocabulary data management class
@@ -24,41 +23,8 @@ class EditingVocabulary {
   // Reference vocabulary 3
   @observable referenceVocabulary3 = [];
 
-  // Example sentence search results
-  @observable exampleResult = {
-    data: {
-      AllResultCount: 0,
-      ExamplePhrases: {
-        id: 1,
-        phrase: '',
-      },
-    },
-  };
-  // Array for displaying example sentence data
-  @observable examplePhrases = [];
-  // Array for storing example sentence data
-  @observable examplePhrasesCopy = [];
-  // For example sentence retrieval term storage
-  @observable searchTerm = '';
-  // Example sentence index
-  @observable dispNowIndex = 0;
-
   // Array for selected term on Visual vocabulary Tab
   @observable selectedTermList = [];
-
-  updated = false;
-  /**
-   * Set vocabulary update flags for editing
-   */
-  setUpdate() {
-    this.updated = true;
-  }
-  /**
-   * Delete vocabulary update flags for editing
-   */
-  clearUpdate() {
-    this.updated = false;
-  }
 
   /**
    * Set deselected term array
@@ -110,8 +76,6 @@ class EditingVocabulary {
           if (this.visualVocRef.current) {
             this.visualVocRef.current.situationArrReset(0);
           }
-          this.setUpdate();
-          this.broaderUriToBroaderTerm = true;
           this.setEditingVocabularyData(response.data.EditingVocabulary);
           if (0 == this.selectedFile.id) {
             this.currentNodeClear();
@@ -565,21 +529,6 @@ class EditingVocabulary {
   }
 
   /**
-   * Index value update of the displayed example sentence
-   * @param {string} mode 'next' or 'prev' string.
-   */
-  @action changeDispNowIndex(mode) {
-    switch (mode) {
-      case 'next':
-        this.dispNowIndex += 1;
-        break;
-      case 'prev':
-        this.dispNowIndex -= 1;
-        break;
-    }
-  }
-
-  /**
    * TextField candidate term referrer display text
    * @param {string} term - target vocabulary
    * @param {string} type 'broader_term' or 'Synonym'
@@ -900,7 +849,7 @@ class EditingVocabulary {
    * @return {array} - list of related term
    */
   @action getCandidateTermList(type) {
-    const list = [];
+    let list = [];
     if ((0 == this.selectedFile.id) && (this.currentNode.id)) {
       const referenceVocabularyList = [
         this.referenceVocabulary1,
@@ -990,6 +939,10 @@ class EditingVocabulary {
           break;
       }
     }
+    list = list.filter((term)=>{
+      return this.editingVocabulary.find( (data) => data.term === term)?true:false;
+    })
+
     return list.sort((a, b) => {
       const lowerA = a.toString().toLowerCase();
       const lowerB = b.toString().toLowerCase();
@@ -1082,7 +1035,6 @@ class EditingVocabulary {
       term: newTerm,
       language: '',
       preferred_label: '',
-      part_of_speech: '',
       relationTermColor: '',
       vocabularyColor: '',
       hidden: false,
@@ -1116,7 +1068,6 @@ class EditingVocabulary {
       term: newTerm,
       language: diffLang,
       preferred_label: '',
-      part_of_speech: '',
       relationTermColor: '',
       vocabularyColor: '',
       hidden: false,
@@ -1139,30 +1090,18 @@ class EditingVocabulary {
    */
   tmpDataClear() {
     this.tmpIdofUri = {id: '', list: []};
-    this.tmpIdofUriInit = true;
     this.tmpUri = {id: '', list: []};
-    this.tmpUriInit = true;
     this.tmpLanguage = {id: '', list: []};
-    this.tmpLanguageInit = true;
     this.tmpBroaderTerm = {id: '', list: []};
-    this.tmpBroaderTermInit = true;
     this.tmpSynonym = {id: '', list: []};
     this.currentSynonym = {id: '', list: []};
-    this.tmpSynonymInit = true;
     this.tmpPreferredLabel = {id: '', list: []};
-    this.tmpPreferredLabelInit = true;
     this.tmpOtherVocSynUri = {id: '', list: []};
-    this.tmpOtherVocSynUriInit = true;
     this.tmpTermDescription = {id: '', list: []};
-    this.tmpTermDescriptionInit = true;
     this.tmpCreatedTime = {id: '', list: []};
-    this.tmpCreatedTimeInit = true;
     this.tmpModifiedTime = {id: '', list: []};
-    this.tmpModifiedTimeInit = true;
     this.tmpBorderColor =
         {id: this.currentNode.id, color: this.currentNode.color1};
-    this.tmpVocabularycolor =
-        {id: this.currentNode.id, color: this.currentNode.color2};
   }
 
   /**
@@ -1878,12 +1817,6 @@ isOtherVocSynUriChanged() {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
-          this.broaderUriToBroaderTerm = false;
-          // this.setEditingVocabularyData(response.data);
-          // // Reselect to reset tmp information
-          // this.setCurrentNodeByTerm(updateCurrent.term,
-          //     '', null, true);
-
           if (!(isHistory)) {
             editingHistoryStore.addHistory(history);
           }
@@ -1929,440 +1862,29 @@ isOtherVocSynUriChanged() {
     }
   }
 
-  @observable tmpVocabularycolor = {id: '', color: ''};
-
-  /**
-   * Vocabulary tab color selection event
-   * @param  {string} id - target vocabulary id
-   * @param  {string} color - selected color
-   */
-  @action selectTmpVocabularycolor(id, color) {
-    if ( (this.tmpVocabularycolor.id !== '') &&
-        (this.tmpVocabularycolor.color != color) ) {
-      this.tmpVocabularycolor = {id: id, color: color};
-    }
-  }
-
-  sortData = [
-    {key: 'ascend', value: '昇順'},
-    {key: 'descend', value: '降順'},
-  ];
-
-  @observable currentSort = {key: 'ascend', value: '昇順'};
-
-  /**
-   * Sort switching
-   * @param {string} orderKey 'ascend' or 'descend'
-   */
-  @action changeSort(orderKey) {
-    this.currentSort = this.sortData.find((obj) => {
-      return (obj.key == orderKey);
-    });
-  }
 
   /**
    * Returns a sorted list of vocabulary lists by sort specification
    * @return {array} - sort list
    */
   @computed get sortedNodeList() {
-    let targetData;
-    // Temporary processing. Needs correction when repairing homotopic 
-    // -------------------------- 
-    // if (this.currentVisualTab.id === 0) {
-    //   const editingVocabulary = this.editingVocabulary;
-    //   let referenceVocabulary = [];
-    //   switch (this.homotopicFile.id) {
-    //     case 1: referenceVocabulary = this.referenceVocabulary1; break;
-    //     case 2: referenceVocabulary = this.referenceVocabulary2; break;
-    //     case 3: referenceVocabulary = this.referenceVocabulary3; break;
-    //     default: break;
-    //   }
+    const targetData = this.getTargetFileData(this.selectedFile.id);
 
-    //   // only the editing vocabulary is displayed. 
-    //   targetData = editingVocabulary
-    // } else {
-      targetData = this.getTargetFileData(this.selectedFile.id);
-    // }
-
-    if (this.currentSort.key == 'ascend') {
-      return targetData.slice().sort((a, b) => {
-        const lowerA = a.term.toString().toLowerCase();
-        const lowerB = b.term.toString().toLowerCase();
-        if (lowerA > lowerB) {
-          return 1;
-        } else {
-          return -1;
-        }
-      });
-    } else {
-      // descend
-      return targetData.slice().sort((a, b) => {
-        const lowerA = a.term.toString().toLowerCase();
-        const lowerB = b.term.toString().toLowerCase();
-        if (lowerA < lowerB) {
-          return 1;
-        } else {
-          return -1;
-        }
-      });
-    }
-  }
-
-  // Visualization screen selection tab information ///////////////////////////////////////////////////
-  @observable currentVisualTab = {id: 0};
-  // id = 0 : Related terms tab
-  // id = 1 : Vocabulary tab
-
-  /**
-   * Table visualization screen selection tab update
-   * @param {number} id index
-   */
-  @action selectCurrentVisualTab(id) {
-    console.log('[selectCurrentVisualTab] id: ' + id);
-    this.currentVisualTab.id = id;
-  }
-
-  // Homotopic display selection file switching ///////////////////////////////////////////////////
-  @observable homotopicFile = {id: 1, name: '参照用語彙1'};
-  // @observable homotopicFile = {id: 0, name: '--------'};
-
-  /**
-   * Display vocabulary data selection
-   * @param {number} id index
-   */
-  @action selectHomotopicFile(id) {
-    console.log('[selectHomotopicFile] id: ' + id);
-
-    if (this.homotopicFile.id == id) return;
-    switch (id) {
-      // case 0:
-      //   this.homotopicFile = {id: 0, name: '--------'};
-      //   break;
-      case 1:
-        this.homotopicFile = {id: 1, name: '参照用語彙1'};
-        break;
-      case 2:
-        this.homotopicFile = {id: 2, name: '参照用語彙2'};
-        break;
-      case 3:
-        this.homotopicFile = {id: 3, name: '参照用語彙3'};
-        break;
-      default:
-        break;
-    }
-    this.currentNodeClear();
-    this.tmpDataClear();
-  }
-
-  /**
-   * Edit operation tab map panel get coordinates for display
-   * @return {object} - edit operation tab coordinates panel display coordinates
-   */
-  getCurrentNodePosition() {
-    const editingVocabFile = this.editingVocabulary;
-    const currentRefFile = this.getTargetFileData(this.homotopicFile.id);
-    let currentPos = {
-      position_x: this.currentNode.position_x,
-      position_y: this.currentNode.position_y,
-    };
-    let selectedPosX;
-    let selectedPosY;
-
-    const edit = editingVocabFile.find(
-        (edit) => this.currentNode.term === edit.term);
-
-    const refere = currentRefFile.find(
-        (ref) => this.currentNode.term === ref.term);
-
-    const magForRef = config.magnification[0].reference;
-
-    let posXMultipliedByMag;
-    let posYMultipliedByMag;
-
-    if (refere) {
-      posXMultipliedByMag = refere.position_x;
-      posYMultipliedByMag = refere.position_y;
-
-      // Set the magnification of the reference vocabulary
-      if (magForRef > 0) {
-        posXMultipliedByMag *= magForRef;
-        posYMultipliedByMag *= magForRef;
-      } else if (magForRef < 0) {
-        posXMultipliedByMag /= magForRef * -1;
-        posYMultipliedByMag /= magForRef * -1;
+    return targetData.slice().sort((a, b) => {
+      const lowerA = a.term.toString().toLowerCase();
+      const lowerB = b.term.toString().toLowerCase();
+      if (lowerA > lowerB) {
+        return 1;
+      } else {
+        return -1;
       }
-    }
-
-    if (edit && refere) {
-      currentPos.position_x = edit.position_x;
-      currentPos.position_y = edit.position_y;
-
-      selectedPosX = edit.position_x;
-      selectedPosY = edit.position_y;
-      if (!selectedPosX && !selectedPosY) {
-        selectedPosX = refere.position_x;
-        selectedPosY = refere.position_y;
-      }
-
-      // Hides the coordinate values in the edit operations panel when for the coordinate values (0, 0)
-      if (!(selectedPosX == 0 && selectedPosY == 0) &&
-        (currentPos.position_x === 0 && currentPos.position_y === 0)) {
-        selectedPosX = edit.position_x;
-        selectedPosY = edit.position_y;
-        currentPos = null;
-      }
-    } else if (edit) {
-      currentPos.position_x = edit.position_x;
-      currentPos.position_y = edit.position_y;
-
-      selectedPosX = edit.position_x;
-      selectedPosY = edit.position_y;
-
-    } else if (refere) {
-      // For terms in reference vocabulary only
-      currentPos.position_x = 0;
-      currentPos.position_y = 0;
-
-      selectedPosX = refere.position_x;
-      selectedPosY = refere.position_y;
-
-      currentPos = null;
-    }
-
-    if (currentPos) {
-    // Rounds down to eight decimal places 
-    currentPos.position_x = this.orgFloor(currentPos.position_x, 100000000);
-    currentPos.position_y = this.orgFloor(currentPos.position_y, 100000000);
-    }
-
-    // Hide coordinate values if they do not exist when importing data
-    if (!selectedPosX && !selectedPosY) {
-      currentPos = null;
-    }
-
-    return currentPos;
-  }
-
-  /**
- * Function to truncate to any digit
- * @param {number} value - number to round off
- * @param {number} base - which digits to truncate (10 - > 10 place, 0.1 - > 1 decimal place)
- * @return {number} - truncated value
- */
-  orgFloor(value, base) {
-    return Math.floor(value * base) / base;
+    });
   }
 
   // //////////////////////////////////////////////////////
 
   // node display MAX number
   DISP_NODE_MAX = 100;
-
-  // Data for controlling graph contraction of visualization screen panel related term tab
-  @observable tmpRelationWordMinZoom = {thinOut: false, value: -1};
-
-  /**
-   * Initialize min zoom factor
-   * @param  {number} zoom - magnification
-   */
-  @action initRelationWordMinZoom(zoom) {
-    if (zoom == -1) {
-      this.tmpRelationWordMinZoom = {thinOut: false, value: -1};
-      // console.log('[RelationWordTab] reset tmpRelationWordMinZoom');
-      return;
-    }
-
-    if (this.tmpRelationWordMinZoom.value == -1) {
-      this.tmpRelationWordMinZoom = {thinOut: false, value: zoom};
-      return;
-    }
-  }
-
-  /**
-   * Minimum zoom magnification update
-   * @param  {number} zoom - zoom magnification
-   */
-  @action updateRelationWordMinZoom(zoom) {
-    const before = this.tmpRelationWordMinZoom.thinOut;
-    if (this.tmpRelationWordMinZoom.value > zoom) {
-      this.tmpRelationWordMinZoom.thinOut = true;
-    } else {
-      this.tmpRelationWordMinZoom.thinOut = false;
-    }
-    if ( true == before && false == this.tmpRelationWordMinZoom.thinOut ) {
-      this.currentNodeClear();
-    }
-  }
-
-  /**
-   * Generate vocabulary list for visualization screen panel related terms tab
-   * @return {array} - generate vocabulary list
-   */
-  @computed get termListForRelationWord() {
-    // Combine reference vocabulary data specified on the related terms tab into a list
-    const editingVocabulary = this.editingVocabulary;
-    let referenceVocabulary = [];
-    switch (this.homotopicFile.id) {
-      case 1: referenceVocabulary = this.referenceVocabulary1; break;
-      case 2: referenceVocabulary = this.referenceVocabulary2; break;
-      case 3: referenceVocabulary = this.referenceVocabulary3; break;
-      default: break;
-    }
-
-    // Add only terms that are not in the editing vocabulary
-    const margeData = [];
-    referenceVocabulary.forEach((merge) => {
-      const find = editingVocabulary.find((data) => data.term === merge.term);
-      if (!find) {
-        margeData.push(merge);
-      }
-    });
-
-    // Related terms all terms of the editorial and reference terms displayed on the screen
-    const targetData = [
-      ...editingVocabulary,
-      ...margeData,
-    ];
-
-    const termListForRelationWord = [];
-
-    // Because related terms have a mix of editing and reference terms, you cannot use the ID for each of the potentially duplicate terms, so issue a unique ID
-    let idCounter = 0;
-
-    targetData.forEach((data) => {
-      // Extracts reference vocabulary data for homotopic display
-      const find = referenceVocabulary.find(
-          (refere) => data.term === refere.term);
-
-      const nodeData = this.createNodeDataForRelation(data, find, idCounter);
-      if (nodeData) {
-        termListForRelationWord.push(nodeData);
-        idCounter += 1;
-      }
-    });
-
-    // Since the node that was listed later has priority, the descending sort order is selected
-    if (this.tmpRelationWordMinZoom.thinOut) {
-      // Weeding sort
-      termListForRelationWord.sort((a, b) => {
-        if (a.randomId > b.randomId) return -1;
-        if (a.randomId < b.randomId) return 1;
-        return 0;
-      });
-      const currentIndex =
-        termListForRelationWord.findIndex((element) =>
-          this.isCurrentNode(element));
-      if (-1 != currentIndex) {
-        this.moveAt(
-            termListForRelationWord,
-            currentIndex,
-            (termListForRelationWord.length - 1),
-        );
-      }
-    } else {
-      // Sort by origin
-      termListForRelationWord.sort((a, b) => {
-        if (a.distance > b.distance) return -1;
-        if (a.distance < b.distance) return 1;
-        return 0;
-      });
-      const currentIndex =
-        termListForRelationWord.findIndex((element) =>
-          this.isCurrentNode(element));
-      if (-1 != currentIndex) {
-        this.moveAt(
-            termListForRelationWord,
-            currentIndex,
-            (termListForRelationWord.length - 1),
-        );
-      }
-
-      // termListForRelationWord =
-      //  termListForRelationWord.slice(
-      //      (termListForRelationWord.length - this.DISP_NODE_MAX),
-      //      termListForRelationWord.length,
-      //  );
-    }
-
-    return termListForRelationWord;
-  }
-
-  /**
-   * Create nodedata for related terms tab
-   * @param {object} data editing or reference vocabulary
-   * @param {object} refer reference vocabulary
-   * @param {Number} idCounter id
-   * @return {object} cytoscape node object
-   */
-  createNodeDataForRelation(data, refer, idCounter) {
-    // Do not list data that does not have coordinate information
-    // if (!data || !data.position_x) return null;
-    if (!data) return null;
-
-    const randomId =
-      Math.floor(Math.random() * Math.floor(1000000000000000));
-    const position =
-      this.calcPositionValueForHomotopic(data, refer);
-
-    return {
-      data: {
-        id: idCounter,
-        term: data.term,
-        hidden: (data.hidden)?data.hidden:false,
-        relationTermColor: (data.color1)?data.color1:'black',
-        confirm: data.confirm,
-        // has_position: (!data.position_x || data.position_y !== null),
-      },
-      position: {
-        x: position.x,
-        y: position.y,
-      },
-      locked: true,
-      // Random number for filter
-      randomId: randomId,
-      distance: Math.sqrt(
-          Math.pow(Math.abs(position.x), 2) +
-          Math.pow(Math.abs(position.y), 2),
-      ),
-    };
-  }
-
-  /**
-   * Related terms tab coordinate value calculation
-   * @param  {object} relationTerm - editing vocabulary data or reference vocabulary data
-   * @param  {object} refer - reference vocabulary data with the same term as relationTerm
-   * @return {object} - related term coordinate value
-   */
-  calcPositionValueForHomotopic(relationTerm, refer) {
-    const position = {x: null, y: null};
-    const editingVocabFile = this.editingVocabulary;
-    const magForRef = config.magnification[0].reference;
-
-    const edit = editingVocabFile.find(
-        (edit) => relationTerm.term === edit.term);
-
-    if (edit && refer) {
-      // Calculates line coordinates for common editing and reference terms
-      position.x =
-      this.calcPositionByHomotopic(edit.position_x);
-      position.y =
-      this.calcPositionByHomotopic(edit.position_y);
-    } else if (edit) {
-      // For terms in editing vocabulary only
-      position.x =
-        this.calcPositionByHomotopic(edit.position_x);
-      position.y =
-        this.calcPositionByHomotopic(edit.position_y);
-    } else if (refer) {
-      // For reference terms only
-      position.x =
-      this.calcPositionByHomotopic(0);
-      position.y =
-      this.calcPositionByHomotopic(0);
-    }
-    position.y *= -1;
-    return position;
-  }
 
   /**
    * Adjust coordinate values to display related terms
@@ -2391,23 +1913,13 @@ isOtherVocSynUriChanged() {
   }
 
   /**
-   * [calcPositionByHomotopic description]
-   * @param  {Number} a vec0 - coordinate value
-   * @return {Number} - coordinate value
-   */
-  calcPositionByHomotopic(a) {
-    const value = a;
-    return this.calcPosition(value);
-  }
-
-  /**
    * For data with a blank "term name", the prefix of the (unique) term name indicating the blank is returned.
-   * 'TERM_BLANK_' cannot be changed because it is common to the file_controller.py and vocablary_controller.py
+   * '_TERM_BLANK_' cannot be changed because it is common to the file_controller.py and vocablary_controller.py
    * 
    * @return {string} - prefix string
    */
    @action getTermBlankPrefix(){
-    return 'TERM_BLANK_';
+    return '_TERM_BLANK_';
   }
   /**
    * Whether the term contains a prefix indicating a blank
@@ -2506,99 +2018,6 @@ isOtherVocSynUriChanged() {
     if (element.data.id === this.currentNode.id) return true;
     return false;
   }
-
-  /**
-   * Move elements at index to at
-   * @param  {array} array - list
-   * @param  {number} index - source element index
-   * @param  {number} at - destination element index
-   * @return {array} - update list
-   */
-  moveAt(array, index, at) {
-    if (index === at || index > array.length -1 || at > array.length - 1) {
-      return array;
-    }
-
-    const value = array[index];
-    const tail = array.slice(index + 1);
-
-    array.splice(index);
-
-    Array.prototype.push.apply(array, tail);
-
-    array.splice(at, 0, value);
-
-    return array;
-  }
-
-  // Hidden filter //////////////////////////////////////////////////
-
-  /**
-   * Hidden filter switching
-   * @param  {Boolean} [isHistory=false] - request by undo/redo?
-   */
-  @action changeHidden(isHistory = false) {
-    if (!(this.currentNode.id)) return;
-
-    const requestBody = [];
-
-    const updateCurrent = {...this.currentNode};
-    const history = new History(
-        'hidden',
-        updateCurrent.id,
-        updateCurrent.hidden,
-        !(updateCurrent.hidden),
-    );
-    updateCurrent.hidden = !(updateCurrent.hidden);
-
-    requestBody.push(updateCurrent);
-    const url = '/api/v1/vocabulary/editing_vocabulary/' + updateCurrent.term;
-    axios
-        .post(url,
-            requestBody,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-        )
-        .then((response) => {
-          console.log('request url:' + url + ' come response.');
-          this.broaderUriToBroaderTerm = false;
-          this.setEditingVocabularyData(response.data);
-          // Reselect to reset tmp information
-          this.setCurrentNodeByTerm(updateCurrent.term,
-              updateCurrent.id, null, true);
-          if (!(isHistory)) {
-            editingHistoryStore.addHistory(history);
-          }
-        }).catch((err) => {
-          console.log('[Error] message : ' + err.message);
-          let errMsg = '';
-          let errCode = -1;
-          // If there is a response
-          if (err.response) {
-            errCode = err.response.status;
-            switch (errCode) {
-              case 400:
-              case 404:
-                // For errors defined in the API
-                if (err.response.data.message) {
-                  errMsg = err.response.data.message;
-                } else {
-                  errMsg = '不明なエラー発生';
-                }
-                break;
-              default:
-                errMsg = '不明なエラー発生';
-                break;
-            }
-          } else {
-            errMsg = err.message;
-          }
-          this.openApiErrorDialog('表示/非表示情報変更エラー', errCode, errMsg);
-        });
-  };
 
   // Vocabulary data update //////////////////////////////////////////////////
 
@@ -2710,25 +2129,6 @@ isOtherVocSynUriChanged() {
       if (deleteSynonymList.length > 0) {
         console.log('delete synonym: ' + deleteSynonymList);
       }   
-    }
-
-    // List of synonyms added in the update
-    let addSynonymList = [];
-    // language data same from the selected term
-    if (this.currentNode.language == this.tmpLanguage.list[0]) {
-      addSynonymList =
-        this.tmpSynonym.list.filter((i) =>
-          this.currentSynonym.list.indexOf(i) == -1);
-      if (addSynonymList.length > 0) {
-        console.log('add synonym: ' + addSynonymList);
-      }
-    } else{ // language data different from the selected term
-      addSynonymList =
-        this.tmpSynonym.list.filter((i) =>
-          this.currentLangDiffSynonym.list.indexOf(i) == -1);
-      if (addSynonymList.length > 0) {
-        console.log('add synonym: ' + addSynonymList);
-      }
     }
 
     // Updated synonym list
@@ -3692,7 +3092,6 @@ isOtherVocSynUriChanged() {
           if (deleteList.length > 0) {
             // Manual update requests
             if (history) {
-              this.broaderUriToBroaderTerm = false;
               this.setEditingVocabularyData(response.data);
 
               deleteList.forEach((id) => {
@@ -3728,7 +3127,6 @@ isOtherVocSynUriChanged() {
                     },
                 )
                 .then((response) => {
-                  this.broaderUriToBroaderTerm = false;
                   this.setEditingVocabularyData(response.data);
                   // Reselect to reset tmp information
                   this.setCurrentNodeByTerm(
@@ -3776,7 +3174,6 @@ isOtherVocSynUriChanged() {
                   this.openApiErrorDialog('語彙データ削除エラー', errCode, errMsg);
                 });
           } else {
-            this.broaderUriToBroaderTerm = false;
             this.setEditingVocabularyData(response.data);
 
             // Reselect to reset tmp information
@@ -3864,47 +3261,6 @@ isOtherVocSynUriChanged() {
     } else {
       return false;
     }
-  }
-
-  /**
-   * Determining if a vocabulary is related to something other than the vocabulary data being edited
-   * @param  {object}  target - vocabulary data
-   * @param  {number}  currentId - editing vocabulary ID
-   * @return {Boolean} - true: not relevant, false: relevant
-   */
-  isNotRelatedExceptCurrent(target, currentId) {
-    // Extracts the vocabulary whose target is set to the broader term
-    let filterList = this.editingVocabulary.filter( (data) =>
-      data.broader_term === target.term );
-    // Removes the currently editing vocabulary from the extracted vocabulary
-    filterList = filterList.filter( (data) => data.id !== currentId );
-
-    // Remove synonyms in the current vocabulary from the extracted vocabulary
-    filterList = filterList.filter( (data) =>
-      data.preferred_label !== this.currentNode.preferred_label );
-
-    if ( filterList.length == 0 ) {
-      // Vocabulary data other than the one being edited is not set as a broader term
-
-      // Extracts the vocabulary whose target is set to the preferred label
-      filterList = this.editingVocabulary.filter( (data) =>
-        data.preferred_label === target.term );
-      // Remove one's vocabulary from the extracted vocabulary
-      filterList = filterList.filter( (data) => data.term !== target.term );
-      // Removes the vocabulary data being edited from the extracted vocabulary
-      filterList = filterList.filter( (data) =>
-        data.term !== this.currentNode.term );
-
-      if ( filterList.length == 0 ) {
-        if (target.id === currentId) {
-          if (this.tmpPreferredLabel.list[0]) {
-            return false;
-          }
-        }
-        return true;
-      }
-    }
-    return false;
   }
 
   /**
@@ -4031,7 +3387,6 @@ isOtherVocSynUriChanged() {
     id: '',
     list: [],
   };
-  tmpUriInit = true;
 
   /**
    * Create URI list for screen display
@@ -4051,25 +3406,7 @@ isOtherVocSynUriChanged() {
         filterList = [this.currentNode.uri];
       }
     }
-    this.tmpUriInit = false;
     return filterList;
-  }
-
-  /**
-   * URI update event
-   * @param  {string} newValue URI
-   */
-  @action updataUri(newValue) {
-    // console.log("updataBroaderTerm :" + newValue.length);
-    const array = [];
-
-    // Add URI received from component to list
-    if (newValue !== '') {
-      array.push(newValue);
-    }
-
-    this.tmpUri.id = this.currentNode.id;
-    this.tmpUri.list = array;
   }
 
   /**
@@ -4220,7 +3557,6 @@ isOtherVocSynUriChanged() {
     id: '',
     list: [],
   };
-  tmpIdofUriInit = true;
 
   /**
    * Create ID of URI list for screen display
@@ -4240,7 +3576,6 @@ isOtherVocSynUriChanged() {
         filterList = [this.currentNode.idofuri];
       }
     }
-    this.tmpIdofUriInit = false;
     return filterList;
   }
 
@@ -4290,43 +3625,17 @@ isOtherVocSynUriChanged() {
     id: '',
     list: [],
   };
-  tmpBroaderTermInit = true;
-  broaderUriToBroaderTerm = true;
-
-  /**
-   * Create a screen display broader term list
-   * @return {Array} - list of broader term
-   */
-  @computed get currentBroaderTerm() {
-    if (!(this.currentNode.id)) {
-      return [];
-    }
-    let filterList = [];
-
-    if (this.tmpBroaderTerm.id == this.currentNode.id) {
-      if ( this.tmpBroaderTerm.list.length > 0 ) {
-        filterList = this.tmpBroaderTerm.list;
-      } else {
-        if (this.tmpBroaderTermInit) {
-          if ( this.currentNode.broader_term != '' ) {
-            filterList = [this.currentNode.broader_term];
-          }
-        }
-      }
-    } else {
-      if ( this.currentNode.broader_term != '' ) {
-        filterList = [this.currentNode.broader_term];
-      }
-    }
-    this.tmpBroaderTermInit = false;
-    return filterList;
-  }
 
   /**
    * Broader term update event
    * @param  {string} newValue - broader term
    */
   @action updataBroaderTerm(newValue) {
+    
+    newValue = newValue.filter((term) => {
+      return this.editingVocabulary.find((d)=>{ return d.term == term });
+    });
+
     const array = [];
     if (this.currentNode.term) {
       newValue.forEach((term) => {
@@ -4482,13 +3791,17 @@ isOtherVocSynUriChanged() {
     id: '',
     list: [],
   };
-  tmpSynonymInit = true;
 
   /**
    * Synonym update event
    * @param  {string} newValue - synonym
    */
   @action updataSynonym(newValue) {
+
+    newValue = newValue.filter((term) => {
+      return this.editingVocabulary.find((d)=>{ return d.term == term });
+    });
+
     const array = [];
     // Add synonyms received from component to the list
     newValue.forEach((synonym) => {
@@ -4625,41 +3938,17 @@ isOtherVocSynUriChanged() {
     id: '',
     list: [],
   };
-  tmpPreferredLabelInit = true;
-
-  /**
-   * Create list for screen display
-   * @return {Array} - list of preferred label
-   */
-  @computed get currentPreferredLabel() {
-    if (!(this.currentNode.id)) {
-      return [];
-    }
-    let filterList = [];
-    if (this.tmpPreferredLabel.id == this.currentNode.id) {
-      if ( this.tmpPreferredLabel.list.length > 0 ) {
-        filterList = this.tmpPreferredLabel.list;
-      } else {
-        if (this.tmpPreferredLabelInit) {
-          if ( this.currentNode.preferred_label != '' ) {
-            filterList = [this.currentNode.preferred_label];
-          }
-        }
-      }
-    } else {
-      if ( this.currentNode.preferred_label != '' ) {
-        filterList = [this.currentNode.preferred_label];
-      }
-    }
-    this.tmpPreferredLabelInit = false;
-    return filterList;
-  }
 
   /**
    * Preferred label update event
    * @param  {array} newValue - preferred label (string)
    */
   @action updataPreferredLabel(newValue) {
+
+    newValue = newValue.filter((term) => {
+      return this.editingVocabulary.find((d)=>{ return d.term == term });
+    });
+
     if (this.currentNode.id) {
       const array = [];
 
@@ -4861,29 +4150,6 @@ isOtherVocSynUriChanged() {
     id: '',
     list: [],
   };
-  tmpTermDescriptionInit = true;
-
-  /**
-   * Create Term Description list for screen display
-   * @return {Array} - Term Description list
-   */
-  @computed get currentTermDescription() {
-    if (!(this.currentNode.id)) {
-      return [];
-    }
-    let filterList = [];
-    if (this.tmpTermDescription.id == this.currentNode.id) {
-      if ( this.tmpTermDescription.list.length > 0 ) {
-        filterList = this.tmpTermDescription.list;
-      }
-    } else {
-      if ( this.currentNode.term_description != '' ) {
-        filterList = [this.currentNode.term_description];
-      }
-    }
-    this.tmpTermDescription = false;
-    return filterList;
-  }
 
   /**
    * Term Description update event
@@ -4892,23 +4158,18 @@ isOtherVocSynUriChanged() {
   @action updataTermDescription(newValue) {
     const array = [];
 
-    // Add term description received from component to list
-//    if (newValue !== '') {
-//      array.push(newValue);
-//    }
-
-  if (this.currentNode.term) {
-    newValue.forEach((term) => {
-      array.push(term);
-    });
-  } else {
-    if (this.tmpPreferredLabel.list.length > 0) {
-      // Do not add terms that are not selected and have no title to the term description
+    if (this.currentNode.term) {
       newValue.forEach((term) => {
         array.push(term);
       });
+    } else {
+      if (this.tmpPreferredLabel.list.length > 0) {
+        // Do not add terms that are not selected and have no title to the term description
+        newValue.forEach((term) => {
+          array.push(term);
+        });
+      }
     }
-  }
     this.tmpTermDescription.id = this.currentNode.id;
     this.tmpTermDescription.list = array;
   }
@@ -4930,178 +4191,25 @@ isOtherVocSynUriChanged() {
     id: '',
     list: [],
   };
-  tmpLanguageInit = true;
-
-  /**
-   * Create Language list for screen display
-   * @return {Array} - Language list
-   */
-  @computed get currentLanguage() {
-    if (!(this.currentNode.id)) {
-      return [];
-    }
-    let filterList = [];
-    if (this.tmpLanguage.id == this.currentNode.id) {
-      if ( this.tmpLanguage.list.length > 0 ) {
-        filterList = this.tmpLanguage.list;
-      }
-    } else {
-      if ( this.currentNode.language != '' ) {
-        filterList = [this.currentNode.language];
-      }
-    }
-    this.tmpLanguage = false;
-    return filterList;
-  }
-
-  /**
-   * Language update event
-   * @param  {string} newValue Language
-   */
-  @action updataLanguage(newValue) {
-    const array = [];
-
-    // Add URI received from component to list
-    if (newValue !== '') {
-      array.push(newValue);
-    }
-
-    this.tmpLanguage.id = this.currentNode.id;
-    this.tmpLanguage.list = array;
-  }
-
-  /**
-   * Delete and update the end of the language list you are editing
-   */
-   @action popTermDescription() { //language？
-    const newArray = [];
-    this.tmpLanguage.list.forEach((data) => {
-      newArray.push(data);
-    });
-    newArray.pop();
-    this.updataLanguage(newArray);
-  }
 
   // Created Time //////////////////////
   @observable tmpCreatedTime = {
     id: '',
     list: [],
   };
-  tmpCreatedTimeInit = true;
-
-  /**
-   * Create Created Time list for screen display
-   * @return {Array} - Created Time list
-   */
-  @computed get currentCreatedTime() {
-    if (!(this.currentNode.id)) {
-      return [];
-    }
-    let filterList = [];
-    if (this.tmpCreatedTime.id == this.currentNode.id) {
-      if ( this.tmpCreatedTime.list.length > 0 ) {
-        filterList = this.tmpCreatedTime.list;
-      }
-    } else {
-      if ( this.currentNode.created_time != '' ) {
-        filterList = [this.currentNode.created_time];
-      }
-    }
-    this.tmpCreatedTime = false;
-    return filterList;
-  }
-
-  /**
-   * Created Time update event
-   * @param  {string} newValue Created Time
-   */
-  @action updataCreatedTime(newValue) {
-    const array = [];
-
-    // Add URI received from component to list
-    if (newValue !== '') {
-      array.push(newValue);
-    }
-
-    this.tmpCreatedTime.id = this.currentNode.id;
-    this.tmpCreatedTime.list = array;
-  }
-
-  /**
-   * Delete and update the end of the created time list you are editing
-   */
-   @action popCreatedTime() {
-    const newArray = [];
-    this.tmpCreatedTime.list.forEach((data) => {
-      newArray.push(data);
-    });
-    newArray.pop();
-    this.updataCreatedTime(newArray);
-  }
 
   // Modified Time //////////////////////
   @observable tmpModifiedTime = {
     id: '',
     list: [],
   };
-  tmpModifiedTimeInit = true;
 
-  /**
-   * Create Modified Time list for screen display
-   * @return {Array} - Modified Time list
-   */
-  @computed get currentModifiedTime() {
-    if (!(this.currentNode.id)) {
-      return [];
-    }
-    let filterList = [];
-    if (this.tmpModifiedTime.id == this.currentNode.id) {
-      if ( this.tmpModifiedTime.list.length > 0 ) {
-        filterList = this.tmpModifiedTime.list;
-      }
-    } else {
-      if ( this.currentNode.modified_time != '' ) {
-        filterList = [this.currentNode.modified_time];
-      }
-    }
-    this.tmpModifiedTime = false;
-    return filterList;
-  }
-
-  /**
-   * Modified Time update event
-   * @param  {string} newValue Modified Time
-   */
-  @action updataModifiedTime(newValue) {
-    const array = [];
-
-    // Add URI received from component to list
-    if (newValue !== '') {
-      array.push(newValue);
-    }
-
-    this.tmpModifiedTime.id = this.currentNode.id;
-    this.tmpModifiedTime.list = array;
-  }
-
-  /**
-   * Delete and update the end of the modified time list you are editing
-   */
-   @action popModifiedTime() {
-    const newArray = [];
-    this.tmpModifiedTime.list.forEach((data) => {
-      newArray.push(data);
-    });
-    newArray.pop();
-    this.updataModifiedTime(newArray);
-  }
 
   // Other Voc Syn Uri //////////////////////
   @observable tmpOtherVocSynUri = {
     id: '',
     list: [],
   };
-  tmpOtherVocSynUriInit = true;
 
   // confirm //////////////////////
   // Confirmed color information
@@ -5172,12 +4280,7 @@ isOtherVocSynUriChanged() {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
-          this.broaderUriToBroaderTerm = false;
           this.setEditingVocabularyData(response.data);
-
-          // Reselect to reset tmp information
-          // this.setCurrentNodeByTerm(updateCurrent.term,
-          //     updateCurrent.id, null, true);
 
           if (!(isHistory)) {
             editingHistoryStore.addHistory(history);
@@ -5271,7 +4374,6 @@ isOtherVocSynUriChanged() {
         )
         .then((response) => {
           // console.log('request url:' + url + ' come response.');
-          // this.setEditingVocabularyData(response.data);
           // Reselect to reset tmp information
           this.setCurrentNodeByTerm(currentNode.term,
               currentNode.id, null, true);

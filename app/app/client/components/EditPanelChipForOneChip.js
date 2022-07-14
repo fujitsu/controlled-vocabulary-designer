@@ -25,17 +25,6 @@ export default
     let label = this.props.label;
     let chipColor= '#bbdefb';
 
-    // Match a simple prefix (label) with a formal URI
-    if (this.props.config) {
-      const prefixList = this.props.config.prefix;
-      const foundPrefix = prefixList.find((prefix) => {
-        return label.startsWith(prefix.equiv);
-      });
-      if (foundPrefix) {
-        label = label.replace(foundPrefix.equiv, foundPrefix.origin);
-      }
-    }
-
     if (data != label) {
       // Chips added by completion
       chipColor = '#ffcdd2';
@@ -59,5 +48,4 @@ export default
 EditPanelChipForOneChip.propTypes = {
   data: PropTypes.string,
   label: PropTypes.string,
-  config: PropTypes.object,
 };

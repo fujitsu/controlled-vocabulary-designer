@@ -8,7 +8,6 @@ import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import config from '../config/Config';
 
 
 import {observer} from 'mobx-react';
@@ -29,7 +28,6 @@ export default
     super(props);
     this.state = {
       disabledFlg: true,
-      config: config,
     };
   }
 
@@ -67,23 +65,8 @@ export default
       finalUri = [idofuri];
     }
 
-    /* eslint-disable no-unused-vars */
-    // object for rendering
-    const uriNum = this.props.editingVocabulary.tmpUri.list.length;
-    /* eslint-enable no-unused-vars */
-
     // Replace URI prefixes with display labels only
-    let alteredUri = uri.map((targetUri) => {
-      const prefixList = this.state.config.prefix;
-      const foundPrefix = prefixList.find((prefix) => {
-        return targetUri.startsWith(prefix.origin);
-      });
-      if (foundPrefix) {
-        return targetUri.replace(foundPrefix.origin, foundPrefix.equiv);
-      } else {
-        return targetUri;
-      }
-    });
+    let alteredUri = uri;
 
     if (finalUri != undefined){
       alteredUri = finalUri;
@@ -117,13 +100,11 @@ export default
                   getOptionLabel={() => ''}
                   renderTags={(tagValue, getTagProps) => {
                     return tagValue.map((option, index) => (
-                      // console.log('option:', option),
                       <EditPanelChipForOneChip
                         key={index}
                         {...getTagProps({index})}
                         label={option}
                         data={currentUri}
-                        config={this.state.config}
                       />
                     ));
                   }}

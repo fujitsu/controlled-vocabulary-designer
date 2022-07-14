@@ -26,21 +26,17 @@ import Slider from '@material-ui/core/Slider';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import ButtonGroup from '@material-ui/core/ButtonGroup';
 import Popover from "@material-ui/core/Popover";
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import SettingsIcon from '@material-ui/icons/Settings';
 import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
 import IndeterminateCheckBoxOutlinedIcon from "@material-ui/icons/IndeterminateCheckBoxOutlined";
 
 import {observer} from 'mobx-react';
 
-// import ColorChartCheckBoxesOfConfirm from './ColorChartCheckBoxesOfConfirm';
 import ColorChartCheckBoxes from './ColorChartCheckBoxes';
 import EditPanelVocabularyTab from './EditPanelVocabularyTab';
-import EditPanelVocabularyNewTab from './EditPanelVocabularyNewTab';
 import DialogSettingSynonym from './DialogSettingSynonym';
 import DialogOkCancel from './DialogOkCancel';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
@@ -313,8 +309,9 @@ export default
         }]
       })
 
+      const dispNodeMax = this.props.editingVocabulary.DISP_NODE_MAX;
       sortArr.sort((a, b)=> { return a.distance - b.distance; });
-      if( sortArr.length > 100 ) sortArr.splice( 100);
+      if( sortArr.length > dispNodeMax ) sortArr.splice( dispNodeMax);
 
       // 100 visibleNodesInView
       let nodesInViewLimit100 = [];
@@ -1431,58 +1428,18 @@ export default
                   close={()=>this.handleBorderColorPopClose()}
                 />
               </Popover>
-              {/* <ButtonGroup>            */}
-                <Button
-                  className={this.props.classes.buttonsGrp}
-                  ml={3}
-                  variant="contained"
-                  color="primary"
-                  size={'small'}
-                  disabled={disabledConfirm}
-                  onClick={()=>this.toggleConfirm(!isConfirm)}
-                >
-                  {confirmButtonText}
-                
-                </Button>       
-                {/* <Button
-                  className={this.props.classes.buttonsGrp}
-                  ml={3}
-                  variant="contained"
-                  color="primary"
-                  disabled={disabledConfirm}
-                  size={'small'}
-                  onClick={(e)=>this.handleConfirmColorPopoverOpen(e)}
-                >
-                  <SettingsIcon fontSize="small" />
-                </Button>
-              </ButtonGroup>
-              <Popover 
-                id={idC}
-                open={openC}
-                anchorEl={anchorElC}
-                onClose={()=>this.handleConfirmColorPopoverClose()}
-                style={{
-                  backgroundColor: "#66666680",
-                }}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center',
-                }}
-                transformOrigin={{
-                  vertical: 'top',
-                  horizontal: 'center',
-                }}
+              <Button
+                className={this.props.classes.buttonsGrp}
+                ml={3}
+                variant="contained"
+                color="primary"
+                size={'small'}
+                disabled={disabledConfirm}
+                onClick={()=>this.toggleConfirm(!isConfirm)}
               >
-                <ColorChartCheckBoxesOfConfirm
-                  classes={this.props.classes}
-                  currentId={this.props.editingVocabulary.currentNode.id}
-                  color={this.props.editingVocabulary.confirmColor}
-                  selectColor={(color) =>
-                    this.seletConfirmColor(color)
-                  }
-                  close={()=>this.handleConfirmColorPopoverClose()}
-                />
-              </Popover> */}
+                {confirmButtonText}
+              
+              </Button>       
             </Box>
           </Grid>
           <Grid item>
@@ -1543,56 +1500,6 @@ export default
                   />
                 </Popover>
               </Grid>
-              {/* <Grid item>
-                <Button
-                  className={this.props.classes.buttonsNewAdd}
-                  ml={3}
-                  variant="contained"
-                  color="primary"
-                  size={'small'}
-                  onClick={(e)=>this.handleNewEditPopoverOpen(e)}
-                  disabled={editButtonsDisableSwitchByFile}
-                >
-                  新規登録
-                </Button>
-                <Popover
-                  id={idNew}
-                  open={openNew}
-                  anchorEl={anchorNewEl}
-                  anchorReference="anchorPosition"
-                  anchorPosition={{ top: 1000, left: 1200 }}
-                  anchorOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left"
-                  }}
-                  transformOrigin={{
-                    vertical: "bottom",
-                    horizontal: "left"
-                  }}
-                  classes={{
-                    root: this.props.classes.popoverPanelRoot,
-                    paper: this.props.classes.popoverPanelpaper,
-                  }}
-                >
-                  <Typography className={this.props.classes.popoverTitle}>
-                    新規登録
-                    {this.handleNewEditPopoverClose ? (
-                      <IconButton
-                        aria-label="close"
-                        className={this.props.classes.popoverTitleCloseButton}
-                        onClick={() => this.handleNewEditPopoverClose()}
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    ) : null}
-                  </Typography>
-                  <EditPanelVocabularyNewTab
-                    classes={this.props.classes}
-                    editingVocabulary={this.props.editingVocabulary}
-                    close={() => this.handleNewEditPopoverClose()}
-                  />
-                </Popover>
-              </Grid> */}
             </Grid>
           </Grid>
         </Grid>
