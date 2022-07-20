@@ -51,8 +51,8 @@ def hypernym(txt_preprocessed_file, domain_words_file):
             hypers_a_word = [] # list containing all the broader term for word
             for synset in synsets:
                 for hypernym in synset.hypernyms():
-                    hypers_a_word.append([lemma for lemma in hypernym.lemma_names("jpn") if lemma in domain_words_no_normalized])
-            hyper[word] = list(itertools.chain.from_iterable(hypers_a_word)) # convert a two-dimensional array to a one-dimensional array
+                    hypers_a_word.append([lemma for lemma in hypernym.lemma_names("jpn") if lemma in domain_words_no_normalized and lemma != word])
+            hyper[word] = list(set(list(itertools.chain.from_iterable(hypers_a_word)))) # convert a two-dimensional array to a one-dimensional array
         except ValueError:
             hyper[word] = []
     return hyper
