@@ -102,9 +102,9 @@ export default
     let currentSynonym;
     // synonym on the selected term
     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
-      currentSynonym = this.props.editingVocabulary.currentSynonym.list;
+      currentSynonym = this.props.editingVocabulary.currentNode.synonymList;
     } else { // synonym when switching with the  language radio button in the selected term
-      currentSynonym = this.props.editingVocabulary.currentLangDiffSynonym.list; 
+      currentSynonym = this.props.editingVocabulary.currentLangDiffNode.synonymList; 
     }
 
     /* eslint-disable no-unused-vars */

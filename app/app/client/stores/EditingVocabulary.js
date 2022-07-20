@@ -960,6 +960,7 @@ class EditingVocabulary {
     uri: '',
     term: '',
     language: '',
+    synonymList: [],
     preferred_label: '',
     hidden: false,
     broader_term: '',
@@ -981,6 +982,7 @@ class EditingVocabulary {
     uri: '',
     term: '',
     language: '',
+    synonymList: [],
     preferred_label: '',
     hidden: false,
     broader_term: '',
@@ -1006,6 +1008,7 @@ class EditingVocabulary {
       uri: '',
       term: '',
       language: '',
+      synonymList: [],
       preferred_label: '',
       hidden: false,
       broader_term: '',
@@ -1023,69 +1026,6 @@ class EditingVocabulary {
   }
 
   /**
-   * Setting of new vocabulary
-   * @param {string} newTerm - new vocabulary
-   * @note assume vocabulary that is not in the editing vocabulary
-   */
-  setCurrentNodeByNewTerm(newTerm) {
-    this.currentNode = {
-      id: null,
-      idofuri: '',
-      uri: '',
-      term: newTerm,
-      language: '',
-      preferred_label: '',
-      relationTermColor: '',
-      vocabularyColor: '',
-      hidden: false,
-      broader_term: '',
-      other_voc_syn_uri: '',
-      term_description: '',
-      created_time: '',
-      modified_time: '',
-      position_x: '',
-      position_y: '',
-      locked: null,
-      color1: 'black',
-      color2: 'black',
-      confirm: 0,
-    };
-  }
-
-  /**
-   * Setting of new vocabulary if data don't have when switching with the language radio button for the selected term
-   * @param {string} newTerm - new vocabulary
-   * @param {string} sameIdofUri - same id of uri on the selected term
-   * @param {string} sameUri - same uri on the selected term
-   * @param {string} diffLang - different language on the selected term
-   * @note assume vocabulary that is not in the editing vocabulary
-   */
-  setCurrentLangDiffNodeByNewTerm(newTerm, sameIdofUri, sameUri, diffLang) {
-    this.currentLangDiffNode = {
-      id: null,
-      idofuri: sameIdofUri,
-      uri: sameUri,
-      term: newTerm,
-      language: diffLang,
-      preferred_label: '',
-      relationTermColor: '',
-      vocabularyColor: '',
-      hidden: false,
-      broader_term: '',
-      other_voc_syn_uri: '',
-      term_description: '',
-      created_time: '',
-      modified_time: '',
-      position_x: '',
-      position_y: '',
-      locked: null,
-      color1: 'black',
-      color2: 'black',
-      confirm: 0,
-    };
-  }
-
-  /**
    * Initialization of data being edited
    */
   tmpDataClear() {
@@ -1094,7 +1034,6 @@ class EditingVocabulary {
     this.tmpLanguage = {id: '', list: []};
     this.tmpBroaderTerm = {id: '', list: []};
     this.tmpSynonym = {id: '', list: []};
-    this.currentSynonym = {id: '', list: []};
     this.tmpPreferredLabel = {id: '', list: []};
     this.tmpOtherVocSynUri = {id: '', list: []};
     this.tmpTermDescription = {id: '', list: []};
@@ -1298,7 +1237,7 @@ class EditingVocabulary {
    * @return {boolean} - true: contain changes, false: not contain changes
    */
   isSynonymChanged() {
-    if (this.currentSynonym.list.length == 0) {
+    if (this.currentNode.synonymList.length == 0) {
       if (this.tmpSynonym.list.length == 0) {
         return false;
       } else {
@@ -1310,28 +1249,28 @@ class EditingVocabulary {
       } else {
         let isAllMatched = true;
         if (this.tmpLanguage.list[0] != this.currentNode.language){ 
-          this.currentLangDiffSynonym.list.forEach((languageCurrent) => {
+          this.currentLangDiffNode.synonymList.forEach((languageCurrent) => {
             const find = this.tmpSynonym.list.find((tmp) => tmp == languageCurrent);
             if (!find) {
               isAllMatched = false;
             }
           });
           this.tmpSynonym.list.forEach((languageCurrent) => {
-            const find = this.currentLangDiffSynonym.list.find((tmp) => tmp == languageCurrent);
+            const find = this.currentLangDiffNode.synonymList.find((tmp) => tmp == languageCurrent);
             if (!find) {
               isAllMatched = false;
             }
           });
         }
         else{
-          this.currentSynonym.list.forEach((current) => {
+          this.currentNode.synonymList.forEach((current) => {
             const find = this.tmpSynonym.list.find((tmp) => tmp == current);
             if (!find) {
               isAllMatched = false;
             }
           });
           this.tmpSynonym.list.forEach((current) => {
-            const find = this.currentSynonym.list.find((tmp) => tmp == current);
+            const find = this.currentNode.synonymList.find((tmp) => tmp == current);
             if (!find) {
               isAllMatched = false;
             }
@@ -1560,7 +1499,7 @@ isOtherVocSynUriChanged() {
     }
 
     if (synonymList) {
-      this.currentSynonym = {id: this.currentNode.id, list: synonymList};
+      this.currentNode.synonymList =  synonymList;
     } else {
       if (this.currentNode.preferred_label) {
         const synonymNode =
@@ -1568,15 +1507,15 @@ isOtherVocSynUriChanged() {
               node.language === this.currentNode.language &&
               node.preferred_label === this.currentNode.preferred_label,
             );
-        this.currentSynonym = {id: this.currentNode.id, list: []};
+        this.currentNode.synonymList =  [];
         synonymNode.forEach((synonym) => {
           if (synonym.term != this.currentNode.term) {
-            this.currentSynonym.list.push(synonym.term);
+            this.currentNode.synonymList.push(synonym.term);
           }
         });
       }
     }
-    this.tmpSynonym.list = this.currentSynonym.list;
+    this.tmpSynonym.list = this.currentNode.synonymList;
 
     this.tmpTermDescription ={id: this.currentNode.id, list:[]};
     if (this.currentNode.term_description) {
@@ -1709,7 +1648,7 @@ isOtherVocSynUriChanged() {
         }
       });
       this.tmpSynonym.list = synonymList;
-      this.currentLangDiffSynonym.list = synonymList;
+      this.currentLangDiffNode.synonymList = synonymList;
 
       const preferredlabel = [];
       const broaderterm = [];
@@ -2031,11 +1970,11 @@ isOtherVocSynUriChanged() {
 
     if (!this.currentNode.id) {
       // When a term is not selected, if a term is entered in the title field, select the term
-      if (this.tmpPreferredLabel.list[0]) {
-        this.setCurrentNodeByNewTerm(this.tmpPreferredLabel.list[0]);
-      } else {
+      // if (this.tmpPreferredLabel.list[0]) {
+      //   this.setCurrentNodeByNewTerm(this.tmpPreferredLabel.list[0]);
+      // } else {
         return '';
-      }
+      // }
     }
     const error = this.errorCheck();
     if (error != '') {
@@ -2115,14 +2054,14 @@ isOtherVocSynUriChanged() {
     // language data same from the selected term
     if (this.currentNode.language == this.tmpLanguage.list[0]) {
       deleteSynonymList =
-        this.currentSynonym.list.filter((i) =>
+        this.currentNode.synonymList.filter((i) =>
           this.tmpSynonym.list.indexOf(i) == -1);
       if (deleteSynonymList.length > 0) {
         console.log('delete synonym: ' + deleteSynonymList);
       }
     } else{ // language data different from the selected term
       deleteSynonymList =
-        this.currentLangDiffSynonym.list.filter((i) =>
+        this.currentLangDiffNode.synonymList.filter((i) =>
           this.tmpSynonym.list.indexOf(i) == -1);
       if (deleteSynonymList.length > 0) {
         console.log('delete synonym: ' + deleteSynonymList);
@@ -3652,14 +3591,6 @@ isOtherVocSynUriChanged() {
 
   // Synonym //////////////////////
   @observable tmpSynonym = {
-    id: '',
-    list: [],
-  };
-  @observable currentSynonym = {
-    id: '',
-    list: [],
-  };
-  @observable currentLangDiffSynonym = {
     id: '',
     list: [],
   };
