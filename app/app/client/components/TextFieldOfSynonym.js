@@ -98,7 +98,7 @@ export default
    * @return {element}
    */
   render() {
-    const synonym = this.props.editingVocabulary.tmpSynonym.list;
+    const synonym = this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list];
     let currentSynonym;
     // synonym on the selected term
     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
@@ -106,11 +106,6 @@ export default
     } else { // synonym when switching with the  language radio button in the selected term
       currentSynonym = this.props.editingVocabulary.currentLangDiffNode.synonymList; 
     }
-
-    /* eslint-disable no-unused-vars */
-    // object for rendering
-    const length = this.props.editingVocabulary.tmpSynonym.list.length;
-    /* eslint-enable no-unused-vars */
 
     return (
       <div>

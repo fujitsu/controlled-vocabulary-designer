@@ -71,11 +71,11 @@ export default class DialogSettingSynonym extends React.Component {
     this.props.editingVocabulary.setSelectedTermList(source.term);
     this.props.editingVocabulary.setCurrentNodeByTerm(source.term, null, null, true);
     
-    let tmpSynonym = [...this.props.editingVocabulary.tmpSynonym.list, target.term];    
+    let tmpSynonym = [...this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list], target.term];    
 
     this.props.editingVocabulary.updataSynonym(tmpSynonym);
 
-    this.preferredList = [...this.props.editingVocabulary.tmpSynonym.list, source.term].filter((val, i, self)=>{
+    this.preferredList = [...this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list], source.term].filter((val, i, self)=>{
       return i === self.indexOf(val);
     });
 

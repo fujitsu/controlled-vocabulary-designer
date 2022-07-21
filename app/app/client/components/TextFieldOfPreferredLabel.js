@@ -88,7 +88,7 @@ export default
       }
     } else if (newValue.length == 0) {
       // Preferred label:Missing error
-      if (this.props.editingVocabulary.tmpSynonym.list.length > 0) {
+      if (this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list].length > 0) {
         const currentTerm = this.props.editingVocabulary.currentNode.term;
         if (currentTerm) {
           // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
