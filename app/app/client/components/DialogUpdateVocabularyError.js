@@ -176,7 +176,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
         break;
       // Broader term:Loop error
       case 'cycleBroaderTerm':
-        const brdrTrm = editingVocabulary.tmpBroaderTerm.list[0];
+        const brdrTrm = editingVocabulary.tmpBroaderTerm.list[editingVocabulary.tmpLanguage.list][0];
         errorMsgEdt = '上位語テキストボックスに \"'+
                    brdrTrm +'\" を記入することで、¥n';
         errorMsgEdt += '代表語 ';
@@ -198,7 +198,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
         errorMsgEdt = errorMsgEdt.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
           
-        const brdrTrmV = editingVocabulary.tmpBroaderTerm.list[0];
+        const brdrTrmV = editingVocabulary.tmpBroaderTerm.list[editingVocabulary.tmpLanguage.list][0];
         errorMsgVoc = '上位語に \"'+
                    brdrTrmV +'\" を設定することで、¥n';
         errorMsgVoc += '代表語 ';
