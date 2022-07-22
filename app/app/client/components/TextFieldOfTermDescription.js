@@ -42,7 +42,7 @@
   }
 
    render() {
-     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.list;
+     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.list[this.props.editingVocabulary.tmpLanguage.list];
      let currentTermDescription;
      // term description on the selected term
      if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
