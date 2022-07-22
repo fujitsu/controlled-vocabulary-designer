@@ -106,7 +106,7 @@ export default
    * @return {element}
    */
   render() {
-    const preferredLabel = this.props.editingVocabulary.tmpPreferredLabel.list;
+    const preferredLabel = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list];
     let currentPreferredLabel;
     // preferred label on the selected term
     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
@@ -116,11 +116,6 @@ export default
       currentPreferredLabel =
         this.props.editingVocabulary.currentLangDiffNode.preferred_label;
     }
-
-    /* eslint-disable no-unused-vars */
-    // object for rendering
-    const length = this.props.editingVocabulary.tmpPreferredLabel.list.length;
-    /* eslint-enable no-unused-vars */
 
     return (
       <div>

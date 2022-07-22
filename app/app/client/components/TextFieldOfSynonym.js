@@ -85,7 +85,7 @@ export default
     this.props.editingVocabulary.updataSynonym(newValue);
     if (this.state.open == false) {
       const preferredLabelLength =
-        this.props.editingVocabulary.tmpPreferredLabel.list.length;
+        this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list].length;
       if (preferredLabelLength > 1) {
         const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
         this.openSnackbar(errorMsg);

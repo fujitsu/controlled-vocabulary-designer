@@ -46,7 +46,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
       currentTerm = editingVocabulary.currentNode.term;
     } else {
       // Display the preferred label as the term name if the term is not selected
-      currentTerm = editingVocabulary.tmpPreferredLabel.list.length>0 ? editingVocabulary.tmpPreferredLabel.list[0] : '';
+      currentTerm = editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list].length>0 ? editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list][0] : '';
     }
 
     let errorMsgEdt='';
@@ -61,7 +61,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
         break;
       // Preferred label:Invalid input error
       case 'invalidPreferredLabel':
-        const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[0];
+        const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list][0];
         errorMsgEdt =  '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
                    '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
                    '代表語テキストボックスには、¥n' +

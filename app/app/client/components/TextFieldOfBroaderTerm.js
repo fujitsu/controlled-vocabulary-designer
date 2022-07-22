@@ -84,7 +84,7 @@ export default
           currentTerm = this.props.editingVocabulary.currentNode.term;
         } else {
           // Display the preferred label as the term name if the term is not selected
-          currentTerm = this.props.editingVocabulary.tmpPreferredLabel.list[0];
+          currentTerm = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list][0];
         }
         const errorMsg = '上位語テキストボックスに、¥n' +
                        '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
