@@ -18,18 +18,6 @@ from nltk.corpus import wordnet as wn
 import codecs
 
 def hypernym(txt_preprocessed_file, domain_words_file):
-    # Imort text
-    words_pre1 = []
-    words_pre2 = []
-
-    with codecs.open(txt_preprocessed_file, 'r', 'utf-8', 'ignore') as f:
-        i = 0
-        for line in f:
-            words_pre1.append(line.split(" "))
-            words_pre1[i][-1] = words_pre1[i][-1].replace('\n','') # exclude extra line breaks
-            i += 1
-        words_pre2 = list(itertools.chain.from_iterable(words_pre1)) # convert a two-dimensional array to a one-dimensional array
-
     # Import a list of terms in a field, normalize strings of terms
     domain_words_csv = pd.read_csv(domain_words_file)
     domain_words_csv = domain_words_csv.fillna("")
@@ -39,9 +27,6 @@ def hypernym(txt_preprocessed_file, domain_words_file):
         domain_words_no_normalized.remove("")
     domain_words = [(unicodedata.normalize("NFKC", char)).lower() for char in domain_words if char != ""] # normalize term strings to match case
     domain_words = list(set(domain_words)) # normalize term strings and reduce term duplication by using lowercase letters
-
-    # All terms
-    words = list(set(words_pre2 + domain_words)) # delete duplicates
 
     ########## Extract broader term ##########
     hyper = {} # broader term dictionary ({keys: value} = {term name: broader termx multiple}) for return values
