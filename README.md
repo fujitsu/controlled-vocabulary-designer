@@ -13,6 +13,8 @@ CVDのヘルプページは[こちら](https://fujitsu.github.io/controlled-voca
 0. proxy環境下で使用されるときは HTTP_PROXY, HTTPS_PROXYを環境変数に設定してください。
 1. Linuxマシンのターミナル上で以下のコマンドを実行します。<br>
 ```docker-compose up -d```
+  - もし次のようなエラーが出たら```ERROR: for app  UnixHTTPConnectionPool(host='localhost', port=None): Read timed out. (read timeout=60)```  
+  HTTPタイムアウト時間を長くするように、次のように起動してください。```COMPOSE_HTTP_TIMEOUT=240 docker-compose up```
 2. 作業環境のWEBブラウザで以下にアクセスします。<br>
 ```http://(hostname):10081/```
 
