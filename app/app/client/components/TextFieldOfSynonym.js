@@ -58,8 +58,10 @@ export default
    * @param  {array} newValue - list of broader terms
    */
   onChange(event, newValue) {
+    const editingVocabulary =this.props.editingVocabulary;
+
     const inputText = event.target.value;
-    const find = this.props.editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
     if( inputText != undefined && !find){
       const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
                        '既存の用語を記入してください。';
@@ -70,8 +72,8 @@ export default
       return false;
     }
     
-    if (this.props.editingVocabulary.isRelationSynonym(newValue)) {
-      const currentTerm = this.props.editingVocabulary.currentNode.term;
+    if (editingVocabulary.isRelationSynonym(newValue)) {
+      const currentTerm = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode.term: editingVocabulary.currentLangDiffNode.term;
       const errorMsg = '下位語テキストボックスに、 \"' + currentTerm +
                        '\" あるいは \"' + currentTerm + '\" の代表語' +
                        'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
@@ -82,10 +84,10 @@ export default
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
     }
-    this.props.editingVocabulary.updataSynonym(newValue);
+    editingVocabulary.updataSynonym(newValue);
     if (this.state.open == false) {
       const preferredLabelLength =
-        this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list].length;
+        editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list].length;
       if (preferredLabelLength > 1) {
         const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
         this.openSnackbar(errorMsg);

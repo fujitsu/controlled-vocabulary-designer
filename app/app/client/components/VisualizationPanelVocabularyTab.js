@@ -76,6 +76,7 @@ export default
       anchorElC: false,           // Confirm Color Setting popover togle
       anchorElColor: false,       // border color setting popover togle
       transformTogle: false,      // transform coordinate togle
+      dlgTmpDelOpen: false,       // dialog for tmpData Delete confirm
       dlgSynonymOpen: false,      // dialog for Synonym term
       dlgBroaderOpen: false,      // dialog for Broader term confirm
       dlgDeselectTermOpen: false, // dialog for deselect term confirm
@@ -1174,9 +1175,33 @@ export default
   /**
    * Edit popover Close
    */
-  handleEditPopoverClose(){
-    this.setState({anchorEl: null});
+  handleEditPopoverClose(saved=false){
+
+    if( !saved && this.props.editingVocabulary.isCurrentNodeChanged ){
+      this.message='編集中のデータを破棄して用語選択を実行します。\n\nよろしいですか？';
+      this.setState({ dlgTmpDelOpen: true});
+    }else{
+      this.setState({ anchorEl: null});
+    }
   }
+
+  /**
+   * Edit data delete popover ok Close
+   */
+  handleTmpDelClose(){
+    this.message = '';    
+    this.props.editingVocabulary.tmpDataClear();
+    this.setState({ anchorEl: null, dlgTmpDelOpen: false});
+  }
+  
+  /**
+   * Edit data delete popover Cancel
+   */
+   handleTmpDelCancelClose(){
+    this.message = '';
+    this.setState({ dlgTmpDelOpen: false});
+  }  
+
 
   /**
    * Confirm Color popover open
@@ -1496,7 +1521,7 @@ export default
                   <EditPanelVocabularyTab
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
-                    close={() =>this.handleEditPopoverClose()}
+                    close={this.handleEditPopoverClose.bind(this)}
                   />
                 </Popover>
               </Grid>
@@ -1510,6 +1535,13 @@ export default
           classes={this.props.classes}
           source={this.synonymSource}
           target={this.synonymTarget}
+        />
+        <DialogOkCancel
+          onOkClose={() => this.handleTmpDelClose()}
+          onCancel={() =>this.handleTmpDelCancelClose()}  
+          open={this.state.dlgTmpDelOpen}
+          classes={this.props.classes}
+          message={this.message}
         />
         <DialogOkCancel
           onOkClose={() => this.handleBroaderClose()}

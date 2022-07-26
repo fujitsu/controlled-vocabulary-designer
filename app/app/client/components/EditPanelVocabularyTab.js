@@ -55,9 +55,7 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    // tmp data reset
-    this.props.editingVocabulary.languageChange();
-    this.props.editingVocabulary.languageSame();
+    this.props.editingVocabulary.setCurrentNodeByTerm(this.props.editingVocabulary.currentNode.term, null, null, true);
   }
 
   /**
@@ -153,7 +151,7 @@ export default
     if (ret !== '') {
       this.errorDialogOpen(ret);
     }else{
-      this.props.close();
+      this.props.close( true);  // true=from EditPanelVocabularyTab.updateVocabulary() 
     }
   }
 
@@ -191,9 +189,9 @@ export default
    handleRadioChange(e){
     this.setState({defalutValue: e.target.value});
     if (e.target.value != this.props.editingVocabulary.currentNode.language) {
-      this.props.editingVocabulary.languageChange();
+      this.props.editingVocabulary.tmpLanguage.list = this.props.editingVocabulary.currentNode.language == 'ja'?'en':'ja';
     }else {
-      this.props.editingVocabulary.languageSame();
+      this.props.editingVocabulary.tmpLanguage.list = this.props.editingVocabulary.currentNode.language;
     }
   }
 

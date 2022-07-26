@@ -135,24 +135,6 @@ export default class DialogUpdateVocabularyError extends React.Component {
           <span key={key}>{line}<br /></span>);
         break;
 
-      // URI error /////////////////////////////
-      // URI:Duplicate input error
-      case 'equalUri':
-        errorMsgEdt = '代表語のURIテキストボックスに、¥n' +
-                   '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
-                   '\" と同じ代表語のURIが記入されています。¥n' +
-                   '代表語のURIテキストボックスには、¥n' +
-                   '既に登録されている他の代表語のURIとは異なる値を記入してください。';
-        errorMsgEdt = errorMsgEdt.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        errorMsgVoc = '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
-                    '\" と同じ代表語のURIが設定されています。¥n' +
-                    '代表語のURIには、¥n' +
-                    '既に登録されている他の代表語のURIとは異なる値を設定してください。';
-        errorMsgVoc = errorMsgVoc.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        break;
-
       // Broader term error /////////////////////////////
       // Broader term:Multiple input error
       case 'multiBroaderTerm':
