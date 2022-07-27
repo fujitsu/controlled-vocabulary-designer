@@ -84,7 +84,7 @@ export default
           currentTerm = this.props.editingVocabulary.currentNode.term;
         } else {
           // Display the preferred label as the term name if the term is not selected
-          currentTerm = this.props.editingVocabulary.tmpPreferredLabel.list[0];
+          currentTerm = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list][0];
         }
         const errorMsg = '上位語テキストボックスに、¥n' +
                        '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
@@ -131,7 +131,7 @@ export default
    * @return {element}
    */
   render() {
-    const broaderTerm = this.props.editingVocabulary.tmpBroaderTerm.list;
+    const broaderTerm = this.props.editingVocabulary.tmpBroaderTerm.list[this.props.editingVocabulary.tmpLanguage.list];
     let currentBroaderTerm;
     // broader term on the selected term
     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
@@ -142,11 +142,6 @@ export default
         this.props.editingVocabulary.currentLangDiffNode.broader_term;
     }
     
-    /* eslint-disable no-unused-vars */
-    // object for rendering
-    const length = this.props.editingVocabulary.tmpBroaderTerm.list.length;
-    /* eslint-enable no-unused-vars */
-
     return (
       <div>
         <form noValidate autoComplete="off">
