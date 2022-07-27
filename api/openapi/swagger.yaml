@@ -194,59 +194,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
       x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
-    post:
-      tags:
-      - vocabulary
-      summary: Delete editing vocabulary term
-      operationId: delete_vocabulary_term
-      parameters:
-      - name: file_type
-        in: path
-        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
-          \ editing vocabulary data.  \n"
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      requestBody:
-        description: |
-          Specify the term id to request.
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: integer
-        required: true
-      responses:
-        "200":
-          description: |
-            Delete editing vocabulary data success.
-            Return updated EditingVocabulary list.
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EditingVocabulary'
-        "400":
-          description: |
-            Bad Request
-            ex. Invalid parameter.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        "404":
-          description: "Not Found  \nex. Request term not found.\n"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
-      x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
-      x-codegen-request-body-name: body
   /vocabulary/{file_type}/{term}:
     get:
       tags:
