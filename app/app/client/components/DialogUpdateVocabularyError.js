@@ -46,7 +46,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
       currentTerm = editingVocabulary.currentNode.term;
     } else {
       // Display the preferred label as the term name if the term is not selected
-      currentTerm = editingVocabulary.tmpPreferredLabel.list.length>0 ? editingVocabulary.tmpPreferredLabel.list[0] : '';
+      currentTerm = editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list].length>0 ? editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list][0] : '';
     }
 
     let errorMsgEdt='';
@@ -61,7 +61,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
         break;
       // Preferred label:Invalid input error
       case 'invalidPreferredLabel':
-        const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[0];
+        const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list][0];
         errorMsgEdt =  '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
                    '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
                    '代表語テキストボックスには、¥n' +
@@ -135,24 +135,6 @@ export default class DialogUpdateVocabularyError extends React.Component {
           <span key={key}>{line}<br /></span>);
         break;
 
-      // URI error /////////////////////////////
-      // URI:Duplicate input error
-      case 'equalUri':
-        errorMsgEdt = '代表語のURIテキストボックスに、¥n' +
-                   '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
-                   '\" と同じ代表語のURIが記入されています。¥n' +
-                   '代表語のURIテキストボックスには、¥n' +
-                   '既に登録されている他の代表語のURIとは異なる値を記入してください。';
-        errorMsgEdt = errorMsgEdt.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        errorMsgVoc = '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
-                    '\" と同じ代表語のURIが設定されています。¥n' +
-                    '代表語のURIには、¥n' +
-                    '既に登録されている他の代表語のURIとは異なる値を設定してください。';
-        errorMsgVoc = errorMsgVoc.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        break;
-
       // Broader term error /////////////////////////////
       // Broader term:Multiple input error
       case 'multiBroaderTerm':
@@ -176,7 +158,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
         break;
       // Broader term:Loop error
       case 'cycleBroaderTerm':
-        const brdrTrm = editingVocabulary.tmpBroaderTerm.list[0];
+        const brdrTrm = editingVocabulary.tmpBroaderTerm.list[editingVocabulary.tmpLanguage.list][0];
         errorMsgEdt = '上位語テキストボックスに \"'+
                    brdrTrm +'\" を記入することで、¥n';
         errorMsgEdt += '代表語 ';
@@ -198,7 +180,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
         errorMsgEdt = errorMsgEdt.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
           
-        const brdrTrmV = editingVocabulary.tmpBroaderTerm.list[0];
+        const brdrTrmV = editingVocabulary.tmpBroaderTerm.list[editingVocabulary.tmpLanguage.list][0];
         errorMsgVoc = '上位語に \"'+
                    brdrTrmV +'\" を設定することで、¥n';
         errorMsgVoc += '代表語 ';

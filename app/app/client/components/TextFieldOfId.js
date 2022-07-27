@@ -58,7 +58,7 @@ export default
    * @param  {array} newValue - list of preferred label
    */
   onChange(event, newValue) {
-    const prfrrdLbl = this.props.editingVocabulary.tmpPreferredLabel.list[0];
+    const prfrrdLbl = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list][0];
 
     if (newValue.length > 1) {
       // When more than one id is entered

@@ -58,8 +58,9 @@ export default
    * @param  {array} newValue - list of preferred label
    */
   onChange(event, newValue) {
+    const editingVocabulary = this.props.editingVocabulary;
     const inputText = event.target.value;
-    const find = this.props.editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
     if( inputText != undefined && !find){
       const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
                        '既存の用語を記入してください。';
@@ -70,14 +71,15 @@ export default
       return false;
     }
     
+    const currentTerm = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode.term: editingVocabulary.currentLangDiffNode.term;
+
     if (newValue.length > 1) {
       // When more than one preferred label is entered
       const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
       // When a selected term or a term that is not a synonym is entered in the preferred label
-      if (this.props.editingVocabulary.isInvalidPreferredLabel(newValue[0])) {
-        const currentTerm = this.props.editingVocabulary.currentNode.term;
+      if (editingVocabulary.isInvalidPreferredLabel(newValue[0])) {
         const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
                          '\"' +currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
                          '代表語テキストボックスには、¥n' +
@@ -88,8 +90,7 @@ export default
       }
     } else if (newValue.length == 0) {
       // Preferred label:Missing error
-      if (this.props.editingVocabulary.tmpSynonym.list.length > 0) {
-        const currentTerm = this.props.editingVocabulary.currentNode.term;
+      if (editingVocabulary.tmpSynonym.list[editingVocabulary.tmpLanguage.list].length > 0) {
         if (currentTerm) {
           // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
           const errorMsg = '代表語テキストボックスには \"' + currentTerm +
@@ -98,7 +99,7 @@ export default
         }
       }
     }
-    this.props.editingVocabulary.updataPreferredLabel(newValue);
+    editingVocabulary.updataPreferredLabel(newValue);
   }
 
   /**
@@ -106,7 +107,7 @@ export default
    * @return {element}
    */
   render() {
-    const preferredLabel = this.props.editingVocabulary.tmpPreferredLabel.list;
+    const preferredLabel = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list];
     let currentPreferredLabel;
     // preferred label on the selected term
     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
@@ -116,11 +117,6 @@ export default
       currentPreferredLabel =
         this.props.editingVocabulary.currentLangDiffNode.preferred_label;
     }
-
-    /* eslint-disable no-unused-vars */
-    // object for rendering
-    const length = this.props.editingVocabulary.tmpPreferredLabel.list.length;
-    /* eslint-enable no-unused-vars */
 
     return (
       <div>

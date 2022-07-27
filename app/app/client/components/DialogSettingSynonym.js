@@ -71,11 +71,11 @@ export default class DialogSettingSynonym extends React.Component {
     this.props.editingVocabulary.setSelectedTermList(source.term);
     this.props.editingVocabulary.setCurrentNodeByTerm(source.term, null, null, true);
     
-    let tmpSynonym = [...this.props.editingVocabulary.tmpSynonym.list, target.term];    
+    let tmpSynonym = [...this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list], target.term];    
 
     this.props.editingVocabulary.updataSynonym(tmpSynonym);
 
-    this.preferredList = [...this.props.editingVocabulary.tmpSynonym.list, source.term].filter((val, i, self)=>{
+    this.preferredList = [...this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list], source.term].filter((val, i, self)=>{
       return i === self.indexOf(val);
     });
 
@@ -84,17 +84,17 @@ export default class DialogSettingSynonym extends React.Component {
       return  val.indexOf(blankPrefix) == -1;
     });
     
-    
-    if (this.props.editingVocabulary.tmpBroaderTerm.list.length > 1) {
+    const list = this.props.editingVocabulary.tmpBroaderTerm.list[this.props.editingVocabulary.tmpLanguage.list];
+    if (list.length > 1) {
       
-      this.broaderList=[...this.props.editingVocabulary.tmpBroaderTerm.list].filter((val, i, self)=>{
+      this.broaderList=list.filter((val, i, self)=>{
         return i === self.indexOf(val);
       });
       this.broaderClassName= this.props.classes.formControl;
     }else{
       this.setState({ 
         selectPreferred: this.props.source.term,
-        selectBroader: this.props.editingVocabulary.tmpBroaderTerm.list.length > 0 ? this.props.editingVocabulary.tmpBroaderTerm.list[0] : '' 
+        selectBroader: list.length > 0 ? list[0] : '' 
       });   
     }
   }
@@ -124,7 +124,7 @@ export default class DialogSettingSynonym extends React.Component {
       window.alert('代表語を選択してください');
       return;
     }
-    if (this.props.editingVocabulary.tmpBroaderTerm.list.length > 1 && this.state.selectBroader === '') {
+    if (this.props.editingVocabulary.tmpBroaderTerm.list[this.props.editingVocabulary.tmpLanguage.list].length > 1 && this.state.selectBroader === '') {
       window.alert('上位語を選択してください');
       return;
     }
