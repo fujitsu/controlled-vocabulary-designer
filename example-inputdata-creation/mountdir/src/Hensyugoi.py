@@ -79,7 +79,7 @@ def hensyugoi(tuning, hensyugoi_file, vec, syn, hyper, filter_words, domain_word
             if(word == ""):
                 writer.writerow([word, pref_label, lang, uri_pref, broader, other_voc_syn_uri, term_description, created, modified, "", "", 0, 0, color1, color2, confirmed])
             else:
-                writer.writerow([word, pref_label, lang, uri_pref, broader, other_voc_syn_uri, term_description, created, modified, ", ".join(syn.item()[word]), ", ".join(hyper.item().get(word_normalized)), vec.item()[word_normalized][0]*tuning, vec.item()[word_normalized][1]*tuning, color1, color2, confirmed])
+                writer.writerow([word, pref_label, lang, uri_pref, broader, other_voc_syn_uri, term_description, created, modified, ", ".join(syn.item()[word]), ", ".join(hyper.item().get(word)), vec.item()[word_normalized][0]*tuning, vec.item()[word_normalized][1]*tuning, color1, color2, confirmed])
             idx = idx + 1
 
 
