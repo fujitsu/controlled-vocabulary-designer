@@ -80,6 +80,7 @@ export default
       dlgSynonymOpen: false,      // dialog for Synonym term
       dlgBroaderOpen: false,      // dialog for Broader term confirm
       dlgDeselectTermOpen: false, // dialog for deselect term confirm
+      dlgLangDiffOpen: false,     // dialog for language diff error message
       dlgErrOpen: false,          // dialog for Error
       popBorderColorOpen: false,  // popover for border color setting
       reason: '',                 // Reason for Error 
@@ -617,6 +618,15 @@ export default
       // other vocabulary node
       if(targetNode.data().term == targetNode.data().other_voc_syn_uri){ 
         event.stopPropagation()
+        return false;
+      }
+      
+      // Different languages node
+      if(sourceNode.data().language != targetNode.data().language){ 
+        this.message = '「'+sourceNode.data().term +'」（'+(sourceNode.data().language=='ja'?'日本語':'英語')
+        +'） \nと \n「'+targetNode.data().term +'」（'+(targetNode.data().language=='ja'?'日本語':'英語')
+        +'） \nは、言語が異なるので設定することができません。';
+        this.setState({dlgLangDiffOpen: true});
         return false;
       }
 
@@ -1165,6 +1175,16 @@ export default
     this.setState({dlgDeselectTermOpen: false});
   }
 
+
+
+  /**
+   * All language diff  error dialog close
+   */
+   handleLangDiffClose(){
+    this.message = '';
+    this.setState({dlgLangDiffOpen: false});
+  }
+
   /**
    * Edit popover open
    */
@@ -1554,6 +1574,14 @@ export default
           onOkClose={() => this.handleDeselectTermClose()}
           onCancel={() =>this.handleDeselectTermCancelClose()}  
           open={this.state.dlgDeselectTermOpen}
+          classes={this.props.classes}
+          message={this.message}
+        />
+        <DialogOkCancel
+          onOkClose={() => this.handleLangDiffClose()}
+          onCancel={() =>this.handleLangDiffClose()}  
+          buttonsDisable={ 1}
+          open={this.state.dlgLangDiffOpen}
           classes={this.props.classes}
           message={this.message}
         />
