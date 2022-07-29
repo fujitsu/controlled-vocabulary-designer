@@ -1180,7 +1180,9 @@ class EditingVocabulary {
       if( nodeObj.term == '' || (this.tmpPreferredLabel.list[ nodeObj.language ]=='' && nodeObj.preferred_label=='' )){        
       }else if( this.tmpPreferredLabel.list[ nodeObj.language ]=='' ||  nodeObj.preferred_label=='' ){        
         ret =  true;
-      }else if( this.tmpPreferredLabel.list[ nodeObj.language ] != nodeObj.preferred_label ){        
+      }else if( this.tmpPreferredLabel.list[ nodeObj.language ].length > 1 ){
+        ret =  true;
+      }else if( this.tmpPreferredLabel.list[ nodeObj.language ][0] != nodeObj.preferred_label ){        
         ret =  true;
       }
     });
@@ -1197,7 +1199,9 @@ class EditingVocabulary {
       if( nodeObj.term == '' || (this.tmpBroaderTerm.list[ nodeObj.language ]=='' && nodeObj.broader_term=='' )){    
       }else if( this.tmpBroaderTerm.list[ nodeObj.language ]=='' ||  nodeObj.broader_term=='' ){   
         ret =  true;
-      }else if( this.tmpBroaderTerm.list[ nodeObj.language ] != nodeObj.broader_term ){        
+      }else if( this.tmpBroaderTerm.list[ nodeObj.language ].length > 1 ){        
+        ret =  true;
+      }else if( this.tmpBroaderTerm.list[ nodeObj.language ][0] != nodeObj.broader_term ){        
         ret =  true;
       }
     });
