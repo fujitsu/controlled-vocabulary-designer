@@ -77,16 +77,6 @@ export default
   }
 
   /**
-   * Key event
-   * @param  {object} event - information of key event
-   */
-  handleKeyDown(event) {
-    if (event.keyCode === 13) {
-      event.preventDefault();
-    }
-  }
-
-  /**
    * Warning displaying snackbar events
    * @param {String} errorMsg - error message
    */
@@ -212,9 +202,7 @@ export default
     const metaAuthor = this.state.metaAuthor ? this.state.metaAuthor : '';
 
     return (
-      <div onKeyDown={(e)=>this.handleKeyDown(e)}>
-
-      {/* <div> */}
+      <div>
         <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
           <Box p={1} width="430px" height='100%' padding='20px' style={{ overflowX: 'hidden', overflowY: 'auto'}}>
             <Grid container spacing={2}>
