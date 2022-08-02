@@ -115,6 +115,11 @@ export default
       currentPreferredLabel =
         this.props.editingVocabulary.currentLangDiffNode.preferred_label;
     }
+    /* eslint-disable no-unused-vars */
+    // object for rendering
+    let length = this.props.editingVocabulary.tmpPreferredLabel.list['ja'].length;
+    length = this.props.editingVocabulary.tmpPreferredLabel.list['en'].length;
+    /* eslint-enable no-unused-vars */
 
     return (
       <div>
