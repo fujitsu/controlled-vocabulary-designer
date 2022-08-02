@@ -78,13 +78,14 @@ export default
       const nextBroaderTerm = newValue[0];
 
       // Check the validity of a broader term /////////////////////////////////////////
-      if (this.props.editingVocabulary.isInvalidBrdrTrm(nextBroaderTerm)) {
+      const currentNode = this.props.editingVocabulary.tmpLanguage.list == this.props.editingVocabulary.currentNode.language ? this.props.editingVocabulary.currentNode: this.props.editingVocabulary.currentLangDiffNode;
+      if (this.props.editingVocabulary.isInvalidBrdrTrm(currentNode, nextBroaderTerm)) {
         let currentTerm;
         if (this.props.editingVocabulary.currentNode.term) {
           currentTerm = this.props.editingVocabulary.currentNode.term;
         } else {
           // Display the preferred label as the term name if the term is not selected
-          currentTerm = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list][0];
+          currentTerm = this.props.editingVocabulary.tmpPreferredLabel.list[currentNode.language][0];
         }
         const errorMsg = '上位語テキストボックスに、¥n' +
                        '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
@@ -95,7 +96,7 @@ export default
         this.openSnackbar(innerText);
       } else {
         // Broader term loop check /////////////////////////////////////////
-        if (this.props.editingVocabulary.isCycleBrdrTrm(nextBroaderTerm)) {
+        if (this.props.editingVocabulary.isCycleBrdrTrm(currentNode, nextBroaderTerm)) {
           const cycleBroaderTerm =
             this.props.editingVocabulary.cycleBroaderTerm;
 

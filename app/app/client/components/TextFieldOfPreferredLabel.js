@@ -71,7 +71,7 @@ export default
       return false;
     }
     
-    const currentTerm = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode.term: editingVocabulary.currentLangDiffNode.term;
+    const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
 
     if (newValue.length > 1) {
       // When more than one preferred label is entered
@@ -79,24 +79,22 @@ export default
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
       // When a selected term or a term that is not a synonym is entered in the preferred label
-      if (editingVocabulary.isInvalidPreferredLabel(newValue[0])) {
+      if (editingVocabulary.isInvalidPreferredLabel(currentNode, newValue[0])) {
         const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
-                         '\"' +currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
+                         '\"' +currentNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
                          '代表語テキストボックスには、¥n' +
-                         '\"' + currentTerm + '\" または同義語の中から選んで記入してください。';
+                         '\"' + currentNode.term + '\" または同義語の中から選んで記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
       }
     } else if (newValue.length == 0) {
       // Preferred label:Missing error
-      if (editingVocabulary.tmpSynonym.list[editingVocabulary.tmpLanguage.list].length > 0) {
-        if (currentTerm) {
-          // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
-          const errorMsg = '代表語テキストボックスには \"' + currentTerm +
-                           '\" または同義語の中から選んで記入してください。';
-          this.openSnackbar(errorMsg);
-        }
+      if (currentNode.term) {
+        // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
+        const errorMsg = '代表語テキストボックスには \"' + currentNode.term +
+                          '\" または同義語の中から選んで記入してください。';
+        this.openSnackbar(errorMsg);
       }
     }
     editingVocabulary.updataPreferredLabel(newValue);
