@@ -71,13 +71,13 @@ export default
 
       return false;
     }
+    const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
     
-    if (editingVocabulary.isRelationSynonym(newValue)) {
-      const currentTerm = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode.term: editingVocabulary.currentLangDiffNode.term;
-      const errorMsg = '下位語テキストボックスに、 \"' + currentTerm +
-                       '\" あるいは \"' + currentTerm + '\" の代表語' +
-                       'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
-                       '同義語テキストボックスには、 \"' + currentTerm +
+    if (editingVocabulary.isRelationSynonym(currentNode, newValue)) {
+      const errorMsg = '下位語テキストボックスに、 \"' + currentNode.term +
+                       '\" あるいは \"' + currentNode.term + '\" の代表語' +
+                       'あるいは \"' + currentNode.term + '\" の同義語が記入されています。¥n' +
+                       '同義語テキストボックスには、 \"' + currentNode.term +
                        '\" と上下関係を持たないように、¥n' +
                        'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
@@ -87,7 +87,7 @@ export default
     editingVocabulary.updataSynonym(newValue);
     if (this.state.open == false) {
       const preferredLabelLength =
-        editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list].length;
+        editingVocabulary.tmpPreferredLabel.list[currentNode.language].length;
       if (preferredLabelLength > 1) {
         const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
         this.openSnackbar(errorMsg);

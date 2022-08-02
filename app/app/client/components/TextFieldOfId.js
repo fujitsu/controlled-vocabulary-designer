@@ -59,13 +59,14 @@ export default
    */
   onChange(event, newValue) {
     const prfrrdLbl = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list][0];
+    const currentNode = this.props.editingVocabulary.tmpLanguage.list == this.props.editingVocabulary.currentNode.language ? this.props.editingVocabulary.currentNode: this.props.editingVocabulary.currentLangDiffNode;
 
     if (newValue.length > 1) {
       // When more than one id is entered
       const errorMsg = 'IDテキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
-      if (this.props.editingVocabulary.isInvalidIdofUri(newValue[0], prfrrdLbl)) {
+      if (this.props.editingVocabulary.isInvalidIdofUri(currentNode, newValue[0], prfrrdLbl)) {
         const errorMsg = '代表語のURIテキストボックスに、¥n' +
                        '同義関係でない別の代表語 \"' +
                        this.props.editingVocabulary.equalUriPreferredLabel +
