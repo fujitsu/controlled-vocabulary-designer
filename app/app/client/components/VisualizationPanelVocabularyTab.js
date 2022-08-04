@@ -608,7 +608,7 @@ export default
   /**
    * Event registration edgeHandles
    */
-   setUpListenersEdgeHandles() {
+  setUpListenersEdgeHandles() {
     this.cy.removeListener('ehcomplete');
     this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       
@@ -618,15 +618,6 @@ export default
       // other vocabulary node
       if(targetNode.data().term == targetNode.data().other_voc_syn_uri){ 
         event.stopPropagation()
-        return false;
-      }
-      
-      // Different languages node
-      if(sourceNode.data().language != targetNode.data().language){ 
-        this.message = '「'+sourceNode.data().term +'」（'+(sourceNode.data().language=='ja'?'日本語':'英語')
-        +'） \nと \n「'+targetNode.data().term +'」（'+(targetNode.data().language=='ja'?'日本語':'英語')
-        +'） \nは、言語が異なるので設定することができません。';
-        this.setState({dlgLangDiffOpen: true});
         return false;
       }
 
