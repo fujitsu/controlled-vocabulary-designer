@@ -113,7 +113,7 @@ export default class DialogSettingSynonym extends React.Component {
         this.preferredList[ currentNode.language] = [...this.preferredList[ currentNode.language] , ...targetSynonymTermList];
       }
       this.preferredList[ currentNode.language] = this.preferredList[ currentNode.language].filter(function(val, i, self){
-	      return i === self.indexOf(val);
+	      return i === self.indexOf(val) && val != '';
       });
 
       // broader
@@ -206,6 +206,10 @@ export default class DialogSettingSynonym extends React.Component {
     const synonymSourceTerm=this.props.source?(this.props.source.term?this.props.source.term:''):'';
     const synonymTargetTerm=this.props.target?(this.props.target.term?this.props.target.term:''):'';
     const title = '「'+synonymSourceTerm+'」の同義語に 「'+synonymTargetTerm+'」を設定します。';
+    const selectedOK = ((1 > this.preferredList['ja'].length || this.state.selectPreferred_Ja!='')
+                    || ( 1 > this.preferredList['en'].length || this.state.selectPreferred_En!=''))
+                    &&(( 1 > this.broaderList['ja'].length   || this.state.selectBroader_Ja!='')
+                    || ( 1 > this.broaderList['en'].length   || this.state.selectBroader_En!=''))
     
     return (
       <div>
@@ -225,7 +229,7 @@ export default class DialogSettingSynonym extends React.Component {
             </IconButton>
           </DialogTitle>
 
-          <DialogContent style={{width: '420px',overflow: 'hidden'}}  dividers>
+          <DialogContent style={{width: '520px',overflow: 'hidden'}}  dividers>
             <Box component="div" display="block" >
               <Grid container spacing={1}>
                 <Grid item xs={12}>
@@ -328,7 +332,7 @@ export default class DialogSettingSynonym extends React.Component {
             </Box>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => this.execSetSynonym()} color="primary">
+            <Button disabled={!selectedOK} onClick={() => this.execSetSynonym()} color="primary">
             OK
             </Button>
             <Button onClick={() => this.handleClose()} color="primary">
