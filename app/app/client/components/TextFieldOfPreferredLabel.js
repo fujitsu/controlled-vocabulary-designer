@@ -61,9 +61,18 @@ export default
     const editingVocabulary = this.props.editingVocabulary;
     const inputText = event.target.value;
     const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
-    if( inputText != undefined && !find){
+    if( inputText != '' && inputText != undefined && !find){
       const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
                        '既存の用語を記入してください。';
+      const innerText = errorMsg.split('¥n').map((line, key) =>
+        <span key={key}>{line}<br /></span>);
+      this.openSnackbar(innerText);
+
+      return false;
+    }
+    if( find && find.language != editingVocabulary.tmpLanguage.list){
+      const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
+                       '現在選択されている言語の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
