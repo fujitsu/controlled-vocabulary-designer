@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS editing_vocabulary (
   "preferred_label" text,
   "language" text,
   "uri" text,
+  "idofuri_default" text,
   "broader_term" text,
   "other_voc_syn_uri" text,
   "term_description" text,

@@ -389,6 +389,9 @@ def _make_bulk_data_editing_vocabulary(data_frame):
         if '代表語のURI' in item:
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
+            insert_data['idofuri_default'] =\
+                item['代表語のURI'].rsplit('/', 1)[1] if len(item['代表語のURI'].rsplit('/', 1)) > 1 else None
+            print('uri[', insert_data['uri'],']---idofuri[',insert_data['idofuri_default'],']')
         if '上位語のURI' in item:
             insert_data['broader_term'] =\
                 item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
