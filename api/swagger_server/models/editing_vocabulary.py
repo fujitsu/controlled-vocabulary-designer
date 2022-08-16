@@ -17,7 +17,7 @@ class EditingVocabulary(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, language: str=None, uri: str=None, broader_term: str=None, synonym: List[str]=None, other_voc_syn_uri: str=None, term_description: str=None, created_time: str=None, modified_time: str=None, synonym_candidate: List[str]=None, broader_term_candidate: List[str]=None, postion_x: str=None, postion_y: str=None, color1: str=None, color2: str=None):  # noqa: E501
+    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, language: str=None, uri: str=None, idofuri_default: str=None, broader_term: str=None, synonym: List[str]=None, other_voc_syn_uri: str=None, term_description: str=None, created_time: str=None, modified_time: str=None, synonym_candidate: List[str]=None, broader_term_candidate: List[str]=None, postion_x: str=None, postion_y: str=None, color1: str=None, color2: str=None):  # noqa: E501
         """EditingVocabulary - a model defined in Swagger
 
         :param id: The id of this EditingVocabulary.  # noqa: E501
@@ -30,6 +30,8 @@ class EditingVocabulary(Model):
         :type language: str
         :param uri: The uri of this EditingVocabulary.  # noqa: E501
         :type uri: str
+        :param idofuri_default: The idofuri_default of this EditingVocabulary.  # noqa: E501
+        :type idofuri_default: str
         :param broader_term: The broader_term of this EditingVocabulary.  # noqa: E501
         :type broader_term: str
         :param synonym: The synonym of this EditingVocabulary.  # noqa: E501
@@ -61,6 +63,7 @@ class EditingVocabulary(Model):
             'preferred_label': str,
             'language': str,
             'uri': str,
+            'idofuri_default': str,
             'broader_term': str,
             'synonym': List[str],
             'other_voc_syn_uri': str,
@@ -81,6 +84,7 @@ class EditingVocabulary(Model):
             'preferred_label': 'preferred_label',
             'language': 'language',
             'uri': 'uri',
+            'idofuri_default': 'idofuri_default',
             'broader_term': 'broader_term',
             'synonym': 'synonym',
             'other_voc_syn_uri': 'other_voc_syn_uri',
@@ -99,6 +103,7 @@ class EditingVocabulary(Model):
         self._preferred_label = preferred_label
         self._language = language
         self._uri = uri
+        self._idofuri_default = idofuri_default
         self._broader_term = broader_term
         self._synonym = synonym
         self._other_voc_syn_uri = other_voc_syn_uri
@@ -227,6 +232,27 @@ class EditingVocabulary(Model):
         """
 
         self._uri = uri
+
+    @property
+    def idofuri_default(self) -> str:
+        """Gets the idofuri_default of this EditingVocabulary.
+
+
+        :return: The idofuri_default of this EditingVocabulary.
+        :rtype: str
+        """
+        return self._idofuri_default
+
+    @uri.setter
+    def idofuri_default(self, idofuri_default: str):
+        """Sets the idofuri_default of this EditingVocabulary.
+
+
+        :param idofuri_default: The idofuri_default of this EditingVocabulary.
+        :type idofuri_default: str
+        """
+
+        self._idofuri_default = idofuri_default
 
     @property
     def broader_term(self) -> str:

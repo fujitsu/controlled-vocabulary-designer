@@ -344,6 +344,8 @@ components:
           type: string
         uri:
           type: string
+        idofuri_default:
+          type: string
         broader_term:
           type: string
         synonym:
@@ -380,6 +382,7 @@ components:
         preferred_label: os
         language: ja
         uri: http://test/0/os
+        idofuri_default: os
         broader_term: http://myVocab/3
         synonym: オペレーティングシステム
         other_voc_syn_uri: http://otherVocab/16
@@ -487,6 +490,7 @@ components:
           preferred_label: os
           language: ja
           uri: http://test/0/os
+          idofuri_default: os
           broader_term: http://myVocab/3
           synonym: オペレーティングシステム
           other_voc_syn_uri: http://otherVocab/16

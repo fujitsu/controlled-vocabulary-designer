@@ -288,13 +288,16 @@ class EditingVocabulary {
         }
       } 
       
-      data.idofuri = data.uri.substring(data.uri.lastIndexOf('/')+1);
-
       // If the parameter is string (Set the empty string character)
       if (!data.preferred_label) data.preferred_label = '';
       if (!data.language) data.language = '';
-      if (!data.uri) data.idofuri = '';
-      if (!data.uri) data.uri = '';
+      if (!data.uri){
+        data.uri = '';
+        data.idofuri = '';
+      } else{
+        data.idofuri = data.uri.substring(data.uri.lastIndexOf('/')+1);
+      }
+      if (!data.idofuri_default) data.idofuri_default = '';
       if (!data.broader_term) data.broader_term = '';
       if (!data.other_voc_syn_uri) data.other_voc_syn_uri = '';
       if (!data.term_description) data.term_description = '';
@@ -1770,7 +1773,7 @@ isOtherVocSynUriChanged() {
    */
    @action isBlankTerm( term){
     const blankPrefix = this.getTermBlankPrefix();
-    if(term.indexOf( blankPrefix) != -1){
+    if(term && term.indexOf( blankPrefix) != -1){
       return true;
     }
     return false;
@@ -1893,14 +1896,14 @@ isOtherVocSynUriChanged() {
       if (currentNode.id) {
         // If the selected term is not in the editing vocabulary data, register it as a new term.
         // This is the case when the term is not selected and the term is entered in the title field
-        previous.push(this.makeVocabularyHistoryData(currentNode));//OK
+        previous.push(this.makeVocabularyHistoryData(currentNode));
       }
 
       if( !updateCurrent){
         // Add selected vocabulary
-        updateCurrent = this.createDBFormatDataByCurrentNode(currentNode);//ok
+        updateCurrent = this.createDBFormatDataByCurrentNode(currentNode);
 
-        following.push(this.makeVocabularyHistoryData(updateCurrent));//ok
+        following.push(this.makeVocabularyHistoryData(updateCurrent));
         updateTermList.push(updateCurrent);
 
       }
@@ -2370,7 +2373,7 @@ isOtherVocSynUriChanged() {
           previous.push(this.makeVocabularyHistoryData(objDelSynonym));
           // Removed synonyms were words belonging to the editing vocabulary (preferred label), so remove the association with the editing vocabulary
           objDelSynonym.preferred_label = setPreferred_label;
-          objDelSynonym.uri = '';
+          objDelSynonym.uri = objDelSynonym.uri.replace(objDelSynonym.uri.substring(objDelSynonym.uri.lastIndexOf('/')+1), objDelSynonym.idofuri_default);
           console.log(
               '[updateVocabulary] ' +
               synonym +
@@ -2925,13 +2928,13 @@ isOtherVocSynUriChanged() {
         return item.idofuri == find.idofuri && item.language != find.language
       })
       langDiffFilters.forEach((node)=>{
-        if(node.preferred_label != '') newLangDiffValue.push(node.preferred_label);
+        if(node.broader_term != '') newLangDiffValue.push(node.broader_term);
       });
     });
 
     const broaderTermNewList={ja:[], en:[]};
     broaderTermNewList[this.tmpLanguage.list] = newValue;
-    broaderTermNewList[this.tmpLanguage.list=='ja'?'en':'ja'] = newLangDiffValue;
+    broaderTermNewList[this.tmpLanguage.list=='ja'?'en':'ja'] = newLangDiffValue.length>0?newLangDiffValue:this.tmpBroaderTerm.list[this.tmpLanguage.list=='ja'?'en':'ja'];
 
     [ this.currentNode, this.currentLangDiffNode].forEach((currentNode)=>{
 
@@ -3092,7 +3095,7 @@ isOtherVocSynUriChanged() {
    */
   @action updataSynonym(newValue) {
 
-    const newLangDiffValue = [];
+    const newLangDiffValue = this.tmpSynonym.list[this.tmpLanguage.list=='ja'?'en':'ja'];
     newValue.forEach((term)=>{
       const find = this.editingVocabulary.find((d)=>d.term==term)
       const langDiffFilters=this.editingVocabulary.filter((item)=>{
@@ -3117,20 +3120,9 @@ isOtherVocSynUriChanged() {
           }else if ( synonym !== currentNode.term) {
             array.push(synonym);
           }
-        } else {
-          if (this.tmpPreferredLabel.list[currentNode.language].length == 0) {
-            // Do not allow addition to a synonym if preferred label does not exist
-          } else if (this.tmpPreferredLabel.list[currentNode.language].length == 1) {
-            // Do not add to synonyms when they are added with no vocabulary selected
-            const find = this.tmpPreferredLabel.list[currentNode.language].find(
-                (prfrrdlbl) => prfrrdlbl == synonym);
-            if (!find) {
-              array.push(synonym);
-            }
-          } else {
-            // If there are two or more preferred labels, they cannot be registered and it is difficult to complete them properly, so they are displayed as they are
-            array.push(synonym);
-          }
+        } else { // should be currentLangDiffNode
+          // If there are two or more preferred labels, they cannot be registered and it is difficult to complete them properly, so they are displayed as they are
+          array.push(synonym);
         }
       });
       // Complete only for additional updates
@@ -3259,18 +3251,33 @@ isOtherVocSynUriChanged() {
       array.push(term);
     });
 
-    const arrayLangDiff = [];
+    let arrayLangDiff = [];
     newValue.forEach((term)=>{
       const find = this.editingVocabulary.find((d)=>d.term==term)
       const langDiffnode=this.editingVocabulary.find((item)=>{
         return item.idofuri == find.idofuri && item.language != find.language
       })
-      if(langDiffnode.preferred_label != '') arrayLangDiff.push(langDiffnode.preferred_label);
+      if(langDiffnode && langDiffnode.preferred_label != '') arrayLangDiff.push(langDiffnode.preferred_label);
     });
+
+    arrayLangDiff = arrayLangDiff.filter((val, i, self)=>{ return i === self.indexOf(val)});
+    arrayLangDiff = arrayLangDiff.length>0?arrayLangDiff:this.tmpPreferredLabel.list[this.tmpLanguage.list=='ja'?'en':'ja'];
 
     this.tmpPreferredLabel.id = this.currentNode.id;  // Setting 'this.currentNode' on purpose
     this.tmpPreferredLabel.list[this.tmpLanguage.list] = array.filter((val, i, self)=>{ return i === self.indexOf(val)});
-    this.tmpPreferredLabel.list[this.tmpLanguage.list=='ja'?'en':'ja'] = arrayLangDiff.filter((val, i, self)=>{ return i === self.indexOf(val)});
+    this.tmpPreferredLabel.list[this.tmpLanguage.list=='ja'?'en':'ja'] = arrayLangDiff;
+
+    let targetPreferredLabel=false
+    if( this.tmpPreferredLabel.list['ja'].length == 1){ // Japanese PreferredLabel takes precedence
+      targetPreferredLabel = this.tmpPreferredLabel.list['ja'][0];
+    }else if(this.tmpPreferredLabel.list['ja'].length == 0 && this.tmpPreferredLabel.list['en'].length == 1){
+      targetPreferredLabel = this.tmpPreferredLabel.list['en'][0];
+    }
+    if( targetPreferredLabel){
+      const preferredNode = this.editingVocabulary.find((data) => data.term === targetPreferredLabel );
+      if(preferredNode)
+        this.tmpIdofUri.list = [ preferredNode.idofuri_default ];
+    }
   }
 
   /**
