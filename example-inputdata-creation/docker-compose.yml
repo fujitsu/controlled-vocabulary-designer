@@ -5,7 +5,6 @@ services:
     build:
       context: ./
       args:
-        - "MS_UID=${MS_UID}"
         - "PROXY=${HTTP_PROXY}"
         - "SPROXY=${HTTPS_PROXY}"
     environment:
