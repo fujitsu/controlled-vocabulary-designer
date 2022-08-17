@@ -114,15 +114,15 @@ mountdir/src/config.jsonで設定を変更することができます。
 
 ```
 用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明
-コンビニ,コンビニエンスストア,ja,http://myVocabulary/1,http://myVocabulary/2,,コンビニエンスストアの略称です
-コンビニエンスストア,コンビニエンスストア,ja,http://myVocabulary/1,http://myVocabulary/2,,コンビニエンスストアの略称です
-convenience store,convenience store,en,http://myVocabulary/1,http://myVocabulary/2,,Alias of convenience store
-drug store,convenience store,en,http://myVocabulary/1,http://myVocabulary/2,,Alias of convenience store
-the corner shop,convenience store,en,http://myVocabulary/1,http://myVocabulary/2,,Alias of convenience store
-店舗,店舗,ja,http://myVocabulary/2,,http://otherVocabulary/16,
-店,店舗,ja,http://myVocabulary/2,,http://otherVocabulary/16,
-store,store,en,http://myVocabulary/2,,http://otherVocabulary/16,
-shop,store,en,http://myVocabulary/2,,http://otherVocabulary/16,
+コンビニ,コンビニエンスストア,ja,http://sampleVocab/1,,,コンビニエンスストアの略称です
+コンビニエンスストア,コンビニエンスストア,ja,http://sampleVocab/1,,,コンビニエンスストアの略称です
+convenience store,convenience store,en,http://sampleVocab/1,,,Alias of convenience store
+drug store,convenience store,en,http://sampleVocab/1,,,Alias of convenience store
+the corner shop,convenience store,en,http://sampleVocab/1,,,Alias of convenience store
+店舗,店舗,ja,http://sampleVocab/2,,http://otherVocab/16,
+店,店舗,ja,http://sampleVocab/2,,http://otherVocab/16,
+store,store,en,http://sampleVocab/2,,http://otherVocab/16,
+shop,store,en,http://sampleVocab/2,,http://otherVocab/16,
 ```
 
 ## domain_text.txtのサンプル
@@ -166,7 +166,7 @@ Edible cotton,Edible cotton,en,http://cavoc.org/cvo/ns/3/C1055,http://cavoc.org/
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 @prefix skos: <http://www.w3.org/2004/02/skos/core#>.
 @prefix dct: <http://purl.org/dc/terms/>.
-@prefix my: <http://myVocabulary/>.
+@prefix my: <http://sampleVocab/>.
 
 my:
     rdf:type skos:ConceptScheme;
@@ -175,7 +175,7 @@ my:
     dct:description "サンプル用の語彙です"@ja, "The vocabulary for sample"@en;
     dct:creator "Sample Man".
 
-<http://otherVocabulary/>
+<http://otherVocab/>
     rdf:type skos:ConceptScheme.
 
 my:1
@@ -194,15 +194,15 @@ my:2
     skos:prefLabel "店舗"@ja, "store"@en;
     skos:altLabel "店"@ja, "shop"@en;
     skos:narrower my:1;
-    skos:exactMatch <http://otherVocabulary/16>;
+    skos:exactMatch <http://otherVocab/16>;
     dct:created "2021-04-01T11:40:15Z";
     dct:modified "2021-04-09T09:22:11Z".
 
-<http://otherVocabulary/16>
+<http://otherVocab/16>
     rdf:type skos:Concept;
-    skos:inScheme <http://otherVocabulary/>;
+    skos:inScheme <http://otherVocab/>;
     skos:exactMatch my:2.
-  ```
+```
 
 <div align="right">
   <img src="https://img.shields.io/badge/python-3-blue.svg?style=plastic&logo=python">
