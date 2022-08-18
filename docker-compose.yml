@@ -65,7 +65,6 @@ services:
       - db
     restart: always
 
-
   # DB(PostgreSQL)
   db:
     container_name: db
