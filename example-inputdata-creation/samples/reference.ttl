@@ -1,0 +1,39 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>.
+@prefix dct: <http://purl.org/dc/terms/>.
+@prefix my: <http://sampleVocab/>.
+
+my:
+    rdf:type skos:ConceptScheme;
+    dct:title "サンプル語彙"@ja, "sample vocabulary"@en;
+    dct:hasVersion "1.0.0";
+    dct:description "サンプル用の語彙です"@ja, "The vocabulary for sample"@en;
+    dct:creator "Sample Man".
+
+<http://otherVocab/>
+    rdf:type skos:ConceptScheme.
+
+my:1
+    rdf:type skos:Concept;
+    skos:inScheme my:;
+    skos:prefLabel "コンビニエンスストア"@ja, "convenience store"@en;
+    skos:altLabel "コンビニ"@ja, "drug store"@en, "the corner shop"@en;
+    skos:broader my:2;
+    dct:description "コンビニエンスストアの略称です"@ja, "Alias of convenience store"@en;
+    dct:created "2021-04-02T12:43:02Z";
+    dct:modified "2021-04-08T16:07:59Z".
+
+my:2
+    rdf:type skos:Concept;
+    skos:inScheme my:;
+    skos:prefLabel "店舗"@ja, "store"@en;
+    skos:altLabel "店"@ja, "shop"@en;
+    skos:narrower my:1;
+    skos:exactMatch <http://otherVocab/16>;
+    dct:created "2021-04-01T11:40:15Z";
+    dct:modified "2021-04-09T09:22:11Z".
+
+<http://otherVocab/16>
+    rdf:type skos:Concept;
+    skos:inScheme <http://otherVocab/>;
+    skos:exactMatch my:2.
