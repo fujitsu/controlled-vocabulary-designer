@@ -113,16 +113,16 @@ mountdir/src/config.jsonで設定を変更することができます。
 ## domain_words.csvのサンプル
 
 ```
-用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明
-コンビニ,コンビニエンスストア,ja,http://sampleVocab/1,,,コンビニエンスストアの略称です
-コンビニエンスストア,コンビニエンスストア,ja,http://sampleVocab/1,,,コンビニエンスストアの略称です
-convenience store,convenience store,en,http://sampleVocab/1,,,Alias of convenience store
-drug store,convenience store,en,http://sampleVocab/1,,,Alias of convenience store
-the corner shop,convenience store,en,http://sampleVocab/1,,,Alias of convenience store
-店舗,店舗,ja,http://sampleVocab/2,,http://otherVocab/16,
-店,店舗,ja,http://sampleVocab/2,,http://otherVocab/16,
-store,store,en,http://sampleVocab/2,,http://otherVocab/16,
-shop,store,en,http://sampleVocab/2,,http://otherVocab/16,
+用語名
+コンビニ
+コンビニエンスストア
+convenience store
+drug store
+the corner shop
+店舗
+店
+store
+shop
 ```
 
 ## domain_text.txtのサンプル
