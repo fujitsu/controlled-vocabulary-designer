@@ -28,14 +28,26 @@ mountdir/data/に、Hensyugoi.csvというファイル名で編集用語彙が�
     },
   ...
 ```
-- デフォルトでは"http\://sampleVocab/"が設定されています。デフォルトのまま以下の手順2～5のコマンドを実行した場合、各用語のURIは"http\://sampleVocab/1"、"http\://sampleVocab/2"などのように出力されます。
+- デフォルトでは"http\://sampleVocab/"が設定されています。デフォルトのままコマンドを実行した場合、各用語のURIは"http\://sampleVocab/1"、"http\://sampleVocab/2"などのように出力されます。
 - domain_words.csvの文字コードはBOM付きUTF-8で作成してください。
 
 ### domain_text.txt
 - 作成する統制語彙に関する用語を含んだテキストデータです。
 - 記号が含まれていても問題ありません。
-- domain_text.csvの文字コードはUTF-8で作成してください。
-
+- domain_text.txtの文字コードはUTF-8で作成してください。
+- 作成する統制語彙に関する用語を含んだテキストデータがない場合は、代わりにWikipediaのダンプデータを使う方法があります。ここでは、日本語Wikipediaダンプデータをdomain_text.txtとして作成する手順を記載します。※python、gitがインストールされていることが前提です。
+  - ①[日本語版Wikipediaダンプデータのページ](https://dumps.wikimedia.org/jawiki/)から、ダウンロードしたい版の日付を選択します。
+  - ②「jawiki-[日付]-pages-articles-multistream.xml.bz2」のリンクからダンプデータをダウンロードします。
+  - ③以下のコマンドで、日本語Wikipediaのダンプデータから記事本文を取り出すために使用するwikiextractorをインストールします。
+    ```
+    $ pip install wikiextractor==3.0.4
+    ```
+  - ④ダウンロードした日本語Wikipediaのダンプデータがあるディレクトリに移動します。
+  - ⑤以下のコマンドで、日本語Wikipediaのダンプデータから記事本文を取り出します。
+    ```
+    $ wikiextractor [ダウンロードした日本語Wikipediaのダンプデータ]
+    ```
+  - ⑥処理が終了すると、textディレクトリが作成され、その中に記事本文が複数ファイルに分割して抽出されています（wiki_00, wiki_01,...）。それらのファイルの中から適当に選択し、ファイル名を「domain_text.txt」として保存します。
 
 ## 参照用語彙を作成する方法
 domain_words.csvをmountdir/data/に置きます。さらに、参照したい既存の語彙がある場合は、ファイル名をreference.csvあるいはreference.ttlとしてmountdir/data/に置きます。<br>
