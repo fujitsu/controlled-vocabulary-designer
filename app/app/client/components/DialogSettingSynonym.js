@@ -124,7 +124,7 @@ export default class DialogSettingSynonym extends React.Component {
         this.broaderList[ currentNode.language].push( targetNode.broader_term)
       }
     })
-    if(  this.broaderList['ja'].length + this.broaderList['en'].length > 1 ){
+    if(  this.broaderList['ja'].length + this.broaderList['en'].length > 0 ){
       this.broaderClassName= this.props.classes.formControl;
     }
   }
