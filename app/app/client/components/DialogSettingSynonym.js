@@ -96,6 +96,22 @@ export default class DialogSettingSynonym extends React.Component {
     const targetNode = editingVocabulary.getTargetFileData(editingVocabulary.selectedFile.id).find(
       (data)=>{ return data.term == target.term });
 
+    if( targetNode.language=='ja'){
+      if( this.state.selectPreferred_Ja =='' && targetNode.preferred_label != ''){
+        this.setState({selectPreferred_Ja: targetNode.preferred_label});
+      }
+      if( this.state.selectBroader_Ja =='' && targetNode.broader_term != ''){
+        this.setState({selectBroader_Ja: targetNode.broader_term});
+      }
+    }else if( targetNode.language=='en' ){
+      if( this.state.selectPreferred_En =='' && targetNode.preferred_label != ''){
+        this.setState({selectPreferred_En: targetNode.preferred_label});
+      }
+      if( this.state.selectBroader_En =='' && targetNode.broader_term != ''){
+        this.setState({selectBroader_En: targetNode.broader_term});
+      }
+    }
+
     [ editingVocabulary.currentNode, editingVocabulary.currentLangDiffNode].forEach(( currentNode)=>{
       
       // preferred
@@ -124,7 +140,7 @@ export default class DialogSettingSynonym extends React.Component {
         this.broaderList[ currentNode.language].push( targetNode.broader_term)
       }
     })
-    if(  this.broaderList['ja'].length + this.broaderList['en'].length > 0 ){
+    if(  this.broaderList['ja'].length > 1 || this.broaderList['en'].length > 1 ){
       this.broaderClassName= this.props.classes.formControl;
     }
   }
@@ -182,7 +198,21 @@ export default class DialogSettingSynonym extends React.Component {
         en: this.state.selectPreferred_En?[this.state.selectPreferred_En]:[]
       }
     }
-    
+
+    // idofuri
+    const term = this.state.selectPreferred_Ja?this.state.selectPreferred_Ja:
+                  this.state.selectPreferred_En?this.state.selectPreferred_En:'';
+    let idofuri = term;
+    if(term){
+      const targetNode = this.props.editingVocabulary.getTargetFileData(this.props.editingVocabulary.selectedFile.id).find(
+        (data)=>{ return data.term == term });
+      if( targetNode) idofuri = targetNode.idofuri;
+    }
+    this.props.editingVocabulary.tmpIdofUri={
+      id: this.props.editingVocabulary.currentNode.id, 
+      list: [ idofuri ]
+    }
+
     // BroaderTerm
     this.props.editingVocabulary.tmpBroaderTerm={
       id: this.props.editingVocabulary.currentNode.id, 
