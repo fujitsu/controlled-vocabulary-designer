@@ -44,7 +44,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "bento/fedora-36" 
   config.vm.box_version = "202206.03.0"
   #config.proxy.http     = "http://userid:PWD@your.proxy.com:8080"
-  #config.proxy.https    = "http://userid:PWD@your.proxy.com:8080"
+  #config.proxy.https    = "https://userid:PWD@your.proxy.com:8080"
   #config.proxy.no_proxy = "localhost,127.0.0.1"
   
   config.vm.provider "virtualbox" do |v|
