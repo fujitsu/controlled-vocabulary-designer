@@ -10,6 +10,8 @@ CVDのヘルプページは[こちら](https://fujitsu.github.io/controlled-voca
 - docker-compose : バージョン1.23以上
 
 # セットアップ方法
+下記では、Linuxネイティブでの起動方法を説明します。Windowsでの起動は[こちら](./run-with-vagrant/README.md)をご覧ください。
+
 0. proxy環境下で使用されるときは HTTP_PROXY, HTTPS_PROXYを環境変数に設定してください。
 1. Linuxマシンのターミナル上で以下のコマンドを実行します。<br>
 ```docker-compose up -d```
