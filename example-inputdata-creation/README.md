@@ -34,7 +34,7 @@ mountdir/data/に、Hensyugoi.csvというファイル名で編集用語彙が�
 ### domain_text.txt
 - 作成する統制語彙に関する用語を含んだテキストデータです。
 - 記号が含まれていても問題ありません。
-- domain_text.txtの文字コードはUTF-8で作成してください。
+- domain_text.txtの文字コードはBOM付きUTF-8で作成してください。
 - 作成する統制語彙に関する用語を含んだテキストデータがない場合は、代わりにWikipediaのダンプデータを使う方法があります。ここでは、日本語Wikipediaダンプデータをdomain_text.txtとして作成する手順を記載します。※python、gitがインストールされていることが前提です。
   - ①[日本語版Wikipediaダンプデータのページ](https://dumps.wikimedia.org/jawiki/)から、ダウンロードしたい版の日付を選択します。
   - ②「jawiki-[日付]-pages-articles-multistream.xml.bz2」のリンクからダンプデータをダウンロードします。
