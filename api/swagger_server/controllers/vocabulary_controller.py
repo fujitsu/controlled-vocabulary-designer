@@ -79,7 +79,7 @@ def get_vocabulary_term(file_type, term):  # noqa: E501
     :param term: Specify the term to request. 
     :type term: str
 
-    :rtype: List[EditingVocabulary]
+    :rtype: EditingVocabulary
     """
     if file_type == 'editing_vocabulary':
 
