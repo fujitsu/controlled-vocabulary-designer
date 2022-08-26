@@ -56,7 +56,7 @@ def download_file(file_type, out_format):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify for editing_vocabulary or editing_vovabulary_meta or controlled_vocabulary.    In case of editing_vocabulary, it will download editing vocabulary file.   In case of editing_vocabulary_meta, it will download editing vocabulary file.   In case of controlled_vocabulary, it will download controlled vocabulary file.    
+    :param file_type: Specify for editing_vocabulary or editing_vovabulary_meta or controlled_vocabulary.    In case of editing_vocabulary, it will download editing vocabulary file.   In case of editing_vocabulary_meta, it will download editing vocabulary meta file.   In case of controlled_vocabulary, it will download controlled vocabulary file.    
     :type file_type: str
     :param out_format: Specify the file format.   In case of editing_vocabulary, format is csv. In case of controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld. 
     :type out_format: str
