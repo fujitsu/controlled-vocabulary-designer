@@ -1,5 +1,5 @@
 /**
- * DialogFileSelecter.js COPYRIGHT FUJITSU LIMITED 2021
+ * DialogFileSelector.js COPYRIGHT FUJITSU LIMITED 2021
  */
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -29,7 +29,7 @@ import DialogApiMetaError from './DialogApiMetaError';
  * File selection dialog
  * @extends React
  */
-export default class DialogFileSelecter extends React.Component {
+export default class DialogFileSelector extends React.Component {
   /**
    * constructor
    * @param {object} props
@@ -879,7 +879,7 @@ export default class DialogFileSelecter extends React.Component {
   }
 }
 
-DialogFileSelecter.propTypes = {
+DialogFileSelector.propTypes = {
   classes: PropTypes.object,
   editingVocabulary: PropTypes.object,
   editingVocabularyMeta: PropTypes.object,
