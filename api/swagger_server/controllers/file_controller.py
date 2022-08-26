@@ -749,7 +749,7 @@ def _check_term_format_reference_vocabulary(payload):
     return SuccessResponse('request is success.'), 200
 
 
-# Check Synonymous Relationship phase 2 reazon 0
+# Check Synonymous Relationship phase 2 reason 0
 def _check_synonymous_relationship_2_0(paylist):
     # 2-0 Check preferred labels within synonymous terms
     wk_error_term = []
@@ -763,7 +763,7 @@ def _check_synonymous_relationship_2_0(paylist):
     return SuccessResponse('request is success.'), 200
 
 
-# Check Synonymous Relationship phase 3 reazon 0
+# Check Synonymous Relationship phase 3 reason 0
 def _check_synonymous_relationship_3_0(paylist):
     # 3-0 Check the URI of preferred labels within and between preferred labels
     wk_error_term = []
@@ -777,7 +777,7 @@ def _check_synonymous_relationship_3_0(paylist):
     return SuccessResponse('request is success.'), 200
 
 
-# Check Synonymous Relationship phase 3 reazon 1
+# Check Synonymous Relationship phase 3 reason 1
 def _check_synonymous_relationship_3_1(preferredlist):
     # 3-1 Check the URI of preferred labels within and between preferred labels (in case the URI of the preferred label does not exist)
     wk_error_term = []
@@ -809,7 +809,7 @@ def _check_synonymous_relationship_3_1(preferredlist):
     return SuccessResponse('request is success.'), 200
 
 
-# Check Synonymous Relationship phase 4 reazon 0
+# Check Synonymous Relationship phase 4 reason 0
 def _check_synonymous_relationship_4_0(paylist):
     broaderlist = []
     wk_error_term = []
@@ -871,7 +871,7 @@ def _add_broader_list(broaderlist, item, itemb=None):
     return True
 
 
-# Check Synonymous Relationship phase 4 reazon 1
+# Check Synonymous Relationship phase 4 reason 1
 def _check_synonymous_relationship_4_1(payload_s, paylist):
     # 4-2 Check the broader term of preferred labels within and between preferred labels
     for name in paylist:
