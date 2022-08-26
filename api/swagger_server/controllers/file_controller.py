@@ -56,9 +56,9 @@ def download_file(file_type, out_format):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify for editing_vocabulary or controlled_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary file.   &#x27;controlled_vocabulary&#x27; get controlled vocabulary file.   
+    :param file_type: Specify for editing_vocabulary or editing_vovabulary_meta or controlled_vocabulary.    In case of editing_vocabulary, it will download editing vocabulary file.   In case of editing_vocabulary_meta, it will download editing vocabulary file.   In case of controlled_vocabulary, it will download controlled vocabulary file.    
     :type file_type: str
-    :param out_format: Specify the file format.   when editing_vocabulary, format is csv.   when controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld. 
+    :param out_format: Specify the file format.   In case of editing_vocabulary, format is csv. In case of controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld. 
     :type out_format: str
 
     :rtype: str
@@ -120,7 +120,7 @@ def download_file(file_type, out_format):  # noqa: E501
 def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None):  # noqa: E501
     """Upload the file to the server
 
-    Uploads the file selected by the client to the server.     When &#x27;editing_vocabulary&#x27; is uploaded, it checks integrity.    # noqa: E501
+    Uploads the file selected by the client to the server. When editing_vocabulary is uploaded, it checks integrity.   # noqa: E501
 
     :param editing_vocabulary: 
     :type editing_vocabulary: strstr

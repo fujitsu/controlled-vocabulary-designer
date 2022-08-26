@@ -21,8 +21,9 @@ paths:
       tags:
       - file
       summary: Upload the file to the server
-      description: "Uploads the file selected by the client to the server.  \n  When\
-        \ 'editing_vocabulary' is uploaded, it checks integrity.  \n"
+      description: |
+        Uploads the file selected by the client to the server.
+        When editing_vocabulary is uploaded, it checks integrity. 
       operationId: upload_file
       requestBody:
         description: Select the file to be uploaded.
@@ -107,9 +108,11 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify for editing_vocabulary or controlled_vocabulary.  \n\
-          'editing_vocabulary' get editing vocabulary file.  \n'controlled_vocabulary'\
-          \ get controlled vocabulary file.  \n"
+        description: |
+          Specify for editing_vocabulary or editing_vovabulary_meta or controlled_vocabulary.   
+          In case of editing_vocabulary, it will download editing vocabulary file.  
+          In case of editing_vocabulary_meta, it will download editing vocabulary file.  
+          In case of controlled_vocabulary, it will download controlled vocabulary file.   
         required: true
         style: simple
         explode: false
@@ -117,9 +120,10 @@ paths:
           type: string
       - name: out_format
         in: query
-        description: "Specify the file format.  \nwhen editing_vocabulary, format\
-          \ is csv.  \nwhen controlled_vocabulary, format is n3, nquads, nt,\
-          \ trix, turtle, xml, json-ld.\n"
+        description: |
+          Specify the file format.  
+          In case of editing_vocabulary, format is csv.
+          In case of controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld.
         required: true
         style: form
         explode: false
@@ -160,11 +164,12 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify for editing_vocabulary, reference_vocabulary1, etc.\
-          \  \n'editing_vocabulary' get editing vocabulary data.  \n'reference_vocabulary1'\
-          \ get reference vocabulary1 data.  \n'reference_vocabulary2' get reference\
-          \ vocabulary2 data.  \n'reference_vocabulary3' get reference vocabulary3\
-          \ data.  \n"
+        description: |
+          Specify for editing_vocabulary, reference_vocabulary1, etc.
+          In case of editing_vocabulary, it downloads editing vocabulary data.
+          In case of reference_vocabulary1, it downloads reference vocabulary1 data.
+          In case of reference_vocabulary2, it downloads reference vocabulary2 data.
+          In case of reference_vocabulary3, it downloads reference vocabulary3 data.
         required: true
         style: simple
         explode: false

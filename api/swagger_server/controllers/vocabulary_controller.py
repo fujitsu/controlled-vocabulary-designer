@@ -27,7 +27,7 @@ def get_vocabulary_data(file_type):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify for editing_vocabulary, reference_vocabulary1, etc.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.   &#x27;reference_vocabulary1&#x27; get reference vocabulary1 data.   &#x27;reference_vocabulary2&#x27; get reference vocabulary2 data.   &#x27;reference_vocabulary3&#x27; get reference vocabulary3 data.   
+    :param file_type: Specify for editing_vocabulary, reference_vocabulary1, etc. In case of editing_vocabulary, it downloads editing vocabulary data. In case of reference_vocabulary1, it downloads reference vocabulary1 data. In case of reference_vocabulary2, it downloads reference vocabulary2 data. In case of reference_vocabulary3, it downloads reference vocabulary3 data. 
     :type file_type: str
 
     :rtype: GetAllSuccessResponse
