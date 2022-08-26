@@ -22,10 +22,10 @@ paths:
       - file
       summary: Upload the file to the server
       description: "Uploads the file selected by the client to the server.  \n  When\
-        \ 'editing_vocabulary' uploaded, its check integrity.  \n"
+        \ 'editing_vocabulary' is uploaded, it checks integrity.  \n"
       operationId: upload_file
       requestBody:
-        description: Select the file to upload.
+        description: Select the file to be uploaded.
         content:
           multipart/form-data:
             schema:
@@ -49,7 +49,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 result: 0
-                message: editing_vocabulary.xlsx
+                message: editing_vocabulary.csv
         "404":
           description: |
             Database Error.
@@ -118,7 +118,7 @@ paths:
       - name: out_format
         in: query
         description: "Specify the file format.  \nwhen editing_vocabulary, format\
-          \ is csv or xlsx.  \nwhen controlled_vocabulary, format is n3, nquads, nt,\
+          \ is csv.  \nwhen controlled_vocabulary, format is n3, nquads, nt,\
           \ trix, turtle, xml, json-ld.\n"
         required: true
         style: form
@@ -312,23 +312,23 @@ components:
       properties:
         editing_vocabulary:
           type: string
-          description: editing_vocabulary is xlsx file
+          description: editing_vocabulary is a csv file
           format: binary
         editing_vocabulary_meta:
           type: string
-          description: editing_vocabulary_meta is xlsx file
+          description: editing_vocabulary_meta is a csv file
           format: binary
         reference_vocabulary1:
           type: string
-          description: reference_vocabulary1 is xlsx file
+          description: reference_vocabulary1 is a csv file
           format: binary
         reference_vocabulary2:
           type: string
-          description: reference_vocabulary2 is xlsx file
+          description: reference_vocabulary2 is a csv file
           format: binary
         reference_vocabulary3:
           type: string
-          description: reference_vocabulary3 is xlsx file
+          description: reference_vocabulary3 is a csv file
           format: binary
     EditingVocabulary:
       type: object

@@ -56,9 +56,9 @@ def download_file(file_type, out_format):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify for editing_vocabulary or editing_vovabulary_meta or controlled_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary file.  &#x27;editing_vocabulary_meta&#x27; get editing vocabulary meta file. &#x27;controlled_vocabulary&#x27; get controlled vocabulary file.
+    :param file_type: Specify for editing_vocabulary or controlled_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary file.   &#x27;controlled_vocabulary&#x27; get controlled vocabulary file.   
     :type file_type: str
-    :param out_format: Specify the file format.   when editing_vocabulary and editing_vovabulary_meta, format is csv or xlsx.   when controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld.
+    :param out_format: Specify the file format.   when editing_vocabulary, format is csv.   when controlled_vocabulary, format is n3, nquads, nt, trix, turtle, xml, json-ld. 
     :type out_format: str
 
     :rtype: str
@@ -120,17 +120,17 @@ def download_file(file_type, out_format):  # noqa: E501
 def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None):  # noqa: E501
     """Upload the file to the server
 
-    Uploads the file selected by the client to the server.     When &#x27;editing_vocabulary&#x27; uploaded, its check integrity.    # noqa: E501
+    Uploads the file selected by the client to the server.     When &#x27;editing_vocabulary&#x27; is uploaded, it checks integrity.    # noqa: E501
 
-    :param editing_vocabulary:
+    :param editing_vocabulary: 
     :type editing_vocabulary: strstr
-    :param editing_vocabulary_meta:
+    :param editing_vocabulary_meta: 
     :type editing_vocabulary_meta: strstr
-    :param reference_vocabulary1:
+    :param reference_vocabulary1: 
     :type reference_vocabulary1: strstr
-    :param reference_vocabulary2:
+    :param reference_vocabulary2: 
     :type reference_vocabulary2: strstr
-    :param reference_vocabulary3:
+    :param reference_vocabulary3: 
     :type reference_vocabulary3: strstr
 
     :rtype: SuccessResponse
