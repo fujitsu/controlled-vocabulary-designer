@@ -212,10 +212,10 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             _make_bulk_data_reference_vocabulary(reference_vocabulary1, r_ext)
         # format check
         exec_res, status_code =\
-            _check_trem_format_reference_vocabulary(payload)
+            _check_term_format_reference_vocabulary(payload)
         if not status_code == 200:
             print(datetime.datetime.now(),
-                  '[Error] failed _check_trem_format_reference_vocabulary',
+                  '[Error] failed _check_term_format_reference_vocabulary',
                   location())
             return ErrorResponse(0, 'Data Format Error.'), 400
         exec_res, status_code =\
@@ -240,10 +240,10 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             _make_bulk_data_reference_vocabulary(reference_vocabulary2, r_ext)
         # format check
         exec_res, status_code =\
-            _check_trem_format_reference_vocabulary(payload)
+            _check_term_format_reference_vocabulary(payload)
         if not status_code == 200:
             print(datetime.datetime.now(),
-                  '[Error] failed _check_trem_format_reference_vocabulary',
+                  '[Error] failed _check_term_format_reference_vocabulary',
                   location())
             return ErrorResponse(0, 'Data Format Error.'), 400
         exec_res, status_code =\
@@ -268,10 +268,10 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             _make_bulk_data_reference_vocabulary(reference_vocabulary3, r_ext)
         # format check
         exec_res, status_code =\
-            _check_trem_format_reference_vocabulary(payload)
+            _check_term_format_reference_vocabulary(payload)
         if not status_code == 200:
             print(datetime.datetime.now(),
-                  '[Error] failed _check_trem_format_reference_vocabulary',
+                  '[Error] failed _check_term_format_reference_vocabulary',
                   location())
             return ErrorResponse(0, 'Data Format Error.'), 400
         exec_res, status_code =\
@@ -739,8 +739,8 @@ def _check_synonymous_relationship(df):
 
 
 # Check trem format reference_vocabulary
-def _check_trem_format_reference_vocabulary(payload):
-    # An item that does not contain a key term is considered an error.
+def _check_term_format_reference_vocabulary(payload):
+    # An item that does not contain a key term is considered as an error.
     for item in payload:
         wk_preferred_label =\
             item['term'] if pd.notnull(item['term']) else None
