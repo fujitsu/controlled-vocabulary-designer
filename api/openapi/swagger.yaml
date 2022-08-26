@@ -111,7 +111,7 @@ paths:
         description: |
           Specify for editing_vocabulary or editing_vovabulary_meta or controlled_vocabulary.   
           In case of editing_vocabulary, it will download editing vocabulary file.  
-          In case of editing_vocabulary_meta, it will download editing vocabulary file.  
+          In case of editing_vocabulary_meta, it will download editing vocabulary meta file.  
           In case of controlled_vocabulary, it will download controlled vocabulary file.   
         required: true
         style: simple
