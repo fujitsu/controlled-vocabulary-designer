@@ -231,10 +231,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EditingVocabulary'
-                x-content-type: application/json
+                $ref: '#/components/schemas/EditingVocabulary'
         "400":
           description: |
             Bad Request
