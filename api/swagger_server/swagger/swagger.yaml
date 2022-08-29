@@ -47,6 +47,11 @@ paths:
             File Format Error.
             ex. Invalid file uploaded.
             Set the error file name for the message.
+            phase 0, reason 0: for editing vocaburaly, some of a required columns are not found.
+            phase 1, reason 0: for editing vocaburaly meta, some of a required columns are not found.
+            phase 2, reason 0: for reference vocaburaly1, some of a required columns are not found.
+            phase 3, reason 0: for reference vocaburaly2, some of a required columns are not found.
+            phase 4, reason 0: for reference vocaburaly3, some of a required columns are not found.
           content:
             application/json:
               schema:
@@ -61,7 +66,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/CheckErrorResponse'
               example:
                 result: 0
                 message: Database connection timeout.
