@@ -23,8 +23,9 @@ paths:
       tags:
       - file
       summary: Upload the file to the server
-      description: "Uploads the file selected by the client to the server.  \n  When\
-        \ 'editing_vocabulary' uploaded, its check integrity.  \n"
+      description: |
+        Uploads the file selected by the client to the server.
+        When editing_vocabulary is uploaded, its check integrity.
       operationId: upload_file
       requestBody:
         description: Select the file to upload.
@@ -34,8 +35,9 @@ paths:
               $ref: '#/components/schemas/Upload'
       responses:
         "200":
-          description: "Upload is complete.  \nIf the client uploads the vocabulary\
-            \ data, call the load API.\n"
+          description: |
+            Upload is completed. 
+            If the client uploads the vocabulary data, call the load API.
           content:
             application/json:
               schema:
@@ -51,7 +53,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 result: 0
-                message: editing_vocabulary.xlsx
+                message: editing_vocabulary.csv
         "404":
           description: |
             Database Error.
@@ -109,9 +111,9 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify for editing_vocabulary or controlled_vocabulary.  \n\
-          'editing_vocabulary' get editing vocabulary file.  \n'controlled_vocabulary'\
-          \ get controlled vocabulary file.  \n"
+        description: |
+          Specify for editing_vocabulary or editing_vocabulary_meta or controlled_vocabulary.
+          It downloads the selected file.
         required: true
         style: simple
         explode: false
@@ -119,9 +121,10 @@ paths:
           type: string
       - name: out_format
         in: query
-        description: "Specify the file format.  \nwhen editing_vocabulary, format\
-          \ is csv or xlsx.  \nwhen controlled_vocabulary, format is n3, nquads, nt,\
-          \ trix, turtle, xml, json-ld.\n"
+        description: |
+          Specify the file format.
+          When editing_vocabulary is set, the format is csv.
+          when controlled_vocabulary is set, the format is n3, nquads, nt, trix, turtle, xml, json-ld.
         required: true
         style: form
         explode: false
@@ -162,11 +165,12 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify for editing_vocabulary, reference_vocabulary1, etc.\
-          \  \n'editing_vocabulary' get editing vocabulary data.  \n'reference_vocabulary1'\
-          \ get reference vocabulary1 data.  \n'reference_vocabulary2' get reference\
-          \ vocabulary2 data.  \n'reference_vocabulary3' get reference vocabulary3\
-          \ data.  \n"
+        description: |
+          Specify for editing_vocabulary, reference_vocabulary1, etc.
+          When editing_vocabulary is set, it gets editing vocabulary data.
+          When reference_vocabulary1 is set, it gets reference vocabulary1 data.
+          When reference_vocabulary2 is set, it gets reference vocabulary2 data.
+          When reference_vocabulary3 is set, it gets reference vocabulary3 data.
         required: true
         style: simple
         explode: false
@@ -205,8 +209,8 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
-          \ editing vocabulary data.  \n"
+        description: |
+          Specify only editing_vocabulary.  It gets editing vocabulary data.
         required: true
         style: simple
         explode: false
@@ -253,8 +257,8 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
-          \ editing vocabulary data.  \n"
+        description: |
+          Specify only editing_vocabulary. It gets editing vocabulary data.  \n"
         required: true
         style: simple
         explode: false
@@ -312,23 +316,23 @@ components:
       properties:
         editing_vocabulary:
           type: string
-          description: editing_vocabulary is xlsx file
+          description: editing_vocabulary is a csv file
           format: binary
         editing_vocabulary_meta:
           type: string
-          description: editing_vocabulary_meta is xlsx file
+          description: editing_vocabulary_meta is a csv file
           format: binary
         reference_vocabulary1:
           type: string
-          description: reference_vocabulary1 is xlsx file
+          description: reference_vocabulary1 is a csv file
           format: binary
         reference_vocabulary2:
           type: string
-          description: reference_vocabulary2 is xlsx file
+          description: reference_vocabulary2 is a csv file
           format: binary
         reference_vocabulary3:
           type: string
-          description: reference_vocabulary3 is xlsx file
+          description: reference_vocabulary3 is a csv file
           format: binary
     EditingVocabulary:
       type: object
