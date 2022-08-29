@@ -555,15 +555,13 @@ def _check_columns(data_frame):
 # check column meta
 def _check_columns_meta(data_frame):
     # columns = '語彙の名称 語彙の英語名称 バージョン 接頭語 語彙のURI 語彙の説明 語彙の英語説明 語彙の作成者'
-    #　要求される列名
     required_columns =['語彙の名称', '語彙の英語名称', 'バージョン', '接頭語', '語彙のURI',
                         '語彙の説明', '語彙の英語説明', '語彙の作成者']
     for req_col in required_columns:
         if req_col not in data_frame.columns:
             return CheckErrorResponse(1, [req_col], 0), 400, data_frame
-
-    data_frame = data_frame[['語彙の名称', '語彙の英語名称', 'バージョン', '接頭語', '語彙のURI',
-                             '語彙の説明', '語彙の英語説明', '語彙の作成者']]
+    # trim colmuns if there is redundant colmns
+    data_frame = data_frame[required_columns] 
     return SuccessResponse('request is success.'), 200, data_frame
 
 def _make_row_data_frame(term, col):
