@@ -29,12 +29,10 @@ POSTGREST_BASE_URL = 'http://dbrest:3000/'
 REFERENCE_VOCABULARY = ['reference_vocabulary1',
                         'reference_vocabulary2',
                         'reference_vocabulary3']
-VOCABULARY_ALLOWED_EXTENSIONS = ['.xls', '.xlsx', '.csv']
-VOCABULARY_ALLOWED_EXTENSIONS_XLS = ['.xls', '.xlsx']
-VOCABULARY_ALLOWED_EXTENSIONS_CSV = ['.csv']
+VOCABULARY_ALLOWED_EXTENSIONS = ['.csv']
 REFERENCE_FORMAT = ['n3', 'nt', 'turtle', 'xml', 'nquads', 'trix']
 REFERENCE_FORMAT_JSON = ['jsonld']
-REFERENCE_FORMAT_EDIT = ['csv', 'xlsx']
+REFERENCE_FORMAT_EDIT = ['csv']
 XLSX_MIMETYPE = 'application/'\
                 'vnd.openxmlformats-officedocument.spreadsheetml.sheet'
 SPLIT_COUNT = 10000
@@ -77,7 +75,7 @@ def download_file(file_type, out_format):  # noqa: E501
         editing_vocabulary = exec_res['result']
         if len(editing_vocabulary) <= 0:
             return ErrorResponse(0, 'Download file not found.'), 404
-        # json to csv or xlsx
+        # json to csv
         ret_serialize =\
             _download_file_ev_serialize(editing_vocabulary, out_format)
         
@@ -110,7 +108,7 @@ def download_file(file_type, out_format):  # noqa: E501
         editing_vocabulary_meta = exec_res['result']
         if len(editing_vocabulary_meta) <= 0:
             return ErrorResponse(0, 'Download file not found.'), 404
-         # json to csv or xlsx
+         # json to csv
         ret_serialize =\
             _download_meta_file_ev_serialize(editing_vocabulary_meta, out_format)
 
@@ -146,7 +144,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return ErrorResponse(0, 'Data Format Error.'), 400
 
         # Check Synonymous Relationship
-        df = _read_file_strage(editing_vocabulary, r_ext)
+        df = _read_file_storage(editing_vocabulary)
 
         # Check columns
         exec_res, status_code = _check_columns(df)
@@ -175,6 +173,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return exec_res, status_code
     
     if editing_vocabulary_meta is not None:
+        # extension check
         allow_extension, r_ext =\
             _check_extensions(editing_vocabulary_meta,
                               VOCABULARY_ALLOWED_EXTENSIONS)
@@ -183,9 +182,9 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_extensions', location())
             return ErrorResponse(0, 'Data Format Error.'), 400
 
-        # Check Synonymous Relationship
-        df = _read_file_strage(editing_vocabulary_meta, r_ext)
-
+        # read file
+        df = _read_file_storage(editing_vocabulary_meta)
+        
         # Check columns
         exec_res, status_code = _check_columns_meta(df)
         if not status_code == 200:
@@ -194,6 +193,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   location())
             return exec_res, status_code
 
+        # Payload make to upload to database by REST API
         payload = _make_bulk_data_editing_vocabulary_meta(df)
 
         exec_res, status_code =\
@@ -209,7 +209,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return ErrorResponse(0, 'Data Format Error.'), 400
 
         payload =\
-            _make_bulk_data_reference_vocabulary(reference_vocabulary1, r_ext)
+            _make_bulk_data_reference_vocabulary(reference_vocabulary1)
         # format check
         exec_res, status_code =\
             _check_term_format_reference_vocabulary(payload)
@@ -237,7 +237,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return ErrorResponse(0, 'Data Format Error.'), 400
 
         payload =\
-            _make_bulk_data_reference_vocabulary(reference_vocabulary2, r_ext)
+            _make_bulk_data_reference_vocabulary(reference_vocabulary2)
         # format check
         exec_res, status_code =\
             _check_term_format_reference_vocabulary(payload)
@@ -265,7 +265,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return ErrorResponse(0, 'Data Format Error.'), 400
 
         payload =\
-            _make_bulk_data_reference_vocabulary(reference_vocabulary3, r_ext)
+            _make_bulk_data_reference_vocabulary(reference_vocabulary3)
         # format check
         exec_res, status_code =\
             _check_term_format_reference_vocabulary(payload)
@@ -325,14 +325,12 @@ def _exec_insert_postgrest(payload, url):
         return SuccessResponse('request is success.'), 200
 
 
-def _make_bulk_data_reference_vocabulary(excel_data, r_extension):
+def _make_bulk_data_reference_vocabulary(in_data):
 
     payload = []
 
-    if r_extension in VOCABULARY_ALLOWED_EXTENSIONS_XLS:
-        df = pd.read_excel(excel_data)
-    else:
-        df = pd.read_csv(excel_data)
+    df = pd.read_csv(in_data)
+    
     for index, item in df.iterrows():
         insert_data = {}
         insert_data['term'] = item['用語名']
@@ -521,15 +519,10 @@ def _add_check_term(namel, bterm, term, puri):  #
         namel.append(wkname)
 
 
-# read EXCEL File
-def _read_file_strage(file_strage, r_extension):
-    print(datetime.datetime.now(),
-          'target file extension is', r_extension, location())
-    # Read EXCEL file
-    if r_extension in VOCABULARY_ALLOWED_EXTENSIONS_XLS:
-        df = pd.read_excel(file_strage, na_values="", keep_default_na=False)
-    else:
-        df = pd.read_csv(file_strage, na_values="", keep_default_na=False)
+# read CSV File
+def _read_file_storage(file_strage):
+    # Read CSV file
+    df = pd.read_csv(file_strage, na_values="", keep_default_na=False)
     return df
 
 # check column
@@ -1267,7 +1260,7 @@ def _download_file_serialize(g, p_format):
 
 
 def _download_file_ev_serialize(pl_simple, p_format):
-    # format is csv or xlsx
+    # format is csv 
     df_json = []
     df_json = pd.json_normalize(pl_simple)
     # print("--- printing "+p_format+" ---")
@@ -1334,18 +1327,20 @@ def _download_file_ev_serialize(pl_simple, p_format):
             response.headers['Content-Disposition'] =\
                 'attachment; filename=test_sample.csv'
             return response
-    elif p_format == 'xlsx':
-        downloadFileName = 'temp_excel.xlsx'
-        df_org.to_excel(downloadFileName, encoding='utf-8', index=False)
-        response = make_response()
-        response.data = open(downloadFileName, "rb").read()
-        response.headers['Content-Disposition'] = 'attachment;'
-        response.mimetype = XLSX_MIMETYPE
-        os.remove(downloadFileName)
-        return response
+    else: 
+        pass
+    # elif p_format == 'xlsx':
+    #     downloadFileName = 'temp_excel.xlsx'
+    #     df_org.to_excel(downloadFileName, encoding='utf-8', index=False)
+    #     response = make_response()
+    #     response.data = open(downloadFileName, "rb").read()
+    #     response.headers['Content-Disposition'] = 'attachment;'
+    #     response.mimetype = XLSX_MIMETYPE
+    #     os.remove(downloadFileName)
+    #     return response
 
 def _download_meta_file_ev_serialize(pl_simple, p_format):
-    # format is csv or xlsx
+    # format is csv 
     df_json = []
     df_json = pd.json_normalize(pl_simple)
     # print("--- printing "+p_format+" ---")
@@ -1373,12 +1368,14 @@ def _download_meta_file_ev_serialize(pl_simple, p_format):
             response.headers['Content-Disposition'] =\
                 'attachment; filename=test_sample.csv'
             return response
-    elif p_format == 'xlsx':
-        downloadFileName = 'temp_excel.xlsx'
-        df_org.to_excel(downloadFileName, encoding='utf-8', index=False)
-        response = make_response()
-        response.data = open(downloadFileName, "rb").read()
-        response.headers['Content-Disposition'] = 'attachment;'
-        response.mimetype = XLSX_MIMETYPE
-        os.remove(downloadFileName)
-        return response
+    else:
+        passs
+    # elif p_format == 'xlsx':
+    #     downloadFileName = 'temp_excel.xlsx'
+    #     df_org.to_excel(downloadFileName, encoding='utf-8', index=False)
+    #     response = make_response()
+    #     response.data = open(downloadFileName, "rb").read()
+    #     response.headers['Content-Disposition'] = 'attachment;'
+    #     response.mimetype = XLSX_MIMETYPE
+    #     os.remove(downloadFileName)
+    #     return response
