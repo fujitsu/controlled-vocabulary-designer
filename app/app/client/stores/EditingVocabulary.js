@@ -3265,7 +3265,7 @@ isOtherVocSynUriChanged() {
       const langDiffnode=this.editingVocabulary.find((item)=>{
         return item.idofuri == find.idofuri && item.language != find.language
       })
-      if(langDiffnode.preferred_label != '') arrayLangDiff.push(langDiffnode.preferred_label);
+      if(langDiffnode != undefined && langDiffnode.preferred_label != '') arrayLangDiff.push(langDiffnode.preferred_label);
     });
 
     this.tmpPreferredLabel.id = this.currentNode.id;  // Setting 'this.currentNode' on purpose
