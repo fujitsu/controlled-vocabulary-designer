@@ -258,7 +258,7 @@ paths:
       - name: file_type
         in: path
         description: |
-          Specify only editing_vocabulary. It gets editing vocabulary data.  \n"
+          Specify only editing_vocabulary. It gets editing vocabulary data. 
         required: true
         style: simple
         explode: false

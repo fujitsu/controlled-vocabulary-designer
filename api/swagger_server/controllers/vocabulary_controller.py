@@ -27,7 +27,7 @@ def get_vocabulary_data(file_type):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify for editing_vocabulary, reference_vocabulary1, etc.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.   &#x27;reference_vocabulary1&#x27; get reference vocabulary1 data.   &#x27;reference_vocabulary2&#x27; get reference vocabulary2 data.   &#x27;reference_vocabulary3&#x27; get reference vocabulary3 data.
+    :param file_type: Specify for editing_vocabulary, reference_vocabulary1, etc. When editing_vocabulary is set, it gets editing vocabulary data. When reference_vocabulary1 is set, it gets reference vocabulary1 data. When reference_vocabulary2 is set, it gets reference vocabulary2 data. When reference_vocabulary3 is set, it gets reference vocabulary3 data. 
     :type file_type: str
 
     :rtype: GetAllSuccessResponse
@@ -74,9 +74,9 @@ def get_vocabulary_term(file_type, term):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify only editing_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.
+    :param file_type: Specify only editing_vocabulary.  It gets editing vocabulary data. 
     :type file_type: str
-    :param term: Specify the term to request.
+    :param term: Specify the term to request. 
     :type term: str
 
     :rtype: EditingVocabulary
@@ -119,9 +119,9 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
 
      # noqa: E501
 
-    :param body:
+    :param body: 
     :type body: list | bytes
-    :param file_type: Specify only editing_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.
+    :param file_type: Specify only editing_vocabulary. It gets editing vocabulary data.   
     :type file_type: str
     :param term: Specify the update term
     :type term: str
