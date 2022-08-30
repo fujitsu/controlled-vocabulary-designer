@@ -191,7 +191,13 @@ export default class DialogFileSelector extends React.Component {
    */
   fileUpload(e) {
 
+    // parameter existence check for editing vocabulary
     if ( !this.state.files[0].name  ) {      
+      this.setState({errOpen: true});
+      return false;
+    }
+    // parameter existence check for editing vocabulary meta
+    if ( !this.state.files[4].name  ) {
       this.setState({errOpen: true});
       return false;
     }
@@ -560,7 +566,7 @@ export default class DialogFileSelector extends React.Component {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Box component="span" display="inline">
-              編集用語彙_meta
+              編集用語彙_meta<span style={{color: 'red'}}>*</span>
               </Box>
             </Grid>
             <Grid item xs={6}>
@@ -893,7 +899,7 @@ export default class DialogFileSelector extends React.Component {
           open={this.state.errOpen}
           buttonsDisable={2}
           classes={this.props.classes}
-          message="編集用語彙ファイルを指定してください。"
+          message="編集用語彙ファイルと編集用語彙_metaファイルを指定してください。"
         />
         <DialogUpdateMetaError
           onClose={() => this.errorDialogClose()}

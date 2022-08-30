@@ -26,6 +26,7 @@ paths:
       description: |
         Uploads the file selected by the client to the server.
         When editing_vocabulary is uploaded, its check integrity.
+        When editing_vocabulary is uploaded, please upload editing_vocabulary_meta together.
       operationId: upload_file
       requestBody:
         description: Select the file to upload.
