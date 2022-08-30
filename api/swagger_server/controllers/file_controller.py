@@ -161,8 +161,14 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_synonymous_relationship',
                   location())
             return exec_res, status_code
-            
-        # Payload make to upload to database by REST API
+
+        ########################### 用語名が空文字のときの対応
+        #### 「代表語」列が空白　&「用語の説明」列が空白ではない & 他の行で「代表語のURI」列が同じでかつ「代表語」列が空白ではない行が存在する
+        # check empty term condition relation
+        # if it is not satified cause error
+
+
+        # Payload-make to upload to database by REST API
         payload = _make_bulk_data_editing_vocabulary(df)
 
         exec_res, status_code =\
@@ -207,17 +213,36 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             print(datetime.datetime.now(),
                   '[Error] failed _check_extensions', location())
             return ErrorResponse(0, 'Data Format Error.'), 400
-
-        payload =\
-            _make_bulk_data_reference_vocabulary(reference_vocabulary1)
-        # format check
-        exec_res, status_code =\
-            _check_term_format_reference_vocabulary(payload)
+        
+        # read file
+        df = _read_file_storage(reference_vocabulary1)
+        # Check columns
+        exec_res, status_code, df = _check_columns_ref(df, 1)
         if not status_code == 200:
             print(datetime.datetime.now(),
-                  '[Error] failed _check_term_format_reference_vocabulary',
+                  '[Error] failed _check_columns_ref',
                   location())
-            return ErrorResponse(0, 'Data Format Error.'), 400
+            return exec_res, status_code
+        
+        payload =\
+            _make_bulk_data_reference_vocabulary(df)
+
+        ########################### 用語名が空文字のときの対応
+        #### 「代表語」列が空白　&「用語の説明」列が空白ではない & 他の行で「代表語のURI」列が同じでかつ「代表語」列が空白ではない行が存在する
+        # check empty term condition relation
+        # if it is not satified cause error
+
+        ###  DBスキーマに　Non NULLが無いよね、。。。。
+
+        # # format check
+        # exec_res, status_code =\
+        #     _check_term_format_reference_vocabulary(payload) ###############################
+        # if not status_code == 200:
+        #     print(datetime.datetime.now(),
+        #           '[Error] failed _check_term_format_reference_vocabulary',
+        #           location())
+        #     return ErrorResponse(0, 'Data Format Error.'), 400
+
         exec_res, status_code =\
             _exec_insert_postgrest(payload, 'reference_vocabulary_1')
         if not status_code == 200:
@@ -235,17 +260,36 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_extensions',
                   location())
             return ErrorResponse(0, 'Data Format Error.'), 400
-
-        payload =\
-            _make_bulk_data_reference_vocabulary(reference_vocabulary2)
-        # format check
-        exec_res, status_code =\
-            _check_term_format_reference_vocabulary(payload)
+        
+        # read file
+        df = _read_file_storage(reference_vocabulary2)
+        # Check columns
+        exec_res, status_code, df = _check_columns_ref(df, 2)
         if not status_code == 200:
             print(datetime.datetime.now(),
-                  '[Error] failed _check_term_format_reference_vocabulary',
+                  '[Error] failed _check_columns_ref',
                   location())
-            return ErrorResponse(0, 'Data Format Error.'), 400
+            return exec_res, status_code
+        
+        payload =\
+            _make_bulk_data_reference_vocabulary(df)
+
+        ########################### 用語名が空文字のときの対応
+        #### 「代表語」列が空白　&「用語の説明」列が空白ではない & 他の行で「代表語のURI」列が同じでかつ「代表語」列が空白ではない行が存在する
+        # check empty term condition relation
+        # if it is not satified cause error
+
+        ###  DBスキーマに　Non NULLが無いよね、。。。。
+
+        # # format check
+        # exec_res, status_code =\
+        #     _check_term_format_reference_vocabulary(payload)
+        # if not status_code == 200:
+        #     print(datetime.datetime.now(),
+        #           '[Error] failed _check_term_format_reference_vocabulary',
+        #           location())
+        #     return ErrorResponse(0, 'Data Format Error.'), 400
+
         exec_res, status_code =\
             _exec_insert_postgrest(payload, 'reference_vocabulary_2')
         if not status_code == 200:
@@ -264,16 +308,35 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   location())
             return ErrorResponse(0, 'Data Format Error.'), 400
 
-        payload =\
-            _make_bulk_data_reference_vocabulary(reference_vocabulary3)
-        # format check
-        exec_res, status_code =\
-            _check_term_format_reference_vocabulary(payload)
+        # read file
+        df = _read_file_storage(reference_vocabulary3)
+        # Check columns
+        exec_res, status_code, df = _check_columns_ref(df, 3)
         if not status_code == 200:
             print(datetime.datetime.now(),
-                  '[Error] failed _check_term_format_reference_vocabulary',
+                  '[Error] failed _check_columns_ref',
                   location())
-            return ErrorResponse(0, 'Data Format Error.'), 400
+            return exec_res, status_code
+        
+        payload =\
+            _make_bulk_data_reference_vocabulary(df)
+
+        ########################### 用語名が空文字のときの対応
+        #### 「代表語」列が空白　&「用語の説明」列が空白ではない & 他の行で「代表語のURI」列が同じでかつ「代表語」列が空白ではない行が存在する
+        # check empty term condition relation
+        # if it is not satified cause error
+
+        ###  DBスキーマに　Non NULLが無いよね、。。。。
+
+        # # format check
+        # exec_res, status_code =\
+        #     _check_term_format_reference_vocabulary(payload)
+        # if not status_code == 200:
+        #     print(datetime.datetime.now(),
+        #           '[Error] failed _check_term_format_reference_vocabulary',
+        #           location())
+        #     return ErrorResponse(0, 'Data Format Error.'), 400
+        
         exec_res, status_code =\
             _exec_insert_postgrest(payload, 'reference_vocabulary_3')
         if not status_code == 200:
@@ -325,11 +388,9 @@ def _exec_insert_postgrest(payload, url):
         return SuccessResponse('request is success.'), 200
 
 
-def _make_bulk_data_reference_vocabulary(in_data):
+def _make_bulk_data_reference_vocabulary(df):
 
     payload = []
-
-    df = pd.read_csv(in_data)
     
     for index, item in df.iterrows():
         insert_data = {}
@@ -556,6 +617,24 @@ def _check_columns_meta(data_frame):
     data_frame = data_frame[required_columns] 
     return SuccessResponse('request is success.'), 200, data_frame
 
+# check column meta
+def _check_columns_ref(data_frame, ref_num):
+    # ref_num: int, the number of reference vocabulary file
+    # columns = '語彙の名称 語彙の英語名称 バージョン 接頭語 語彙のURI 語彙の説明 語彙の英語説明 語彙の作成者'
+    required_columns =['用語名', '代表語', '言語', '代表語のURI', '上位語のURI',
+                        '他語彙体系の同義語のURI', '用語の説明', '作成日',
+                        '最終更新日', '同義語候補', '上位語候補',
+                        'x座標値', 'y座標値' ]
+    missing_colmuns = []
+    for req_col in required_columns:
+        if req_col not in data_frame.columns:
+            missing_colmuns.append(req_col)
+    if missing_colmuns: # if it is empty
+        return CheckErrorResponse(1, missing_colmuns, ref_num+1), 400, data_frame
+    # trim colmuns if there is redundant colmns
+    data_frame = data_frame[required_columns] 
+    return SuccessResponse('request is success.'), 200, data_frame
+
 def _make_row_data_frame(term, col):
     """Make row data
 
@@ -722,7 +801,7 @@ def _check_synonymous_relationship(df):
     return SuccessResponse('request is success.'), 200
 
 
-# Check trem format reference_vocabulary
+# Check term format reference_vocabulary
 def _check_term_format_reference_vocabulary(payload):
     # An item that does not contain a key term is considered as an error.
     for item in payload:
