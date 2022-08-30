@@ -240,6 +240,43 @@ export default class DialogFileSelector extends React.Component {
             errCode = errResponse.status;
             switch (errCode) {
               case 400:
+                if ( (errResponse.data.phase == 0) &&
+                     (errResponse.data.reason == 0)) {
+                  errMsg = '編集用語彙の、列「' +
+                    errResponse.data.terms[0] +
+                    '」が無いためファイルが読み込めません。「'+
+                    errResponse.data.terms[0] +
+                    '」を追加して再読み込みしてください。' ;
+                } else if ( (errResponse.data.phase == 1) &&
+                     (errResponse.data.reason == 0)) {
+                  errMsg = '編集用語彙_metaの、列「' +
+                    errResponse.data.terms[0] +
+                    '」が無いためファイルが読み込めません。「'+
+                    errResponse.data.terms[0] +
+                    '」を追加して再読み込みしてください。' ;
+                } else if ( (errResponse.data.phase == 2) &&
+                    (errResponse.data.reason == 0)) {
+                  errMsg = '参照用語彙1の、列「' +
+                    errResponse.data.terms[0] +
+                    '」が無いためファイルが読み込めません。「'+
+                    errResponse.data.terms[0] +
+                    '」を追加して再読み込みしてください。' ;
+                } else if ( (errResponse.data.phase == 3) &&
+                    (errResponse.data.reason == 0)) {
+                  errMsg = '参照用語彙2の、列「' +
+                    errResponse.data.terms[0] +
+                    '」が無いためファイルが読み込めません。「'+
+                    errResponse.data.terms[0] +
+                    '」を追加して再読み込みしてください。' ;
+                } else if ( (errResponse.data.phase == 4) &&
+                    (errResponse.data.reason == 0)) {
+                  errMsg = '参照用語彙3の、列「' +
+                    errResponse.data.terms[0] +
+                    '」が無いためファイルが読み込めません。「'+
+                    errResponse.data.terms[0] +
+                    '」を追加して再読み込みしてください。' ;
+                }
+                break;
               case 404:
                 // For errors defined in the API
                 if (err.response.data.message) {
