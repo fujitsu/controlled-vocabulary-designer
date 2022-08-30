@@ -527,29 +527,18 @@ def _read_file_storage(file_strage):
 
 # check column
 def _check_columns(data_frame):
-    # columns = '用語名 代表語 言語 代表語のURI 上位語のURI 他語彙体系の同義語のURI 用語の説明 作成日 最終更新日 同義語候補 上位語候補 x座標値 y座標値 色1 色2'
-    # ins_f = lambda x:columns not in x
-    for index, item in data_frame.iterrows():
-        # if any(map(ins_f, item)):
-        if ('用語名' not in item
-         or '代表語' not in item
-         or '言語' not in item
-         or '代表語のURI' not in item
-         or '上位語のURI' not in item
-         or '他語彙体系の同義語のURI' not in item
-         or '用語の説明' not in item
-         or '作成日' not in item
-         or '最終更新日' not in item
-         or '同義語候補' not in item
-         or '上位語候補' not in item
-         or 'x座標値' not in item
-         or 'y座標値' not in item
-         or '色1' not in item
-         or '色2' not in item):
-            return ErrorResponse(0, 'Data Format Error.'), 400
-    data_frame = data_frame[['用語名', '代表語', '言語', '代表語のURI',
-                             '上位語のURI', '他語彙体系の同義語のURI', '用語の説明', 
-                             '作成日', '最終更新日', '同義語候補', '上位語候補', 'x座標値', 'y座標値', '色1', '色2' ]]
+    # columns = '用語名 代表語 言語 代表語のURI 上位語のURI 他語彙体系の同義語のURI 用語の説明 作成日 最終更新日 同義語候補 上位語候補 x座標値 y座標値 色1 色2 確定済み用語''
+    required_columns =['用語名', '代表語', '言語', '代表語のURI', '上位語のURI',
+                        '他語彙体系の同義語のURI', '用語の説明', '作成日',
+                        '最終更新日', '同義語候補', '上位語候補',
+                        'x座標値', 'y座標値', '色1', '色2', '確定済み用語' ]
+    missing_colmuns = []
+    for req_col in required_columns:
+        if req_col not in data_frame.columns:
+            missing_colmuns.append(req_col)
+    if missing_colmuns: # if it is empty
+        return CheckErrorResponse(0, missing_colmuns, 0), 400, data_frame
+    data_frame = data_frame[required_columns]
     return SuccessResponse('request is success.'), 200, data_frame
 
 # check column meta
@@ -557,9 +546,12 @@ def _check_columns_meta(data_frame):
     # columns = '語彙の名称 語彙の英語名称 バージョン 接頭語 語彙のURI 語彙の説明 語彙の英語説明 語彙の作成者'
     required_columns =['語彙の名称', '語彙の英語名称', 'バージョン', '接頭語', '語彙のURI',
                         '語彙の説明', '語彙の英語説明', '語彙の作成者']
+    missing_colmuns = []
     for req_col in required_columns:
         if req_col not in data_frame.columns:
-            return CheckErrorResponse(1, [req_col], 0), 400, data_frame
+            missing_colmuns.append(req_col)
+    if missing_colmuns: # if it is empty
+        return CheckErrorResponse(1, missing_colmuns, 0), 400, data_frame
     # trim colmuns if there is redundant colmns
     data_frame = data_frame[required_columns] 
     return SuccessResponse('request is success.'), 200, data_frame
