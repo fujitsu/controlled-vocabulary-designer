@@ -47,11 +47,11 @@ paths:
             File Format Error.
             ex. Invalid file uploaded.
             Set the error file name for the message.
-            phase 0, reason 0: for editing vocaburaly, some of a required columns are not found.
-            phase 1, reason 0: for editing vocaburaly meta, some of a required columns are not found.
-            phase 2, reason 0: for reference vocaburaly1, some of a required columns are not found.
-            phase 3, reason 0: for reference vocaburaly2, some of a required columns are not found.
-            phase 4, reason 0: for reference vocaburaly3, some of a required columns are not found.
+            phase 0, reason 0: for editing vocaburaly, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 1, reason 0: for editing vocaburaly meta, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 2, reason 0: for reference vocaburaly1, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 3, reason 0: for reference vocaburaly2, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 4, reason 0: for reference vocaburaly3, some of a required columns are not found. Missing colmuns are in terms parameter.
           content:
             application/json:
               schema:
