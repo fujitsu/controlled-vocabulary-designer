@@ -21,9 +21,6 @@ import axios from 'axios';
 import $ from 'jquery';
 
 import DialogOkCancel from './DialogOkCancel';
-import EditPanelMetaTab from './EditPanelMetaTab';
-import DialogUpdateMetaError from './DialogUpdateMetaError';
-import DialogApiMetaError from './DialogApiMetaError';
 
 /**
  * File selection dialog
@@ -41,7 +38,6 @@ export default class DialogFileSelector extends React.Component {
       open: false,
       errOpen: false,
       reason: '',
-      activeStep: 0,
       files: [
         {
           name: '',
@@ -71,24 +67,6 @@ export default class DialogFileSelector extends React.Component {
       ],
     };
   }
-
-  /**
-   * NEXT button press event
-   */
-  handleNext(){
-    const step = this.state.activeStep;
-    // this.setState({activeStep: step + 1});
-    // temporary solution
-    setTimeout( ()=>{ this.setState({activeStep: step + 1});}, 1000 )
-  };
-
-  /**
-   * PREV button press event
-   */
-  handleBack(){
-    const step = this.state.activeStep;
-    this.setState({activeStep: step - 1});
-  };
 
   /**
    * Determines if the file being uploaded is already uploaded
@@ -234,7 +212,7 @@ export default class DialogFileSelector extends React.Component {
           if (undefined != this.state.files[4].file.name) {
             this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
           }
-          this.handleNext();
+          this.handleClose();
         }).catch((err) => {
           console.log('error callback.');
           this.uploadingEnd();
@@ -364,7 +342,6 @@ export default class DialogFileSelector extends React.Component {
 
    */
   handleClose() {
-    this.setState({activeStep: 0});
     this.props.onClose();
   };
 
@@ -458,33 +435,6 @@ export default class DialogFileSelector extends React.Component {
    */
   uploadingStart() {
     this.setState( {uploading: true} );
-  }
-
-  /**
-   * Error dialog open
-   * @param  {string} ret - error content
-   */
-   errorDialogOpen(ret) {
-    this.setState({open: true, reason: ret});
-  }
-
-  /**
-   * Error dialog close
-   */
-  errorDialogClose() {
-    this.setState({open: false, reason: ''});
-  }
-
-  /**
-   * Update edits
-   */
-  updateMetaData() {
-    const ret = this.props.editingVocabularyMeta.updateMetaData();
-    if (ret !== '') {
-      this.errorDialogOpen(ret);
-    }else{
-      this.handleClose();
-    }
   }
 
   /**
@@ -840,35 +790,12 @@ export default class DialogFileSelector extends React.Component {
             </DialogActions>
           </DialogTitle>
           <DialogContent style={{width: '450px', overflow:'hidden'}}>
-
-            {this.state.activeStep === 0 ? fileReadContent
-            : <EditPanelMetaTab 
-                classes={this.props.classes}
-                editingVocabulary={this.props.editingVocabulary}
-                editingVocabularyMeta={this.props.editingVocabularyMeta}
-                submitDisabled={true}
-                value={true}
-              />}
+            { fileReadContent }
           </DialogContent>
 
           <Grid container justify="center" spacing={1} style={{ marginBottom: '-20px'}}>
 
-            {this.state.activeStep === 0 ?(
-            
-            <Button
-            color="primary"
-            onClick={(e)=>{this.fileUpload(e)}}
-            className={this.props.classes.stepButton}
-            >NEXT</Button>
-                
-              ) :(
-            <Button
-            color="primary"
-            onClick={()=>this.handleBack()}
-            className={this.props.classes.stepButton}
-            >PREV</Button>)}  
-
-            <Button
+          <Button
               color="primary"
               onClick={()=>this.handleClose()}
               className={this.props.classes.stepButton}
@@ -876,13 +803,13 @@ export default class DialogFileSelector extends React.Component {
               CANCEL
             </Button>
 
-            {this.state.activeStep === 1 && 
             <Button
               color="primary"
-              onClick={()=>this.updateMetaData()}
+              onClick={()=>this.fileUpload()}
               className={this.props.classes.stepButton}
-            >OK</Button>}
-
+            >
+              OK
+            </Button>
           </Grid>
         </Dialog>
 
@@ -900,22 +827,6 @@ export default class DialogFileSelector extends React.Component {
           buttonsDisable={2}
           classes={this.props.classes}
           message="編集用語彙ファイルと編集用語彙_metaファイルを指定してください。"
-        />
-        <DialogUpdateMetaError
-          onClose={() => this.errorDialogClose()}
-          open={this.state.open}
-          classes={this.props.classes}
-          editingVocabulary={this.props.editingVocabulary}
-          editingVocabularyMeta={this.props.editingVocabularyMeta}
-          isFromEditPanel={true}
-          reason={this.state.reason}
-        />
-        <DialogApiMetaError
-          open={this.props.editingVocabularyMeta.apiErrorDialog.open}
-          classes={this.props.classes}
-          editingVocabulary={this.props.editingVocabulary}
-          editingVocabularyMeta={this.props.editingVocabularyMeta}
-          close={() => this.props.editingVocabularyMeta.closeApiErrorDialog()}
         />
       </div>
     );
