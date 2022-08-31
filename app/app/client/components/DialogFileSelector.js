@@ -21,9 +21,6 @@ import axios from 'axios';
 import $ from 'jquery';
 
 import DialogOkCancel from './DialogOkCancel';
-import EditPanelMetaTab from './EditPanelMetaTab';
-import DialogUpdateMetaError from './DialogUpdateMetaError';
-import DialogApiMetaError from './DialogApiMetaError';
 
 /**
  * File selection dialog
@@ -41,7 +38,6 @@ export default class DialogFileSelector extends React.Component {
       open: false,
       errOpen: false,
       reason: '',
-      activeStep: 0,
       files: [
         {
           name: '',
@@ -71,24 +67,6 @@ export default class DialogFileSelector extends React.Component {
       ],
     };
   }
-
-  /**
-   * NEXT button press event
-   */
-  handleNext(){
-    const step = this.state.activeStep;
-    // this.setState({activeStep: step + 1});
-    // temporary solution
-    setTimeout( ()=>{ this.setState({activeStep: step + 1});}, 1000 )
-  };
-
-  /**
-   * PREV button press event
-   */
-  handleBack(){
-    const step = this.state.activeStep;
-    this.setState({activeStep: step - 1});
-  };
 
   /**
    * Determines if the file being uploaded is already uploaded
@@ -191,7 +169,13 @@ export default class DialogFileSelector extends React.Component {
    */
   fileUpload(e) {
 
+    // parameter existence check for editing vocabulary
     if ( !this.state.files[0].name  ) {      
+      this.setState({errOpen: true});
+      return false;
+    }
+    // parameter existence check for editing vocabulary meta
+    if ( !this.state.files[4].name  ) {
       this.setState({errOpen: true});
       return false;
     }
@@ -228,7 +212,7 @@ export default class DialogFileSelector extends React.Component {
           if (undefined != this.state.files[4].file.name) {
             this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
           }
-          this.handleNext();
+          this.handleClose();
         }).catch((err) => {
           console.log('error callback.');
           this.uploadingEnd();
@@ -358,7 +342,6 @@ export default class DialogFileSelector extends React.Component {
 
    */
   handleClose() {
-    this.setState({activeStep: 0});
     this.props.onClose();
   };
 
@@ -455,33 +438,6 @@ export default class DialogFileSelector extends React.Component {
   }
 
   /**
-   * Error dialog open
-   * @param  {string} ret - error content
-   */
-   errorDialogOpen(ret) {
-    this.setState({open: true, reason: ret});
-  }
-
-  /**
-   * Error dialog close
-   */
-  errorDialogClose() {
-    this.setState({open: false, reason: ''});
-  }
-
-  /**
-   * Update edits
-   */
-  updateMetaData() {
-    const ret = this.props.editingVocabularyMeta.updateMetaData();
-    if (ret !== '') {
-      this.errorDialogOpen(ret);
-    }else{
-      this.handleClose();
-    }
-  }
-
-  /**
    * render
    * @return {element}
    */
@@ -560,7 +516,7 @@ export default class DialogFileSelector extends React.Component {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Box component="span" display="inline">
-              編集用語彙_meta
+              編集用語彙_meta<span style={{color: 'red'}}>*</span>
               </Box>
             </Grid>
             <Grid item xs={6}>
@@ -834,35 +790,12 @@ export default class DialogFileSelector extends React.Component {
             </DialogActions>
           </DialogTitle>
           <DialogContent style={{width: '450px', overflow:'hidden'}}>
-
-            {this.state.activeStep === 0 ? fileReadContent
-            : <EditPanelMetaTab 
-                classes={this.props.classes}
-                editingVocabulary={this.props.editingVocabulary}
-                editingVocabularyMeta={this.props.editingVocabularyMeta}
-                submitDisabled={true}
-                value={true}
-              />}
+            { fileReadContent }
           </DialogContent>
 
           <Grid container justify="center" spacing={1} style={{ marginBottom: '-20px'}}>
 
-            {this.state.activeStep === 0 ?(
-            
-            <Button
-            color="primary"
-            onClick={(e)=>{this.fileUpload(e)}}
-            className={this.props.classes.stepButton}
-            >NEXT</Button>
-                
-              ) :(
-            <Button
-            color="primary"
-            onClick={()=>this.handleBack()}
-            className={this.props.classes.stepButton}
-            >PREV</Button>)}  
-
-            <Button
+          <Button
               color="primary"
               onClick={()=>this.handleClose()}
               className={this.props.classes.stepButton}
@@ -870,13 +803,13 @@ export default class DialogFileSelector extends React.Component {
               CANCEL
             </Button>
 
-            {this.state.activeStep === 1 && 
             <Button
               color="primary"
-              onClick={()=>this.updateMetaData()}
+              onClick={()=>this.fileUpload()}
               className={this.props.classes.stepButton}
-            >OK</Button>}
-
+            >
+              OK
+            </Button>
           </Grid>
         </Dialog>
 
@@ -893,23 +826,7 @@ export default class DialogFileSelector extends React.Component {
           open={this.state.errOpen}
           buttonsDisable={2}
           classes={this.props.classes}
-          message="編集用語彙ファイルを指定してください。"
-        />
-        <DialogUpdateMetaError
-          onClose={() => this.errorDialogClose()}
-          open={this.state.open}
-          classes={this.props.classes}
-          editingVocabulary={this.props.editingVocabulary}
-          editingVocabularyMeta={this.props.editingVocabularyMeta}
-          isFromEditPanel={true}
-          reason={this.state.reason}
-        />
-        <DialogApiMetaError
-          open={this.props.editingVocabularyMeta.apiErrorDialog.open}
-          classes={this.props.classes}
-          editingVocabulary={this.props.editingVocabulary}
-          editingVocabularyMeta={this.props.editingVocabularyMeta}
-          close={() => this.props.editingVocabularyMeta.closeApiErrorDialog()}
+          message="編集用語彙ファイルと編集用語彙_metaファイルを指定してください。"
         />
       </div>
     );
