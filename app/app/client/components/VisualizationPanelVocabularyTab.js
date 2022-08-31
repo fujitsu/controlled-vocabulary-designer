@@ -536,6 +536,8 @@ export default
         return;
       }
       const target = event.target.data();
+      const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
+      console.log('--[ event - data(cy) - data(react) ]-- '+target.term,event, target, find)
       // other vocabulary node
       if(target.term == target.other_voc_syn_uri){ 
         return;

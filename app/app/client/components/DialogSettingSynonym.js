@@ -86,15 +86,35 @@ export default class DialogSettingSynonym extends React.Component {
     editingVocabulary.setSelectedTermList(source.term);
     editingVocabulary.setCurrentNodeByTerm(source.term, null, null, true);
 
-    this.setState({ 
-      selectPreferred_Ja:editingVocabulary.currentNode.language=='ja'?editingVocabulary.currentNode.preferred_label:editingVocabulary.currentLangDiffNode.preferred_label,
-      selectPreferred_En:editingVocabulary.currentNode.language=='en'?editingVocabulary.currentNode.preferred_label:editingVocabulary.currentLangDiffNode.preferred_label,
-      selectBroader_Ja:editingVocabulary.currentNode.language=='ja'?editingVocabulary.currentNode.broader_term:editingVocabulary.currentLangDiffNode.broader_term,
-      selectBroader_En:editingVocabulary.currentNode.language=='en'?editingVocabulary.currentNode.broader_term:editingVocabulary.currentLangDiffNode.broader_term
-    });
+    let selectPreferred_Ja = editingVocabulary.currentNode.language=='ja'?editingVocabulary.currentNode.preferred_label:editingVocabulary.currentLangDiffNode.preferred_label;
+    let selectPreferred_En = editingVocabulary.currentNode.language=='en'?editingVocabulary.currentNode.preferred_label:editingVocabulary.currentLangDiffNode.preferred_label;
+    let selectBroader_Ja = editingVocabulary.currentNode.language=='ja'?editingVocabulary.currentNode.broader_term:editingVocabulary.currentLangDiffNode.broader_term;
+    let selectBroader_En = editingVocabulary.currentNode.language=='en'?editingVocabulary.currentNode.broader_term:editingVocabulary.currentLangDiffNode.broader_term;
 
     const targetNode = editingVocabulary.getTargetFileData(editingVocabulary.selectedFile.id).find(
       (data)=>{ return data.term == target.term });
+
+    if( targetNode.language =='ja'){
+      if( selectPreferred_Ja == '' && targetNode.preferred_label != ''){
+        selectPreferred_Ja = targetNode.preferred_label;
+      }
+      if( selectBroader_Ja == '' && targetNode.broader_term != ''){
+        selectBroader_Ja = targetNode.broader_term;
+      }
+    }else if( targetNode.language =='en' ){
+      if( selectPreferred_En == '' && targetNode.preferred_label != ''){
+        selectPreferred_En = targetNode.preferred_label;
+      }
+      if( selectBroader_En == '' && targetNode.broader_term != ''){
+        selectBroader_En = targetNode.broader_term;
+      }
+    }
+    this.setState({ 
+      selectPreferred_Ja:selectPreferred_Ja,
+      selectPreferred_En:selectPreferred_En,
+      selectBroader_Ja:selectBroader_Ja,
+      selectBroader_En:selectBroader_En,
+    });
 
     [ editingVocabulary.currentNode, editingVocabulary.currentLangDiffNode].forEach(( currentNode)=>{
       
@@ -120,11 +140,13 @@ export default class DialogSettingSynonym extends React.Component {
       if( currentNode.broader_term){
         this.broaderList[ currentNode.language] = [ currentNode.broader_term];
       }
-      if( targetNode && targetNode.broader_term  && targetNode.language == currentNode.language){
+      if( targetNode && targetNode.broader_term  && targetNode.language == currentNode.language
+        && currentNode.broader_term != targetNode.broader_term){
         this.broaderList[ currentNode.language].push( targetNode.broader_term)
       }
     })
-    if(  this.broaderList['ja'].length + this.broaderList['en'].length > 0 ){
+    // No selection is also an option, so if any language has broader terms, show the broader term selection
+    if(  this.broaderList['ja'].length + this.broaderList['en'].length > 1 ){
       this.broaderClassName= this.props.classes.formControl;
     }
   }
@@ -182,7 +204,21 @@ export default class DialogSettingSynonym extends React.Component {
         en: this.state.selectPreferred_En?[this.state.selectPreferred_En]:[]
       }
     }
-    
+
+    // idofuri
+    const term = this.state.selectPreferred_Ja?this.state.selectPreferred_Ja:
+                  this.state.selectPreferred_En?this.state.selectPreferred_En:'';
+    let idofuri = term;
+    if(term){
+      const targetNode = this.props.editingVocabulary.getTargetFileData(this.props.editingVocabulary.selectedFile.id).find(
+        (data)=>{ return data.term == term });
+      if( targetNode) idofuri = targetNode.idofuri;
+    }
+    this.props.editingVocabulary.tmpIdofUri={
+      id: this.props.editingVocabulary.currentNode.id, 
+      list: [ idofuri ]
+    }
+
     // BroaderTerm
     this.props.editingVocabulary.tmpBroaderTerm={
       id: this.props.editingVocabulary.currentNode.id, 
