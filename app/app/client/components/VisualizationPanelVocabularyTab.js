@@ -64,8 +64,8 @@ export default
     this.fitCenterPan = true;
     this.situationArr = [];
     this.message = '';
-    this.synonymSource = null;
-    this.synonymTarget = null;
+    this.source = null;
+    this.target = null;
     this.sliderStep = 20,
     this.initSlider = 0;      // Initialize zoom (0% zoom value)
     this.sliderPercent = 0;   // 1% of zoom range
@@ -623,8 +623,8 @@ export default
         return false;
       }
 
-      this.synonymSource = sourceNode.data();
-      this.synonymTarget = targetNode.data();
+      this.source = sourceNode.data();
+      this.target = targetNode.data();
 
       if( this.hitHandle == 1){
         this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します\nよろしいですか？';
@@ -782,9 +782,9 @@ export default
    */
   setBroaderTerm(){
 
-    const source = this.synonymSource;
+    const source = this.source;
     
-    const nextBroaderTerm = this.synonymTarget.term;
+    const nextBroaderTerm = this.target.term;
 
     this.props.editingVocabulary.deselectTermList();
     this.props.editingVocabulary.setSelectedTermList(source.term);
@@ -1546,8 +1546,8 @@ export default
           open={this.state.dlgSynonymOpen}
           editingVocabulary={this.props.editingVocabulary}
           classes={this.props.classes}
-          source={this.synonymSource}
-          target={this.synonymTarget}
+          source={this.source}
+          target={this.target}
         />
         <DialogOkCancel
           onOkClose={() => this.handleTmpDelClose()}
