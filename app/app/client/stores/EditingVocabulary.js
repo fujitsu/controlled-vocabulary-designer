@@ -2721,6 +2721,16 @@ isOtherVocSynUriChanged() {
       }
     });
 
+    // Determine whether URIs between broader terms are common
+    if (this.tmpBroaderTerm.list['ja'].length > 0 && this.tmpBroaderTerm.list['en'].length > 0) {
+      if (this.isInvalidSynonymBrdrTrm(this.currentNode, this.tmpBroaderTerm.list[this.currentNode.language][0])) {
+        console.log('[errorCheck] invalidSynonymBroaderTerm.');
+        errorKind = 'invalidSynonymBroaderTerm';
+        return errorKind;
+      }
+    }
+
+
     return errorKind;
   }
 
@@ -3051,6 +3061,30 @@ isOtherVocSynUriChanged() {
     } while (continueFlg);
 
     return false;
+  }
+  
+  /**
+   * Determine whether URIs between broader terms are common
+   * @param  {object}  currentNode - check target node
+   * @param  {String}  broaderTerm - broader term
+   * @return {Boolean} - true: invalid(synonym), false: valid
+   */
+  @action isInvalidSynonymBrdrTrm(currentNode, broaderTerm){
+    
+    let ret = false;
+    const tmpBroaderTerm_j = currentNode.language=='ja'?broaderTerm:this.tmpBroaderTerm.list['ja'][0];
+    const tmpBroaderTerm_e = currentNode.language=='en'?broaderTerm:this.tmpBroaderTerm.list['en'][0];
+
+    const find_j = this.editingVocabulary.find((data) => {
+      return data.term == tmpBroaderTerm_j
+    });
+    const find_e = this.editingVocabulary.find((data) => {
+      return data.term == tmpBroaderTerm_e
+    });
+    if( find_j && find_e && find_j.uri != find_e.uri){
+      ret = true;
+    }
+    return ret;
   }
 
   // Synonym //////////////////////

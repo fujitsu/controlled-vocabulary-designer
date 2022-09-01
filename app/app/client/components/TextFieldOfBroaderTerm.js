@@ -103,9 +103,8 @@ export default
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
-      } else {
+      } else if (this.props.editingVocabulary.isCycleBrdrTrm(currentNode, nextBroaderTerm)) {
         // Broader term loop check /////////////////////////////////////////
-        if (this.props.editingVocabulary.isCycleBrdrTrm(currentNode, nextBroaderTerm)) {
           const cycleBroaderTerm =
             this.props.editingVocabulary.cycleBroaderTerm;
 
@@ -130,7 +129,11 @@ export default
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
-        }
+      } else if (this.props.editingVocabulary.isInvalidSynonymBrdrTrm(currentNode, nextBroaderTerm)) {
+        let errorMsg = '上位語テキストボックスに、日本語と英語で同義関係ではない用語が記入されています。¥n日本語と英語で同義関係の用語を記入してください。'
+        const innerText = errorMsg.split('¥n').map((line, key) =>
+          <span key={key}>{line}<br /></span>);
+        this.openSnackbar(innerText);
       }
     }
     this.props.editingVocabulary.updataBroaderTerm(newValue);
