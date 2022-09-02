@@ -117,6 +117,11 @@ export default
     } else { // synonym when switching with the  language radio button in the selected term
       currentSynonym = this.props.editingVocabulary.currentLangDiffNode.synonymList; 
     }
+    /* eslint-disable no-unused-vars */
+    // object for rendering
+    let length = this.props.editingVocabulary.tmpSynonym.list['ja'].length;
+    length = this.props.editingVocabulary.tmpSynonym.list['en'].length;
+    /* eslint-enable no-unused-vars */
 
     return (
       <div>

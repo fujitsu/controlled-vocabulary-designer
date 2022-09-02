@@ -227,6 +227,12 @@ export default class DialogSettingSynonym extends React.Component {
         en: this.state.selectBroader_En?[this.state.selectBroader_En]:[]
       }
     }
+    
+    // langDiff termDescript
+    if( this.props.target.language != this.props.editingVocabulary.currentNode.language
+      && this.props.editingVocabulary.tmpTermDescription.list[this.props.target.language] == ''){
+      this.props.editingVocabulary.tmpTermDescription.list[this.props.target.language][0] = this.props.target.term_description;
+    }
 
     const ret = this.props.editingVocabulary.updateVocabulary();
 
