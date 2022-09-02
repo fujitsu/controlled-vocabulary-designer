@@ -3182,6 +3182,10 @@ isOtherVocSynUriChanged() {
             // URI
             if ((this.tmpUri.list.length == 0) && (target.uri)) {
               this.tmpUri.list.push(target.uri);
+            }            
+            // term description
+            if (target.term_description != '' && target.term_description != null ) {
+              this.tmpTermDescription.list[currentNode.language].push(target.term_description);
             }
 
             // Add additional synonyms if any
