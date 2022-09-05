@@ -93,16 +93,24 @@ export default class DialogFileSelector extends React.Component {
   setUploadRequestBody() {
     const formData = new FormData();
 
-    if (undefined != this.state.files[0].file.name) {
-      const fileInfo = this.state.files[0];
+    if (undefined != this.state.files[0].file.name & undefined != this.state.files[4].file.name) {
+      const fileInfo0 = this.state.files[0];
+      const fileInfo4 = this.state.files[4];
       if (this.isSameFile(
-          fileInfo.file,
+          fileInfo0.file,
           localStorage.getItem('fileName0'),
-          localStorage.getItem('fileSize0'))) {
+          localStorage.getItem('fileSize0'))
+          & this.isSameFile(
+            fileInfo4.file,
+            localStorage.getItem('fileName4'),
+            localStorage.getItem('fileSize4'))) {
         console.log('[setUploadRequestBody] ' +
-          fileInfo.name + ' is already uploaded(not upload).');
+          fileInfo0.name + ' is already uploaded(not upload).');
+        console.log('[setUploadRequestBody] ' +
+          fileInfo4.name + ' is already uploaded(not upload).');
       } else {
-        formData.append('editing_vocabulary', fileInfo.file);
+        formData.append('editing_vocabulary', fileInfo0.file);
+        formData.append('editing_vocabulary_meta', fileInfo4.file);
       }
     }
     if (undefined != this.state.files[1].file.name) {
@@ -141,18 +149,18 @@ export default class DialogFileSelector extends React.Component {
         formData.append('reference_vocabulary3', fileInfo.file);
       }
     }
-    if (undefined != this.state.files[4].file.name) {
-      const fileInfo = this.state.files[4];
-      if (this.isSameFile(
-          fileInfo.file,
-          localStorage.getItem('fileName4'),
-          localStorage.getItem('fileSize4'))) {
-        console.log('[setUploadRequestBody] ' +
-          fileInfo.name + ' is already uploaded(not upload).');
-      } else {
-        formData.append('editing_vocabulary_meta', fileInfo.file);
-      }
-    }
+    // if (undefined != this.state.files[4].file.name) {
+    //   const fileInfo = this.state.files[4];
+    //   if (this.isSameFile(
+    //       fileInfo.file,
+    //       localStorage.getItem('fileName4'),
+    //       localStorage.getItem('fileSize4'))) {
+    //     console.log('[setUploadRequestBody] ' +
+    //       fileInfo.name + ' is already uploaded(not upload).');
+    //   } else {
+    //     formData.append('editing_vocabulary_meta', fileInfo.file);
+    //   }
+    // }
     return formData;
   }
 

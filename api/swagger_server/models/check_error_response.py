@@ -17,29 +17,34 @@ class CheckErrorResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, phase: int=None, terms: List[str]=None, reason: int=None):  # noqa: E501
+    def __init__(self, phase: int=None, terms: List[str]=None, langs: List[str]=None, reason: int=None):  # noqa: E501
         """CheckErrorResponse - a model defined in Swagger
 
         :param phase: The phase of this CheckErrorResponse.  # noqa: E501
         :type phase: int
         :param terms: The terms of this CheckErrorResponse.  # noqa: E501
         :type terms: List[str]
+        :param langs: The langs of this CheckErrorResponse.  # noqa: E501
+        :type langs: List[str]
         :param reason: The reason of this CheckErrorResponse.  # noqa: E501
         :type reason: int
         """
         self.swagger_types = {
             'phase': int,
             'terms': List[str],
+            'langs': List[str],
             'reason': int
         }
 
         self.attribute_map = {
             'phase': 'phase',
             'terms': 'terms',
+            'langs': 'langs',
             'reason': 'reason'
         }
         self._phase = phase
         self._terms = terms
+        self._langs = langs
         self._reason = reason
 
     @classmethod
@@ -94,6 +99,27 @@ class CheckErrorResponse(Model):
         """
 
         self._terms = terms
+
+    @property
+    def langs(self) -> List[str]:
+        """Gets the langs of this CheckErrorResponse.
+
+
+        :return: The langs of this CheckErrorResponse.
+        :rtype: List[str]
+        """
+        return self._langs
+
+    @langs.setter
+    def langs(self, langs: List[str]):
+        """Sets the langs of this CheckErrorResponse.
+
+
+        :param langs: The langs of this CheckErrorResponse.
+        :type langs: List[str]
+        """
+
+        self._langs = langs
 
     @property
     def reason(self) -> int:
