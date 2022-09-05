@@ -248,83 +248,101 @@ export default class DialogFileSelector extends React.Component {
                 }
                 break;
               case 409:
+                let file_name=''
+                switch(errResponse.data.file_type){
+                  case 0:
+                    file_name = '編集語彙';
+                    break;
+                  case 1:
+                    file_name = '参照語彙1';
+                    break;
+                  case 2:
+                    file_name = '参照語彙2';
+                    break;
+                  case 3:
+                    file_name = '参照語彙3';
+                    break;
+                  case 4:
+                    file_name = '編集語彙メタ';
+                    break;
+                };
                 if ( (errResponse.data.phase == 1) &&
                      (errResponse.data.reason == 0)) {
-                  errMsg = '条件を満たさない用語列が空白のものが有ります。代表語のURIは' +
+                  errMsg = file_name+ 'で、条件を満たさない用語列が空白のものが有ります。代表語のURIは' +
                   errResponse.data.terms[0] +
                   'です。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 1) &&
                     (errResponse.data.reason == 1)) {
-                  errMsg = '用語名列で空白のものが存在条件を満たしていますが、複数行あります。代表語のURIは' +
+                  errMsg = file_name+ 'で、用語名列で空白のものが存在条件を満たしていますが、複数行あります。代表語のURIは' +
                   errResponse.data.terms[0] +
-                  'です。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。';
+                  'です。行を削除するか、用語を入力した後後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 1) &&
                     (errResponse.data.reason == 2)) {
-                  errMsg = '用語名列で空白のものが存在条件を満たしていますが、同一言語の同義グループに値のある行があります。代表語のURIは' +
+                  errMsg = file_name+ 'で、用語名列で空白のものが存在条件を満たしていますが、同一言語の同義グループに値のある行があります。代表語のURIは' +
                   errResponse.data.terms[0] +
-                  'です。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。';
+                  'です。行を削除するか、用語を入力した後後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 1) &&
                     (errResponse.data.reason == 5)) {
-                  errMsg = '用語名列で用語「' +
+                  errMsg = file_name+ 'で、用語名列で用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」が重複しています。行を削除など、重複しないように編集した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 2) &&
                     (errResponse.data.reason == 0)) {
-                  errMsg = '同義関係と思われる、用語「' +
+                  errMsg = file_name+ 'で、同義関係と思われる、用語「' +
                   this.getErrorTerms(errResponse.data.terms, ',') +
                   '」の言語ごとの代表語を1つに揃えた後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 2) &&
                     (errResponse.data.reason == 1)) {
-                  errMsg = '同義関係の用語「' +
+                  errMsg = file_name+ 'で、同義関係の用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」の中に、どの言語にも代表語が無いです。いずれかの言語の代表語を設定した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 2) &&
                     (errResponse.data.reason == 2)) {
-                  errMsg = '複数の同義関係の用語「' +
+                  errMsg = file_name+ 'で、複数の同義関係の用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
-                  'で同じ代表語を持っています。異なる同義語では異なる代表語を持つようにした後に再読み込みしてください。';
+                  '」で同じ代表語を持っています。異なる同義語では異なる代表語を持つようにした後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 3) &&
                   (errResponse.data.reason == 0)) {
-                  errMsg = '「言語」列がja, enもしくは空白以外が含まれています。ja, en, 空文字を記入した後に再読み込みしてください。';
+                  errMsg = file_name+ 'で、「言語」列がja, enもしくは空白以外が含まれています。ja, en, 空文字を記入した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 4) &&
                   (errResponse.data.reason == 0)) {
-                  errMsg = '「代表語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。';
+                  errMsg = file_name+ 'で、「代表語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 5) &&
                   (errResponse.data.reason == 0)) {
-                  errMsg = '「上位語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。';
+                  errMsg = file_name+ 'で、「上位語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 5) &&
                   (errResponse.data.reason == 1)) {
-                  errMsg = '同義関係の用語「' +
+                  errMsg = file_name+ 'で、同義関係の用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」で上位語のURIが一つに揃っていません。一つになるように編集した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 5) &&
                   (errResponse.data.reason == 2)) {
-                  errMsg = '同義関係の用語「' +
+                  errMsg = file_name+ 'で、同義関係の用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」で上位語のURIとして指定された用語が存在しません。URIを直すか削除するかして編集した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 5) &&
                   (errResponse.data.reason == 3)) {
-                  errMsg = '用語「' +
+                  errMsg = file_name+ 'で、用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」で、上下関係性が循環しています。上位語を修正した後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 6) &&
                   (errResponse.data.reason == 0)) {
-                  errMsg = '用語「' +
+                  errMsg = file_name+ 'で、用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」で、他語彙体系の同義語のURIが同義語内で異なります。1つに揃えた後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 7) &&
                   (errResponse.data.reason == 0)) {
-                  errMsg = '同義関係の用語「' +
+                  errMsg = file_name+ 'で、同義関係の用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」で、用語の説明が異なっています。1つに揃えた後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 8) &&
                   (errResponse.data.reason == 0)) {
-                  errMsg = '同義関係の用語「' +
+                  errMsg = file_name+ 'で、同義関係の用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」で、作成日が異なっています。1つに揃えた後に再読み込みしてください。';
                 } else if ((errResponse.data.phase == 9) &&
                   (errResponse.data.reason == 0)) {
-                  errMsg = '同義関係の用語「' +
+                  errMsg = file_name+ 'で、同義関係の用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」で、最終更新日が異なっています。1つに揃えた後に再読み込みしてください。';
                 }
@@ -393,10 +411,17 @@ export default class DialogFileSelector extends React.Component {
    */
   getErrorTerms(terms, split) {
     let errTerms = '';
-    terms.forEach( (term) => {
-      errTerms = errTerms + term + split;
-    });
-    errTerms = errTerms.slice(0, -1);
+    for (var i =0; i < terms.length; i++){
+      if(i != terms.length -1){
+        errTerms = errTerms + terms[i] + split;
+      }else{
+        errTerms = errTerms + terms[i]
+      }
+    }
+    // terms.forEach( (term) => {
+    //   errTerms = errTerms + term + split;
+    // });
+    //errTerms = errTerms.slice(0, -1);
     return errTerms;
   }
 
@@ -409,12 +434,16 @@ export default class DialogFileSelector extends React.Component {
      getErrorTermsWithLang(terms, langs, split) {
       let errTerms = '';
       for (var i =0; i < terms.length; i++){
-        errTerms = errTerms + terms[i] + '@'+ langs[i] + split;
+        if(i != terms.length -1){
+          errTerms = errTerms + terms[i] + '@'+ langs[i] + split;
+        }else{
+          errTerms = errTerms + terms[i] + '@'+ langs[i]
+        }
       }
       // terms.forEach( (term) => {
       //   errTerms = errTerms + term + split;
       // });
-      errTerms = errTerms.slice(0, -1);
+      //errTerms = errTerms.slice(0, -1);
       return errTerms;
     }
   /**

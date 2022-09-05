@@ -91,13 +91,14 @@ paths:
             terms : Returns terms in which the error occurred.
             langs : Returns language in which the error occurred.
             reason : Returns the check error reason code.
+            file_type: Returns which file cause error. 0 editing volabulary, 1,2,3 reference vocabulary, 4 editing volabulary meta.
             
             phase 1, reason 0 (This returns only one error even if there are many)
             条件を満たさない用語列が空白のものが有ります。代表語のURIはｘｘｘです。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。
             phase 1, reason 1 (This returns only one error even if there are many)
-            用語名列で空白のものが存在条件を満たしていますが、複数行あります。代表語のURIはｘｘｘです。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。
+            用語名列で空白のものが存在条件を満たしていますが、複数行あります。代表語のURIはｘｘｘです。行を削除するか、用語を入力した後に再読み込みしてください。
             phase 1, reason 2 (This returns only one error even if there are many)
-            用語名列で空白のものが存在条件を満たしていますが、同一言語の同義グループに値のある行があります。代表語のURIはｘｘｘです。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。
+            用語名列で空白のものが存在条件を満たしていますが、同一言語の同義グループに値のある行があります。代表語のURIはｘｘｘです。行を削除するか、用語を入力した後に再読み込みしてください。
             phase 1, reason 5
             用語名列で用語a, b, c @langが重複しています。行を削除など、重複しないように編集した後に再読み込みしてください。
             phase 2, reason 0 (This returns only one error group even if there are many error group)
@@ -611,4 +612,6 @@ components:
           items:
             type: string
         reason:
+          type: integer
+        file_type:
           type: integer
