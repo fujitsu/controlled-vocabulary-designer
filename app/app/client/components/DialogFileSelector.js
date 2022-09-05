@@ -224,41 +224,11 @@ export default class DialogFileSelector extends React.Component {
             errCode = errResponse.status;
             switch (errCode) {
               case 400:
-                if ( (errResponse.data.phase == 0) &&
-                     (errResponse.data.reason == 0)) {
-                  errMsg = '編集用語彙の、列「' +
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」が無いためファイルが読み込めません。「'+
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」を追加して再読み込みしてください。' ;
-                } else if ( (errResponse.data.phase == 1) &&
-                     (errResponse.data.reason == 0)) {
-                  errMsg = '編集用語彙_metaの、列「' +
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」が無いためファイルが読み込めません。「'+
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」を追加して再読み込みしてください。' ;
-                } else if ( (errResponse.data.phase == 2) &&
-                    (errResponse.data.reason == 0)) {
-                  errMsg = '参照用語彙1の、列「' +
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」が無いためファイルが読み込めません。「'+
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」を追加して再読み込みしてください。' ;
-                } else if ( (errResponse.data.phase == 3) &&
-                    (errResponse.data.reason == 0)) {
-                  errMsg = '参照用語彙2の、列「' +
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」が無いためファイルが読み込めません。「'+
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」を追加して再読み込みしてください。' ;
-                } else if ( (errResponse.data.phase == 4) &&
-                    (errResponse.data.reason == 0)) {
-                  errMsg = '参照用語彙3の、列「' +
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」が無いためファイルが読み込めません。「'+
-                    this.getErrorTerms(errResponse.data.terms, '」,「') +
-                    '」を追加して再読み込みしてください。' ;
+                // For errors defined in the API
+                if (err.response.data.message) {
+                  errMsg = err.response.data.message;
+                } else {
+                  errMsg = '不明なエラー発生';
                 }
                 break;
               case 404:
@@ -270,44 +240,129 @@ export default class DialogFileSelector extends React.Component {
                 }
                 break;
               case 409:
-                if ( (errResponse.data.phase == 2) &&
+                if ( (errResponse.data.phase == 1) &&
                      (errResponse.data.reason == 0)) {
-                  errMsg = '同義関係と思われる、用語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の代表語を1つに揃えてください。';
-                } else if ((errResponse.data.phase == 3) &&
-                    (errResponse.data.reason == 0)) {
-                  errMsg = '用語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の代表語のURIの個数を1つに絞ってください。';
-                } else if ((errResponse.data.phase == 3) &&
+                  errMsg = '条件を満たさない用語列が空白のものが有ります。代表語のURIは' +
+                  errResponse.data.terms[0] +
+                  'です。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 1) &&
                     (errResponse.data.reason == 1)) {
-                  errMsg = '用語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の代表語のURIを統一してください。';
-                } else if ((errResponse.data.phase == 3) &&
+                  errMsg = '用語名列で空白のものが存在条件を満たしていますが、複数行あります。代表語のURIは' +
+                  errResponse.data.terms[0] +
+                  'です。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 1) &&
                     (errResponse.data.reason == 2)) {
-                  errMsg = '代表語「' +
-                  this.getErrorTerms(errResponse.data.terms, ',') +
-                  '」について、同じ代表語のURIが設定されています。代表語のURIを修正してください。';
-                } else if ((errResponse.data.phase == 3) &&
-                    (errResponse.data.reason == 3)) {
-                  errMsg = '用語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の代表語のURIを1つに揃えてください。';
-                } else if ((errResponse.data.phase == 4) &&
+                  errMsg = '用語名列で空白のものが存在条件を満たしていますが、同一言語の同義グループに値のある行があります。代表語のURIは' +
+                  errResponse.data.terms[0] +
+                  'です。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 1) &&
+                    (errResponse.data.reason == 5)) {
+                  errMsg = '用語名列で用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」が重複しています。行を削除など、重複しないように編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 2) &&
                     (errResponse.data.reason == 0)) {
-                  errMsg = '代表語「' +
-                    errResponse.data.terms[0] +
-                    '」の上位語の代表語が一致するように上位語を修正してください。';
-                } else if ((errResponse.data.phase == 4) &&
+                  errMsg = '同義関係と思われる、用語「' +
+                  this.getErrorTerms(errResponse.data.terms, ',') +
+                  '」の言語ごとの代表語を1つに揃えた後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 2) &&
                     (errResponse.data.reason == 1)) {
-                  errMsg = '代表語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」は、関係性が循環しています。上位語を修正してください。';
+                  errMsg = '同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」の中に、どの言語にも代表語が無いです。いずれかの言語の代表語を設定した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 2) &&
+                    (errResponse.data.reason == 2)) {
+                  errMsg = '複数の同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  'で同じ代表語を持っています。異なる同義語では異なる代表語を持つようにした後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 3) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = '「言語」列がja, enもしくは空白以外が含まれています。ja, en, 空文字を記入した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 4) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = '「代表語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 5) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = '「上位語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 5) &&
+                  (errResponse.data.reason == 1)) {
+                  errMsg = '同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で上位語のURIが一つに揃っていません。一つになるように編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 5) &&
+                  (errResponse.data.reason == 2)) {
+                  errMsg = '同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で上位語のURIとして指定された用語が存在しません。URIを直すか削除するかして編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 5) &&
+                  (errResponse.data.reason == 3)) {
+                  errMsg = '用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、上下関係性が循環しています。上位語を修正した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 6) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = '用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、他語彙体系の同義語のURIが同義語内で異なります。1つに揃えた後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 7) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = '同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、用語の説明が異なっています。1つに揃えた後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 8) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = '同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、作成日が異なっています。1つに揃えた後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 9) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = '同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、最終更新日が異なっています。1つに揃えた後に再読み込みしてください。';
                 }
                 break;
-              default:
+                case 411:
+                  if ( (errResponse.data.phase == 0) &&
+                       (errResponse.data.reason == 0)) {
+                    errMsg = '編集用語彙の、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == 1) &&
+                       (errResponse.data.reason == 0)) {
+                    errMsg = '編集用語彙_metaの、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == 2) &&
+                      (errResponse.data.reason == 0)) {
+                    errMsg = '参照用語彙1の、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == 3) &&
+                      (errResponse.data.reason == 0)) {
+                    errMsg = '参照用語彙2の、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == 4) &&
+                      (errResponse.data.reason == 0)) {
+                    errMsg = '参照用語彙3の、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == -1) &&
+                      (errResponse.data.reason == 0)) {
+                    errMsg = errResponse.data.terms[0];
+                  }
+                  break;
+                default:
                 errMsg = '不明なエラー発生';
                 break;
             }
@@ -337,6 +392,23 @@ export default class DialogFileSelector extends React.Component {
     return errTerms;
   }
 
+  /**
+   * Combine vocabulary for error messages
+   * @param  {string} terms - error vocabulary
+   * @param  {string} split - delimiter character
+   * @return {string} - error message
+   */
+     getErrorTermsWithLang(terms, langs, split) {
+      let errTerms = '';
+      for (var i =0; i < terms.length; i++){
+        errTerms = errTerms + terms[i] + '@'+ langs[i] + split;
+      }
+      // terms.forEach( (term) => {
+      //   errTerms = errTerms + term + split;
+      // });
+      errTerms = errTerms.slice(0, -1);
+      return errTerms;
+    }
   /**
    * Dialog close event
 

@@ -30,6 +30,9 @@ REFERENCE_VOCABULARY = ['reference_vocabulary1',
                         'reference_vocabulary2',
                         'reference_vocabulary3']
 VOCABULARY_ALLOWED_EXTENSIONS = ['.csv']
+VOCABULARY_ALLOWED_LANGUAGE = ['ja', 'en']
+VOCABULARY_ALLOWED_COLOR1 = ['black', 'red', 'orange', 'green', 'blue','purple']
+VOCABULARY_ALLOWED_COLOR2 = ['black', 'red', 'orange', 'green', 'blue','purple']
 REFERENCE_FORMAT = ['n3', 'nt', 'turtle', 'xml', 'nquads', 'trix']
 REFERENCE_FORMAT_JSON = ['jsonld']
 REFERENCE_FORMAT_EDIT = ['csv']
@@ -133,51 +136,9 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
 
     :rtype: SuccessResponse
     """
+    # prefix
+    uri_prefix = ""
 
-    if editing_vocabulary is not None:
-        allow_extension, r_ext =\
-            _check_extensions(editing_vocabulary,
-                              VOCABULARY_ALLOWED_EXTENSIONS)
-        if not allow_extension:
-            print(datetime.datetime.now(),
-                  '[Error] failed _check_extensions', location())
-            return ErrorResponse(0, 'Data Format Error.'), 400
-
-        
-        df = _read_file_storage(editing_vocabulary)
-
-        # Check columns
-        exec_res, status_code, df = _check_columns(df)
-        if not status_code == 200:
-            print(datetime.datetime.now(),
-                  '[Error] failed _check_columns',
-                  location())
-            return exec_res, status_code
-
-        # Check Synonymous Relationship
-        exec_res, status_code = _check_synonymous_relationship(df)
-        if not status_code == 200:
-            print(datetime.datetime.now(),
-                  '[Error] failed _check_synonymous_relationship',
-                  location())
-            return exec_res, status_code
-
-        ########################### 用語名が空文字のときの対応
-        #### 「代表語」列が空白　&「用語の説明」列が空白ではない & 他の行で「代表語のURI」列が同じでかつ「代表語」列が空白ではない行が存在する
-        # check empty term condition relation
-        # if it is not satified cause error
-
-
-        # Payload-make to upload to database by REST API
-        payload = _make_bulk_data_editing_vocabulary(df)
-
-        exec_res, status_code =\
-            _exec_insert_postgrest(payload, 'editing_vocabulary')
-        if not status_code == 200:
-            print(datetime.datetime.now(),
-                  '[Error] failed _exec_insert_postgrest', location())
-            return exec_res, status_code
-    
     if editing_vocabulary_meta is not None:
         # extension check
         allow_extension, r_ext =\
@@ -199,12 +160,244 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   location())
             return exec_res, status_code
 
+        uri_prefix = df['語彙のURI']
+        if uri_prefix[-1:] == '/':
+            pass
+        else:
+            uri_prefix = uri_prefix + '/'
+
         # Payload make to upload to database by REST API
         payload = _make_bulk_data_editing_vocabulary_meta(df)
 
         exec_res, status_code =\
             _exec_insert_postgrest(payload, 'editing_vocabulary_meta')
 
+
+
+    if editing_vocabulary is not None:
+        if editing_vocabulary_meta is None:
+            # something is wrong
+            return CheckErrorResponse(-1, 'upload editing voc and meta together', 0), 411
+        allow_extension, r_ext =\
+            _check_extensions(editing_vocabulary,
+                              VOCABULARY_ALLOWED_EXTENSIONS)
+        if not allow_extension:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_extensions', location())
+            return ErrorResponse(0, 'Data Format Error.'), 400
+
+        
+        df = _read_file_storage(editing_vocabulary)
+
+        # Check columns
+        exec_res, status_code, df = _check_columns(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_columns',
+                  location())
+            return exec_res, status_code
+
+        # Check Synonymous Relationship <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<, THIS IS OLD One
+        exec_res, status_code = _check_synonymous_relationship(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_synonymous_relationship',
+                  location())
+            return exec_res, status_code
+        
+        # uri must starts with meta_uri 
+        # phase 4, reasn 0
+        exec_res, status_code = _check_uri_startswith_prefix(df, uri_prefix)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_uri_startswith_prefix',
+                  location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected the above
+        # broader_term must start with prefix
+        # phase 5, reason 0
+        exec_res, status_code = _check_broader_term_startswith_prefix(df, uri_prefix)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed __check_broader_term_startswith_prefix',
+                  location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected the above
+        
+        # values of lang must be ja or en or empty (which contains white spaces)
+        # phase 3, reason 0
+        exec_res, status_code = _check_lang_val(df, uri_prefix)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_lang_val',
+                  location())
+            return exec_res, status_code
+
+        # fill lang cell with 'ja'
+        # term_colname ='用語名'
+        lang_colname = '言語'
+        df[df[lang_colname].str.strip() == ''] = 'ja'
+
+
+        # At here, uri must be valid.
+        
+        # check all pref_label in a group that have same uri and lang are same
+        # phase 2, reason 0
+        exec_res, status_code = _check_pref_label_val(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_pref_label_val',
+                  location())
+            return exec_res, status_code
+
+        # check not all preferred label in a group that have same uri are empty  
+        # this returns only one error if there are many groups that having empty preferred label
+        # pahse 2, reason 1
+        exec_res, status_code = _check_pref_label_empty(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_pref_label_empty',
+                  location())
+            return exec_res, status_code
+        # for a empty prefered label, term need not to be empty　
+
+        # trim white space cells to empty string
+        preferred_label_colname = '代表語'
+        df[ df[preferred_label_colname].str.strip()  == '' ] = ''
+        
+        # check there does not exist different synonim group that having same uri have same preffered label 
+        # this returns only one error if there are many groups that having same preferred label
+        # pahse 2, reason 2
+        exec_res, status_code = _check_diff_synogroup_have_diff_pref(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_diff_synogroup_have_diff_pref',
+                  location())
+            return exec_res, status_code
+
+        
+        # At here, sysnominus relations must be valid.
+
+
+        # check blanck term existence condition
+        # 409 phase 1, reason 0 
+        exec_res, status_code = _check_blanck_term_condition(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_blanck_term_condition',
+                  location())
+            return exec_res, status_code
+
+        # trim white space cells to empty string
+        term_colname = '代表語'
+        df[ df[term_colname].str.strip()  == '' ] = ''
+
+
+        # check duplicated terms
+        # phase 1, reason 5
+        exec_res, status_code = _check_duplicated_terms(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_duplicated_terms',
+                  location())
+            return exec_res, status_code
+
+        # check broader terms are same in a synonum group
+        # phase 5, reason 0
+        exec_res, status_code = _check_broader_terms_same(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_broader_terms_same',
+                  location())
+            return exec_res, status_code
+
+        # check broader values are in uri
+        # phase 5, reason 1
+        exec_res, status_code = _check_broader_exist_in_uri(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_broader_exist_in_uri',
+                  location())
+            return exec_res, status_code
+ 
+        # checks loop relation between terms
+        # phase 5, reason 2 (This returns only one error even if there are many)
+        exec_res, status_code = _check_broader_loop_relation(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_broader_loop_relation',
+                  location())
+            return exec_res, status_code
+
+        # check other vocabulary synonimum are same in a synonum group
+        # 409 phase 6, reason 0
+        exec_res, status_code = _check_other_voc_syn_same(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_other_voc_syn_same',
+                  location())
+            return exec_res, status_code
+
+        # check term_description are same in a synonum group for each language
+        # phase 7, reason 0 (This returns only one error even if there are many)
+        exec_res, status_code = _check_term_description_same(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_term_description_same',
+                  location())
+            return exec_res, status_code
+
+
+        # check created time are same in a synonum group for each language
+        # phase 8, reason 0 (This returns only one error even if there are many)
+        exec_res, status_code = _check_created_time_same(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_created_time_same',
+                  location())
+            return exec_res, status_code
+
+        # check created time are same in a synonum group for each language
+        # phase 9, reason 0 (This returns only one error even if there are many)
+        exec_res, status_code = _check_modified_time_same(df)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _check_modified_time_same',
+                  location())
+            return exec_res, status_code
+        
+
+
+        # fill values for color1 and color2
+        df = _fill_color_val(df, color1_colname,
+                 default_color='black', allowed_color=VOCABULARY_ALLOWED_COLOR1)
+        df = _fill_color_val(df, color2_colname,
+                 default_color='black', allowed_color=VOCABULARY_ALLOWED_COLOR2)
+
+        # fill values for position_x_colname and position_y_colname
+        df = _fill_pos_val(df)
+
+        # fills cells without 0 are replaced to 1
+        df = _fill_confirm_val(df)
+
+
+        # 「作成日」とか「更新日時」とか　どのフォーマットか？
+
+        # 自分メモ　最後に　０行、１行のデータでテスト。意図しないことが起こる可能性あり
+        
+        # あとで　ファイル種類の変数を入れる
+
+
+        # Payload-make to upload to database by REST API
+        payload = _make_bulk_data_editing_vocabulary(df)
+
+        exec_res, status_code =\
+            _exec_insert_postgrest(payload, 'editing_vocabulary')
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                  '[Error] failed _exec_insert_postgrest', location())
+            return exec_res, status_code
+    
     if reference_vocabulary1 is not None:
         allow_extension, r_ext =\
             _check_extensions(reference_vocabulary1,
@@ -224,6 +417,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   location())
             return exec_res, status_code
         
+
         payload =\
             _make_bulk_data_reference_vocabulary(df)
 
@@ -583,7 +777,8 @@ def _add_check_term(namel, bterm, term, puri):  #
 # read CSV File
 def _read_file_storage(file_strage):
     # Read CSV file
-    df = pd.read_csv(file_strage, na_values="", keep_default_na=False)
+    #df = pd.read_csv(file_strage, na_values="", keep_default_na=False)
+    df = pd.read_csv(file_strage, na_filter=False, dtype=str)
     return df
 
 # check column
@@ -598,7 +793,7 @@ def _check_columns(data_frame):
         if req_col not in data_frame.columns:
             missing_colmuns.append(req_col)
     if missing_colmuns: # if it is empty
-        return CheckErrorResponse(0, missing_colmuns, 0), 400, data_frame
+        return CheckErrorResponse(0, missing_colmuns, 0), 411, data_frame
     data_frame = data_frame[required_columns]
     return SuccessResponse('request is success.'), 200, data_frame
 
@@ -612,7 +807,7 @@ def _check_columns_meta(data_frame):
         if req_col not in data_frame.columns:
             missing_colmuns.append(req_col)
     if missing_colmuns: # if it is empty
-        return CheckErrorResponse(1, missing_colmuns, 0), 400, data_frame
+        return CheckErrorResponse(1, missing_colmuns, 0), 411, data_frame
     # trim colmuns if there is redundant colmns
     data_frame = data_frame[required_columns] 
     return SuccessResponse('request is success.'), 200, data_frame
@@ -630,7 +825,7 @@ def _check_columns_ref(data_frame, ref_num):
         if req_col not in data_frame.columns:
             missing_colmuns.append(req_col)
     if missing_colmuns: # if it is empty
-        return CheckErrorResponse(1, missing_colmuns, ref_num+1), 400, data_frame
+        return CheckErrorResponse(1, missing_colmuns, ref_num+1), 411, data_frame
     # trim colmuns if there is redundant colmns
     data_frame = data_frame[required_columns] 
     return SuccessResponse('request is success.'), 200, data_frame
@@ -1449,3 +1644,434 @@ def _download_meta_file_ev_serialize(pl_simple, p_format):
     #     response.mimetype = XLSX_MIMETYPE
     #     os.remove(downloadFileName)
     #     return response
+
+
+#########################################################################################################
+#########################################################################################################
+#########################################################################################################
+# 411 check column
+def _check_columns(data_frame):
+    # check required column existence
+    # the non-requrired columns are trimed
+    # columns = '用語名 代表語 言語 代表語のURI 上位語のURI 他語彙体系の同義語のURI 用語の説明 作成日 最終更新日 同義語候補 上位語候補 x座標値 y座標値 色1 色2 確定済み用語''
+    required_columns =['用語名', '代表語', '言語', '代表語のURI', '上位語のURI',
+                        '他語彙体系の同義語のURI', '用語の説明', '作成日',
+                        '最終更新日', '同義語候補', '上位語候補',
+                        'x座標値', 'y座標値', '色1', '色2', '確定済み用語' ]
+    missing_colmuns = []
+    for req_col in required_columns:
+        if req_col not in data_frame.columns:
+            missing_colmuns.append(req_col)
+    if missing_colmuns: # if it is empty
+        return CheckErrorResponse(0, missing_colmuns, 0), 411, data_frame
+    data_frame = data_frame[required_columns]
+    return SuccessResponse('request is success.'), 200, data_frame
+
+# 409 phase 4, reasn 0
+def _check_uri_startswith_prefix(df, uri_prefix):
+    # uri must starts with meta_uri 
+    # the empty cell or cells with white spaces are also detected and returns errorresponse
+    term_colname ='用語名'
+    lang_colname = '言語'
+    pre_uri_colname = '代表語のURI'
+    tmpdf = df[~df[pre_uri_colname].str.startswith(uri_prefix, na=False)][[term_colname, lang_colname]]
+    term_list = tmpdf[term_colname].to_list()
+    lang_list = tmpdf[lang_colname].to_list()
+    if len(term_list) != 0:
+        return CheckErrorResponse(4, term_list, 0, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+# 409 phase 5, reason 0
+def _check_broader_term_startswith_prefix(df, uri_prefix):
+    # broader_term must start with prefix
+    # the empty cell or cells with white spaces are also detected and returns errorresponse
+    term_colname ='用語名'
+    lang_colname = '言語'
+    broader_term_colname =  '上位語のURI'
+    # non empty
+    tmpdf1 = df[broader_term_colname] != '' 
+    # starts with prefix
+    tmpdf2 = df[broader_term_colname].str.startswith(uri_prefix)
+    tmpdf = df[tmpdf1 & ~tmpdf2][[term_colname, lang_colname]]
+    term_list = tmpdf[term_colname].to_list()
+    lang_list = tmpdf[lang_colname].to_list()
+    if len(term_list) != 0:
+        return CheckErrorResponse(5, term_list, 0, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+# # 409 phase 3, reason 0
+def _check_lang_val(df):
+    # the values must be in VOCABULARY_ALLOWED_LANGUAGE or empty (which contains white spaces)
+    # empty cells are not filled
+    term_colname ='用語名'
+    lang_colname = '言語'
+    num_row = df.shape[0]
+    tmpseries2 = df[lang_colname].str.strip() # get lang col
+    tmp_data = [False] * num_row
+    boolseries1 = pd.Series(tmp_data)
+    # check existence
+    for lang_val in VOCABULARY_ALLOWED_LANGUAGE:
+        boolseries1 = boolseries1 | (tmpseries2 == lang_val)
+    
+    # detect empty cells
+    boolseries1 = boolseries1 | (tmpseries2 == '')
+
+    tmpdf = df[~boolseries1][[term_colname, lang_colname]]
+    term_list = tmpdf[term_colname].to_list()
+    lang_list = tmpdf[lang_colname].to_list()
+    if len(term_list) != 0:
+        return CheckErrorResponse(3, term_list, 0, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+# # 409 phase 2, reason 0
+def _check_pref_label_val(df):
+    # check all pref_label in a group that have same uri and lang are same
+    # this returns only one error if there are many groups that having empty preferred label
+    term_colname ='用語名'
+    preferred_label_colname = '代表語'
+    lang_colname = '言語'
+    uri_colname =  '代表語のURI'
+    # 一旦埋めておく
+    df[df[lang_colname].str.strip() == ''] = 'ja'
+    df = df[[term_colname,uri_colname, lang_colname, preferred_label_colname]]
+    # count distinct pref_label in eeach group 
+    count_df = df.groupby([lang_colname, uri_colname]).nunique(dropna= False) # this is a DataFrame　
+    # this count blanck string
+    count_df2 = count_df[count_df[preferred_label_colname] != 1]
+    if count_df2.size != 0:
+        # if there are distinct pref_labels
+        tmplang, tmpuri = count_df2.index[0] # get the first uri and lang
+        tmpdf = df[(df[uri_colname] == tmpuri) & (df[lang_colname] == tmplang)][[term_colname, lang_colname]]
+        term_list = tmpdf[term_colname].to_list()
+        lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(2, term_list, 0, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+
+# # 409 phase 2, reason 1
+def _check_pref_label_empty(df):
+    # check not all preferred label in a group that have same uri are empty  
+    # this returns only one error if there are many groups that having empty preferred label
+    term_colname ='用語名'
+    preferred_label_colname = '代表語'
+    lang_colname = '言語'
+    uri_colname =  '代表語のURI'
+    for group_uri, group_df in df.groupby(uri_colname):
+        tmp_bool_df = group_df[preferred_label_colname].str.strip()  == '' #
+        if tmp_bool_df.all():
+            #all preferred_label in the group is empty
+            tmpdf = df[df[uri_colname] == group_uri][[term_colname, lang_colname]]
+            term_list = tmpdf[term_colname].to_list()
+            lang_list = tmpdf[lang_colname].to_list()
+            return CheckErrorResponse(2, term_list, 1, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+
+
+# # 409 pahse 2, reason 2
+def _check_diff_synogroup_have_diff_pref(df):
+    # check there does not exist different synonim group that having same uri have same preffered label 
+    # this returns only one error if there are many groups that having same preferred label
+    term_colname = '用語名'  
+    preferred_label_colname = '代表語' 
+    lang_colname = '言語' 
+    uri_colname = '代表語のURI' 
+    count_df = df.groupby([preferred_label_colname, lang_colname]).nunique(dropna= False) # this is a DataFrame　
+    count_df2 = count_df[count_df[uri_colname] != 1]
+    if count_df2.size != 0:
+        # there are different synonim group that have same preffered label
+        tmppreflabel, tmplang = count_df2.index[0] # get the first preflabel and lang
+        tmpdf = df[(df[preferred_label_colname] == tmppreflabel) & (df[lang_colname] == tmplang)][[term_colname, lang_colname]]
+        term_list = tmpdf[term_colname].to_list()
+        lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(2, term_list, 2, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+
+# 409 phase 1, reason 0, 1, 2
+def _check_blanck_term_condition(df):
+    # check blanck term existence condition
+    # preferred label must be blanck for the row
+    # term description must not be blanck for the row
+    # 
+    # empty terms that have same uri and lang are not allowed
+    # empty term and no empty term that have same uri and lang are not allowed
+    #
+    # prerequest:
+    #  1. terms that having same uri and lang have same preferred label
+    #  2. At least in some languege, preferred label are defined
+    #
+    # this returns only one error if there are many
+    term_colname = '用語名'  
+    preferred_label_colname = '代表語' 
+    lang_colname = '言語' 
+    uri_colname = '代表語のURI' 
+    term_description_colname = '用語の説明' 
+    # get rows with blanck terms
+    empty_term_df= df[df[term_colname].str.strip() == '']
+    # check preferred label are empty, term description are not empty
+    for idx, row in empty_term_df.iterrows():
+        if row[preferred_label_colname].strip() != '':
+            # term is blanck but preferred label is not empty
+            term_list = [row[uri_colname]]
+            lang_list = [row[lang_colname]]
+            return CheckErrorResponse(1, term_list, 0, lang_list), 409
+        if row[term_description_colname].strip() == '':
+            # term description is empty
+            term_list = [row[uri_colname]]
+            lang_list = [row[lang_colname]]
+            return CheckErrorResponse(1, term_list, 0, lang_list), 409
+    ### 1-1
+    # check duplicate rows with blanck terms
+    count_df = empty_term_df.groupby([lang_colname, uri_colname]).count() # this is a DataFrame　
+    # this count blanck string
+    count_df2 = count_df[count_df[term_colname] != 1]
+    if count_df2.size != 0:
+        # if there are blanck terms
+        tmplang, tmpuri = count_df2.index[0] # get the first uri and lang
+        term_list = [tmpuri]
+        lang_list = [tmplang]
+        return CheckErrorResponse(1, term_list, 1, lang_list), 409
+    ### 1-2
+    for idx, row in empty_term_df.iterrows():
+        lang = row[lang_colname]
+        uri = row[uri_colname]
+        tmpdf = df[(df[uri_colname] == uri) & (df[lang_colname] == lang)]
+        count_series = tmpdf.nunique()
+        if count_series[term_colname] != 1:
+            # blanck and non blanck term are existed
+            term_list = [uri]
+            lang_list = [lang]
+            return CheckErrorResponse(1, term_list, 2, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+# 409 phase 1, reason 5
+def _check_duplicated_terms(df):
+    # check duplicated terms
+    term_colname = '用語名'  
+    lang_colname = '言語'
+    # detedt duplicated terms
+    tmpdf = df[df.duplicated(subset=term_colname)][[term_colname, lang_colname]]
+    if tmpdf.size != 0:
+        # there are duplicated terms
+        tmpdf = tmpdf.drop_duplicates()
+        term_list = tmpdf[term_colname].to_list()
+        lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(1, term_list, 5, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+# 409 phase 5, reason 0
+def _check_broader_terms_same(df):
+    # check broader terms are same in a synonum group
+    # this returns only one error if there are many
+    term_colname = '用語名'  
+    lang_colname = '言語' 
+    uri_colname = '代表語のURI' 
+    broader_term_colname = '上位語のURI' 
+    # df = df[[term_colname, lang_colname, uri_colname, broader_term_colname]] # just for debug
+    count_df = df.groupby(uri_colname).nunique(dropna= False)
+    count_df2 = count_df[count_df[broader_term_colname] != 1]
+    if count_df2.size != 0:
+        # there is non unique broader
+        tmpuri = count_df2.index[0] # get the first uri
+        tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname]]
+        term_list = tmpdf[term_colname].to_list()
+        #lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(5, term_list, 0, []), 409
+    return SuccessResponse('request is success.'), 200
+
+# 409 phase 5, reason 1
+def _check_broader_exist_in_uri(df):
+    # check broader values are in uri
+    # this returns only one error if there are many
+    term_colname = '用語名'  
+    lang_colname = '言語' 
+    uri_colname = '代表語のURI' 
+    broader_term_colname = '上位語のURI' 
+    # get broader uri
+    uri_series = df[broader_term_colname].drop_duplicates()
+    uri_list = uri_series[uri_series != ''].to_list()
+    for tmpuri in uri_list:
+        tmp_bool_series = ~(df[uri_colname] == tmpuri)
+        if tmp_bool_series.all():
+            # there does not exist the broader uri in uri
+            tmpdf = df[df[broader_term_colname] == tmpuri][[term_colname, lang_colname]]
+            term_list = tmpdf[term_colname].to_list()
+            lang_list = tmpdf[lang_colname].to_list()
+            return CheckErrorResponse(5, term_list, 1, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+# recursive depth first search
+def dfs(v, neighbor, invisited, infinished, pushdown):
+    if infinished[v]:
+        return invisited, infinished, pushdown, 0, v
+    if invisited[v]:
+        #print("Cycle found")
+        return invisited, infinished, pushdown, 1, v
+    invisited[v] = True
+    pushdown.append(v)
+    for vnext in neighbor[v]:
+        invisited, infinished, pushdown, status, tmpv = dfs(vnext, neighbor, invisited, infinished, pushdown)
+        if status == 1:
+            return invisited, infinished, pushdown, 1, tmpv
+    infinished[v]=True
+    pushdown.pop()
+    return invisited, infinished, pushdown, 0, v
+
+# phase 5, reason 2 (This returns only one error even if there are many)
+def _check_broader_loop_relation(df):
+    # checks loop relation between terms
+    # prerequest all values in broader_term must exist in uri
+    # this use graph theoreticd depth first search
+    term_colname = '用語名'
+    lang_colname = '言語'
+    uri_colname = '代表語のURI' 
+    broader_term_colname = '上位語のURI' 
+    df2 = df[[uri_colname, broader_term_colname]] 
+    df2 = df2.drop_duplicates()
+    # make graph adjacent list
+    df2[uri_colname]
+    uri_set = set(df2[uri_colname])
+    visited ={ x: False for x in uri_set}
+    finished ={ x: False for x in uri_set}
+    neighbor ={ x: [] for x in uri_set}
+    for idx, row in df2.iterrows():
+        if row[broader_term_colname] != '':
+            neighbor[row[uri_colname]].append(row[broader_term_colname])
+    pushdown = []
+    for uri_item in uri_set:
+        visited, finished, pushdown, status, tmp_uri = dfs(uri_item, neighbor, visited, finished, pushdown)
+        if status == 1:
+            # print("Cycle found")
+            # print("cycle start form tmp_uri={}".format(tmp_uri))
+            break
+    if status == 1:
+        term_list = []
+        lang_list = []
+        first_idx = pushdown.index(tmp_uri)
+        uri_chain = pushdown[first_idx:]
+        for ii_uri in uri_chain:
+            row = df[df[uri_colname]  == ii_uri ].iloc[0]
+            term_list.append(row[term_colname])
+            lang_list.append(row[lang_colname])
+        return CheckErrorResponse(5, term_list, 2, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+# 409 phase 6, reason 0
+def _check_other_voc_syn_same(df):
+    # check other vocabulary synonimum are same in a synonum group
+    # this returns only one error if there are many
+    term_colname = '用語名'  
+    lang_colname = '言語' 
+    uri_colname = '代表語のURI' 
+    other_voc_syn_uri_colname = '他語彙体系の同義語のURI' 
+    # df = df[[term_colname, lang_colname, uri_colname, other_voc_syn_uri_colname]] # just for debug
+    count_df = df.groupby(uri_colname).nunique(dropna= False)
+    count_df2 = count_df[count_df[other_voc_syn_uri_colname] != 1]
+    if count_df2.size != 0:
+        # there is non unique broader
+        tmpuri = count_df2.index[0] # get the first uri
+        tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
+        term_list = tmpdf[term_colname].to_list()
+        lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(6, term_list, 0, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+# 409 phase 7, reason 0
+def _check_term_description_same(df):
+    # check term_description are same in a synonum group for each language
+    # this returns only one error if there are many
+    term_colname = '用語名'  
+    lang_colname = '言語' 
+    uri_colname = '代表語のURI' 
+    term_description_colname = '用語の説明'
+    # df = df[[term_colname, lang_colname, uri_colname, term_description_colname]] # just for debug
+    count_df = df.groupby([uri_colname, lang_colname]).nunique(dropna= False)
+    count_df2 = count_df[count_df[term_description_colname] != 1]
+    if count_df2.size != 0:
+        # there is non unique broader
+        tmpuri = count_df2.index[0] # get the first uri
+        tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
+        term_list = tmpdf[term_colname].to_list()
+        lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(7, term_list, 0, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+# 409 phase 8, reason 0
+def _check_created_time_same(df):
+    # check created time are same in a synonum group for each language
+    # this returns only one error if there are many
+    term_colname = '用語名'  
+    lang_colname = '言語' 
+    uri_colname = '代表語のURI' 
+    created_time_colname = '作成日'
+    count_df = df.groupby(uri_colname).nunique(dropna= False)
+    count_df2 = count_df[count_df[created_time_colname] != 1]
+    if count_df2.size != 0:
+        # there is non unique broader
+        tmpuri = count_df2.index[0] # get the first uri
+        tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
+        term_list = tmpdf[term_colname].to_list()
+        lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(8, term_list, 0, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+# 409 phase 9, reason 0
+def _check_modified_time_same(df):
+    # check created time are same in a synonum group for each language
+    # this returns only one error if there are many
+    term_colname = '用語名'  
+    lang_colname = '言語' 
+    uri_colname = '代表語のURI' 
+    modified_time_colname = '最終更新日' 
+    count_df = df.groupby(uri_colname).nunique(dropna= False)
+    count_df2 = count_df[count_df[modified_time_colname] != 1]
+    if count_df2.size != 0:
+        # there is non unique broader
+        tmpuri = count_df2.index[0] # get the first uri
+        tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
+        term_list = tmpdf[term_colname].to_list()
+        lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(9, term_list, 0, lang_list), 409
+    return SuccessResponse('request is success.'), 200
+
+
+def _fill_color_val(df, colname, default_color='black', allowed_color=VOCABULARY_ALLOWED_COLOR1):
+    # non allowed colors are replaced to default color
+    num_row = df.shape[0]
+    tmpseries2 = df[colname].str.strip() # get color col
+    tmp_data = [False] * num_row
+    boolseries1 = pd.Series(tmp_data)
+    # check existence
+    for color_val in allowed_color:
+        boolseries1 = boolseries1 | (tmpseries2 == color_val)
+    df.loc[~boolseries1, colname] = default_color    
+    # df[colname].where(boolseries1, default_color, inplace = True)
+    return df
+
+def _fill_pos_val(df):
+    # fills uncastable values to 0.0
+    position_x_colname = 'x座標値' 
+    position_y_colname = 'y座標値'
+    tmp_bool = pd.to_numeric(df[position_x_colname]).isnull()
+    df.loc[tmp_bool, position_x_colname] = 0.0
+    tmp_bool = pd.to_numeric(df[position_y_colname]).isnull()
+    df.loc[tmp_bool, position_y_colname] = 0.0
+    return df
+
+def _fill_confirm_val(df):
+    # fills cells without 0 are replaced to 1
+    confirm_colname =  '確定済み用語'
+    tmp_bool = df[confirm_colname] != '0'
+    df.loc[tmp_bool, confirm_colname] = '1'
+    return df
