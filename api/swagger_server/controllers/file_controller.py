@@ -425,7 +425,7 @@ def _check_inconsistencies_vocs(df, file_type):
         return exec_res, status_code, df
 
     # check broader terms are same in a synonum group
-    # phase 5, reason 0
+    # phase 5, reason 1
     exec_res, status_code = _check_broader_terms_same(df, file_type)
     if not status_code == 200:
         print(datetime.datetime.now(),
@@ -434,7 +434,7 @@ def _check_inconsistencies_vocs(df, file_type):
         return exec_res, status_code, df
 
     # check broader values are in uri
-    # phase 5, reason 1
+    # phase 5, reason 2
     exec_res, status_code = _check_broader_exist_in_uri(df, file_type)
     if not status_code == 200:
         print(datetime.datetime.now(),
@@ -443,7 +443,7 @@ def _check_inconsistencies_vocs(df, file_type):
         return exec_res, status_code, df
 
     # checks loop relation between terms
-    # phase 5, reason 2 (This returns only one error even if there are many)
+    # phase 5, reason 3 (This returns only one error even if there are many)
     exec_res, status_code = _check_broader_loop_relation(df, file_type)
     if not status_code == 200:
         print(datetime.datetime.now(),
@@ -1436,10 +1436,10 @@ def _check_broader_terms_same(df, file_type=0):
     if count_df2.size != 0:
         # there is non unique broader
         tmpuri = count_df2.index[0] # get the first uri
-        tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname]]
+        tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
         term_list = tmpdf[term_colname].to_list()
-        #lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(5, term_list, [], 1, file_type), 409
+        lang_list = tmpdf[lang_colname].to_list()
+        return CheckErrorResponse(5, term_list, lang_list, 1, file_type), 409
     return SuccessResponse('request is success.'), 200
 
 # 409 phase 5, reason 2
@@ -1506,7 +1506,6 @@ def _check_broader_loop_relation(df, file_type=0):
         visited, finished, pushdown, status, tmp_uri = dfs(uri_item, neighbor, visited, finished, pushdown)
         if status == 1:
             # print("Cycle found")
-            # print("cycle start form tmp_uri={}".format(tmp_uri))
             break
     if status == 1:
         term_list = []
