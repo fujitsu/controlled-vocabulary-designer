@@ -493,12 +493,11 @@ def _check_inconsistencies_vocs(df, file_type):
                     default_color='black', allowed_color=VOCABULARY_ALLOWED_COLOR1)
         df = _fill_color_val(df, '色2',
                     default_color='black', allowed_color=VOCABULARY_ALLOWED_COLOR2)
+        # fills cells without 0 are replaced to 1
+        df = _fill_confirm_val(df)
 
     # fill values for position_x_colname and position_y_colname
     df = _fill_pos_val(df)
-
-    # fills cells without 0 are replaced to 1
-    df = _fill_confirm_val(df)
 
     # parse created_time modified_time
 
@@ -779,7 +778,7 @@ def _check_columns_meta(data_frame):
 def _check_columns_ref(data_frame, ref_num):
     # ref_num: int, the number of reference vocabulary file
     required_columns =['用語名', '代表語', '言語', '代表語のURI', '上位語のURI',
-                        '他語彙体系の同義語のURI', '用語の説明', '作成日',
+                        '他語彙体系の同義語のURI', '用語の説明', '作成日', '最終更新日',
                         'x座標値', 'y座標値' ]
     missing_colmuns = []
     for req_col in required_columns:
