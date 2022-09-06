@@ -79,6 +79,7 @@ export default
       dlgTmpDelOpen: false,       // dialog for tmpData Delete confirm
       dlgSynonymOpen: false,      // dialog for Synonym term
       dlgBroaderOpen: false,      // dialog for Broader term confirm
+      handleDisableButton: 0,     // disp buttons of dialog for Broader term error 
       dlgDeselectTermOpen: false, // dialog for deselect term confirm
       dlgLangDiffOpen: false,     // dialog for language diff error message
       dlgErrOpen: false,          // dialog for Error
@@ -627,8 +628,15 @@ export default
       this.target = targetNode.data();
 
       if( this.hitHandle == 1){
-        this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します\nよろしいですか？';
-        this.setState({dlgBroaderOpen: true});
+        let _disableButton = this.state.handleDisableButton;
+        if( sourceNode.data().language != targetNode.data().language){
+          this.message = '「'+sourceNode.data().term +'」と「'+targetNode.data().term +'」は、言語が異なるので上位語に設定できません。\n上位語には同じ言語の用語を設定してください。';
+          _disableButton = 1;// OK only buttons
+        }else{
+          this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します。\nよろしいですか？';
+          _disableButton = 0;// OK & CANCEL buttons
+        }
+        this.setState({handleDisableButton: _disableButton,dlgBroaderOpen: true});   
       } else{        
         this.setState({dlgSynonymOpen: true});   
       }
@@ -1108,9 +1116,12 @@ export default
    */
   handleBroaderClose(){
     this.message = '';
-    this.setState({dlgBroaderOpen: false});   
-    
-    this.setBroaderTerm(); 
+
+    this.setState({dlgBroaderOpen: false});
+    if( this.state.handleDisableButton !== 1){
+      this.setBroaderTerm(); 
+    }
+    this.setState({handleDisableButton: 0});// OK & CANCEL buttons
   }
 
   /**
@@ -1118,7 +1129,10 @@ export default
    */
   handleBroaderCancelClose(){
     this.message = '';
-    this.setState({dlgBroaderOpen: false});
+    this.setState({ 
+      handleDisableButton: 0,   // OK & CANCEL buttons
+      dlgBroaderOpen: false
+    });
   }
 
   /**
@@ -1559,6 +1573,7 @@ export default
         <DialogOkCancel
           onOkClose={() => this.handleBroaderClose()}
           onCancel={() =>this.handleBroaderCancelClose()}  
+          buttonsDisable={ this.state.handleDisableButton}
           open={this.state.dlgBroaderOpen}
           classes={this.props.classes}
           message={this.message}

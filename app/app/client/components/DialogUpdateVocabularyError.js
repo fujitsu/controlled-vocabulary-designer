@@ -41,12 +41,14 @@ export default class DialogUpdateVocabularyError extends React.Component {
 
     const editingVocabulary = this.props.editingVocabulary;
 
-    let currentTerm;
-    if (editingVocabulary.currentNode.term) {
-      currentTerm = editingVocabulary.currentNode.term;
-    } else {
-      // Display the preferred label as the term name if the term is not selected
-      currentTerm = editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list].length>0 ? editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list][0] : '';
+    const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+    let _currentNode = currentNode;
+    if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+      && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
+      && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
+        const find = editingVocabulary.editingVocabulary.find((item)=>
+            item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
+        _currentNode = find?find:currentNode;
     }
 
     let errorMsgEdt='';
@@ -56,45 +58,45 @@ export default class DialogUpdateVocabularyError extends React.Component {
       // Preferred label error /////////////////////////////
       // Preferred label:Multiple Input Error
       case 'multiPreferredLabel':
-        errorMsgEdt = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+        errorMsgEdt = '代表語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
         errorMsgVoc = '代表語は、複数の値を設定できません。' ;
         break;
       // Preferred label:Invalid input error
       case 'invalidPreferredLabel':
         const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.list][0];
         errorMsgEdt =  '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
-                   '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
+                   '\"' + _currentNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
                    '代表語テキストボックスには、¥n' +
-                   '\"' + currentTerm +'\" または同義語の中から選んで記入してください。';
+                   '\"' + _currentNode.term +'\" または同義語の中から選んで記入してください。';
         
         errorMsgVoc = '代表語に設定された \"' + prfrrdlbl + '\" は、¥n' +
-                    '\"' + currentTerm + '\" または同義語のいずれにも含まれていません。¥n' +
-                    '代表語には、¥n\"' + currentTerm +'\" または同義語の中から選んで設定してください。';
+                    '\"' + _currentNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
+                    '代表語には、¥n\"' + _currentNode.term +'\" または同義語の中から選んで設定してください。';
         break;
       // Preferred label:Missing error
       case 'needToPreferredLabel':
-        errorMsgEdt = '代表語テキストボックスには \"' + currentTerm +
+        errorMsgEdt = '代表語テキストボックスには \"' + _currentNode.term +
                    '\" または同義語の中から選んで記入してください。';
-        errorMsgVoc = '代表語には \"' + currentTerm +'\" または同義語の中から選んで設定してください。';
+        errorMsgVoc = '代表語には \"' + _currentNode.term +'\" または同義語の中から選んで設定してください。';
         break;
 
       // Synonym error /////////////////////////////
       // Synonym:Synonym error registered in the hierarchical relationship
       case 'relationSynonym':
-        errorMsgEdt = '下位語テキストボックスに、 \"' + currentTerm +
-                   '\" あるいは \"' + currentTerm + '\" の代表語' +
-                   'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
-                   '同義語テキストボックスには、 \"' + currentTerm +
+        errorMsgEdt = '下位語テキストボックスに、 \"' + _currentNode.term +
+                   '\" あるいは \"' + _currentNode.term + '\" の代表語' +
+                   'あるいは \"' + _currentNode.term + '\" の同義語が記入されています。¥n' +
+                   '同義語テキストボックスには、 \"' + _currentNode.term +
                    '\" と上下関係を持たないように、¥n' +
                    'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
-        errorMsgVoc = '同義語には、 \"' + currentTerm +
+        errorMsgVoc = '同義語には、 \"' + _currentNode.term +
                     '\" と上下関係を持たない用語を設定してください。';
         break;
 
       // Id of URI error /////////////////////////////
       // Id of URI:Multiple Input Error
       case 'multiIdofUri':
-        errorMsgEdt = 'IDテキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+        errorMsgEdt = 'IDテキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
         errorMsgVoc = 'IDは、複数の値を設定できません。' ;
         break;
       // Id of URI:Duplicate input error
@@ -122,20 +124,20 @@ export default class DialogUpdateVocabularyError extends React.Component {
       // Broader term error /////////////////////////////
       // Broader term:Multiple input error
       case 'multiBroaderTerm':
-        errorMsgEdt = '上位語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+        errorMsgEdt = '上位語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
         errorMsgVoc = '上位語には、複数の値を設定できません。';
         break;
       // Broader term:Invalid input error
       case 'invalidBroaderTerm':
         errorMsgEdt = '上位語テキストボックスに、¥n' +
-                   '\"' + currentTerm + '\" の代表語あるいは同義語が記入されています。¥n' +
+                   '\"' + _currentNode.term + '\" の代表語あるいは同義語が記入されています。¥n' +
                    '上位語テキストボックスには、¥n' +
-                   '\"' + currentTerm + '\" の代表語と同義語以外の値を記入してください。';
+                   '\"' + _currentNode.term + '\" の代表語と同義語以外の値を記入してください。';
 
         errorMsgVoc = '上位語に、¥n' +
-                    '\"' + currentTerm + '\" の代表語あるいは同義語が設定されています。¥n' +
+                    '\"' + _currentNode.term + '\" の代表語あるいは同義語が設定されています。¥n' +
                     '上位語には、¥n' +
-                    '\"' + currentTerm + '\" の代表語と同義語以外の値を設定してください。';
+                    '\"' + _currentNode.term + '\" の代表語と同義語以外の値を設定してください。';
         break;
       // Broader term:synonym error
       case 'invalidSynonymBroaderTerm':
@@ -183,6 +185,10 @@ export default class DialogUpdateVocabularyError extends React.Component {
         });
         errorMsgVoc = errorMsgVoc.slice( 0, -2 );
         errorMsgVoc += ' 以外の代表語を持つ用語を設定してください。';
+        break;
+      case 'multiTermDescription':        
+        errorMsgEdt = '用語の説明テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+        errorMsgVoc = '用語の説明には、複数の値を設定できません。';
         break;
     }
     let errorMsg = this.props.isFromEditPanel ? errorMsgEdt : errorMsgVoc;

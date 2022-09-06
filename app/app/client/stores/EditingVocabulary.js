@@ -2652,7 +2652,19 @@ isOtherVocSynUriChanged() {
 
     [ this.currentNode, this.currentLangDiffNode].forEach(( currentNode)=>{
       
-      if( !currentNode.id) return errorKind;
+      if( !currentNode.id){
+        if( this.tmpSynonym.list[currentNode.language].length > 0){
+          const findTerm = this.tmpSynonym.list[currentNode.language][0];
+          const find = this.editingVocabulary.find((item)=> item.term == findTerm )
+          if(find){
+            currentNode = find;
+          }else{  // should not be
+            return errorKind;
+          }
+        }else{
+          return errorKind;
+        }
+      }
 
       // Multiple selection check /////////////////////////////////////////
 
@@ -2718,6 +2730,13 @@ isOtherVocSynUriChanged() {
           errorKind = 'cycleBroaderTerm';
           return errorKind;
         }
+      }
+      
+      // When multiple term description labels are selected
+      if (this.tmpTermDescription.list[currentNode.language].length > 1) {
+        console.log('[errorCheck] multiTermDescription.');
+        errorKind = 'multiTermDescription';
+        return errorKind;
       }
     });
 
@@ -3184,7 +3203,8 @@ isOtherVocSynUriChanged() {
               this.tmpUri.list.push(target.uri);
             }            
             // term description
-            if (target.term_description != '' && target.term_description != null ) {
+            if ( target.term_description != '' && target.term_description != null 
+              && this.tmpTermDescription.list[currentNode.language].indexOf(target.term_description) == -1) {
               this.tmpTermDescription.list[currentNode.language].push(target.term_description);
             }
 
