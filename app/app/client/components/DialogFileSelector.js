@@ -289,6 +289,11 @@ export default class DialogFileSelector extends React.Component {
                   errMsg = file_name+ 'で、複数の同義関係の用語「' +
                   this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
                   '」で同じ代表語を持っています。異なる同義語では異なる代表語を持つようにした後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 2) &&
+                    (errResponse.data.reason == 3)) {
+                  errMsg = file_name+ 'で、用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」の代表語が同義語に存在しません。同義語の中から選択するようにした後に再読み込みしてください。'; 
                 } else if ((errResponse.data.phase == 3) &&
                   (errResponse.data.reason == 0)) {
                   errMsg = file_name+ 'で、「言語」列がja, enもしくは空白以外が含まれています。ja, en, 空文字を記入した後に再読み込みしてください。';

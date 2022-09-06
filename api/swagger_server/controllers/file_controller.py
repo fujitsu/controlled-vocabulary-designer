@@ -451,6 +451,15 @@ def _check_inconsistencies_vocs(df, file_type):
                 location())
         return exec_res, status_code, df
 
+    # checks pref label exists in terms in each synonimun group
+    # 409 phase 2, reason 3
+    exec_res, status_code = _check_preflabel_existence(df, file_type)
+    if not status_code == 200:
+        print(datetime.datetime.now(),
+                '[Error] failed _check_preflabel_existence',
+                location())
+        return exec_res, status_code, df
+
     # check other vocabulary synonimum are same in a synonum group
     # 409 phase 6, reason 0
     exec_res, status_code = _check_other_voc_syn_same(df, file_type)
@@ -1214,7 +1223,7 @@ def _download_meta_file_ev_serialize(pl_simple, p_format):
                 'attachment; filename=test_sample.csv'
             return response
     else:
-        passs
+        pass
 
 
 
@@ -1518,6 +1527,23 @@ def _check_broader_loop_relation(df, file_type=0):
         return CheckErrorResponse(5, term_list, lang_list, 3, file_type), 409
     return SuccessResponse('request is success.'), 200
 
+# 409 phase 2, reason 3
+def _check_preflabel_existence(df, file_type=0):
+    # checks pref label exists in terms in each synonimun group
+    term_colname = '用語名'
+    preferred_label_colname = '代表語'
+    lang_colname = '言語'
+    uri_colname = '代表語のURI'
+    for (group_lang, group_uri), group_df in df.groupby([lang_colname, uri_colname]):
+        tmp_preflabel = group_df[preferred_label_colname].iloc[0]
+        term_list = group_df[term_colname].to_list()
+        if (tmp_preflabel != '') & (tmp_preflabel not in term_list):
+            print("DEBUG")
+            print(tmp_preflabel)
+            print(term_list)
+            lang_list = [group_lang] * len(term_list) 
+            return CheckErrorResponse(2, term_list, lang_list, 3, file_type), 409
+    return SuccessResponse('request is success.'), 200
 
 # 409 phase 6, reason 0
 def _check_other_voc_syn_same(df, file_type=0):

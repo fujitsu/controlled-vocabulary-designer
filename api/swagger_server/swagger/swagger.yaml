@@ -107,6 +107,8 @@ paths:
             同義関係の用語a,b,cの中に、どの言語にも代表語が無いです。いずれかの言語の代表語を設定した後に再読み込みしてください。
             pahse 2, reason 2 (This returns only one error group even if there are many error group)
             複数の同義関係の用語a,b,c, @langで同じ代表語を持っています。異なる同義語では異なる代表語を持つようにした後に再読み込みしてください。
+            pahse 2, reason 3 (This returns only one error group even if there are many error group)
+            用語a,b,c, @langの代表語が同義語に存在しません。同義語の中から選択するようにした後に再読み込みしてください。
             phase 3, reason 0
             「言語」列がja, enもしくは空白以外が含まれています。ja, en, 空文字を記入した後に再読み込みしてください。
             phase 4, reasn 0
