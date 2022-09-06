@@ -71,7 +71,7 @@ export default class DialogFileSelector extends React.Component {
   /**
    * Determines if the file being uploaded is already uploaded
    * @param  {Object}  fileObj - upload file object
-   * @param  {string}  name - uploaded fail name
+   * @param  {string}  name - uploaded file name
    * @param  {string}  strSize - uploaded file size
    * @return {Boolean}         true:same file, false:other files
    */
@@ -149,18 +149,6 @@ export default class DialogFileSelector extends React.Component {
         formData.append('reference_vocabulary3', fileInfo.file);
       }
     }
-    // if (undefined != this.state.files[4].file.name) {
-    //   const fileInfo = this.state.files[4];
-    //   if (this.isSameFile(
-    //       fileInfo.file,
-    //       localStorage.getItem('fileName4'),
-    //       localStorage.getItem('fileSize4'))) {
-    //     console.log('[setUploadRequestBody] ' +
-    //       fileInfo.name + ' is already uploaded(not upload).');
-    //   } else {
-    //     formData.append('editing_vocabulary_meta', fileInfo.file);
-    //   }
-    // }
     return formData;
   }
 
@@ -178,12 +166,12 @@ export default class DialogFileSelector extends React.Component {
   fileUpload(e) {
 
     // parameter existence check for editing vocabulary
-    if ( !this.state.files[0].name  ) {      
+    if ( undefined != this.state.files[0].file & !this.state.files[0].file.name  ) {      
       this.setState({errOpen: true});
       return false;
     }
     // parameter existence check for editing vocabulary meta
-    if ( !this.state.files[4].name  ) {
+    if ( undefined != this.state.files[4].file & !this.state.files[4].file.name  ) {
       this.setState({errOpen: true});
       return false;
     }
@@ -418,10 +406,6 @@ export default class DialogFileSelector extends React.Component {
         errTerms = errTerms + terms[i]
       }
     }
-    // terms.forEach( (term) => {
-    //   errTerms = errTerms + term + split;
-    // });
-    //errTerms = errTerms.slice(0, -1);
     return errTerms;
   }
 
@@ -440,10 +424,6 @@ export default class DialogFileSelector extends React.Component {
           errTerms = errTerms + terms[i] + '@'+ langs[i]
         }
       }
-      // terms.forEach( (term) => {
-      //   errTerms = errTerms + term + split;
-      // });
-      //errTerms = errTerms.slice(0, -1);
       return errTerms;
     }
   /**
@@ -476,9 +456,13 @@ export default class DialogFileSelector extends React.Component {
     const array = [];
     for (let i = 0; i < this.state.files.length; i++) {
       const file = {name: '', size: 'サイズ：byte', file: {}};
-      if ( localStorage.getItem('fileName' + i) ) {
-        file.name = localStorage.getItem('fileName' + i);
-        file.size = localStorage.getItem('fileSize' + i);
+      if (i ==0 | i ==4){
+        ;
+      }else{
+        if ( localStorage.getItem('fileName' + i) ) {
+          file.name = localStorage.getItem('fileName' + i);
+          file.size = localStorage.getItem('fileSize' + i);
+        }
       }
       array.push(file);
     }

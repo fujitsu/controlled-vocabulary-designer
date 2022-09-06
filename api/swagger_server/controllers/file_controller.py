@@ -197,13 +197,6 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
         # phase 4, reasn 0
         exec_res, status_code = _check_uri_startswith_prefix(df, uri_prefix, file_type)
         if not status_code == 200:
-            # print("DEBUG !!! df={}".format(df))
-            # print("DEBUG !!! exec_res.terms={}".format(exec_res.terms))
-            # print("DEBUG !!! exec_res.phase={}".format(exec_res.phase))
-            # print("DEBUG !!! exec_res.reason={}".format(exec_res.reason))
-            # print("DEBUG !!! exec_res.file_type={}".format(exec_res.file_type))
-            # print("DEBUG !!! exec_res={}".format(exec_res))
-            # print("DEBUG !!! status_code={}".format(status_code))   
             print(datetime.datetime.now(),
                     '[Error] failed _check_uri_startswith_prefix',
                     location())
