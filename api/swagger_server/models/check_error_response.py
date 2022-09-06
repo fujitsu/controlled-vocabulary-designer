@@ -17,30 +17,41 @@ class CheckErrorResponse(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, phase: int=None, terms: List[str]=None, reason: int=None):  # noqa: E501
+    def __init__(self, phase: int=None, terms: List[str]=None, langs: List[str]=None, reason: int=None, file_type: int=None):  # noqa: E501
         """CheckErrorResponse - a model defined in Swagger
 
         :param phase: The phase of this CheckErrorResponse.  # noqa: E501
         :type phase: int
         :param terms: The terms of this CheckErrorResponse.  # noqa: E501
         :type terms: List[str]
+        :param langs: The langs of this CheckErrorResponse.  # noqa: E501
+        :type langs: List[str]
         :param reason: The reason of this CheckErrorResponse.  # noqa: E501
         :type reason: int
+        :param file_type: The file_type of this CheckErrorResponse.  # noqa: E501
+        :type file_type: int
+
         """
         self.swagger_types = {
             'phase': int,
             'terms': List[str],
-            'reason': int
+            'langs': List[str],
+            'reason': int,
+            'file_type': int
         }
 
         self.attribute_map = {
             'phase': 'phase',
             'terms': 'terms',
-            'reason': 'reason'
+            'langs': 'langs',
+            'reason': 'reason',
+            'file_type': 'file_type'
         }
         self._phase = phase
         self._terms = terms
+        self._langs = langs
         self._reason = reason
+        self._file_type = file_type
 
     @classmethod
     def from_dict(cls, dikt) -> 'CheckErrorResponse':
@@ -96,6 +107,27 @@ class CheckErrorResponse(Model):
         self._terms = terms
 
     @property
+    def langs(self) -> List[str]:
+        """Gets the langs of this CheckErrorResponse.
+
+
+        :return: The langs of this CheckErrorResponse.
+        :rtype: List[str]
+        """
+        return self._langs
+
+    @langs.setter
+    def langs(self, langs: List[str]):
+        """Sets the langs of this CheckErrorResponse.
+
+
+        :param langs: The langs of this CheckErrorResponse.
+        :type langs: List[str]
+        """
+
+        self._langs = langs
+
+    @property
     def reason(self) -> int:
         """Gets the reason of this CheckErrorResponse.
 
@@ -115,3 +147,24 @@ class CheckErrorResponse(Model):
         """
 
         self._reason = reason
+
+    @property
+    def file_type(self) -> int:
+        """Gets the file_type of this CheckErrorResponse.
+
+
+        :return: The file_type of this CheckErrorResponse.
+        :rtype: int
+        """
+        return self._file_type
+
+    @file_type.setter
+    def file_type(self, file_type: int):
+        """Sets the file_type of this CheckErrorResponse.
+
+
+        :param file_type: The file_type of this CheckErrorResponse.
+        :type file_type: int
+        """
+
+        self._file_type = file_type
