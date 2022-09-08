@@ -1865,10 +1865,10 @@ isOtherVocSynUriChanged() {
   @action updateVocabulary( setTerm=null) {
 
     if (!this.currentNode.id) {
-      return '';
+      return null;
     }
-    const error = this.errorCheck();
-    if (error != '') {
+    const error =  this.errorCheck();
+    if (error !== null) {
       return error;
     }
 
@@ -1953,7 +1953,7 @@ isOtherVocSynUriChanged() {
     }); 
 
     this.updateRequest(updateTermList, updateCurrent, history, setTerm);
-    return '';
+    return null;
   }
 
 
@@ -2621,22 +2621,28 @@ isOtherVocSynUriChanged() {
    */
   errorCheck() {
 
-    let errorKind = '';
-    if( !this.currentNode.id) return errorKind;
+    if( !this.currentNode.id) return null;
+
+    // let errorKind = '';
+    let ret={
+      errorKind : '',
+      term: this.currentNode.term,
+      language: this.currentNode.language,
+    }
 
     // More than one id of uri selected
     if (this.tmpIdofUri.list.length > 1) {
       console.log('[errorCheck] multiIdofUri.');
-      errorKind = 'multiIdofUri';
-      return errorKind;
+      ret.errorKind = 'multiIdofUri';
+      return ret;
     }
 
     // Check Id of URL setting /////////////////////////////////////////
     // If no id of uri is set, it is an error.
     if (this.tmpIdofUri.list.length == 0) {
       console.log('[errorCheck] needToIdofUri.');
-      errorKind = 'needToIdofUri';
-      return errorKind;
+      ret.errorKind = 'needToIdofUri';
+      return ret;
     }
 
     // Check Id of URL setting for other preferred labels /////////////////////////////////////////
@@ -2645,29 +2651,45 @@ isOtherVocSynUriChanged() {
       const prfrrdLbl = this.tmpPreferredLabel.list[this.currentNode.language][0];
       if (this.isInvalidIdofUri(this.currentNode, idofuri, prfrrdLbl)) {
         console.log('[errorCheck] equalIdofUri.');
-        errorKind = 'equalIdofUri';
-        return errorKind;
+        ret.errorKind = 'equalIdofUri';
+        return ret;
       }
     }
 
     [ this.currentNode, this.currentLangDiffNode].forEach(( currentNode)=>{
       
-      if( !currentNode.id) return errorKind;
+      if( !currentNode.id){
+        if( this.tmpSynonym.list[currentNode.language].length > 0){
+          const findTerm = this.tmpSynonym.list[currentNode.language][0];
+          const find = this.editingVocabulary.find((item)=> item.term == findTerm )
+          if(find){
+            currentNode = find;
+          }else{  // should not be
+            return null;
+          }
+        }else{
+          return null;
+        }
+      }
 
       // Multiple selection check /////////////////////////////////////////
 
       // When multiple preferred labels are selected
       if (this.tmpPreferredLabel.list[currentNode.language].length > 1) {
         console.log('[errorCheck] multiPreferredLabel.');
-        errorKind = 'multiPreferredLabel';
-        return errorKind;
+        ret.errorKind = 'multiPreferredLabel';
+        ret.term = currentNode.term;
+        ret.language = currentNode.language;
+        return ret;
       }
 
       // More than one broader term selected
       if (this.tmpBroaderTerm.list[currentNode.language].length > 1) {
         console.log('[errorCheck] multiBroaderTerm.');
-        errorKind = 'multiBroaderTerm';
-        return errorKind;
+        ret.errorKind = 'multiBroaderTerm';
+        ret.term = currentNode.term;
+        ret.language = currentNode.language;
+        return ret;
       }
 
       // Effective term check for preferred label /////////////////////////////////////////
@@ -2675,8 +2697,10 @@ isOtherVocSynUriChanged() {
       if (this.tmpPreferredLabel.list[currentNode.language].length == 1) {
         if (this.isInvalidPreferredLabel(currentNode, this.tmpPreferredLabel.list[currentNode.language][0])) {
           console.log('[errorCheck] invalidPreferredLabel.');
-          errorKind = 'invalidPreferredLabel';
-          return errorKind;
+          ret.errorKind = 'invalidPreferredLabel';
+          ret.term = currentNode.term;
+          ret.language = currentNode.language;
+          return ret;
         }
       }
 
@@ -2684,16 +2708,20 @@ isOtherVocSynUriChanged() {
       if ( this.tmpPreferredLabel.list[currentNode.language].length == 0) {
         // && this.tmpSynonym.list[currentNode.language].length > 0) {
         console.log('[errorCheck] needToPreferredLabel.');
-        errorKind = 'needToPreferredLabel';
-        return errorKind;
+        ret.errorKind = 'needToPreferredLabel';
+        ret.term = currentNode.term;
+        ret.language = currentNode.language;
+        return ret;
       }
 
       // Check for existing cycles of synonyms
       if (this.tmpSynonym.list[currentNode.language].length > 0) {
         if (this.isRelationSynonym(currentNode, this.tmpSynonym.list[currentNode.language])) {
           console.log('[errorCheck] relationSynonym.');
-          errorKind = 'relationSynonym';
-          return errorKind;
+          ret.errorKind = 'relationSynonym';
+          ret.term = currentNode.term;
+          ret.language = currentNode.language;
+          return ret;
         }
       }
 
@@ -2705,8 +2733,10 @@ isOtherVocSynUriChanged() {
 
         if (this.isInvalidBrdrTrm(currentNode, nextBroaderTerm)) {
           console.log('[errorCheck] invalidBroaderTerm.');
-          errorKind = 'invalidBroaderTerm';
-          return errorKind;
+          ret.errorKind = 'invalidBroaderTerm';
+          ret.term = currentNode.term;
+          ret.language = currentNode.language;
+          return ret;
         }
       }
 
@@ -2715,9 +2745,20 @@ isOtherVocSynUriChanged() {
           (this.tmpBroaderTerm.list[currentNode.language][0])) {
         if (this.isCycleBrdrTrm(currentNode, this.tmpBroaderTerm.list[currentNode.language][0])) {
           console.log('[errorCheck] cycleBroaderTerm.');
-          errorKind = 'cycleBroaderTerm';
-          return errorKind;
+          ret.errorKind = 'cycleBroaderTerm';
+          ret.term = currentNode.term;
+          ret.language = currentNode.language;
+          return ret;
         }
+      }
+      
+      // When multiple term description labels are selected
+      if (this.tmpTermDescription.list[currentNode.language].length > 1) {
+        console.log('[errorCheck] multiTermDescription.');
+        ret.errorKind = 'multiTermDescription';
+        ret.term = currentNode.term;
+        ret.language = currentNode.language;
+        return ret;
       }
     });
 
@@ -2725,13 +2766,14 @@ isOtherVocSynUriChanged() {
     if (this.tmpBroaderTerm.list['ja'].length > 0 && this.tmpBroaderTerm.list['en'].length > 0) {
       if (this.isInvalidSynonymBrdrTrm(this.currentNode, this.tmpBroaderTerm.list[this.currentNode.language][0])) {
         console.log('[errorCheck] invalidSynonymBroaderTerm.');
-        errorKind = 'invalidSynonymBroaderTerm';
-        return errorKind;
+        ret.errorKind = 'invalidSynonymBroaderTerm';
+        ret.term = this.currentNode.term;
+        ret.language = this.currentNode.language;
+        return ret;
       }
     }
 
-
-    return errorKind;
+    return ret.errorKind==''?null:ret;
   }
 
   @observable equalUriPreferredLabel = '';
@@ -2924,12 +2966,10 @@ isOtherVocSynUriChanged() {
           array.push(term);
         });
       } else {
-        if (this.tmpPreferredLabel.list[currentNode.language].length > 0) {
-          // Do not add terms that are not selected and have no title to the broader term
-          broaderTermNewList[currentNode.language].forEach((term) => {
-            array.push(term);
-          });
-        }
+        // Do not add terms that are not selected and have no title to the broader term
+        broaderTermNewList[currentNode.language].forEach((term) => {
+          array.push(term);
+        });
       }
       this.tmpBroaderTerm.id = this.currentNode.id; // Setting 'this.currentNode' on purpose
       this.tmpBroaderTerm.list[currentNode.language] = array.filter((val, i, self)=>{ return i === self.indexOf(val)});
@@ -3099,7 +3139,7 @@ isOtherVocSynUriChanged() {
    */
   @action updataSynonym(newValue) {
 
-    const newLangDiffValue = this.tmpSynonym.list[this.tmpLanguage.list=='ja'?'en':'ja'];
+    const newLangDiffValue = this.tmpSynonym.list[this.tmpLanguage.list=='ja'?'en':'ja'].concat();
     const currentNodeSynList = this.tmpLanguage.list==this.currentNode.language?this.currentNode.synonymList:this.currentLangDiffNode.synonymList
     if( newValue.length > currentNodeSynList.length ){
       newValue.forEach((term)=>{
@@ -3184,7 +3224,8 @@ isOtherVocSynUriChanged() {
               this.tmpUri.list.push(target.uri);
             }            
             // term description
-            if (target.term_description != '' && target.term_description != null ) {
+            if ( target.term_description != '' && target.term_description != null 
+              && this.tmpTermDescription.list[currentNode.language].indexOf(target.term_description) == -1) {
               this.tmpTermDescription.list[currentNode.language].push(target.term_description);
             }
 
@@ -3439,12 +3480,10 @@ isOtherVocSynUriChanged() {
         array.push(term);
       });
     } else {
-      if (this.tmpPreferredLabel.list[currentNode.language].length > 0) {
-        // Do not add terms that are not selected and have no title to the term description
-        newValue.forEach((term) => {
-          array.push(term);
-        });
-      }
+      // Do not add terms that are not selected and have no title to the term description
+      newValue.forEach((term) => {
+        array.push(term);
+      });
     }
     this.tmpTermDescription.id = currentNode.id;
     this.tmpTermDescription.list[currentNode.language] = array;

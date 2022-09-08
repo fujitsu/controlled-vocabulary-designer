@@ -41,7 +41,7 @@ export default
     this.state = {
       disabledFlg: true,
       open: false,
-      reason: '',
+      reason: null,
       synymact: false,
       prfrrdlblact: false,
       idofuriact: false,
@@ -125,7 +125,7 @@ export default
    * Error dialog close
    */
   errorDialogClose() {
-    this.setState({open: false, reason: ''});
+    this.setState({open: false, reason: null});
   }
 
   /**
@@ -148,7 +148,7 @@ export default
   updateVocabulary() {
     const baseTerm= this.props.editingVocabulary.currentNode.term;
     const ret = this.props.editingVocabulary.updateVocabulary( baseTerm);
-    if (ret !== '') {
+    if (ret !== null) {
       this.errorDialogOpen(ret);
     }else{
       this.props.close( true);  // true=from EditPanelVocabularyTab.updateVocabulary() 

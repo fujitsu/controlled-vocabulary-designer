@@ -81,12 +81,19 @@ export default
     }
 
     const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
-    
-    if (editingVocabulary.isRelationSynonym(currentNode, newValue)) {
-      const errorMsg = '下位語テキストボックスに、 \"' + currentNode.term +
-                       '\" あるいは \"' + currentNode.term + '\" の代表語' +
-                       'あるいは \"' + currentNode.term + '\" の同義語が記入されています。¥n' +
-                       '同義語テキストボックスには、 \"' + currentNode.term +
+    let _currentNode = currentNode;
+    if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+      && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
+      && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
+        const find = editingVocabulary.editingVocabulary.find((item)=>
+            item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
+        _currentNode = find?find:currentNode;
+    }
+    if (editingVocabulary.isRelationSynonym(_currentNode, newValue)) {
+      const errorMsg = '下位語テキストボックスに、 \"' + _currentNode.term +
+                       '\" あるいは \"' + _currentNode.term + '\" の代表語' +
+                       'あるいは \"' + _currentNode.term + '\" の同義語が記入されています。¥n' +
+                       '同義語テキストボックスには、 \"' + _currentNode.term +
                        '\" と上下関係を持たないように、¥n' +
                        'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
@@ -96,10 +103,12 @@ export default
     editingVocabulary.updataSynonym(newValue);
     if (this.state.open == false) {
       const preferredLabelLength =
-        editingVocabulary.tmpPreferredLabel.list[currentNode.language].length;
+        editingVocabulary.tmpPreferredLabel.list[_currentNode.language].length;
       if (preferredLabelLength > 1) {
-        const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
-        this.openSnackbar(errorMsg);
+        const errorMsg = '代表語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+        const innerText = errorMsg.split('¥n').map((line, key) =>
+          <span key={key}>{line}<br /></span>);
+        this.openSnackbar(innerText);
       }
     }
   }
