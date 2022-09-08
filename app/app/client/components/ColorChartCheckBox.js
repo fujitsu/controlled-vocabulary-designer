@@ -66,7 +66,7 @@ export default class ColorChartCheckBox extends React.Component {
           style={this.buttonStyles()}
         >
           <CheckIcon style={{color: setcolor}} />
-          {　colorNameJa[ this.props.name]}
+          { colorNameJa[ this.props.name]}
           <Checkbox
             checked={this.props.checked}
             onChange={(event)=>this.checkBoxClick(event)}
