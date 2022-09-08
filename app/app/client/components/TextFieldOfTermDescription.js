@@ -64,7 +64,6 @@
       // When more than one TermDescription is entered
       const errorMsg = '用語の説明テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
       this.openSnackbar(errorMsg);
-      return false;
     }
     this.props.editingVocabulary.updataTermDescription(newValue);
   }

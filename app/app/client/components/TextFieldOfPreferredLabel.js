@@ -86,23 +86,35 @@ export default
       // When more than one preferred label is entered
       const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
       this.openSnackbar(errorMsg);
-    } else if (newValue.length == 1) {
-      // When a selected term or a term that is not a synonym is entered in the preferred label
-      if (editingVocabulary.isInvalidPreferredLabel(currentNode, newValue[0])) {
-        const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
-                         '\"' +currentNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
-                         '代表語テキストボックスには、¥n' +
-                         '\"' + currentNode.term + '\" または同義語の中から選んで記入してください。';
-        const innerText = errorMsg.split('¥n').map((line, key) =>
-          <span key={key}>{line}<br /></span>);
-        this.openSnackbar(innerText);
+    } else{
+      let _currentNode = currentNode;
+      if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+        && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
+        && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
+          const find = editingVocabulary.editingVocabulary.find((item)=>
+              item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
+          _currentNode = find?find:currentNode;
       }
-    } else if (newValue.length == 0) {
-      // Preferred label:Missing error
-      if (currentNode.term) {
-        // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
-        const errorMsg = '代表語テキストボックスには \"' + currentNode.term +
-                          '\" または同義語の中から選んで記入してください。';
+      if (newValue.length == 1) {
+
+        // When a selected term or a term that is not a synonym is entered in the preferred label
+        if (editingVocabulary.isInvalidPreferredLabel(_currentNode, newValue[0])) {
+          const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
+                          '\"' +_currentNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
+                          '代表語テキストボックスには、¥n' +
+                          '\"' + _currentNode.term + '\" または同義語の中から選んで記入してください。';
+          const innerText = errorMsg.split('¥n').map((line, key) =>
+            <span key={key}>{line}<br /></span>);
+          this.openSnackbar(innerText);
+        }
+      } else if (newValue.length == 0) {
+        // Preferred label:Missing error
+        let errorMsg = '代表語テキストボックスに、同義語の中から選んで記入してください。';
+        if (_currentNode.term) {
+          // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
+          errorMsg = '代表語テキストボックスには \"' + _currentNode.term +
+                            '\" または同義語の中から選んで記入してください。';
+        }
         this.openSnackbar(errorMsg);
       }
     }
