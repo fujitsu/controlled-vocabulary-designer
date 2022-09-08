@@ -443,15 +443,19 @@ export default class DialogFileSelector extends React.Component {
    * Save file information to local storage
    */
   saveFileInfoToLocalstorage() {
-    this.state.files.forEach((file, index) => {
-      if (file.name != '') {
-        localStorage.setItem('fileName' + index, file.name);
-        localStorage.setItem('sFileName' + index, file.name);
-        localStorage.setItem('fileSize' + index, file.size);
+    for (let i = 0; i < this.state.files.length; i++) {
+      if (i ==0 | i ==4){
+        ;
+      }else{
+        if (this.state.files[i].name != '') {
+          localStorage.setItem('fileName' + i, this.state.files[i].name);
+          localStorage.setItem('sFileName' + i, this.state.files[i].name);
+          localStorage.setItem('fileSize' + i, this.state.files[i].size);
+        }
       }
       // Send to VisualizationPanel.js 
       this.props.onReadFileChange();
-    });
+    };
   }
 
   /**
