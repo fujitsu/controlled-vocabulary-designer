@@ -112,10 +112,9 @@ export default class DialogSettingSynonym extends React.Component {
     this.setState({ 
       selectPreferred_Ja:selectPreferred_Ja,
       selectPreferred_En:selectPreferred_En,
-      selectBroader_Ja:selectBroader_Ja,
-      selectBroader_En:selectBroader_En,
     });
 
+    this.broaderList = {ja:[], en:[]};
     [ editingVocabulary.currentNode, editingVocabulary.currentLangDiffNode].forEach(( currentNode)=>{
       
       // preferred
@@ -137,18 +136,83 @@ export default class DialogSettingSynonym extends React.Component {
       });
 
       // broader
+      // Add the representative word of another language of broader term to the list
       if( currentNode.broader_term){
-        this.broaderList[ currentNode.language] = [ currentNode.broader_term];
+        this.broaderList[ currentNode.language].push({ term:currentNode.broader_term, id:'currentNode' });
+
+        const pre = this.getPreferredFromBroadrByTerm( currentNode.broader_term, currentNode.language);
+        if(pre != ''){
+          this.broaderList[ currentNode.language=='ja'?'en':'ja'].push( {term:pre, id:'currentNode'});    
+          if(currentNode.language=='ja'){
+            selectBroader_En = pre;
+          } else{
+            selectBroader_Ja = pre;
+          }     
+        }
       }
       if( targetNode && targetNode.broader_term  && targetNode.language == currentNode.language
         && currentNode.broader_term != targetNode.broader_term){
-        this.broaderList[ currentNode.language].push( targetNode.broader_term)
+        this.broaderList[ currentNode.language].push( { term:targetNode.broader_term, id:'targetNode' });
+
+        const pre = this.getPreferredFromBroadrByTerm( targetNode.broader_term, targetNode.language);
+        if(pre != ''){
+          this.broaderList[ currentNode.language=='ja'?'en':'ja'].push(  {term:pre, id:'targetNode'});   
+          if(currentNode.language=='ja' && selectBroader_En == ''){
+            selectBroader_En = pre;
+          } else if(currentNode.language=='en' && selectBroader_Ja == ''){
+            selectBroader_Ja = pre;
+          }             
+        }
       }
     })
+
+    // Priority is given to the broader term of the source node.If there is another language, arrange it.
+    if( this.broaderList['en'].length > 1 && this.broaderList['ja'].length > 0){
+      selectBroader_Ja = this.broaderList['ja'][0].term;
+      this.broaderList['en'].forEach(( item)=>{
+        if(item.id == this.broaderList['ja'][0].id)
+        selectBroader_En = item.term;
+      });
+    }else if( this.broaderList['ja'].length > 1 && this.broaderList['en'].length > 0){
+      selectBroader_En = this.broaderList['en'][0].term;
+      this.broaderList['ja'].forEach(( item)=>{
+        if(item.id == this.broaderList['en'][0].id)
+        selectBroader_Ja = item.term;
+      });
+    }
+
+    this.setState({ 
+      selectBroader_Ja:selectBroader_Ja,
+      selectBroader_En:selectBroader_En,
+    });
+
     // No selection is also an option, so if any language has broader terms, show the broader term selection
-    if(  this.broaderList['ja'].length + this.broaderList['en'].length > 1 ){
+    if(  this.broaderList['ja'].length + this.broaderList['en'].length > 0 ){
       this.broaderClassName= this.props.classes.formControl;
     }
+  }
+  
+  /**
+   * Get the representative term from the broader term name
+   * @param  {string} term - broader term
+   * @param  {string} lang - language
+   * @return {string} preferred label
+   */
+  getPreferredFromBroadrByTerm( term, lang){
+
+    let ret = '';
+    const brdNode = this.props.editingVocabulary.editingVocabulary.find((data)=>{
+      return data.term == term ;
+    })
+    if( brdNode){
+      const find = this.props.editingVocabulary.editingVocabulary.find((data)=>{
+        return data.uri == brdNode.uri &&  data.language != lang;
+      })
+      if( find){
+        ret = find.preferred_label;
+      }
+    }
+    return ret;
   }
 
   /**
@@ -170,10 +234,20 @@ export default class DialogSettingSynonym extends React.Component {
    * @param  {string}lang - language
    */
   changeBroader(e, lang) {
+    const id = e.target[e.target.selectedIndex].getAttribute('data-id');
+    const brdTerm = e.target.value;
     if(lang == 'ja'){
-      this.setState({ selectBroader_Ja: e.target.value });  
+      this.setState({ selectBroader_Ja: brdTerm });
+      this.broaderList['en'].forEach(( item)=>{
+        if(item.id == id)
+          this.setState({ selectBroader_En: item.term });  
+      });
     }else{
-      this.setState({ selectBroader_En: e.target.value });  
+      this.setState({ selectBroader_En: brdTerm });
+      this.broaderList['ja'].forEach(( item)=>{
+        if(item.id == id)
+          this.setState({ selectBroader_Ja: item.term });  
+      });
     }   
   }
   
@@ -343,7 +417,7 @@ export default class DialogSettingSynonym extends React.Component {
                     >
                       <option key={-1} value=''>日本語の上位語：指定なし</option>
                       { this.broaderList['ja'].map((item, i) => (
-                        <option key={i} value={item}>{item}</option>
+                        <option key={i} value={item.term} data-id={item.id}>{item.term}</option>
                       ))}
                     </Select>
                     }
@@ -364,7 +438,7 @@ export default class DialogSettingSynonym extends React.Component {
                     >
                       <option key={-1} value=''>英語の上位語：指定なし</option>
                       { this.broaderList['en'].map((item, i) => (
-                        <option key={i} value={item}>{item}</option>
+                        <option key={i} value={item.term} data-id={item.id}>{item.term}</option>
                       ))}
                     </Select>
                     }
