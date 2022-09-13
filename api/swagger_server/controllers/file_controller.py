@@ -1420,7 +1420,7 @@ def _check_duplicated_terms(df, file_type=0):
     term_colname = '用語名'  
     lang_colname = '言語'
     # detedt duplicated terms
-    tmpdf = df[df.duplicated(subset=term_colname)][[term_colname, lang_colname]]
+    tmpdf = df[df.duplicated(subset=[term_colname, lang_colname])][[term_colname, lang_colname]]
     if tmpdf.size != 0:
         # there are duplicated terms
         tmpdf = tmpdf.drop_duplicates()
