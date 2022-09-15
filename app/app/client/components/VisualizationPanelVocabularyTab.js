@@ -1505,6 +1505,9 @@ export default
               <Grid item>
                 <Button
                   className={this.props.classes.buttons}
+                  style={{
+                    marginLeft: "10px",
+                  }}
                   ml={3}
                   variant="contained"
                   color="primary"
