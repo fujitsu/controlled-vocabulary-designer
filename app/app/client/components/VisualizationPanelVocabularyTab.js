@@ -233,7 +233,7 @@ export default
           case 'blue': bgStyle = 'bgBlue'; break;
           case 'deepPurple': bgStyle = 'bgDeepPurple'; break;
           case 'purple': bgStyle = 'bgPurple'; break;
-          default: bgStyle = 'bgBlack'; break;
+          default: bgStyle = 'bgWhite'; break;
         }
 
         if (bgStyle) {
@@ -241,7 +241,7 @@ export default
         }
       }
     } else {
-      eles.addClass('bgBlack');
+      eles.addClass('bgWhite');
     }
   }
 
@@ -899,7 +899,7 @@ export default
             'blue',
             'deepPurple',
             'purple',
-            'bgBlack',
+            'bgWhite',
             'bgBrown',
             'bgRed',
             'bgOrange',
@@ -944,7 +944,7 @@ export default
             'blue',
             'deepPurple',
             'purple',
-            'bgBlack',
+            'bgWhite',
             'bgBrown',
             'bgRed',
             'bgOrange',
@@ -1816,7 +1816,7 @@ export default
               },
             },
             {
-              selector: '.bgBlack',
+              selector: '.bgWhite',
               style: {
                 'background-color': 'white',
               },
