@@ -231,14 +231,6 @@ def _create_update_sql(file_type, id):
     return ret_sql
 
 
-def _create_delete_sql(file_type, id):
-
-    ret_sql = ''
-    ret_sql = file_type + '?id=eq.' + str(id)
-
-    return ret_sql
-
-
 def _create_update_payload(target_data, index):
 
     update_data = {}

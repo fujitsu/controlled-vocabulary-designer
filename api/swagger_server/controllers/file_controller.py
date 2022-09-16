@@ -172,10 +172,10 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             _exec_insert_postgrest(payload, 'editing_vocabulary_meta')
 
     if editing_vocabulary is not None:
-        file_type = 0
+        file_type_num = 0
         if editing_vocabulary_meta is None:
             # something is wrong
-            return CheckErrorResponse(-1, 0, 'upload editing voc and meta together', file_type), 411
+            return CheckErrorResponse(-1, 0, 'upload editing voc and meta together', file_type_num), 411
         allow_extension, r_ext =\
             _check_extensions(editing_vocabulary,
                               VOCABULARY_ALLOWED_EXTENSIONS)
@@ -195,7 +195,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return exec_res, status_code
         # uri must starts with meta_uri 
         # phase 4, reasn 0
-        exec_res, status_code = _check_uri_startswith_prefix(df, uri_prefix, file_type)
+        exec_res, status_code = _check_uri_startswith_prefix(df, uri_prefix, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                     '[Error] failed _check_uri_startswith_prefix',
@@ -204,7 +204,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
         # the empty cell or cells with white spaces are detected the above
         # broader_term must start with prefix
         # phase 5, reason 0
-        exec_res, status_code = _check_broader_term_startswith_prefix(df, uri_prefix, file_type)
+        exec_res, status_code = _check_broader_term_startswith_prefix(df, uri_prefix, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                     '[Error] failed __check_broader_term_startswith_prefix',
@@ -213,7 +213,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
         # the empty cell or cells with white spaces are detected the above
 
         # check inconsistencies
-        exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type)
+        exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                   '[Error] failed _check_inconsistencies_vocs',
@@ -231,7 +231,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return exec_res, status_code
     
     if reference_vocabulary1 is not None:
-        file_type = 1
+        file_type_num = 1
         allow_extension, r_ext =\
             _check_extensions(reference_vocabulary1,
                               VOCABULARY_ALLOWED_EXTENSIONS)
@@ -243,14 +243,14 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
         # read file
         df = _read_file_storage(reference_vocabulary1)
         # Check columns
-        exec_res, status_code, df = _check_columns_ref(df, 1)
+        exec_res, status_code, df = _check_columns_ref(df, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
         # check inconsistencies
-        exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type)
+        exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                   '[Error] failed _check_inconsistencies_vocs',
@@ -269,7 +269,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return exec_res, status_code
 
     if reference_vocabulary2 is not None:
-        file_type = 2
+        file_type_num = 2
         allow_extension, r_ext =\
             _check_extensions(reference_vocabulary2,
                               VOCABULARY_ALLOWED_EXTENSIONS)
@@ -282,14 +282,14 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
         # read file
         df = _read_file_storage(reference_vocabulary2)
         # Check columns
-        exec_res, status_code, df = _check_columns_ref(df, 2)
+        exec_res, status_code, df = _check_columns_ref(df, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
         # check inconsistencies
-        exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type)
+        exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                   '[Error] failed _check_inconsistencies_vocs',
@@ -307,7 +307,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
             return exec_res, status_code
 
     if reference_vocabulary3 is not None:
-        file_type=3
+        file_type_num=3
         allow_extension, r_ext =\
             _check_extensions(reference_vocabulary3,
                               VOCABULARY_ALLOWED_EXTENSIONS)
@@ -320,14 +320,14 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
         # read file
         df = _read_file_storage(reference_vocabulary3)
         # Check columns
-        exec_res, status_code, df = _check_columns_ref(df, 3)
+        exec_res, status_code, df = _check_columns_ref(df, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
         # check inconsistencies
-        exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type)
+        exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
                   '[Error] failed _check_inconsistencies_vocs',
@@ -348,10 +348,10 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
 
 
 
-def _check_inconsistencies_vocs(df, file_type):
+def _check_inconsistencies_vocs(df, file_type_num):
     # values of lang must be ja or en or empty (which contains white spaces)
     # phase 3, reason 0
-    exec_res, status_code = _check_lang_val(df, file_type)
+    exec_res, status_code = _check_lang_val(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_lang_val',
@@ -367,7 +367,7 @@ def _check_inconsistencies_vocs(df, file_type):
     
     # check all pref_label in a group that have same uri and lang are same
     # phase 2, reason 0
-    exec_res, status_code = _check_pref_label_val(df, file_type)
+    exec_res, status_code = _check_pref_label_val(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_pref_label_val',
@@ -377,7 +377,7 @@ def _check_inconsistencies_vocs(df, file_type):
     # check not all preferred label in a group that have same uri are empty  
     # this returns only one error if there are many groups that having empty preferred label
     # pahse 2, reason 1
-    exec_res, status_code = _check_pref_label_empty(df, file_type)
+    exec_res, status_code = _check_pref_label_empty(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_pref_label_empty',
@@ -392,7 +392,7 @@ def _check_inconsistencies_vocs(df, file_type):
     # check there does not exist different synonim group that having same uri have same preffered label 
     # this returns only one error if there are many groups that having same preferred label
     # pahse 2, reason 2
-    exec_res, status_code = _check_diff_synogroup_have_diff_pref(df, file_type)
+    exec_res, status_code = _check_diff_synogroup_have_diff_pref(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_diff_synogroup_have_diff_pref',
@@ -404,7 +404,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # check blanck term existence condition
     # 409 phase 1, reason 0 
-    exec_res, status_code = _check_blanck_term_condition(df, file_type)
+    exec_res, status_code = _check_blanck_term_condition(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_blanck_term_condition',
@@ -417,7 +417,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # check duplicated terms
     # phase 1, reason 5
-    exec_res, status_code = _check_duplicated_terms(df, file_type)
+    exec_res, status_code = _check_duplicated_terms(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_duplicated_terms',
@@ -426,7 +426,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # check broader terms are same in a synonum group
     # phase 5, reason 1
-    exec_res, status_code = _check_broader_terms_same(df, file_type)
+    exec_res, status_code = _check_broader_terms_same(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_broader_terms_same',
@@ -435,7 +435,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # check broader values are in uri
     # phase 5, reason 2
-    exec_res, status_code = _check_broader_exist_in_uri(df, file_type)
+    exec_res, status_code = _check_broader_exist_in_uri(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_broader_exist_in_uri',
@@ -444,7 +444,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # checks loop relation between terms
     # phase 5, reason 3 (This returns only one error even if there are many)
-    exec_res, status_code = _check_broader_loop_relation(df, file_type)
+    exec_res, status_code = _check_broader_loop_relation(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_broader_loop_relation',
@@ -453,7 +453,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # checks pref label exists in terms in each synonimun group
     # 409 phase 2, reason 3
-    exec_res, status_code = _check_preflabel_existence(df, file_type)
+    exec_res, status_code = _check_preflabel_existence(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_preflabel_existence',
@@ -462,7 +462,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # check other vocabulary synonimum are same in a synonum group
     # 409 phase 6, reason 0
-    exec_res, status_code = _check_other_voc_syn_same(df, file_type)
+    exec_res, status_code = _check_other_voc_syn_same(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_other_voc_syn_same',
@@ -471,7 +471,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # check term_description are same in a synonum group for each language
     # phase 7, reason 0 (This returns only one error even if there are many)
-    exec_res, status_code = _check_term_description_same(df, file_type)
+    exec_res, status_code = _check_term_description_same(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_term_description_same',
@@ -480,7 +480,7 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # check created time are same in a synonum group for each language
     # phase 8, reason 0 (This returns only one error even if there are many)
-    exec_res, status_code = _check_created_time_same(df, file_type)
+    exec_res, status_code = _check_created_time_same(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_created_time_same',
@@ -489,14 +489,14 @@ def _check_inconsistencies_vocs(df, file_type):
 
     # check created time are same in a synonum group for each language
     # phase 9, reason 0 (This returns only one error even if there are many)
-    exec_res, status_code = _check_modified_time_same(df, file_type)
+    exec_res, status_code = _check_modified_time_same(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
                 '[Error] failed _check_modified_time_same',
                 location())
         return exec_res, status_code, df
 
-    if file_type == 0: # if editing vocabulary   
+    if file_type_num == 0: # if editing vocabulary   
         # fill values for color1 and color2
         df = _fill_color_val(df, '色1',
                     default_color='black', allowed_color=VOCABULARY_ALLOWED_COLOR1)
@@ -798,103 +798,6 @@ def _check_columns_ref(data_frame, ref_num):
     # trim colmuns if there is redundant colmns
     data_frame = data_frame[required_columns] 
     return SuccessResponse('request is success.'), 200, data_frame
-
-def _make_row_data_frame(term, col):
-    """Make row data
-
-    Make new vocabulary for DataFrame format at term.
-
-    :param term:
-    :type term: strstr
-    :param col:
-    :type col: integer
-
-    :rtype: list
-    """
-    if col == 11:
-        row = [
-            term,
-            term,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            'black',
-            'black',
-        ]
-        return row
-    elif col == 12:
-        row = [
-            term,
-            term,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            'black',
-            'black',
-            0,
-        ]
-        return row
-    elif col == 15:
-        row = [
-            term,
-            term,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            None,
-            'black',
-            'black',
-            0,
-        ]
-        return row
-    else:
-        return None
-
-
-def _repair_broader_term(df):
-    """Repair for lost broader_term.
-
-    If broader_term is not in df, add to broader_term to df in term.
-
-    :param df:
-    :type df: DataFormat
-
-    """
-    for index, item in df.iterrows():
-        broader_term = item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
-        if broader_term is not None:
-            resdf = df.query('用語名 == @broader_term')
-            if len(resdf) == 0:
-                row, col = df.shape
-                # Add the broader term if it does not already exist in the vocabulary
-                newRow = _make_row_data_frame(broader_term, col)
-                if newRow is not None:
-                    df.loc[row] = newRow
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -1232,7 +1135,7 @@ def _download_meta_file_ev_serialize(pl_simple, p_format):
 #########################################################################################################
 
 # 409 phase 4, reason 0
-def _check_uri_startswith_prefix(df, uri_prefix, file_type=0):
+def _check_uri_startswith_prefix(df, uri_prefix, file_type_num=0):
     # uri must starts with meta_uri 
     # the empty cell or cells with white spaces are also detected and returns errorresponse
     term_colname ='用語名'
@@ -1242,12 +1145,12 @@ def _check_uri_startswith_prefix(df, uri_prefix, file_type=0):
     term_list = tmpdf[term_colname].to_list()
     lang_list = tmpdf[lang_colname].to_list()
     if len(term_list) != 0:
-        return CheckErrorResponse(4, term_list, lang_list, 0, file_type), 409
+        return CheckErrorResponse(4, term_list, lang_list, 0, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
 # 409 phase 5, reason 0
-def _check_broader_term_startswith_prefix(df, uri_prefix, file_type=0):
+def _check_broader_term_startswith_prefix(df, uri_prefix, file_type_num=0):
     # broader_term must start with prefix
     # the empty cell or cells with white spaces are also detected and returns errorresponse
     term_colname ='用語名'
@@ -1261,12 +1164,12 @@ def _check_broader_term_startswith_prefix(df, uri_prefix, file_type=0):
     term_list = tmpdf[term_colname].to_list()
     lang_list = tmpdf[lang_colname].to_list()
     if len(term_list) != 0:
-        return CheckErrorResponse(5, term_list, lang_list, 0, file_type), 409
+        return CheckErrorResponse(5, term_list, lang_list, 0, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
 # # 409 phase 3, reason 0
-def _check_lang_val(df, file_type=0):
+def _check_lang_val(df, file_type_num=0):
     # the values must be in VOCABULARY_ALLOWED_LANGUAGE or empty (which contains white spaces)
     # empty cells are not filled
     term_colname ='用語名'
@@ -1286,11 +1189,11 @@ def _check_lang_val(df, file_type=0):
     term_list = tmpdf[term_colname].to_list()
     lang_list = tmpdf[lang_colname].to_list()
     if len(term_list) != 0:
-        return CheckErrorResponse(3, term_list, lang_list, 0, file_type), 409
+        return CheckErrorResponse(3, term_list, lang_list, 0, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 # # 409 phase 2, reason 0
-def _check_pref_label_val(df, file_type=0):
+def _check_pref_label_val(df, file_type_num=0):
     # check all pref_label in a group that have same uri and lang are same
     # this returns only one error if there are many groups that having empty preferred label
     term_colname ='用語名'
@@ -1310,13 +1213,13 @@ def _check_pref_label_val(df, file_type=0):
         tmpdf = df[(df[uri_colname] == tmpuri) & (df[lang_colname] == tmplang)][[term_colname, lang_colname]]
         term_list = tmpdf[term_colname].to_list()
         lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(2, term_list, lang_list, 0, file_type), 409
+        return CheckErrorResponse(2, term_list, lang_list, 0, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
 
 # # 409 phase 2, reason 1
-def _check_pref_label_empty(df, file_type=0):
+def _check_pref_label_empty(df, file_type_num=0):
     # check not all preferred label in a group that have same uri are empty  
     # this returns only one error if there are many groups that having empty preferred label
     term_colname ='用語名'
@@ -1330,14 +1233,14 @@ def _check_pref_label_empty(df, file_type=0):
             tmpdf = df[df[uri_colname] == group_uri][[term_colname, lang_colname]]
             term_list = tmpdf[term_colname].to_list()
             lang_list = tmpdf[lang_colname].to_list()
-            return CheckErrorResponse(2, term_list, lang_list, 1, file_type), 409
+            return CheckErrorResponse(2, term_list, lang_list, 1, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
 
 
 # # 409 pahse 2, reason 2
-def _check_diff_synogroup_have_diff_pref(df, file_type=0):
+def _check_diff_synogroup_have_diff_pref(df, file_type_num=0):
     # check there does not exist different synonim group that having same uri have same preffered label 
     # this returns only one error if there are many groups that having same preferred label
     term_colname = '用語名'  
@@ -1352,13 +1255,13 @@ def _check_diff_synogroup_have_diff_pref(df, file_type=0):
         tmpdf = df[(df[preferred_label_colname] == tmppreflabel) & (df[lang_colname] == tmplang)][[term_colname, lang_colname]]
         term_list = tmpdf[term_colname].to_list()
         lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(2, term_list, lang_list, 2, file_type), 409
+        return CheckErrorResponse(2, term_list, lang_list, 2, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
 
 # 409 phase 1, reason 0, 1, 2
-def _check_blanck_term_condition(df, file_type=0):
+def _check_blanck_term_condition(df, file_type_num=0):
     # check blanck term existence condition
     # preferred label must be blanck for the row
     # term description must not be blanck for the row
@@ -1384,12 +1287,12 @@ def _check_blanck_term_condition(df, file_type=0):
             # term is blanck but preferred label is not empty
             term_list = [row[uri_colname]]
             lang_list = [row[lang_colname]]
-            return CheckErrorResponse(1, term_list, lang_list, 0, file_type), 409
+            return CheckErrorResponse(1, term_list, lang_list, 0, file_type_num), 409
         if row[term_description_colname].strip() == '':
             # term description is empty
             term_list = [row[uri_colname]]
             lang_list = [row[lang_colname]]
-            return CheckErrorResponse(1, term_list, lang_list, 0, file_type), 409
+            return CheckErrorResponse(1, term_list, lang_list, 0, file_type_num), 409
     ### 1-1
     # check duplicate rows with blanck terms
     count_df = empty_term_df.groupby([lang_colname, uri_colname]).count() # this is a DataFrame　
@@ -1400,7 +1303,7 @@ def _check_blanck_term_condition(df, file_type=0):
         tmplang, tmpuri = count_df2.index[0] # get the first uri and lang
         term_list = [tmpuri]
         lang_list = [tmplang]
-        return CheckErrorResponse(1, term_list, lang_list, 1, file_type), 409
+        return CheckErrorResponse(1, term_list, lang_list, 1, file_type_num), 409
     ### 1-2
     for idx, row in empty_term_df.iterrows():
         lang = row[lang_colname]
@@ -1411,11 +1314,11 @@ def _check_blanck_term_condition(df, file_type=0):
             # blanck and non blanck term are existed
             term_list = [uri]
             lang_list = [lang]
-            return CheckErrorResponse(1, term_list, lang_list, 2, file_type), 409
+            return CheckErrorResponse(1, term_list, lang_list, 2, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 # 409 phase 1, reason 5
-def _check_duplicated_terms(df, file_type=0):
+def _check_duplicated_terms(df, file_type_num=0):
     # check duplicated terms
     term_colname = '用語名'  
     lang_colname = '言語'
@@ -1426,12 +1329,12 @@ def _check_duplicated_terms(df, file_type=0):
         tmpdf = tmpdf.drop_duplicates()
         term_list = tmpdf[term_colname].to_list()
         lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(1, term_list, lang_list, 5, file_type), 409
+        return CheckErrorResponse(1, term_list, lang_list, 5, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
 # 409 phase 5, reason 1
-def _check_broader_terms_same(df, file_type=0):
+def _check_broader_terms_same(df, file_type_num=0):
     # check broader terms are same in a synonum group
     # this returns only one error if there are many
     term_colname = '用語名'  
@@ -1447,11 +1350,11 @@ def _check_broader_terms_same(df, file_type=0):
         tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
         term_list = tmpdf[term_colname].to_list()
         lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(5, term_list, lang_list, 1, file_type), 409
+        return CheckErrorResponse(5, term_list, lang_list, 1, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 # 409 phase 5, reason 2
-def _check_broader_exist_in_uri(df, file_type=0):
+def _check_broader_exist_in_uri(df, file_type_num=0):
     # check broader values are in uri
     # this returns only one error if there are many
     term_colname = '用語名'  
@@ -1468,7 +1371,7 @@ def _check_broader_exist_in_uri(df, file_type=0):
             tmpdf = df[df[broader_term_colname] == tmpuri][[term_colname, lang_colname]]
             term_list = tmpdf[term_colname].to_list()
             lang_list = tmpdf[lang_colname].to_list()
-            return CheckErrorResponse(5, term_list, lang_list, 2, file_type), 409
+            return CheckErrorResponse(5, term_list, lang_list, 2, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
@@ -1490,7 +1393,7 @@ def dfs(v, neighbor, invisited, infinished, pushdown):
     return invisited, infinished, pushdown, 0, v
 
 # phase 5, reason 3 (This returns only one error even if there are many)
-def _check_broader_loop_relation(df, file_type=0):
+def _check_broader_loop_relation(df, file_type_num=0):
     # checks loop relation between terms
     # prerequest all values in broader_term must exist in uri
     # this use graph theoreticd depth first search
@@ -1524,11 +1427,11 @@ def _check_broader_loop_relation(df, file_type=0):
             row = df[df[uri_colname]  == ii_uri ].iloc[0]
             term_list.append(row[term_colname])
             lang_list.append(row[lang_colname])
-        return CheckErrorResponse(5, term_list, lang_list, 3, file_type), 409
+        return CheckErrorResponse(5, term_list, lang_list, 3, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 # 409 phase 2, reason 3
-def _check_preflabel_existence(df, file_type=0):
+def _check_preflabel_existence(df, file_type_num=0):
     # checks pref label exists in terms in each synonimun group
     term_colname = '用語名'
     preferred_label_colname = '代表語'
@@ -1542,11 +1445,11 @@ def _check_preflabel_existence(df, file_type=0):
             print(tmp_preflabel)
             print(term_list)
             lang_list = [group_lang] * len(term_list) 
-            return CheckErrorResponse(2, term_list, lang_list, 3, file_type), 409
+            return CheckErrorResponse(2, term_list, lang_list, 3, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 # 409 phase 6, reason 0
-def _check_other_voc_syn_same(df, file_type=0):
+def _check_other_voc_syn_same(df, file_type_num=0):
     # check other vocabulary synonimum are same in a synonum group
     # this returns only one error if there are many
     term_colname = '用語名'  
@@ -1562,12 +1465,12 @@ def _check_other_voc_syn_same(df, file_type=0):
         tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
         term_list = tmpdf[term_colname].to_list()
         lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(6, term_list, lang_list, 0, file_type), 409
+        return CheckErrorResponse(6, term_list, lang_list, 0, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
 # 409 phase 7, reason 0
-def _check_term_description_same(df, file_type=0):
+def _check_term_description_same(df, file_type_num=0):
     # check term_description are same in a synonum group for each language
     # this returns only one error if there are many
     term_colname = '用語名'  
@@ -1583,11 +1486,11 @@ def _check_term_description_same(df, file_type=0):
         tmpdf = df[(df[uri_colname] == tmpuri) & (df[lang_colname] == tmplang) ][[term_colname, lang_colname]]
         term_list = tmpdf[term_colname].to_list()
         lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(7, term_list, lang_list, 0, file_type), 409
+        return CheckErrorResponse(7, term_list, lang_list, 0, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 # 409 phase 8, reason 0
-def _check_created_time_same(df, file_type=0):
+def _check_created_time_same(df, file_type_num=0):
     # check created time are same in a synonum group for each language
     # this returns only one error if there are many
     term_colname = '用語名'  
@@ -1602,12 +1505,12 @@ def _check_created_time_same(df, file_type=0):
         tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
         term_list = tmpdf[term_colname].to_list()
         lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(8, term_list, lang_list, 0, file_type), 409
+        return CheckErrorResponse(8, term_list, lang_list, 0, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
 # 409 phase 9, reason 0
-def _check_modified_time_same(df, file_type=0):
+def _check_modified_time_same(df, file_type_num=0):
     # check created time are same in a synonum group for each language
     # this returns only one error if there are many
     term_colname = '用語名'  
@@ -1622,7 +1525,7 @@ def _check_modified_time_same(df, file_type=0):
         tmpdf = df[(df[uri_colname] == tmpuri) ][[term_colname, lang_colname]]
         term_list = tmpdf[term_colname].to_list()
         lang_list = tmpdf[lang_colname].to_list()
-        return CheckErrorResponse(9, term_list, lang_list, 0, file_type), 409
+        return CheckErrorResponse(9, term_list, lang_list, 0, file_type_num), 409
     return SuccessResponse('request is success.'), 200
 
 
