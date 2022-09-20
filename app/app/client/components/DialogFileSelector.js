@@ -355,22 +355,22 @@ export default class DialogFileSelector extends React.Component {
                       '」が無いためファイルが読み込めません。「'+
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」を追加して再読み込みしてください。' ;
-                  } else if ( (errResponse.data.phase == 2) &&
-                      (errResponse.data.reason == 0)) {
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 2)) {
                     errMsg = '参照用語彙1の、列「' +
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」が無いためファイルが読み込めません。「'+
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」を追加して再読み込みしてください。' ;
-                  } else if ( (errResponse.data.phase == 3) &&
-                      (errResponse.data.reason == 0)) {
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 3)) {
                     errMsg = '参照用語彙2の、列「' +
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」が無いためファイルが読み込めません。「'+
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」を追加して再読み込みしてください。' ;
-                  } else if ( (errResponse.data.phase == 4) &&
-                      (errResponse.data.reason == 0)) {
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 4)) {
                     errMsg = '参照用語彙3の、列「' +
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」が無いためファイルが読み込めません。「'+
