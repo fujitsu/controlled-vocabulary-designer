@@ -128,7 +128,7 @@ shop,store,en,http://sampleVocab/2,,http://otherVocab/16,,2021-04-01T11:40:15Z,2
 -  「色2」列
     -  CVDの画面で用語を図形つきで表示した際につけられる図形の背景の色のことです。
     -  デフォルトは"green"です。
-    -  "white"、"red"、"orange"、"green"、"blue"、"purple"以外の値の場合は、ファイル読み込み時に"green"として処理されます。
+    -  "green"、"white"、"red"、"orange"、"blue"、"purple"以外の値の場合は、ファイル読み込み時に"green"として処理されます。
 -  「確定済み用語」列
     -  その用語のCVDにおける編集確定（※）フラグのことです。
         -  ※ここでいう確定とは、CVDで用語の編集をロックした状態のことをいいます。
