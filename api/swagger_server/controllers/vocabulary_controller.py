@@ -128,16 +128,18 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
 
     :rtype: List[EditingVocabulary]
     """
-
     if file_type == 'editing_vocabulary':
         # Objects may be included and numbering cannot be used     
         index = 0
+        id_list=[]
         for item in body:
             payload = _create_update_payload(item, index)
 
             if 'id' in item:
                 # update data.
                 update_sql = _create_update_sql(file_type, item['id'])
+                id_list.append(item['id'])
+                
                 exec_res, status_code = _exec_update_postgrest(payload, update_sql)
                 if not status_code == 200:
                     return exec_res, status_code
@@ -148,12 +150,11 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
             index = index + 1
 
         editing_vocabulary = []
-        exec_res, status_code = _exec_get_postgrest('editing_vocabulary')
+        exec_res, status_code = _exec_get_postgrest('editing_vocabulary', id_list)
         if not status_code == 200:
             return ErrorResponse(0, exec_res['message']), status_code
 
         editing_vocabulary = exec_res['result']
-
         return editing_vocabulary, 200
 
     elif file_type == 'editing_vocabulary_meta':
@@ -274,11 +275,21 @@ def _create_updatemeta_payload(target_data):
     return update_data
 
 
-def _exec_get_postgrest(target_table):
+def _exec_get_postgrest(target_table, id_list=None):
 
     response_data = {}
+    
+    if id_list is not None:
+        tmpstrlist = "("
+        for item in id_list:
+            tmpstrlist += str(item) + ','
+        tmpstrlist = tmpstrlist[:-1]
+        tmpstrlist += ')'
+        request_url = POSTGREST_BASE_URL + target_table + '?id=in.'+tmpstrlist
+    else:
+        request_url = POSTGREST_BASE_URL + target_table
 
-    psg_res = requests.get(POSTGREST_BASE_URL + target_table, headers=HEADER)
+    psg_res = requests.get(request_url, headers=HEADER)
     try:
         psg_res.raise_for_status()
     except requests.exceptions.RequestException as e:
@@ -292,7 +303,6 @@ def _exec_get_postgrest(target_table):
 
 
 def _exec_update_postgrest(payload, url):
-
     response_data = {}
 
     psg_res = requests.patch(POSTGREST_BASE_URL + url,
@@ -307,5 +317,4 @@ def _exec_update_postgrest(payload, url):
         return response_data, psg_res.status_code
 
     return response_data, 200
-
 

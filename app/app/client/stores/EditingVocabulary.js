@@ -76,7 +76,7 @@ class EditingVocabulary {
           if (this.visualVocRef.current) {
             this.visualVocRef.current.situationArrReset(0);
           }
-          this.setEditingVocabularyData(response.data.EditingVocabulary);
+          this.initializeEditingVocabularyData(response.data.EditingVocabulary);
           if (0 == this.selectedFile.id) {
             this.currentNodeClear();
             this.tmpDataClear();
@@ -248,9 +248,43 @@ class EditingVocabulary {
    * Editing vocabulary data initialization
    * @param {array} dbData - list of editing vocabulary
    */
-  setEditingVocabularyData(dbData) {
-    const editingVocabulary = [];
+  initializeEditingVocabularyData(dbData) {
+    // calculate values to set (update)
+    const editingVocabulary = this.calcEditingVocValues(dbData) ;
 
+    this.editingVocabulary = editingVocabulary;
+    this.initConfirmColor();
+  }
+
+  /**
+   * Editing vocabulary data update
+   * @param {array} dbData - list of editing vocabulary
+   */
+  updateEditingVocabularyData(dbData) {
+
+    // make id_list with whome terms are updated
+    let id_list=[];
+    for( let item of dbData){
+      id_list.push(item.id);
+    };
+
+    // filter unrelated terms
+    let unChangeVocabulary = this.editingVocabulary.filter((item) => {return (!id_list.includes(item['id']))}) ;
+
+    // calculate values to update
+    const editingVocabulary = this.calcEditingVocValues(dbData) ;
+
+    this.editingVocabulary = unChangeVocabulary.concat(editingVocabulary);
+    this.initConfirmColor();
+  }
+
+  /**
+   * Calculate Editing vocabulary data to update
+   * @param {array} dbData - list of editing vocabulary
+   */
+  calcEditingVocValues(dbData) {
+    // calculate values to update
+    const editingVocabulary = [];
     const uri_preferred_label_ja = {};
     const uri_preferred_label_en = {};
     dbData.forEach( (data) => {
@@ -315,9 +349,7 @@ class EditingVocabulary {
 
       editingVocabulary.push(data);
     });
-
-    this.editingVocabulary = editingVocabulary;
-    this.initConfirmColor();
+    return editingVocabulary;
   }
 
   /**
@@ -2527,7 +2559,7 @@ isOtherVocSynUriChanged() {
             },
         )
         .then((response) => {
-          this.setEditingVocabularyData(response.data);
+          this.updateEditingVocabularyData(response.data);
 
           // Reselect to reset tmp information
           if( setCurrent){
@@ -3596,7 +3628,7 @@ isOtherVocSynUriChanged() {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
-          this.setEditingVocabularyData(response.data);
+          this.updateEditingVocabularyData(response.data);
 
           if (!(isHistory)) {
             editingHistoryStore.addHistory(history);
