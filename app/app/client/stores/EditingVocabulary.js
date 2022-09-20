@@ -417,7 +417,7 @@ class EditingVocabulary {
       position_y: '',
       hidden: false,
       color1: 'black',
-      color2: 'white',
+      color2: 'green',
       confirm: 0,
     };
     if (uri) createData.uri = uri;
@@ -3530,7 +3530,7 @@ isOtherVocSynUriChanged() {
   // Confirmed color information
   // The confirmed color information is stored in color2 in each term data of the editing vocabulary data,
   // but since it becomes the same information, it is managed by confirmColor in app
-  @observable confirmColor = 'white';
+  @observable confirmColor = 'green';
 
   /**
    * Get confirmed color information from editing vocabulary data
@@ -3656,7 +3656,7 @@ isOtherVocSynUriChanged() {
           data.color2 = this.confirmColor;
         } else {
           data.confirm = 0;
-          data.color2 = 'black';
+          data.color2 = 'green';
         }
       });
     } else {
@@ -3666,7 +3666,7 @@ isOtherVocSynUriChanged() {
         currentNode.color2 = this.confirmColor;
       } else {
         currentNode.confirm = 0;
-        currentNode.color2 = 'white';
+        currentNode.color2 = 'green';
       }
       targetList.push(currentNode);
     }

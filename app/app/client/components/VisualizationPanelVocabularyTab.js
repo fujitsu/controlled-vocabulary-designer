@@ -223,6 +223,7 @@ export default
         const confirmColor = this.props.editingVocabulary.confirmColor;
         let bgStyle;
         switch (confirmColor) {
+          case 'white': bgStyle = 'bgWhite'; break;
           case 'brown': bgStyle = 'bgBrown'; break;
           case 'red': bgStyle = 'bgRed'; break;
           case 'orange': bgStyle = 'bgOrange'; break;
@@ -233,7 +234,7 @@ export default
           case 'blue': bgStyle = 'bgBlue'; break;
           case 'deepPurple': bgStyle = 'bgDeepPurple'; break;
           case 'purple': bgStyle = 'bgPurple'; break;
-          default: bgStyle = 'bgWhite'; break;
+          default: bgStyle = 'bgGreen'; break;
         }
 
         if (bgStyle) {
