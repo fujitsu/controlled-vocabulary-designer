@@ -501,7 +501,7 @@ def _check_inconsistencies_vocs(df, file_type_num):
         df = _fill_color_val(df, '色1',
                     default_color='black', allowed_color=VOCABULARY_ALLOWED_COLOR1)
         df = _fill_color_val(df, '色2',
-                    default_color='black', allowed_color=VOCABULARY_ALLOWED_COLOR2)
+                    default_color='green', allowed_color=VOCABULARY_ALLOWED_COLOR2)
         # fills cells without 0 are replaced to 1
         df = _fill_confirm_val(df)
 
