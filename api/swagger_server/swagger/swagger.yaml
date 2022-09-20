@@ -455,7 +455,7 @@ components:
         postion_x: "100"
         postion_y: "100"
         color1: black
-        color2: black
+        color2: green
     EditingVocabularyMeta:
       type: object
       properties:
@@ -562,7 +562,7 @@ components:
           postion_x: "100"
           postion_y: "100"
           color1: black
-          color2: black
+          color2: green
         EditingVocabularyMeta:
         - id: 1
           meta_name: 名称
