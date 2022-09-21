@@ -81,51 +81,6 @@ const useStyles = (theme) => ({
     backgroundColor: 'rgba(0, 0, 0, 0.15)',
   },
 
-  'sliderDivRoot': {
-    height: '400px',  
-    width: '50px',
-    position: 'absolute',
-    left: '15px',
-    bottom: '15px',
-    zIndex: 1,
-    backgroundColor: 'white',
-  },
-  
-  'sliderRoot':{
-    height: '300px !important',  
-    padding: '0 23px !important',
-  },
-
-
-  'sliderRail':{
-    backgroundColor: grey[300],
-    marginLeft:'-3px !important',
-    width: '7px !important',
-    borderRadius: '4px !important',
-
-  },
-
-  'sliderTrackt':{
-    backgroundColor: grey[600],
-    marginLeft:'-3px !important',
-    width: '7px !important',
-    borderRadius: '4px !important',
-  },
-  'sliderThumb':{
-    backgroundColor: 'white',
-    border: `2px solid ${grey[600]}`,
-    marginLeft:'-4px !important',
-    width: '8px !important',
-    height: '8px !important',  
-  },
-
-  'sliderMark':{
-    backgroundColor: grey[400],
-    marginLeft:'-4px !important',
-    width: '8px !important',
-
-  },
-
   'displayNone': {
     display: 'none',
   },
