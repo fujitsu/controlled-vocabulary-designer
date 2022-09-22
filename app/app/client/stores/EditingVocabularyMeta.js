@@ -237,13 +237,18 @@ class EditingVocabularyMeta {
     const metaUri = this.currentNode.meta_uri.replace(new RegExp('\/$'), '');
     datas.forEach((data) =>{
       const uri = metaUri + '/' + data.uri.substring(data.uri.lastIndexOf('/')+1);
-      
+      let broader_uri = '';
+      if(data.broader_uri !=''){
+        broader_uri = metaUri + '/' + data.broader_uri.substring(data.broader_uri.lastIndexOf('/')+1);
+      }
+
       const dbData = {
         term: data.term,
         preferred_label: data.preferred_label,
         language:data.language,
         uri: uri,
         broader_term: data.broader_term,
+        broader_uri: broader_uri,
         other_voc_syn_uri: data.other_voc_syn_uri,
         term_description: data.term_description,
         created_time: data.created_time,

@@ -129,7 +129,7 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
     :rtype: List[EditingVocabulary]
     """
     if file_type == 'editing_vocabulary':
-        # Objects may be included and numbering cannot be used     
+        # Objects may be included and numbering cannot be used  
         index = 0
         id_list=[]
         for item in body:
@@ -240,7 +240,7 @@ def _create_update_payload(target_data, index):
     update_data['preferred_label'] = target_data['preferred_label']
     update_data['language'] = target_data['language']
     update_data['uri'] = target_data['uri']
-    update_data['broader_term'] = target_data['broader_term']
+    update_data['broader_uri'] = target_data['broader_uri']
     update_data['other_voc_syn_uri'] = target_data['other_voc_syn_uri']
     update_data['term_description'] = target_data['term_description']
     update_data['created_time'] = target_data['created_time']

@@ -202,12 +202,12 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                     location())
             return exec_res, status_code
         # the empty cell or cells with white spaces are detected the above
-        # broader_term must start with prefix
+        # broader_uri must start with prefix
         # phase 5, reason 0
-        exec_res, status_code = _check_broader_term_startswith_prefix(df, uri_prefix, file_type_num)
+        exec_res, status_code = _check_broader_uri_startswith_prefix(df, uri_prefix, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
-                    '[Error] failed __check_broader_term_startswith_prefix',
+                    '[Error] failed __check_broader_uri_startswith_prefix',
                     location())
             return exec_res, status_code
         # the empty cell or cells with white spaces are detected the above
@@ -426,10 +426,10 @@ def _check_inconsistencies_vocs(df, file_type_num):
 
     # check broader terms are same in a synonum group
     # phase 5, reason 1
-    exec_res, status_code = _check_broader_terms_same(df, file_type_num)
+    exec_res, status_code = _check_broader_uris_same(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
-                '[Error] failed _check_broader_terms_same',
+                '[Error] failed _check_broader_uris_same',
                 location())
         return exec_res, status_code, df
 
@@ -570,7 +570,7 @@ def _make_bulk_data_reference_vocabulary(df):
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
         if '上位語のURI' in item:
-            insert_data['broader_term'] =\
+            insert_data['broader_uri'] =\
                 item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
         if '他語彙体系の同義語のURI' in item:
             insert_data['other_voc_syn_uri'] =\
@@ -614,7 +614,7 @@ def _make_bulk_data_editing_vocabulary(data_frame):
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
         if '上位語のURI' in item:
-            insert_data['broader_term'] =\
+            insert_data['broader_uri'] =\
                 item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
         if '他語彙体系の同義語のURI' in item:
             insert_data['other_voc_syn_uri'] =\
@@ -850,18 +850,6 @@ def _download_file_make(pl_simple, pl_simple_meta):
         if row['preferred_label'] != "":
             dic_preflabel_uri[row['preferred_label']] = row['uri']
 
-    # replace label with URI
-    col_broader_uri = []
-    for broader_term in nm['broader_term']:
-        if broader_term in dic_preflabel_uri.keys():
-            col_broader_uri.append(dic_preflabel_uri[broader_term])
-        elif broader_term != "":
-            col_broader_uri.append(broader_term)
-        else:
-            col_broader_uri.append("")
-
-    nm.loc[:, "broader_term"] = col_broader_uri
-
     # create meta
     namelx = nm_meta.loc[:, ['meta_name', 'meta_enname', 'meta_version', 'meta_prefix', 'meta_uri',  'meta_description', 'meta_endescription', 'meta_author']].values
     for name in namelx:
@@ -942,10 +930,10 @@ def _download_file_make(pl_simple, pl_simple_meta):
         namel.append(nameb)
 
     # create broader links
-    # query broader_term
-    namelbt = nm.query('broader_term != "" and uri != ""')
-    # get uri and broader_term
-    namelx = namelbt.loc[:, ['broader_term', 'term', 'uri']].values
+    # query broader_uri
+    namelbt = nm.query('broader_uri != "" and uri != ""')
+    # get uri and broader_uri
+    namelx = namelbt.loc[:, ['broader_uri', 'term', 'uri']].values
     for name in namelx:
         if TERM_BLANK_MARK in str(name[1]):
             continue
@@ -1057,7 +1045,7 @@ def _download_file_ev_serialize(pl_simple, p_format):
                                     'preferred_label': '代表語',
                                     'language': '言語',
                                     'uri': '代表語のURI',
-                                    'broader_term': '上位語のURI',
+                                    'broader_uri': '上位語のURI',
                                     'other_voc_syn_uri': '他語彙体系の同義語のURI',
                                     'term_description': '用語の説明',
                                     'created_time': '作成日',
@@ -1138,16 +1126,16 @@ def _check_uri_startswith_prefix(df, uri_prefix, file_type_num=0):
 
 
 # 409 phase 5, reason 0
-def _check_broader_term_startswith_prefix(df, uri_prefix, file_type_num=0):
-    # broader_term must start with prefix
+def _check_broader_uri_startswith_prefix(df, uri_prefix, file_type_num=0):
+    # broader_uri must start with prefix
     # the empty cell or cells with white spaces are also detected and returns errorresponse
     term_colname ='用語名'
     lang_colname = '言語'
-    broader_term_colname =  '上位語のURI'
+    broader_uri_colname =  '上位語のURI'
     # non empty
-    tmpdf1 = df[broader_term_colname] != '' 
+    tmpdf1 = df[broader_uri_colname] != '' 
     # starts with prefix
-    tmpdf2 = df[broader_term_colname].str.startswith(uri_prefix)
+    tmpdf2 = df[broader_uri_colname].str.startswith(uri_prefix)
     tmpdf = df[tmpdf1 & ~tmpdf2][[term_colname, lang_colname]]
     term_list = tmpdf[term_colname].to_list()
     lang_list = tmpdf[lang_colname].to_list()
@@ -1322,16 +1310,16 @@ def _check_duplicated_terms(df, file_type_num=0):
 
 
 # 409 phase 5, reason 1
-def _check_broader_terms_same(df, file_type_num=0):
+def _check_broader_uris_same(df, file_type_num=0):
     # check broader terms are same in a synonum group
     # this returns only one error if there are many
     term_colname = '用語名'  
     lang_colname = '言語' 
     uri_colname = '代表語のURI' 
-    broader_term_colname = '上位語のURI' 
-    # df = df[[term_colname, lang_colname, uri_colname, broader_term_colname]] # just for debug
+    broader_uri_colname = '上位語のURI' 
+    # df = df[[term_colname, lang_colname, uri_colname, broader_uri_colname]] # just for debug
     count_df = df.groupby(uri_colname).nunique(dropna= False)
-    count_df2 = count_df[count_df[broader_term_colname] != 1]
+    count_df2 = count_df[count_df[broader_uri_colname] != 1]
     if count_df2.size != 0:
         # there is non unique broader
         tmpuri = count_df2.index[0] # get the first uri
@@ -1348,15 +1336,15 @@ def _check_broader_exist_in_uri(df, file_type_num=0):
     term_colname = '用語名'  
     lang_colname = '言語' 
     uri_colname = '代表語のURI' 
-    broader_term_colname = '上位語のURI' 
+    broader_uri_colname = '上位語のURI' 
     # get broader uri
-    uri_series = df[broader_term_colname].drop_duplicates()
+    uri_series = df[broader_uri_colname].drop_duplicates()
     uri_list = uri_series[uri_series != ''].to_list()
     for tmpuri in uri_list:
         tmp_bool_series = ~(df[uri_colname] == tmpuri)
         if tmp_bool_series.all():
             # there does not exist the broader uri in uri
-            tmpdf = df[df[broader_term_colname] == tmpuri][[term_colname, lang_colname]]
+            tmpdf = df[df[broader_uri_colname] == tmpuri][[term_colname, lang_colname]]
             term_list = tmpdf[term_colname].to_list()
             lang_list = tmpdf[lang_colname].to_list()
             return CheckErrorResponse(5, term_list, lang_list, 2, file_type_num), 409
@@ -1383,13 +1371,13 @@ def dfs(v, neighbor, invisited, infinished, pushdown):
 # phase 5, reason 3 (This returns only one error even if there are many)
 def _check_broader_loop_relation(df, file_type_num=0):
     # checks loop relation between terms
-    # prerequest all values in broader_term must exist in uri
+    # prerequest all values in broader_uri must exist in uri
     # this use graph theoreticd depth first search
     term_colname = '用語名'
     lang_colname = '言語'
     uri_colname = '代表語のURI' 
-    broader_term_colname = '上位語のURI' 
-    df2 = df[[uri_colname, broader_term_colname]] 
+    broader_uri_colname = '上位語のURI' 
+    df2 = df[[uri_colname, broader_uri_colname]] 
     df2 = df2.drop_duplicates()
     # make graph adjacent list
     df2[uri_colname]
@@ -1398,8 +1386,8 @@ def _check_broader_loop_relation(df, file_type_num=0):
     finished ={ x: False for x in uri_set}
     neighbor ={ x: [] for x in uri_set}
     for idx, row in df2.iterrows():
-        if row[broader_term_colname] != '':
-            neighbor[row[uri_colname]].append(row[broader_term_colname])
+        if row[broader_uri_colname] != '':
+            neighbor[row[uri_colname]].append(row[broader_uri_colname])
     pushdown = []
     for uri_item in uri_set:
         visited, finished, pushdown, status, tmp_uri = dfs(uri_item, neighbor, visited, finished, pushdown)
