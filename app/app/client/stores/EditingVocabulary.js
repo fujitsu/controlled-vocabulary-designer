@@ -249,7 +249,7 @@ class EditingVocabulary {
    * @param {array} dbData - list of editing vocabulary
    */
   initializeEditingVocabularyData(dbData) {
-    // calculate values to set (update)
+    // calculate values to set 
     const editingVocabulary = this.calcEditingVocValues(dbData) ;
 
     this.editingVocabulary = editingVocabulary;
@@ -324,7 +324,7 @@ class EditingVocabulary {
       
       data.idofuri = data.uri.substring(data.uri.lastIndexOf('/')+1);
 
-      // If the parameter is string (Set the empty string character)
+      // If the parameter is not string (Set the empty string character)
       if (!data.preferred_label) data.preferred_label = '';
       if (!data.language) data.language = '';
       if (!data.uri) data.idofuri = '';
@@ -381,7 +381,7 @@ class EditingVocabulary {
 
       data.idofuri = data.uri.substring(data.uri.lastIndexOf('/')+1);
 
-      // If the parameter is string (Sets the empty string character)
+      // If the parameter is not string (Sets the empty string character)
       if (!data.preferred_label) data.preferred_label = '';
       if (!data.language) data.language = '';
       if (!data.uri) data.idofuri = '';
@@ -639,7 +639,7 @@ class EditingVocabulary {
   // Select file switch ////////////////////////////////////////////////////////////
   @observable selectedFile = {id: 0, name: '編集用語彙'};
 
-  @observable isSelected = {ralation: false, vocabulary: true};
+  @observable isSelected = {relation: false, vocabulary: true};
 
   /**
    * Visualization screen Initial display status update
@@ -648,7 +648,7 @@ class EditingVocabulary {
    */
   @action setSelected(target, value) {
     if (target == 0) {
-      this.isSelected.ralation = value;
+      this.isSelected.relation = value;
     } else {
       this.isSelected.vocabulary = value;
     }
@@ -661,7 +661,7 @@ class EditingVocabulary {
    */
   @action getSelected(target) {
     if (target == 0) {
-      return this.isSelected.ralation;
+      return this.isSelected.relation;
     } else {
       return this.isSelected.vocabulary;
     }
