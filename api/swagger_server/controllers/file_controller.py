@@ -1441,9 +1441,6 @@ def _check_preflabel_existence(df, file_type_num=0):
         tmp_preflabel = group_df[preferred_label_colname].iloc[0]
         term_list = group_df[term_colname].to_list()
         if (tmp_preflabel != '') & (tmp_preflabel not in term_list):
-            print("DEBUG")
-            print(tmp_preflabel)
-            print(term_list)
             lang_list = [group_lang] * len(term_list) 
             return CheckErrorResponse(2, term_list, lang_list, 3, file_type_num), 409
     return SuccessResponse('request is success.'), 200
