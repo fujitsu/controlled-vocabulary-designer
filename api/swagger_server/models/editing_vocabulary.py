@@ -17,7 +17,7 @@ class EditingVocabulary(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, language: str=None, uri: str=None, broader_term: str=None, synonym: List[str]=None, other_voc_syn_uri: str=None, term_description: str=None, created_time: str=None, modified_time: str=None, synonym_candidate: List[str]=None, broader_term_candidate: List[str]=None, postion_x: str=None, postion_y: str=None, color1: str=None, color2: str=None):  # noqa: E501
+    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, language: str=None, uri: str=None, broader_uri: str=None, synonym: List[str]=None, other_voc_syn_uri: str=None, term_description: str=None, created_time: str=None, modified_time: str=None, synonym_candidate: List[str]=None, broader_term_candidate: List[str]=None, postion_x: str=None, postion_y: str=None, color1: str=None, color2: str=None):  # noqa: E501
         """EditingVocabulary - a model defined in Swagger
 
         :param id: The id of this EditingVocabulary.  # noqa: E501
@@ -30,8 +30,8 @@ class EditingVocabulary(Model):
         :type language: str
         :param uri: The uri of this EditingVocabulary.  # noqa: E501
         :type uri: str
-        :param broader_term: The broader_term of this EditingVocabulary.  # noqa: E501
-        :type broader_term: str
+        :param broader_uri: The broader_uri of this EditingVocabulary.  # noqa: E501
+        :type broader_uri: str
         :param synonym: The synonym of this EditingVocabulary.  # noqa: E501
         :type synonym: List[str]
         :param other_voc_syn_uri: The other_voc_syn_uri of this EditingVocabulary.  # noqa: E501
@@ -61,7 +61,7 @@ class EditingVocabulary(Model):
             'preferred_label': str,
             'language': str,
             'uri': str,
-            'broader_term': str,
+            'broader_uri': str,
             'synonym': List[str],
             'other_voc_syn_uri': str,
             'term_description': str,
@@ -81,7 +81,7 @@ class EditingVocabulary(Model):
             'preferred_label': 'preferred_label',
             'language': 'language',
             'uri': 'uri',
-            'broader_term': 'broader_term',
+            'broader_uri': 'broader_uri',
             'synonym': 'synonym',
             'other_voc_syn_uri': 'other_voc_syn_uri',
             'term_description': 'term_description',
@@ -99,7 +99,7 @@ class EditingVocabulary(Model):
         self._preferred_label = preferred_label
         self._language = language
         self._uri = uri
-        self._broader_term = broader_term
+        self._broader_uri = broader_uri
         self._synonym = synonym
         self._other_voc_syn_uri = other_voc_syn_uri
         self._term_description = term_description
@@ -229,25 +229,25 @@ class EditingVocabulary(Model):
         self._uri = uri
 
     @property
-    def broader_term(self) -> str:
-        """Gets the broader_term of this EditingVocabulary.
+    def broader_uri(self) -> str:
+        """Gets the broader_uri of this EditingVocabulary.
 
 
-        :return: The broader_term of this EditingVocabulary.
+        :return: The broader_uri of this EditingVocabulary.
         :rtype: str
         """
-        return self._broader_term
+        return self._broader_uri
 
-    @broader_term.setter
-    def broader_term(self, broader_term: str):
-        """Sets the broader_term of this EditingVocabulary.
+    @broader_uri.setter
+    def broader_uri(self, broader_uri: str):
+        """Sets the broader_uri of this EditingVocabulary.
 
 
-        :param broader_term: The broader_term of this EditingVocabulary.
-        :type broader_term: str
+        :param broader_uri: The broader_uri of this EditingVocabulary.
+        :type broader_uri: str
         """
 
-        self._broader_term = broader_term
+        self._broader_uri = broader_uri
 
     @property
     def synonym(self) -> List[str]:

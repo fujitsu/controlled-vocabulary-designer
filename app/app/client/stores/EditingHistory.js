@@ -250,6 +250,7 @@ class EditingHistory {
           target.preferred_label = data.preferred_label;
           target.uri = data.uri;
           target.broader_term = data.broader_term;
+          target.broader_uri = data.broader_uri;
           target.term_description = data.term_description;
           updateList.push(target);
         }
@@ -264,6 +265,7 @@ class EditingHistory {
           target.preferred_label = data.preferred_label;
           target.uri = data.uri;
           target.broader_term = data.broader_term;
+          target.broader_uri = data.broader_uri;
           target.term_description = data.term_description;
           updateList.push(target);
         }

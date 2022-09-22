@@ -497,7 +497,7 @@ export default
    */
   setUpListeners() {
     this.cy.on('dragfreeon', 'node', (event) => {      
-      this.updateVocabularys( true);
+      this.updateVocabularies( true);
     });
 
     this.cy.on('click', 'node', (event) => {
@@ -1026,7 +1026,7 @@ export default
     
     await cy.elements().layout( defaults).run();
     
-    await this.updateVocabularys();
+    await this.updateVocabularies();
     
     await cy.nodes().unlock();
   }
@@ -1034,12 +1034,12 @@ export default
   /**
    * Update coordinate transform
    */
-  async updateVocabularys( isDrag=false) {
+  async updateVocabularies( isDrag=false) {
     
     const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
     
     this.fitCenterPan = false;
-    const ret = await this.props.editingVocabulary.updateVocabularys( this.cy.nodes(), isDrag);
+    const ret = await this.props.editingVocabulary.updateVocabularies( this.cy.nodes(), isDrag);
     this.fitCenterPan = true;
 
     if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
