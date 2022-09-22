@@ -731,7 +731,6 @@ def _exec_get_postgrest(target_table):
         return response_data, psg_res.status_code
 
     response_data['result'] = json.loads(psg_res.text)
-
     return response_data, 200
 
 
@@ -1052,18 +1051,7 @@ def _download_file_ev_serialize(pl_simple, p_format):
         df_org['broader_term_candidate'].str.replace('\'', '')
     # delete columns id hidden
     df_org.drop(columns=['id', 'hidden'], inplace=True)
-    # make dictionary {preferred_label: uri}
-    dic_preflabel_uri = dict(zip(df_org['preferred_label'], df_org['uri']))
-    # if broader_term is label, convert label into uri
-    col_broader_uri = []
-    for broader_term in list(df_org['broader_term']):
-        if broader_term in list(df_org['uri']):
-            col_broader_uri.append(broader_term)
-        elif broader_term in list(df_org['preferred_label']):
-            col_broader_uri.append(dic_preflabel_uri[broader_term])
-        else:
-            col_broader_uri.append(np.nan)
-    df_org.loc[:, 'broader_term'] = col_broader_uri
+
     # header change
     df_org = df_org.rename(columns={'term': '用語名',
                                     'preferred_label': '代表語',
