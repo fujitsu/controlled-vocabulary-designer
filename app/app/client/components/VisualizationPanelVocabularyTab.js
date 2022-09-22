@@ -229,7 +229,7 @@ export default
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if( undefined == this.situationArr[ fileId]){
       this.setIniZoom();
-      cy.center(cy.nodes );
+      cy.fit(cy.nodes ,50);
     }else{
       const initPan = {x: cy.width()/2, y: cy.height()/2};
       cy.pan( this.situationArr[ fileId].pan || initPan);
