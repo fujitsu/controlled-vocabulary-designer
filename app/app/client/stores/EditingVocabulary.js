@@ -249,42 +249,7 @@ class EditingVocabulary {
    * @param {array} dbData - list of editing vocabulary
    */
   initializeEditingVocabularyData(dbData) {
-    // calculate values to set 
-    const editingVocabulary = this.calcEditingVocValues(dbData) ;
-
-    this.editingVocabulary = editingVocabulary;
-    this.initConfirmColor();
-  }
-
-  /**
-   * Editing vocabulary data update
-   * @param {array} dbData - list of editing vocabulary
-   */
-  updateEditingVocabularyData(dbData) {
-
-    // make id_list with whome terms are updated
-    let id_list=[];
-    for( let item of dbData){
-      id_list.push(item.id);
-    };
-
-    // filter unrelated terms
-    let unChangeVocabulary = this.editingVocabulary.filter((item) => {return (!id_list.includes(item['id']))}) ;
-
-    // calculate values to update
-    const editingVocabulary = this.calcEditingVocValues(dbData) ;
-
-    this.editingVocabulary = unChangeVocabulary.concat(editingVocabulary);
-    this.initConfirmColor();
-  }
-
-  /**
-   * Calculate Editing vocabulary data to update
-   * @param {array} dbData - list of editing vocabulary
-   */
-  calcEditingVocValues(dbData) {
-    // calculate values to update
-    const editingVocabulary = [];
+    // tentative treatment
     const uri_preferred_label_ja = {};
     const uri_preferred_label_en = {};
     dbData.forEach( (data) => {
@@ -297,6 +262,81 @@ class EditingVocabulary {
         }
       }
     });
+    // tentative treatment
+    // calculate values to set 
+    const editingVocabulary = this.calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) ;
+
+    this.editingVocabulary = editingVocabulary;
+    this.initConfirmColor();
+  }
+
+  /**
+   * Editing vocabulary data update
+   * @param {array} dbData - list of editing vocabulary
+   */
+  updateEditingVocabularyData(dbData) {
+    // make id_list with whome terms are updated
+    let id_list=[];
+    for( let item of dbData){
+      id_list.push(item.id);
+    };
+
+    // filter unrelated terms
+    let unChangeVocabulary = this.editingVocabulary.filter((item) => {return (!id_list.includes(item['id']))}) ;
+
+    // tentative treatment
+    const uri_preferred_label_ja = {};
+    const uri_preferred_label_en = {};
+    dbData.forEach( (data) => {
+      // Make dictionary {uri: preferred_label} 
+      if (data.preferred_label && data.uri && data.language) {
+        if (data.language === 'ja') { // If the language is Japanese
+          uri_preferred_label_ja[data.uri] = data.preferred_label;
+        } else { // If the language is English
+          uri_preferred_label_en[data.uri] = data.preferred_label;
+        }
+      }
+    });
+    unChangeVocabulary.forEach( (data) => {
+      // Make dictionary {uri: preferred_label} 
+      if (data.preferred_label && data.uri && data.language) {
+        if (data.language === 'ja') { // If the language is Japanese
+          uri_preferred_label_ja[data.uri] = data.preferred_label;
+        } else { // If the language is English
+          uri_preferred_label_en[data.uri] = data.preferred_label;
+        }
+      }
+    });
+    // tentative treatment
+
+    // calculate values to update
+    const updatedEditingVocabulary = this.calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) ;
+
+    this.editingVocabulary = unChangeVocabulary.concat(updatedEditingVocabulary);
+    this.initConfirmColor();
+  }
+
+  /**
+   * Calculate Editing vocabulary data to update
+   * @param {array} dbData - list of editing vocabulary
+   * @param {dictinary} uri_preferred_label_ja
+   * @param {dictinary} uri_preferred_label_en
+   */
+  calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) {
+    // calculate values to update
+    const editingVocabulary = [];
+    // const uri_preferred_label_ja = {};
+    // const uri_preferred_label_en = {};
+    // dbData.forEach( (data) => {
+    //   // Make dictionary {uri: preferred_label} 
+    //   if (data.preferred_label && data.uri && data.language) {
+    //     if (data.language === 'ja') { // If the language is Japanese
+    //       uri_preferred_label_ja[data.uri] = data.preferred_label;
+    //     } else { // If the language is English
+    //       uri_preferred_label_en[data.uri] = data.preferred_label;
+    //     }
+    //   }
+    // });
 
     dbData.forEach( (data) => {
       // Convert broader_uri into broader_term
@@ -1994,7 +2034,7 @@ isOtherVocSynUriChanged() {
    * @param  {object} nodes - cytoscape nodes
    * @return {string} - error message
    */
-  @action updateVocabularys( nodes, isDrag=false) {
+  @action updateVocabularies( nodes, isDrag=false) {
 
     // Get coordinate information from the visualization panel
     const updateTermList = [];

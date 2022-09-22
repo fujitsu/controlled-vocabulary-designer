@@ -219,7 +219,7 @@ class EditingVocabularyMeta {
     this.updateRequest([updateCurrent], updateCurrent);
 
     // all uri over write 
-    this.updateVocabularysUriFromMeta( datas );
+    this.updateVocabulariesUriFromMeta( datas );
 
     return '';
   }
@@ -229,7 +229,7 @@ class EditingVocabularyMeta {
    * Updating uri values etc. to DB 
    * @param  {object} datas - react datas (EditingVocabulary.editingVocabulary) 
    */
-  @action updateVocabularysUriFromMeta( datas=null ) {
+  @action updateVocabulariesUriFromMeta( datas=null ) {
     if( !datas) return;
     if( this.currentNode.meta_uri == this.editingVocabularyMeta.meta_uri) return;
     
