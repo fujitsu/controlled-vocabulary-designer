@@ -182,7 +182,7 @@ class EditingVocabulary {
           this.tmpBroaderTerm.list[node.language][0] = findData.preferred_label;
         }
       }
-    }      
+    }
     if (node.synonym_candidate) {
       node.synonym_candidate.forEach((term) => {
         dbData.synonym_candidate.push(term);
