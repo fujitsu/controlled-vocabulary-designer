@@ -1298,8 +1298,10 @@ def _check_duplicated_terms(df, file_type_num=0):
     # check duplicated terms
     term_colname = '用語名'  
     lang_colname = '言語'
-    # detedt duplicated terms
-    tmpdf = df[df.duplicated(subset=term_colname)][[term_colname, lang_colname]]
+    # get rows with non-blanck terms
+    nonempty_term_df= df[df[term_colname].str.strip() != '']
+    # detect duplicated terms
+    tmpdf = nonempty_term_df[nonempty_term_df.duplicated(subset=term_colname)][[term_colname, lang_colname]]
     if tmpdf.size != 0:
         # there are duplicated terms
         tmpdf = tmpdf.drop_duplicates()
