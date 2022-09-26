@@ -270,7 +270,6 @@ class EditingHistory {
         }
       });
     }
-    //EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.term);
     EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.id);
   }
 
