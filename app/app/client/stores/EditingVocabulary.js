@@ -2544,14 +2544,14 @@ isOtherVocSynUriChanged() {
     updateList.forEach((item) => {
       if(undefined == item.broader_uri){ item.broader_uri = '';}
     });
-    // broader termあるけど　broader uriないとき　ログに書き出す
+    // tentative when broader term exist and broader uri does not exist, log it
     updateList.forEach((item) => {
       if(item.broader_term != '' && item.broader_uri==''){
         console.log('something wrong');
         console.log(item.broader_term);
       }}
     );
-    // broader termあるけど　broader uriないとき　探してきてくっ付ける
+    // tentative when broader term exist and broader uri does not exist, find the uri and substitute it
     updateList.forEach((item) => {
       if(item.broader_term != '' && item.broader_uri==''){
         const tmpObj = this.editingVocabulary.find( (data) =>
