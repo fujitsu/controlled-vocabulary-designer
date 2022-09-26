@@ -769,7 +769,8 @@ export default
 
     this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
 
-    const ret = this.props.editingVocabulary.updateVocabulary();
+    //const ret = this.props.editingVocabulary.updateVocabulary();
+    const ret = this.props.editingVocabulary.updateVocabulary(null, 111);
     if (ret !== null) {
       this.setState({dlgErrOpen: true, reason : ret});  
     }

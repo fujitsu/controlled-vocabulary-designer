@@ -127,6 +127,7 @@ class EditingVocabulary {
       idofuri: '',
       uri: '',
       broader_term: '',
+      broader_uri: '',
       // synonym : [],
       other_voc_syn_uri: '',
       term_description: '',
@@ -161,13 +162,17 @@ class EditingVocabulary {
     if (this.tmpUri.list && this.tmpUri.list.length > 0) {
       dbData.uri = this.tmpUri.list[0].replace(this.tmpUri.list[0].substring(this.tmpUri.list[0].lastIndexOf('/')+1), this.tmpIdofUri.list[0]);
     }
+
+    dbData.broader_uri = this.tmpBroaderTerm.broader_uri;
+
     if (this.tmpBroaderTerm.list && this.tmpBroaderTerm.list[node.language].length > 0) {
       const broaderTerm = this.tmpBroaderTerm.list[node.language][0];
       dbData.broader_term = broaderTerm;
       const findData = this.editingVocabulary.find((data) =>
         data.term === broaderTerm);
 
-      // Replace with the preferred label of the specified broader term
+      // If the broaderterm is not the preferred label in the sysnonym group,
+      // replace with the preferred label of the specified broader term
       if (findData && findData.preferred_label) {
         // Assume that the broader term you want to replace is not a current preferred term or term
         // Case in which the broader term had a synonymous relationship before amendment
@@ -177,7 +182,7 @@ class EditingVocabulary {
           this.tmpBroaderTerm.list[node.language][0] = findData.preferred_label;
         }
       }
-    }
+    }      
     if (node.synonym_candidate) {
       node.synonym_candidate.forEach((term) => {
         dbData.synonym_candidate.push(term);
@@ -205,7 +210,6 @@ class EditingVocabulary {
     if (this.tmpOtherVocSynUri.list && this.tmpOtherVocSynUri.list.length > 0) {
       dbData.other_voc_syn_uri = this.tmpOtherVocSynUri.list[0];
     }
-
     return dbData;
   }
 
@@ -1119,7 +1123,7 @@ class EditingVocabulary {
   tmpDataClear() {
     this.tmpIdofUri = {id: '', list: []};
     this.tmpUri = {id: '', list: []};
-    this.tmpBroaderTerm = {id: '', list: {ja:[], en:[]}};
+    this.tmpBroaderTerm = {id: '', list: {ja:[], en:[]}, broader_uri: ''};
     this.tmpSynonym = {id: '', list: {ja:[], en:[]}};
     this.tmpPreferredLabel = {id: '', list: {ja:[], en:[]}};
     this.tmpOtherVocSynUri = {id: '', list: []};
@@ -1411,29 +1415,24 @@ isOtherVocSynUriChanged() {
   /**
    * Select vocabulary
    * @param {String} term - vocbulary
-   * @param {number} [id=null] id
+   * @param {number} id id
    * @param {array} [synonymList=null] - configuration synonym list
    * @param {boolean} [isForce=false] - forced selection
    */
-  @action setCurrentNodeByTerm(
-      term, id = '', synonymList = null, isForce = false) {
+  @action setCurrentNodeById(
+    id , synonymList = null, isForce = false) {
     let target = {};
-    if (!id) {
-      target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
-        return (obj.term == term);
-      });
-    } else {
-      target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
-        return (obj.id == id);
-      });
-    }
+    target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
+      return (obj.id == id);
+    });
+    
 
-    if (undefined == target) {
-      console.log('[setCurrentNodeByTerm] Not Found term:' + term + '.');
-      this.currentNodeClear();
-      this.tmpDataClear();
-      return;
-    }
+    // if (undefined == target) {
+    //   console.log('[setCurrentNodeByTerm] Not Found term:' + term + '.');
+    //   this.currentNodeClear();
+    //   this.tmpDataClear();
+    //   return;
+    // }
 
     // Deselect selected terms when they are reselected
     if (!isForce) {
@@ -1460,11 +1459,12 @@ isOtherVocSynUriChanged() {
     if (this.currentNode.uri) {
       this.tmpUri.list.push(this.currentNode.uri);
     }
-    this.tmpBroaderTerm = {id: this.currentNode.id, list:{ja:[], en:[]}};
+    this.tmpBroaderTerm = {id: this.currentNode.id, list:{ja:[], en:[]}, broader_uri: ''};
 
     if (this.currentNode.broader_term) {
       this.tmpBroaderTerm.list[this.currentNode.language].push(this.currentNode.broader_term);
     }
+    this.tmpBroaderTerm.broader_uri = this.currentNode.broader_uri;
 
     let preferredLabel;
     if (this.currentNode.preferred_label) {
@@ -1526,6 +1526,7 @@ isOtherVocSynUriChanged() {
     // Center the selected vocabulary in the visualization screen vocabulary tab and update each NodeStyle
     this.fitToCurrent();
   }
+
 
   /**
    * Ref for visualization screen vocabulary tab operations
@@ -1632,6 +1633,7 @@ isOtherVocSynUriChanged() {
 
       const preferredlabel = [];
       const broaderterm = [];
+      let broader_uri = '';
       const termdescription = [];
       const language = [];
     
@@ -1649,6 +1651,8 @@ isOtherVocSynUriChanged() {
         broaderterm.push(languageChangeNodeData.broader_term);
       }
 
+      broader_uri = languageChangeNodeData.broader_uri;
+
       if (languageChangeNodeData.term_description.length > 0) {
         termdescription.push(languageChangeNodeData.term_description);
       }
@@ -1659,6 +1663,7 @@ isOtherVocSynUriChanged() {
 
       this.tmpPreferredLabel.list[language] = preferredlabel;
       this.tmpBroaderTerm.list[language] = broaderterm;
+      this.tmpBroaderTerm.broader_uri = broader_uri;
       this.tmpTermDescription.list[language] = termdescription;
     }else{
       this.currentLangDiffNodeClear();
@@ -1684,7 +1689,7 @@ isOtherVocSynUriChanged() {
         responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
       });
       const ret = this.centerMoveDisabled(true);
-      this.setCurrentNodeByTerm('', currentId, null, true);
+      this.setCurrentNodeById(currentId, null, true);
       this.centerMoveDisabled( ret);
     }  
   }
@@ -1934,7 +1939,7 @@ isOtherVocSynUriChanged() {
    * @param  {string} setTerm - term you want to set after update
    * @return {string} - error message
    */
-  @action updateVocabulary( setTerm=null) {
+  @action updateVocabulary( setTermId=null, debugind=0) {
 
     if (!this.currentNode.id) {
       return null;
@@ -1951,32 +1956,27 @@ isOtherVocSynUriChanged() {
     let updateCurrent=null;
 
     [ this.currentNode, this.currentLangDiffNode].forEach(( currentNode)=>{
-      if (currentNode.id) {
-        // If the selected term is not in the editing vocabulary data, register it as a new term.
-        // This is the case when the term is not selected and the term is entered in the title field
-        previous.push(this.makeVocabularyHistoryData(currentNode));
-      }
-
       if( !updateCurrent){
         // Add selected vocabulary
         updateCurrent = this.createDBFormatDataByCurrentNode(currentNode);
-
         following.push(this.makeVocabularyHistoryData(updateCurrent));
         updateTermList.push(updateCurrent);
-
       }
 
       // Updating vocabulary information by updating a broader term //////////////////
 
       // Pre-Update broader term (current superordinate)
       const strPrevBrdrTrm = currentNode.broader_term;
+      const strPrevBrdrUri = currentNode.broader_uri;
       // Updated broader term
       const strNextBrdrTrm = this.tmpBroaderTerm.list[currentNode.language][0];
+      const strNextBrdrUri = this.tmpBroaderTerm.broader_uri;
 
       if (this.isUpdateBroaderTerm(strPrevBrdrTrm, strNextBrdrTrm)) {
         this.updateVocabularyForBroaderTerm(
             strPrevBrdrTrm,
             strNextBrdrTrm,
+            strNextBrdrUri,
             updateCurrent,
             updateTermList,
             previous,
@@ -2002,7 +2002,6 @@ isOtherVocSynUriChanged() {
           following,
           currentNode,
       );
-
       // Updating vocabulary information by updating preferred label //////////////////
 
       // Pre-update preferred label
@@ -2024,7 +2023,7 @@ isOtherVocSynUriChanged() {
       history.following = following;
     }); 
 
-    this.updateRequest(updateTermList, updateCurrent, history, setTerm);
+    this.updateRequest(updateTermList, updateCurrent, history, setTermId);
     return null;
   }
 
@@ -2173,6 +2172,7 @@ isOtherVocSynUriChanged() {
    * Updating vocabulary information by updating a broader term
    * @param  {String}   strPrevBrdrTrm - pre-update broader term (IN)
    * @param  {String}   strNextBrdrTrm - updated broader term (IN)
+   * @param  {String}   strNextBrdrUri - updated broader uri (IN)
    * @param  {Object}   updateCurrent - updated vocabulary information (IN)
    * @param  {Array}    updateTermList - list of terms to be updated (IN/OUT)
    * @param  {Array}    previous - pre-update history information list (IN/OUT)
@@ -2181,6 +2181,7 @@ isOtherVocSynUriChanged() {
   updateVocabularyForBroaderTerm(
       strPrevBrdrTrm,
       strNextBrdrTrm,
+      strNextBrdrUri,
       updateCurrent,
       updateTermList,
       previous,
@@ -2188,7 +2189,7 @@ isOtherVocSynUriChanged() {
   ) {
     // Vocabulary extraction for deletion
     if (strPrevBrdrTrm) {
-      // Remove terms from the editing vocabulary if the original broader term was added from the reference vocabulary
+      // // Remove terms from the editing vocabulary if the original broader term was added from the reference vocabulary
 
       // Vocabulary information of the pre-update broader term
       const objPrevBrdrTrm = this.editingVocabulary.find( (data) =>
@@ -2219,26 +2220,7 @@ isOtherVocSynUriChanged() {
             strNextBrdrTrm +
             ' is already existed of editing_vocabulary.',
         );
-      } else {
-        console.log(
-            '[updateVocabulary] Add ' +
-            strNextBrdrTrm +
-            ' to editing_vocabulary by broaderTerm.',
-        );
-        const addData = this.createFromReferenceVocabulary(
-            strNextBrdrTrm, strNextBrdrTrm,
-            updateCurrent.language,
-            null,
-            null,
-            null,
-            null,
-            updateCurrent.created_time,
-            updateCurrent.modified_time
-            );
-        console.log(addData);
-        updateTermList.push(addData);
-        following.push(this.makeVocabularyHistoryData(addData));
-      }
+      } 
     }
   }
 
@@ -2559,13 +2541,28 @@ isOtherVocSynUriChanged() {
    * @param  {string} oldNodeTerm - vocabulary old data to be updated
    * @param  {bool} setCurrent - do setCurrentNodeByTerm() 
    */
-  updateRequest(updateList, current, history = null, oldNodeTerm = null, setCurrent=true) {
-    // tentative treatment. if broader_uri is not defined, put empty string 
+  updateRequest(updateList, current, history = null, oldNodeId = null, setCurrent=true) {
+    // tentative treatment. if broader_uri is not defined, put empty string  <<<<<<<<<<<<<<<<<<
     updateList.forEach((item) => {
       if(undefined == item.broader_uri){ item.broader_uri = '';}
     });
+    // broader termあるけど　broader uriないとき　ログに書き出す
+    updateList.forEach((item) => {
+      if(item.broader_term != '' && item.broader_uri==''){
+        console.log('something wrong');
+        console.log(item.broader_term);
+      }}
+    );
+    // broader termあるけど　broader uriないとき　探してきてくっ付ける
+    updateList.forEach((item) => {
+      if(item.broader_term != '' && item.broader_uri==''){
+        const tmpObj = this.editingVocabulary.find( (data) =>
+          data.term === item.broader_term);
+         item.broader_uri = tmpObj.uri;
+        };
+    });
     if(undefined == current.broader_uri){ current.broader_uri = '';}
-    // end tentative treatment.  
+    // end tentative treatment.  <<<<<<<<<<<<<<<<<<
 
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
@@ -2612,7 +2609,7 @@ isOtherVocSynUriChanged() {
 
           // Reselect to reset tmp information
           if( setCurrent){
-            this.setCurrentNodeByTerm(current.term, current.id, null, oldNodeTerm?false:true);
+            this.setCurrentNodeById(current.id, null, oldNodeId?false:true);
           }
 
           if (history) {
@@ -2626,8 +2623,8 @@ isOtherVocSynUriChanged() {
             }
             editingHistoryStore.addHistory(history);
           }
-          if( oldNodeTerm && (!this.currentNode.term || (this.currentNode.term && this.currentNode.term != oldNodeTerm))){
-            this.setCurrentNodeByTerm( oldNodeTerm, '', null, true);
+          if( oldNodeId && (!this.currentNode.term || (this.currentNode.id && this.currentNode.id != oldNodeId))){
+            this.setCurrentNodeById( oldNodeId, '', null, true);
           }
         }).catch((err) => {
           console.log('[Error] message : ' + err.message);
@@ -3016,6 +3013,7 @@ isOtherVocSynUriChanged() {
   @observable tmpBroaderTerm = {
     id: '',
     list: {ja:[], en:[]},
+    broader_uri: '',
   };
 
   /**
@@ -3023,6 +3021,18 @@ isOtherVocSynUriChanged() {
    * @param  {string} newValue - broader term
    */
   @action updataBroaderTerm(newValue) {
+    // newValue must be one string or empty
+    if(newValue == ''){
+      // clear currentLangDiffNode's broader term info
+      this.currentLangDiffNode.broader_term = '';
+      this.currentLangDiffNode.broader_uri = '';
+      // clear tmpBroaderTerm
+      this.tmpBroaderTerm.id = this.currentNode.id; 
+      this.tmpBroaderTerm.list['ja'] = [];
+      this.tmpBroaderTerm.list['en'] = [];
+      this.tmpBroaderTerm.broader_uri = '';
+      return;
+    };
 
     const newLangDiffValue = [];
     newValue.forEach((term)=>{
@@ -3034,6 +3044,12 @@ isOtherVocSynUriChanged() {
         if(node.preferred_label != '') newLangDiffValue.push(node.preferred_label);
       });
     });
+    
+    // find newValue-term's uri
+    const currentLang = this.currentNode.language;
+    const find = this.editingVocabulary.find((data)=> (data.term==newValue) && (data.language == currentLang) );
+    let newValueUri = '';
+    if(find){newValueUri = find.uri};
 
     const broaderTermNewList={ja:[], en:[]};
     broaderTermNewList[this.tmpLanguage.list] = newValue;
@@ -3054,6 +3070,7 @@ isOtherVocSynUriChanged() {
       }
       this.tmpBroaderTerm.id = this.currentNode.id; // Setting 'this.currentNode' on purpose
       this.tmpBroaderTerm.list[currentNode.language] = array.filter((val, i, self)=>{ return i === self.indexOf(val)});
+      this.tmpBroaderTerm.broader_uri = newValueUri;
     });
   }
 
@@ -3299,6 +3316,8 @@ isOtherVocSynUriChanged() {
             (target.broader_term != null) &&
             (this.tmpBroaderTerm.list[currentNode.language].indexOf(target.broader_term) == -1)) {
               this.tmpBroaderTerm.list[currentNode.language].push(target.broader_term);
+              this.tmpBroaderTerm.broader_uri =  target.broader_uri;
+              
             }
             // URI
             if ((this.tmpUri.list.length == 0) && (target.uri)) {
@@ -3772,9 +3791,7 @@ isOtherVocSynUriChanged() {
         .then((response) => {
           // console.log('request url:' + url + ' come response.');
           // Reselect to reset tmp information
-          this.setCurrentNodeByTerm(currentNode.term,
-              currentNode.id, null, true);
-
+          this.setCurrentNodeById(currentNode.id, null, true);
           if (!(isHistory)) {
             editingHistoryStore.addHistory(history);
           }

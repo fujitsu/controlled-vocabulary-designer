@@ -271,7 +271,8 @@ class EditingHistory {
         }
       });
     }
-    EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.term);
+    //EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.term);
+    EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.id);
   }
 
   /**
@@ -295,7 +296,9 @@ class EditingHistory {
     }
 
     const EditingVocabulary = editingVocabularyStore;
-    EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
+    // EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
+    EditingVocabulary.setCurrentNodeById(history.targetId);
+    
 
     EditingVocabulary.toggleConfirm(currentTerm, isConfirm, true);
   }

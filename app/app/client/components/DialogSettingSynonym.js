@@ -299,7 +299,8 @@ export default class DialogSettingSynonym extends React.Component {
       list:{
         ja: this.state.selectBroader_Ja?[this.state.selectBroader_Ja]:[],
         en: this.state.selectBroader_En?[this.state.selectBroader_En]:[]
-      }
+      },
+      broader_uri: this.props.editingVocabulary.currentNode.broader_uri
     }
     
     // langDiff termDescript
@@ -308,7 +309,8 @@ export default class DialogSettingSynonym extends React.Component {
       this.props.editingVocabulary.tmpTermDescription.list[this.props.target.language][0] = this.props.target.term_description;
     }
 
-    const ret = this.props.editingVocabulary.updateVocabulary();
+    //const ret = this.props.editingVocabulary.updateVocabulary();
+    const ret = this.props.editingVocabulary.updateVocabulary(null, 333);
 
     this.crearDatas();
     this.props.onClose( ret);
