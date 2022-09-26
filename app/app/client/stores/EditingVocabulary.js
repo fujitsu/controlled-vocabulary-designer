@@ -2564,6 +2564,14 @@ isOtherVocSynUriChanged() {
     updateList.forEach((item) => {
       if(undefined == item.broader_uri){ item.broader_uri = '';}
     });
+    // tentative when broader term exist and broader uri does not exist, find the uri and substitute it
+    updateList.forEach((item) => {
+      if(item.broader_term != '' && item.broader_uri==''){
+        const tmpObj = this.editingVocabulary.find( (data) =>
+          data.term === item.broader_term);
+         item.broader_uri = tmpObj.uri;
+        };
+    });
     if(undefined == current.broader_uri){ current.broader_uri = '';}
     // end tentative treatment.  
 
