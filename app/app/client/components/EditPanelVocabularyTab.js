@@ -146,8 +146,6 @@ export default
    * Update edits
    */
   updateVocabulary() {
-    // const baseTerm= this.props.editingVocabulary.currentNode.term;
-    //const ret = this.props.editingVocabulary.updateVocabulary( baseTerm);
     const baseTermId= this.props.editingVocabulary.currentNode.id;   
     const ret = this.props.editingVocabulary.updateVocabulary( baseTermId, 222);
     if (ret !== null) {
