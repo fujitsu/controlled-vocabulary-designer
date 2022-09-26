@@ -71,7 +71,7 @@ export default class Search extends React.Component {
     if (result) {
       editingVocabulary.deselectTermList();
       editingVocabulary.setSelectedTermList( result.term,);
-      editingVocabulary.setCurrentNodeByTerm( result.term, '', null, true);
+      editingVocabulary.setCurrentNodeById( result.id, null, true);
     } else {
       
         this.handleClickOpen(newValue);

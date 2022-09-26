@@ -55,7 +55,7 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    this.props.editingVocabulary.setCurrentNodeByTerm(this.props.editingVocabulary.currentNode.term, null, null, true);
+    this.props.editingVocabulary.setCurrentNodeById(this.props.editingVocabulary.currentNode.id, null, true);
   }
 
   /**

@@ -522,23 +522,23 @@ export default
         if( this.props.editingVocabulary.selectedTermList.length > 1){
           this.props.editingVocabulary.deselectTermList();
           isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id, null, true);
+          this.props.editingVocabulary.setCurrentNodeById(target.id, null, true);
         }else{
           this.props.editingVocabulary.deselectTermList();
           if(this.props.editingVocabulary.currentNode.id !=  target.id){
             isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
           }
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+          this.props.editingVocabulary.setCurrentNodeById(target.id);
         }
       }else{
         isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
         if(isAddTerm && this.props.editingVocabulary.selectedTermList.length == 1){
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+          this.props.editingVocabulary.setCurrentNodeById(target.id);
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length > 0){
           const firstSelectedTerm = this.props.editingVocabulary.selectedTermList.slice(0,1)[0];
-          this.props.editingVocabulary.setCurrentNodeByTerm(firstSelectedTerm.term, firstSelectedTerm.id, null, true);
+          this.props.editingVocabulary.setCurrentNodeById(firstSelectedTerm.id, null, true);
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length == 0){
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+          this.props.editingVocabulary.setCurrentNodeById(target.id);
         }
       }
       this.fitCenterPan = true;
@@ -765,7 +765,7 @@ export default
 
     this.props.editingVocabulary.deselectTermList();
     this.props.editingVocabulary.setSelectedTermList(source.term);
-    this.props.editingVocabulary.setCurrentNodeByTerm(source.term, source.id, null, true);
+    this.props.editingVocabulary.setCurrentNodeById(source.id, null, true);
 
     this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
 
@@ -1038,13 +1038,14 @@ export default
   async updateVocabularies( isDrag=false) {
     
     const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
+    const saveCurrentNodeId = await this.props.editingVocabulary.currentNode.id;
     
     this.fitCenterPan = false;
     const ret = await this.props.editingVocabulary.updateVocabularies( this.cy.nodes(), isDrag);
     this.fitCenterPan = true;
 
     if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
-      await this.props.editingVocabulary.setCurrentNodeByTerm( saveCurrentNodeTerm);
+      await this.props.editingVocabulary.setCurrentNodeById( saveCurrentNodeId);
     }
   }
   
@@ -1061,7 +1062,7 @@ export default
       }
       // currentNode clear
       await this.props.editingVocabulary.deselectTermList();       
-      await this.props.editingVocabulary.setCurrentNodeByTerm('');
+      await this.props.editingVocabulary.setCurrentNodeById('');
   }
   /**
    * When setting a synonym, select a Preferred term and then close the dialog 

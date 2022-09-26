@@ -1425,14 +1425,13 @@ isOtherVocSynUriChanged() {
     target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
       return (obj.id == id);
     });
-    
 
-    // if (undefined == target) {
-    //   console.log('[setCurrentNodeByTerm] Not Found term:' + term + '.');
-    //   this.currentNodeClear();
-    //   this.tmpDataClear();
-    //   return;
-    // }
+    if (undefined == target) {
+      console.log('[setCurrentNodeById] Not Found term with id:' + id + '.');
+      this.currentNodeClear();
+      this.tmpDataClear();
+      return;
+    }
 
     // Deselect selected terms when they are reselected
     if (!isForce) {

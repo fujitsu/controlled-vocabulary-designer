@@ -51,15 +51,17 @@
    handleConfirmClose(){
      
     const targetTerm = this.props.editingVocabulary.sortedNodeList;
+    let id = ';'
     for (let i = 0; i < targetTerm.length; i++) {
       if (targetTerm[i].term == this.changeTerm ) {
         this.setState({tabIndex: i});
         this.props.change( targetTerm[i].language);
+        id = targetTerm[i].id;
         break;
       }
     }
 
-    this.props.editingVocabulary.setCurrentNodeByTerm( this.changeTerm );
+    this.props.editingVocabulary.setCurrentNodeById( id );
     this.props.editingVocabulary.deselectTermList();
     if( this.props.editingVocabulary.currentNode.id){
      this.props.editingVocabulary.setSelectedTermList( this.changeTerm );
