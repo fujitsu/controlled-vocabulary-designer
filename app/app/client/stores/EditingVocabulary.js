@@ -1526,7 +1526,6 @@ isOtherVocSynUriChanged() {
     this.fitToCurrent();
   }
 
-
   /**
    * Ref for visualization screen vocabulary tab operations
    * @type {Object}
