@@ -84,7 +84,7 @@ export default class DialogSettingSynonym extends React.Component {
 
     editingVocabulary.deselectTermList();
     editingVocabulary.setSelectedTermList(source.term);
-    editingVocabulary.setCurrentNodeByTerm(source.term, null, null, true);
+    editingVocabulary.setCurrentNodeById(source.id, null, true);
 
     let selectPreferred_Ja = editingVocabulary.currentNode.language=='ja'?editingVocabulary.currentNode.preferred_label:editingVocabulary.currentLangDiffNode.preferred_label;
     let selectPreferred_En = editingVocabulary.currentNode.language=='en'?editingVocabulary.currentNode.preferred_label:editingVocabulary.currentLangDiffNode.preferred_label;
@@ -299,7 +299,8 @@ export default class DialogSettingSynonym extends React.Component {
       list:{
         ja: this.state.selectBroader_Ja?[this.state.selectBroader_Ja]:[],
         en: this.state.selectBroader_En?[this.state.selectBroader_En]:[]
-      }
+      },
+      broader_uri: this.props.editingVocabulary.currentNode.broader_uri
     }
     
     // langDiff termDescript
@@ -308,7 +309,8 @@ export default class DialogSettingSynonym extends React.Component {
       this.props.editingVocabulary.tmpTermDescription.list[this.props.target.language][0] = this.props.target.term_description;
     }
 
-    const ret = this.props.editingVocabulary.updateVocabulary();
+    //const ret = this.props.editingVocabulary.updateVocabulary();
+    const ret = this.props.editingVocabulary.updateVocabulary(null, 333);
 
     this.crearDatas();
     this.props.onClose( ret);

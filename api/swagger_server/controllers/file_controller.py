@@ -1115,8 +1115,8 @@ def _check_uri_startswith_prefix(df, uri_prefix, file_type_num=0):
     # the empty cell or cells with white spaces are also detected and returns errorresponse
     term_colname ='用語名'
     lang_colname = '言語'
-    pre_uri_colname = '代表語のURI'
-    tmpdf = df[~df[pre_uri_colname].str.startswith(uri_prefix, na=False)][[term_colname, lang_colname]]
+    uri_colname = '代表語のURI'
+    tmpdf = df[~df[uri_colname].str.startswith(uri_prefix, na=False)][[term_colname, lang_colname]]
     term_list = tmpdf[term_colname].to_list()
     lang_list = tmpdf[lang_colname].to_list()
     if len(term_list) != 0:
