@@ -253,22 +253,19 @@ class EditingVocabulary {
    * @param {array} dbData - list of editing vocabulary
    */
   initializeEditingVocabularyData(dbData) {
-    // tentative treatment
-    const uri_preferred_label_ja = {};
-    const uri_preferred_label_en = {};
+    this.uri2preflabel['ja'] = {};
+    this.uri2preflabel['en'] = {};
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
         if (data.language === 'ja') { // If the language is Japanese
-          uri_preferred_label_ja[data.uri] = data.preferred_label;
+          this.uri2preflabel['ja'][data.uri] = data.preferred_label;
         } else { // If the language is English
-          uri_preferred_label_en[data.uri] = data.preferred_label;
+          this.uri2preflabel['en'][data.uri] = data.preferred_label;
         }
       }
     });
-    // tentative treatment
-    // calculate values to set 
-    const editingVocabulary = this.calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) ;
+    const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
 
     this.editingVocabulary = editingVocabulary;
     this.initConfirmColor();
@@ -288,16 +285,15 @@ class EditingVocabulary {
     // filter unrelated terms
     let unChangeVocabulary = this.editingVocabulary.filter((item) => {return (!id_list.includes(item['id']))}) ;
 
-    // tentative treatment
-    const uri_preferred_label_ja = {};
-    const uri_preferred_label_en = {};
+    this.uri2preflabel['ja'] = {};
+    this.uri2preflabel['en'] = {};
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
         if (data.language === 'ja') { // If the language is Japanese
-          uri_preferred_label_ja[data.uri] = data.preferred_label;
+          this.uri2preflabel['ja'][data.uri] = data.preferred_label;
         } else { // If the language is English
-          uri_preferred_label_en[data.uri] = data.preferred_label;
+          this.uri2preflabel['en'][data.uri] = data.preferred_label;
         }
       }
     });
@@ -305,16 +301,17 @@ class EditingVocabulary {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
         if (data.language === 'ja') { // If the language is Japanese
-          uri_preferred_label_ja[data.uri] = data.preferred_label;
+          // uri_preferred_label_ja[data.uri] = data.preferred_label;
+          this.uri2preflabel['ja'][data.uri] = data.preferred_label;
         } else { // If the language is English
-          uri_preferred_label_en[data.uri] = data.preferred_label;
+          // uri_preferred_label_en[data.uri] = data.preferred_label;
+          this.uri2preflabel['en'][data.uri] = data.preferred_label;
         }
       }
     });
-    // tentative treatment
 
     // calculate values to update
-    const updatedEditingVocabulary = this.calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) ;
+    const updatedEditingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
 
     this.editingVocabulary = unChangeVocabulary.concat(updatedEditingVocabulary);
     this.initConfirmColor();
@@ -329,18 +326,6 @@ class EditingVocabulary {
   calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) {
     // calculate values to update
     const editingVocabulary = [];
-    // const uri_preferred_label_ja = {};
-    // const uri_preferred_label_en = {};
-    // dbData.forEach( (data) => {
-    //   // Make dictionary {uri: preferred_label} 
-    //   if (data.preferred_label && data.uri && data.language) {
-    //     if (data.language === 'ja') { // If the language is Japanese
-    //       uri_preferred_label_ja[data.uri] = data.preferred_label;
-    //     } else { // If the language is English
-    //       uri_preferred_label_en[data.uri] = data.preferred_label;
-    //     }
-    //   }
-    // });
 
     dbData.forEach( (data) => {
       // Convert broader_uri into broader_term
@@ -348,21 +333,21 @@ class EditingVocabulary {
         if (uri_preferred_label_ja[data.broader_uri] != undefined) {
           if((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
             data.broader_term = uri_preferred_label_ja[data.broader_uri];
+          }else{
+            console.log('WARINING 111');
           }
-        }else if (data.broader_uri != null) {
-          if ((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
-            data.broader_term = '';
-          }
+        }else{
+          data.broader_term = '';
         }
       }else { // If the language is English
         if (uri_preferred_label_en[data.broader_uri] != undefined) {
           if((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
             data.broader_term = uri_preferred_label_en[data.broader_uri];
+          }else{
+            console.log('WARINING 222');
           }
-        }else if (data.broader_uri != null) {
-          if ((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
-            data.broader_term = '';
-          }
+        }else{
+          data.broader_term = '';
         }
       } 
       
@@ -3389,6 +3374,13 @@ isOtherVocSynUriChanged() {
     id: '',
     list: {ja:[], en:[]},
   };
+  // uri to preferred  //////////////////////
+  @observable uri2preflabel = {
+    ja:{},
+    en:{}
+  };
+
+
 
   /**
    * Preferred label update event
