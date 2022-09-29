@@ -1015,6 +1015,7 @@ class EditingVocabulary {
     preferred_label: '',
     hidden: false,
     broader_term: '',
+    broader_uri: '',
     other_voc_syn_uri: '',
     term_description: '',
     created_time: '',
@@ -1037,6 +1038,7 @@ class EditingVocabulary {
     preferred_label: '',
     hidden: false,
     broader_term: '',
+    broader_uri: '',
     other_voc_syn_uri: '',
     term_description: '',
     created_time: '',
@@ -1063,6 +1065,7 @@ class EditingVocabulary {
       preferred_label: '',
       hidden: false,
       broader_term: '',
+      broader_uri: '',
       other_voc_syn_uri: '',
       term_description: '',
       created_time: '',
@@ -1089,6 +1092,7 @@ class EditingVocabulary {
       preferred_label: '',
       hidden: false,
       broader_term: '',
+      broader_uri: '',
       other_voc_syn_uri: '',
       term_description: '',
       created_time: '',
@@ -1399,13 +1403,12 @@ isOtherVocSynUriChanged() {
 
   /**
    * Select vocabulary
-   * @param {String} term - vocbulary
    * @param {number} id id
    * @param {array} [synonymList=null] - configuration synonym list
    * @param {boolean} [isForce=false] - forced selection
    */
   @action setCurrentNodeById(
-    id , synonymList = null, isForce = false) {
+    id , isForce = false) {
     let target = {};
     target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
       return (obj.id == id);
@@ -1436,18 +1439,18 @@ isOtherVocSynUriChanged() {
     this.tmpDataClear();
 
     this.tmpIdofUri = {id: this.currentNode.id, list:[]};
-    if (this.currentNode.idofuri) {
-      this.tmpIdofUri.list.push(this.currentNode.idofuri);
-    }
-    this.tmpUri = {id: this.currentNode.id, list:[]};
-    if (this.currentNode.uri) {
-      this.tmpUri.list.push(this.currentNode.uri);
-    }
-    this.tmpBroaderTerm = {id: this.currentNode.id, list:{ja:[], en:[]}, broader_uri: ''};
+    this.tmpIdofUri.list.push(this.currentNode.idofuri);
 
-    if (this.currentNode.broader_term) {
-      this.tmpBroaderTerm.list[this.currentNode.language].push(this.currentNode.broader_term);
-    }
+    this.tmpUri = {id: this.currentNode.id, list:[]};
+    this.tmpUri.list.push(this.currentNode.uri);
+    
+    this.tmpBroaderTerm = {id: this.currentNode.id, list:{ja:[], en:[]}, broader_uri: ''};
+    if (this.currentNode.broader_uri) {
+      if(this.uri2preflabel[this.currentNode.language][this.currentNode.broader_uri]){
+        this.tmpBroaderTerm.list[this.currentNode.language].push(
+          this.uri2preflabel[this.currentNode.language][this.currentNode.broader_uri]);  
+      }
+          }
     this.tmpBroaderTerm.broader_uri = this.currentNode.broader_uri;
 
     let preferredLabel;
@@ -1465,22 +1468,19 @@ isOtherVocSynUriChanged() {
       this.tmpPreferredLabel.list[this.currentNode.language].push(preferredLabel);
     }
 
-    if (synonymList) {
-      this.currentNode.synonymList =  synonymList;
-    } else {
-      if (this.currentNode.preferred_label) {
-        const synonymNode =
-            this.getTargetFileData(this.selectedFile.id).filter((node) =>
-              node.language === this.currentNode.language &&
-              node.uri === this.currentNode.uri,
-            );
-        this.currentNode.synonymList =  [];
-        synonymNode.forEach((synonym) => {
-          if (synonym.term != this.currentNode.term) {
-            this.currentNode.synonymList.push(synonym.term);
-          }
-        });
-      }
+
+    if (this.currentNode.preferred_label) {
+      const synonymNode =
+          this.getTargetFileData(this.selectedFile.id).filter((node) =>
+            node.language === this.currentNode.language &&
+            node.uri === this.currentNode.uri,
+          );
+      this.currentNode.synonymList =  [];
+      synonymNode.forEach((synonym) => {
+        if (synonym.term != this.currentNode.term) {
+          this.currentNode.synonymList.push(synonym.term);
+        }
+      });
     }
     this.tmpSynonym.list[this.currentNode.language] = this.currentNode.synonymList;
 
@@ -1489,9 +1489,7 @@ isOtherVocSynUriChanged() {
       this.tmpTermDescription.list[this.currentNode.language].push(this.currentNode.term_description);
     }
 
-    if (this.currentNode.language) {
-      this.tmpLanguage = {id: this.currentNode.id, list: [this.currentNode.language]};
-    }
+    this.tmpLanguage = {id: this.currentNode.id, list: [this.currentNode.language]};
 
     if (this.currentNode.created_time) {
       this.tmpCreatedTime = {id: this.currentNode.id, list: [this.currentNode.created_time]};
@@ -1597,9 +1595,10 @@ isOtherVocSynUriChanged() {
 
   setCurrentLangDiffNode(){
     let languageChangeNode = [];
+    // select terms with otherlang and with same uri 
     this.getTargetFileData(this.selectedFile.id).forEach((data) => {
-      if(data.language != this.currentNode.language &&
-      data.uri == this.currentNode.uri) {
+      if(data.uri == this.currentNode.uri &&
+        data.language != this.currentNode.language ) {
         languageChangeNode.push(data);
       }
     }); 
@@ -1630,21 +1629,31 @@ isOtherVocSynUriChanged() {
         preferredlabel.push(languageChangeNodeData.preferred_label);
       }
 
-      if (languageChangeNodeData.broader_term.length > 0) {
-        broaderterm.push(languageChangeNodeData.broader_term);
+      if (this.uri2preflabel[languageChangeNodeData.language][languageChangeNodeData.broader_uri].length > 0) {
+        broaderterm.push(this.uri2preflabel[languageChangeNodeData.language][languageChangeNodeData.broader_uri]);        
       }
-
       broader_uri = languageChangeNodeData.broader_uri;
 
       if (languageChangeNodeData.term_description.length > 0) {
         termdescription.push(languageChangeNodeData.term_description);
       }
 
-      if (languageChangeNodeData.language.length > 0) {
-        language.push(languageChangeNodeData.language);
+      language.push(languageChangeNodeData.language);
+
+      let preferredLabel;
+      if (this.currentNode.preferred_label) {
+        preferredLabel = this.currentNode.preferred_label;
+      } else {
+        // If a preferred label is not defined, display the term in the preferred label column
+        // Do not add for determined terms
+        if (this.currentNode.confirm == 0) {
+          preferredLabel = this.currentNode.term;
+        }
+      }
+      if (preferredLabel) {
+       this.tmpPreferredLabel.list[languageChangeNodeData.language] = preferredlabel;
       }
 
-      this.tmpPreferredLabel.list[language] = preferredlabel;
       this.tmpBroaderTerm.list[language] = broaderterm;
       this.tmpBroaderTerm.broader_uri = broader_uri;
       this.tmpTermDescription.list[language] = termdescription;
@@ -1672,7 +1681,7 @@ isOtherVocSynUriChanged() {
         responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
       });
       const ret = this.centerMoveDisabled(true);
-      this.setCurrentNodeById(currentId, null, true);
+      this.setCurrentNodeById(currentId, true);
       this.centerMoveDisabled( ret);
     }  
   }
@@ -2592,7 +2601,7 @@ isOtherVocSynUriChanged() {
 
           // Reselect to reset tmp information
           if( setCurrent){
-            this.setCurrentNodeById(current.id, null, oldNodeId?false:true);
+            this.setCurrentNodeById(current.id, oldNodeId?false:true);
           }
 
           if (history) {
@@ -2607,7 +2616,7 @@ isOtherVocSynUriChanged() {
             editingHistoryStore.addHistory(history);
           }
           if( oldNodeId && (!this.currentNode.term || (this.currentNode.id && this.currentNode.id != oldNodeId))){
-            this.setCurrentNodeById( oldNodeId, '', null, true);
+            this.setCurrentNodeById( oldNodeId, true);
           }
         }).catch((err) => {
           console.log('[Error] message : ' + err.message);
@@ -3781,7 +3790,7 @@ isOtherVocSynUriChanged() {
         .then((response) => {
           // console.log('request url:' + url + ' come response.');
           // Reselect to reset tmp information
-          this.setCurrentNodeById(currentNode.id, null, true);
+          this.setCurrentNodeById(currentNode.id, true);
           if (!(isHistory)) {
             editingHistoryStore.addHistory(history);
           }

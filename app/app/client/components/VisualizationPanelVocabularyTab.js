@@ -522,7 +522,7 @@ export default
         if( this.props.editingVocabulary.selectedTermList.length > 1){
           this.props.editingVocabulary.deselectTermList();
           isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
-          this.props.editingVocabulary.setCurrentNodeById(target.id, null, true);
+          this.props.editingVocabulary.setCurrentNodeById(target.id, true);
         }else{
           this.props.editingVocabulary.deselectTermList();
           if(this.props.editingVocabulary.currentNode.id !=  target.id){
@@ -536,7 +536,7 @@ export default
           this.props.editingVocabulary.setCurrentNodeById(target.id);
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length > 0){
           const firstSelectedTerm = this.props.editingVocabulary.selectedTermList.slice(0,1)[0];
-          this.props.editingVocabulary.setCurrentNodeById(firstSelectedTerm.id, null, true);
+          this.props.editingVocabulary.setCurrentNodeById(firstSelectedTerm.id, true);
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length == 0){
           this.props.editingVocabulary.setCurrentNodeById(target.id);
         }
@@ -765,7 +765,7 @@ export default
 
     this.props.editingVocabulary.deselectTermList();
     this.props.editingVocabulary.setSelectedTermList(source.term);
-    this.props.editingVocabulary.setCurrentNodeById(source.id, null, true);
+    this.props.editingVocabulary.setCurrentNodeById(source.id, true);
 
     this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
 
@@ -1045,7 +1045,7 @@ export default
     this.fitCenterPan = true;
 
     if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
-      await this.props.editingVocabulary.setCurrentNodeById( saveCurrentNodeId);
+      await this.props.editingVocabulary.setCurrentNodeById(saveCurrentNodeId);
     }
   }
   

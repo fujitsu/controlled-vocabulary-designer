@@ -84,7 +84,7 @@ export default class DialogSettingSynonym extends React.Component {
 
     editingVocabulary.deselectTermList();
     editingVocabulary.setSelectedTermList(source.term);
-    editingVocabulary.setCurrentNodeById(source.id, null, true);
+    editingVocabulary.setCurrentNodeById(source.id, true);
 
     let selectPreferred_Ja = editingVocabulary.currentNode.language=='ja'?editingVocabulary.currentNode.preferred_label:editingVocabulary.currentLangDiffNode.preferred_label;
     let selectPreferred_En = editingVocabulary.currentNode.language=='en'?editingVocabulary.currentNode.preferred_label:editingVocabulary.currentLangDiffNode.preferred_label;
