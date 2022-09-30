@@ -603,7 +603,7 @@ def _make_bulk_data_editing_vocabulary(data_frame):
         insert_data = {}
         if '用語名' in item:
             insert_data['term'] = \
-            item['用語名'] if pd.notnull(item['用語名']) else TERM_BLANK_MARK + str(index)
+            item['用語名'] if item['用語名'] != '' else TERM_BLANK_MARK + str(index)
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
