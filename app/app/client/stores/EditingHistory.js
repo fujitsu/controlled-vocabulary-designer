@@ -247,10 +247,13 @@ class EditingHistory {
             EditingVocabulary.editingVocabulary.find((i) => i.id == data.id);
         if (target) {
           target.preferred_label = data.preferred_label;
+          target.idofuri = data.idofuri;
           target.uri = data.uri;
-          target.broader_term = data.broader_term;
           target.broader_uri = data.broader_uri;
+          target.broader_term = data.broader_term;
+          target.other_voc_syn_uri = data.other_voc_syn_uri;
           target.term_description = data.term_description;
+          target.modified_time = data.modified_time;
           updateList.push(target);
         }
       });
@@ -262,10 +265,13 @@ class EditingHistory {
           i.id == data.id);
         if (target) {
           target.preferred_label = data.preferred_label;
+          target.idofuri = data.idofuri;
           target.uri = data.uri;
-          target.broader_term = data.broader_term;
           target.broader_uri = data.broader_uri;
+          target.broader_term = data.broader_term;
+          target.other_voc_syn_uri = data.other_voc_syn_uri;
           target.term_description = data.term_description;
+          target.modified_time = data.modified_time;
           updateList.push(target);
         }
       });
@@ -956,8 +962,13 @@ class EditingHistory {
         id : 0,
         term : "",
         preferred_label : "",
+        idofuri: '',
         uri : "",
+        broader_uri : "",
         broader_term : "",
+        other_voc_syn_uri : '';
+        term_description : '';
+        modified_time : '';
       },
     ],
     following : [
@@ -965,8 +976,13 @@ class EditingHistory {
         id : 0,
         term : "",
         preferred_label : "",
+        idofuri: '',
         uri : "",
+        broader_uri : "",
         broader_term : "",
+        other_voc_syn_uri : '';
+        term_description : '';
+        modified_time : '';
       },
     ],
   };

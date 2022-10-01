@@ -55,7 +55,8 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    this.props.editingVocabulary.setCurrentNodeById(this.props.editingVocabulary.currentNode.id, null, true);
+    this.props.editingVocabulary.setCurrentNodeById(
+      this.props.editingVocabulary.currentNode.id, true);
   }
 
   /**
@@ -167,7 +168,7 @@ export default
     if (!isConfirm) {
       // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
       if (!currentNode.preferred_label) {
-        this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list].push(currentNode.term);
+        this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.value].push(currentNode.term);
       }
     }
   }
@@ -189,9 +190,9 @@ export default
    handleRadioChange(e){
     this.setState({defalutValue: e.target.value});
     if (e.target.value != this.props.editingVocabulary.currentNode.language) {
-      this.props.editingVocabulary.tmpLanguage.list = this.props.editingVocabulary.currentNode.language == 'ja'?'en':'ja';
+      this.props.editingVocabulary.tmpLanguage.value = this.props.editingVocabulary.currentNode.language == 'ja'?'en':'ja';
     }else {
-      this.props.editingVocabulary.tmpLanguage.list = this.props.editingVocabulary.currentNode.language;
+      this.props.editingVocabulary.tmpLanguage.value = this.props.editingVocabulary.currentNode.language;
     }
   }
 
