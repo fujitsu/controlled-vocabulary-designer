@@ -340,12 +340,12 @@ class App extends React.Component {
    * Get db data
    */
   async componentDidMount() {
-
-    editingVocabularyStore.getEditingVocabularyDataFromDB();
+    await editingVocabularyMetaStore.getEditingVocabularyMetaDataFromDB();
+    await editingVocabularyStore.getEditingVocabularyDataFromDB();
     await editingVocabularyStore.getReferenceVocabularyDataFromDB('1');
     await editingVocabularyStore.getReferenceVocabularyDataFromDB('2');
     await editingVocabularyStore.getReferenceVocabularyDataFromDB('3');
-    await editingVocabularyMetaStore.getEditingVocabularyMetaDataFromDB();
+
     await this.readFileChack();
   }
 

@@ -227,19 +227,26 @@ class EditingVocabularyMeta {
 
   /**
    * Updating uri values etc. to DB 
-   * @param  {object} datas - react datas (EditingVocabulary.editingVocabulary) 
+   * @param  {object} datas - react data (EditingVocabulary.editingVocabulary) 
    */
   @action updateVocabulariesUriFromMeta( datas=null ) {
     if( !datas) return;
     if( this.currentNode.meta_uri == this.editingVocabularyMeta.meta_uri) return;
     
     let updateTermList=[];
-    const metaUri = this.currentNode.meta_uri.replace(new RegExp('\/$'), '');
+    const prevMetaUri = this.meta_uri;
+    let nextMetaUri = this.currentNode.meta_uri;
+    if(!nextMetaUri.endsWith('/')){
+      nextMetaUri = nextMetaUri + '/'
+    }
+    // this.currentNode.meta_uri <- input uri value
+    // const metaUri = this.currentNode.meta_uri.replace(new RegExp('\/$'), '');
     datas.forEach((data) =>{
-      const uri = metaUri + '/' + data.uri.substring(data.uri.lastIndexOf('/')+1);
+      // const uri = metaUri + '/' + data.uri.substring(data.uri.lastIndexOf('/')+1);
+      const uri = data.uri.replace(prevMetaUri, nextMetaUri);
       let broader_uri = '';
       if(data.broader_uri !=''){
-        broader_uri = metaUri + '/' + data.broader_uri.substring(data.broader_uri.lastIndexOf('/')+1);
+        broader_uri = data.broader_uri.replace(prevMetaUri, nextMetaUri);
       }
 
       const dbData = {

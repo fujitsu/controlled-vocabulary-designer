@@ -100,7 +100,7 @@ export default
    * @return {element}
    */
   render() {
-    const id = this.props.editingVocabulary.tmpIdofUri.list; 
+    const idofuri = this.props.editingVocabulary.tmpIdofUri.list;
     const currentId =
         this.props.editingVocabulary.currentNode.idofuri;
 
@@ -113,7 +113,7 @@ export default
                 multiple
                 freeSolo
                 disabled={this.props.disabled}
-                value={id}
+                value={idofuri}
                 onFocus={(e)=>this.props.change('Id', true)}
                 onBlur={(e)=>this.props.change('Id', false)}
                 onChange={(event, newValue) => this.onChange(event, newValue)}
