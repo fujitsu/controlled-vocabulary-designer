@@ -27,7 +27,7 @@ export default
     const tmpSubordinateTerm = this.props.editingVocabulary.tmpSubordinateTerm;
     let currentSubordinateTerm;
     // subordinate term on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
       currentSubordinateTerm = this.props.editingVocabulary.currentSubordinateTerm;
     } else { // subordinate term when switching with the  language radio button in the selected term
       currentSubordinateTerm =

@@ -966,7 +966,7 @@ class EditingVocabulary {
   }
   /**
    * Initialization of data being edited
-   *   Never clear ⇒ this.tmpLanguage = {id: '', list: ''};
+   *   Never clear ⇒ this.tmpLanguage = {id: '', value: ''};
    */
   tmpDataClear() {
     this.tmpIdofUri = {id: '', list: []};
@@ -1351,7 +1351,7 @@ isOtherVocSynUriChanged() {
       this.tmpTermDescription.list[this.currentNode.language].push(this.currentNode.term_description);
     }
 
-    this.tmpLanguage = {id: this.currentNode.id, list: this.currentNode.language};
+    this.tmpLanguage = {id: this.currentNode.id, value: this.currentNode.language};
 
     if (this.currentNode.created_time) {
       this.tmpCreatedTime = {id: this.currentNode.id, list: [this.currentNode.created_time]};
@@ -1837,9 +1837,9 @@ isOtherVocSynUriChanged() {
     console.log(this.tmpTermDescription.id);
     console.log(this.tmpTermDescription.list["ja"].concat());
     console.log(this.tmpTermDescription.list["en"].concat());
-    console.log("this.tmpLanguage .id .list");
+    console.log("this.tmpLanguage .id .value");
     console.log(this.tmpLanguage.id);
-    console.log(this.tmpLanguage.list);
+    console.log(this.tmpLanguage.value);
     console.log("this.tmpCreatedTime .id .list");
     console.log(this.tmpCreatedTime.id);
     console.log(this.tmpCreatedTime.list.concat());
@@ -2518,11 +2518,11 @@ isOtherVocSynUriChanged() {
 
     const tmpPreferredLabel = prfrrdLbl;
     const tmpIdofUri = idofuri;
-    const tmpLanguage = currentNode.language;
+    const tmp4Language = currentNode.language;
 
     // Extract vocabulary with same Id of URI and same language
     let idofuriVocList = this.editingVocabulary.filter((data) =>
-      data.idofuri === tmpIdofUri && data.language === tmpLanguage);
+      data.idofuri === tmpIdofUri && data.language === tmp4Language);
     if (idofuriVocList) {
       // Exclude terms and terms in preferred label being edited
       if (tmpPreferredLabel) {
@@ -2602,7 +2602,7 @@ isOtherVocSynUriChanged() {
         array.push(id);
       });
     } else {
-      if (this.tmpPreferredLabel.list[this.tmpLanguage.list].length > 0) {
+      if (this.tmpPreferredLabel.list[this.tmpLanguage.value].length > 0) {
         // Do not add terms that are not selected and have no title to the broader term
         newValue.forEach((id) => {
           array.push(id);
@@ -2661,7 +2661,7 @@ isOtherVocSynUriChanged() {
 
     const newLangDiffValue = [];
     const langDiffFilters=this.editingVocabulary.filter((item)=>{
-      return item.uri == newValueUri && item.language != this.tmpLanguage.list
+      return item.uri == newValueUri && item.language != this.tmpLanguage.value
     })
     langDiffFilters.forEach((node)=>{
       if(node.preferred_label != '' && node.term===node.preferred_label){
@@ -2670,8 +2670,8 @@ isOtherVocSynUriChanged() {
     });
 
     this.tmpBroaderTerm.id = this.currentNode.id; 
-    this.tmpBroaderTerm.list[this.tmpLanguage.list] = newValue;
-    this.tmpBroaderTerm.list[this.tmpLanguage.list=='ja'?'en':'ja'] =newLangDiffValue;
+    this.tmpBroaderTerm.list[this.tmpLanguage.value] = newValue;
+    this.tmpBroaderTerm.list[this.tmpLanguage.value=='ja'?'en':'ja'] =newLangDiffValue;
     this.tmpBroaderTerm.broader_uri = newValueUri;
   }
 
@@ -2680,7 +2680,7 @@ isOtherVocSynUriChanged() {
    */
   @action popBroaderTerm() {
     const newArray = [];
-    this.tmpBroaderTerm.list[this.tmpLanguage.list].forEach((data) => {
+    this.tmpBroaderTerm.list[this.tmpLanguage.value].forEach((data) => {
       newArray.push(data);
     });
     newArray.pop();
@@ -2839,8 +2839,8 @@ isOtherVocSynUriChanged() {
    */
   @action updateSynonym(newValue) {
 
-    const newLangDiffValue = this.tmpSynonym.list[this.tmpLanguage.list=='ja'?'en':'ja'].concat();
-    const currentNodeSynList = this.tmpLanguage.list==this.currentNode.language?this.currentNode.synonymList:this.currentLangDiffNode.synonymList
+    const newLangDiffValue = this.tmpSynonym.list[this.tmpLanguage.value=='ja'?'en':'ja'].concat();
+    const currentNodeSynList = this.tmpLanguage.value==this.currentNode.language?this.currentNode.synonymList:this.currentLangDiffNode.synonymList
     if( newValue.length > currentNodeSynList.length ){
       newValue.forEach((term)=>{
         const find = this.editingVocabulary.find((d)=>d.term==term)
@@ -2856,8 +2856,8 @@ isOtherVocSynUriChanged() {
     }
 
     const synonymNewList={ja:[], en:[]};
-    synonymNewList[this.tmpLanguage.list] = newValue;
-    synonymNewList[this.tmpLanguage.list=='ja'?'en':'ja'] = newLangDiffValue;
+    synonymNewList[this.tmpLanguage.value] = newValue;
+    synonymNewList[this.tmpLanguage.value=='ja'?'en':'ja'] = newLangDiffValue;
 
     [ this.currentNode, this.currentLangDiffNode].forEach((currentNode)=>{
 
@@ -2956,7 +2956,7 @@ isOtherVocSynUriChanged() {
    */
   @action popSynonym() {
     const newArray = [];
-    this.tmpSynonym.list[this.tmpLanguage.list].forEach((data) => {
+    this.tmpSynonym.list[this.tmpLanguage.value].forEach((data) => {
       newArray.push(data);
     });
     newArray.pop();
@@ -3024,7 +3024,7 @@ isOtherVocSynUriChanged() {
     });
 
     this.tmpPreferredLabel.id = this.currentNode.id;  // Setting 'this.currentNode' on purpose
-    this.tmpPreferredLabel.list[this.tmpLanguage.list] = array.filter((val, i, self)=>{ return i === self.indexOf(val)});
+    this.tmpPreferredLabel.list[this.tmpLanguage.value] = array.filter((val, i, self)=>{ return i === self.indexOf(val)});
 
     if( this.tmpPreferredLabel.list['ja'].length == 1){ // Japanese PreferredLabel takes precedence
       const find = this.editingVocabulary.find((d)=>d.term==this.tmpPreferredLabel.list['ja'][0]);
@@ -3040,7 +3040,7 @@ isOtherVocSynUriChanged() {
    */
   @action popPreferredLabel() {
     const newArray = [];
-    this.tmpPreferredLabel.list[this.tmpLanguage.list].forEach((data) => {
+    this.tmpPreferredLabel.list[this.tmpLanguage.value].forEach((data) => {
       newArray.push(data);
     });
     newArray.pop();
@@ -3110,8 +3110,8 @@ isOtherVocSynUriChanged() {
 
     let keyList = [];
     // Extract a narrower term, extract a preferred label in a preferred label column as key
-    if (this.tmpPreferredLabel.list[this.tmpLanguage.list].length > 0) {
-      keyList = this.tmpPreferredLabel.list[this.tmpLanguage.list].concat();
+    if (this.tmpPreferredLabel.list[this.tmpLanguage.value].length > 0) {
+      keyList = this.tmpPreferredLabel.list[this.tmpLanguage.value].concat();
 
       // If there is no current term in the list of preferred labels, the narrower term may designate a current term as a narrower term, so add it as key
       if (this.currentNode.term) {
@@ -3127,8 +3127,8 @@ isOtherVocSynUriChanged() {
 
     const selectedFilesList = this.getTargetFileData(this.selectedFile.id);
     // In order to extract a narrower term, the term as a preferred label among the terms in the synonym column is extracted as key
-    if (this.tmpSynonym.list[this.tmpLanguage.list].length > 0) {
-      this.tmpSynonym.list[this.tmpLanguage.list].forEach((synonym) => {
+    if (this.tmpSynonym.list[this.tmpLanguage.value].length > 0) {
+      this.tmpSynonym.list[this.tmpLanguage.value].forEach((synonym) => {
         const objSynonym = selectedFilesList.find((data) =>
           data.term === synonym);
         // Synonyms not found in selectedFilesList are new terms
@@ -3157,7 +3157,7 @@ isOtherVocSynUriChanged() {
         if (data.broader_term === prfrdLbl) {
           // language data same from the selected term
           if (data.preferred_label === data.term &&
-            this.tmpLanguage.list == this.currentNode.language) {
+            this.tmpLanguage.value == this.currentNode.language) {
               subordinateTerm.push(data.term);
           }
           // language data different from the selected term
@@ -3190,7 +3190,7 @@ isOtherVocSynUriChanged() {
   @action updataTermDescription(newValue) {
     const array = [];
 
-    const currentNode = this.tmpLanguage.list == this.currentNode.language ? this.currentNode: this.currentLangDiffNode;
+    const currentNode = this.tmpLanguage.value == this.currentNode.language ? this.currentNode: this.currentLangDiffNode;
  
     if (currentNode.term) {
       newValue.forEach((term) => {
@@ -3211,7 +3211,7 @@ isOtherVocSynUriChanged() {
    */
    @action popTermDescription() {
     const newArray = [];
-    this.tmpTermDescription.list[this.tmpLanguage.list].forEach((data) => {
+    this.tmpTermDescription.list[this.tmpLanguage.value].forEach((data) => {
       newArray.push(data);
     });
     newArray.pop();
@@ -3221,7 +3221,7 @@ isOtherVocSynUriChanged() {
   // Language //////////////////////
   @observable tmpLanguage = {
     id: '',
-    list: 'ja',
+    value: 'ja',
   };
 
   // Created Time //////////////////////

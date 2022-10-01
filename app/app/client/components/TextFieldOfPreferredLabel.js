@@ -70,7 +70,7 @@ export default
 
       return false;
     }
-    if( find && find.language != editingVocabulary.tmpLanguage.list){
+    if( find && find.language != editingVocabulary.tmpLanguage.value){
       const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
                        '現在選択されている言語の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
@@ -80,7 +80,7 @@ export default
       return false;
     }
     
-    const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+    const currentNode = editingVocabulary.tmpLanguage.value == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
 
     if (newValue.length > 1) {
       // When more than one preferred label is entered
@@ -88,7 +88,7 @@ export default
       this.openSnackbar(errorMsg);
     } else{
       let _currentNode = currentNode;
-      if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+      if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
         && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
         && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
           const find = editingVocabulary.editingVocabulary.find((item)=>
@@ -126,10 +126,10 @@ export default
    * @return {element}
    */
   render() {
-    const preferredLabel = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list];
+    const preferredLabel = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.value];
     let currentPreferredLabel;
     // preferred label on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
       currentPreferredLabel =
         this.props.editingVocabulary.currentNode.preferred_label;
     } else { // preferred label when switching with the  language radio button in the selected term
