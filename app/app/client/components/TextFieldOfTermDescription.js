@@ -79,11 +79,11 @@
        currentTermDescription =
          this.props.editingVocabulary.currentLangDiffNode.term_description;
      }
-     /* eslint-disable no-unused-vars */
-     // object for rendering
-     let length = this.props.editingVocabulary.tmpTermDescription.list['ja'].length;
-     length = this.props.editingVocabulary.tmpTermDescription.list['en'].length;
-     /* eslint-enable no-unused-vars */
+    //  /* eslint-disable no-unused-vars */
+    //  // object for rendering
+    //  let length = this.props.editingVocabulary.tmpTermDescription.list['ja'].length;
+    //  length = this.props.editingVocabulary.tmpTermDescription.list['en'].length;
+    //  /* eslint-enable no-unused-vars */
 
 return (
     <div>

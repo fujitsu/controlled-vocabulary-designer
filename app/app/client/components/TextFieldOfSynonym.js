@@ -55,14 +55,16 @@ export default
   /**
    * Synonym update event
    * @param  {object} event - information of event
-   * @param  {array} newValue - list of broader terms
+   * @param  {array} newValue - list of synonym terms
    */
   onChange(event, newValue) {
     const editingVocabulary =this.props.editingVocabulary;
     const inputText = event.target.value;
-    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    const displayLanguage = editingVocabulary.tmpLanguage.list;
+    // const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});  
     if( inputText != '' && inputText != undefined && !find){
-      const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
+      const errorMsg =  '\"' +inputText + '\" は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
                        '既存の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
@@ -70,21 +72,15 @@ export default
 
       return false;
     }
-    if( find && find.language != editingVocabulary.tmpLanguage.list){
-      const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
-                       '現在選択されている言語の用語を記入してください。';
-      const innerText = errorMsg.split('¥n').map((line, key) =>
-        <span key={key}>{line}<br /></span>);
-      this.openSnackbar(innerText);
-
-      return false;
-    }
+    let inputTextUri = find? find.uri:''; // uri for inputText term
 
     const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
     let _currentNode = currentNode;
     if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
       && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
       && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
+        //DEBUG
+        console.assert(false, "something is wrong 245");
         const find = editingVocabulary.editingVocabulary.find((item)=>
             item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
         _currentNode = find?find:currentNode;
@@ -100,7 +96,8 @@ export default
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
     }
-    editingVocabulary.updataSynonym(newValue);
+    editingVocabulary.updateSynonym(newValue);
+    // if the added term have diffrent preferred label the label is added to the Text Field of PrefLabel
     if (this.state.open == false) {
       const preferredLabelLength =
         editingVocabulary.tmpPreferredLabel.list[_currentNode.language].length;

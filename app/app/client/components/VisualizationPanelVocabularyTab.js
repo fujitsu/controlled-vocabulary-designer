@@ -767,7 +767,8 @@ export default
     this.props.editingVocabulary.setSelectedTermList(source.term);
     this.props.editingVocabulary.setCurrentNodeById(source.id, true);
 
-    this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
+    //this.props.editingVocabulary.updateBroaderTerm( [ nextBroaderTerm ] );
+    this.props.editingVocabulary.updateBroaderTerm( [ nextBroaderTerm ], this.target.uri);
 
     //const ret = this.props.editingVocabulary.updateVocabulary();
     const ret = this.props.editingVocabulary.updateVocabulary(null, 111);

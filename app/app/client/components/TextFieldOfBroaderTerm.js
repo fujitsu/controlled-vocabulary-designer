@@ -60,9 +60,10 @@ export default
   onChange(event, newValue) {
     const editingVocabulary = this.props.editingVocabulary;
     const inputText = event.target.value;
-    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    const displayLanguage = editingVocabulary.tmpLanguage.list;
+    const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});
     if( inputText != '' && inputText != undefined && !find){
-      const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
+      const errorMsg =  '\"' +inputText + '\" は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
                        '既存の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
@@ -70,15 +71,7 @@ export default
 
       return false;
     }
-    if( find && find.language != editingVocabulary.tmpLanguage.list){
-      const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
-                      '現在選択されている言語の用語を記入してください。';
-      const innerText = errorMsg.split('¥n').map((line, key) =>
-        <span key={key}>{line}<br /></span>);
-      this.openSnackbar(innerText);
-
-      return false;
-    }
+    let newValueUri = find? find.uri:'';
 
     if (newValue.length > 1) {
       // More than one broader term selected
@@ -86,18 +79,20 @@ export default
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
       const nextBroaderTerm = newValue[0];
-
+      
       // Check the validity of a broader term /////////////////////////////////////////
-      const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+      const currentNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
       let _currentNode = currentNode;
-      if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
-        && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
+      if(  _currentNode.term == '' && displayLanguage !== editingVocabulary.currentNode.language
+        && editingVocabulary.currentLangDiffNode.term === '' // && editingVocabulary.currentLangDiffNode.language !== ''
         && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
           const find = editingVocabulary.editingVocabulary.find((item)=>
               item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
           _currentNode = find?find:currentNode;
+          //DEBUG
+          console.assert(false, "something is wrong");
       }
-      if (editingVocabulary.isInvalidBrdrTrm(_currentNode, nextBroaderTerm)) {
+      if (!editingVocabulary.isValidBrdrTrm(_currentNode, nextBroaderTerm)) {
         const errorMsg = '上位語テキストボックスに、¥n' +
                        '\"' + _currentNode.term + '\" の代表語あるいは同義語が記入されています。¥n' +
                        '上位語テキストボックスには、¥n' +
@@ -131,14 +126,14 @@ export default
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
-      } else if (editingVocabulary.isInvalidSynonymBrdrTrm(_currentNode, nextBroaderTerm)) {
+      } else if (!editingVocabulary.isValidSynonymBrdrTrm(_currentNode, nextBroaderTerm)) {
         let errorMsg = '上位語テキストボックスに、日本語と英語で同義関係ではない用語が記入されています。¥n日本語と英語で同義関係の用語を記入してください。'
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
       }
     }
-    editingVocabulary.updataBroaderTerm(newValue);
+    editingVocabulary.updateBroaderTerm(newValue, newValueUri);
   }
 
   /**
