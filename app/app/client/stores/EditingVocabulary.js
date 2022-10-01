@@ -236,6 +236,7 @@ class EditingVocabulary {
             data.broader_term = uri_preferred_label_ja[data.broader_uri];
           }else{
             console.assert(false, 'WARINING 111');
+            console.log("uri_prefix=" + uri_prefix);
           }
         }else{
           data.broader_term = '';
@@ -246,6 +247,7 @@ class EditingVocabulary {
             data.broader_term = uri_preferred_label_en[data.broader_uri];
           }else{
             console.assert(false, 'WARINING 222');
+            console.log("uri_prefix=" + uri_prefix);
           }
         }else{
           data.broader_term = '';
@@ -1334,9 +1336,6 @@ isOtherVocSynUriChanged() {
     this.tmpIdofUri = {id: this.currentNode.id, list:[]};
     this.tmpIdofUri.list.push(this.currentNode.idofuri);
 
-    // this.tmpUri = {id: this.currentNode.id, list:[]};
-    // this.tmpUri.list.push(this.currentNode.uri);
-    
     this.tmpBroaderTerm = {id: this.currentNode.id, list:{ja:[], en:[]},  broader_uri: ''};
     if (this.currentNode.broader_uri) {
       if(this.uri2preflabel[this.currentNode.language][this.currentNode.broader_uri]){
@@ -2203,15 +2202,15 @@ isOtherVocSynUriChanged() {
     });
     // DEBUG
 
-    // tentative when broader term exist and broader uri does not exist, log it
-    updateList.forEach((item) => {
-      if(item.broader_term != '' && item.broader_uri==''){
-        console.log('something wrong');
-        console.log(item.id);
-        console.log(item.term);
-        console.log(item.broader_term);
-      }}
-    );
+    // // tentative when broader term exist and broader uri does not exist, log it
+    // updateList.forEach((item) => {
+    //   if(item.broader_term != '' && item.broader_uri==''){
+    //     console.log('something wrong');
+    //     console.log(item.id);
+    //     console.log(item.term);
+    //     console.log(item.broader_term);
+    //   }}
+    // );
 
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
