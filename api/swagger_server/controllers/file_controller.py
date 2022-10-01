@@ -201,7 +201,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                     '[Error] failed _check_uri_startswith_prefix',
                     location())
             return exec_res, status_code
-        # the empty cell or cells with white spaces are detected the above
+        # the empty cell or cells with white spaces are detected at the above
         # broader_uri must start with prefix
         # phase 5, reason 0
         exec_res, status_code = _check_broader_uri_startswith_prefix(df, uri_prefix, file_type_num)
@@ -210,7 +210,7 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                     '[Error] failed __check_broader_uri_startswith_prefix',
                     location())
             return exec_res, status_code
-        # the empty cell or cells with white spaces are detected the above
+        # the empty cell or cells with white spaces are detected at the above
 
         # check inconsistencies
         exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
@@ -248,6 +248,26 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
+
+        # uri must starts with http  
+        # phase 4, reasn 0
+        exec_res, status_code = _check_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed _check_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+        # broader_uri must start with http
+        # phase 5, reason 0
+        exec_res, status_code = _check_broader_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed __check_broader_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+
         # check inconsistencies
         exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
@@ -287,6 +307,26 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
+
+        # uri must starts with http  
+        # phase 4, reasn 0
+        exec_res, status_code = _check_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed _check_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+        # broader_uri must start with http
+        # phase 5, reason 0
+        exec_res, status_code = _check_broader_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed __check_broader_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+
         # check inconsistencies
         exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
@@ -325,6 +365,26 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
+
+        # uri must starts with http  
+        # phase 4, reasn 0
+        exec_res, status_code = _check_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed _check_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+        # broader_uri must start with http
+        # phase 5, reason 0
+        exec_res, status_code = _check_broader_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed __check_broader_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+
         # check inconsistencies
         exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:

@@ -12,8 +12,6 @@ import History from './History';
 
 import editingVocabularyMetaStore from './EditingVocabularyMeta';
 
-// console.log(editingVocabularyMetaStore);
-
 /**
  * Vocabulary data management class
  */
@@ -116,6 +114,14 @@ class EditingVocabulary {
         });
   }
 
+  /**
+   * get uri_prefix from meta store
+   * @return {string} uri_prefix
+   */
+   getUriPrefix(){
+    //uri_prefix
+    return editingVocabularyMetaStore.editingVocabularyMeta.meta_uri;
+  }
 
   /**
    * Create history information
@@ -217,33 +223,40 @@ class EditingVocabulary {
   calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) {
     // calculate values to update
     const editingVocabulary = [];
+    if(undefined == dbData || dbData.length == 0){
+      return [];
+    }
+    const uri_prefix = this.getUriPrefix();
 
     dbData.forEach( (data) => {
       // Convert broader_uri into broader_term
       if (data.language === 'ja'){ // If the language is Japanese
         if (uri_preferred_label_ja[data.broader_uri] != undefined) {
-          if((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
+          if(data.broader_uri.startsWith(uri_prefix) ) {
             data.broader_term = uri_preferred_label_ja[data.broader_uri];
           }else{
             console.assert(false, 'WARINING 111');
+            console.log("uri_prefix=" + uri_prefix);
           }
         }else{
           data.broader_term = '';
         }
       }else { // If the language is English
         if (uri_preferred_label_en[data.broader_uri] != undefined) {
-          if((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
+          if(data.broader_uri.startsWith(uri_prefix)) {
             data.broader_term = uri_preferred_label_en[data.broader_uri];
           }else{
             console.assert(false, 'WARINING 222');
+            console.log("uri_prefix=" + uri_prefix);
           }
         }else{
           data.broader_term = '';
         }
       } 
       
-      data.idofuri = data.uri.substring(data.uri.lastIndexOf('/')+1);
-
+      //uri_prefix
+      data.idofuri = data.uri.replace(uri_prefix, ''); // delete first matched prefix
+      
       // // If the parameter is not string (Set the empty string character)
       // if (!data.preferred_label) data.preferred_label = '';
       // if (!data.language) data.language = '';
@@ -291,22 +304,29 @@ class EditingVocabulary {
    */
   setReferenceVocabularyData(dbData) {
     const referenceVocabulary = [];
-    const uri_preferred_label = {};
+    const uri_preferred_label_ja = {};
+    const uri_preferred_label_en = {};
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label}
       if (data.preferred_label && data.uri) {
-          uri_preferred_label[data.uri] = data.preferred_label;
+        if(data.language === 'ja'){
+          uri_preferred_label_ja[data.uri] = data.preferred_label;
+        }else{
+          uri_preferred_label_en[data.uri] = data.preferred_label;
         }
+      }
     });
 
     dbData.forEach( (data) => {
       // Convert broader_uri into broader_term
       if (uri_preferred_label[data.broader_uri] != undefined) {
         if((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
-          data.broader_term = uri_preferred_label[data.broader_uri];
-        }
-      } else if (data.broader_uri != null) {
-        if ((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
+          if(data.language === 'ja'){
+            data.broader_term = uri_preferred_label_ja[data.broader_uri];
+          }else{
+            data.broader_term = uri_preferred_label_en[data.broader_uri];
+          }
+        }else{
           data.broader_term = '';
         }
       }
@@ -970,7 +990,7 @@ class EditingVocabulary {
    */
   tmpDataClear() {
     this.tmpIdofUri = {id: '', list: []};
-    this.tmpUri = {id: '', list: []};
+    // this.tmpUri = {id: '', list: []};
     this.tmpBroaderTerm = {id: '', list: {ja:[], en:[]}, broader_uri: ''};
     this.tmpSynonym = {id: '', list: {ja:[], en:[]}, idList: {ja:[], en:[]}};
     this.tmpPreferredLabel = {id: '', list: {ja:[], en:[]}};
@@ -1316,9 +1336,6 @@ isOtherVocSynUriChanged() {
     this.tmpIdofUri = {id: this.currentNode.id, list:[]};
     this.tmpIdofUri.list.push(this.currentNode.idofuri);
 
-    this.tmpUri = {id: this.currentNode.id, list:[]};
-    this.tmpUri.list.push(this.currentNode.uri);
-    
     this.tmpBroaderTerm = {id: this.currentNode.id, list:{ja:[], en:[]},  broader_uri: ''};
     if (this.currentNode.broader_uri) {
       if(this.uri2preflabel[this.currentNode.language][this.currentNode.broader_uri]){
@@ -1852,7 +1869,7 @@ isOtherVocSynUriChanged() {
     // DEBUG  // preferred_label //////////////////////
 
     //uri_prefix
-    const uri_prefix = editingVocabularyMetaStore.editingVocabularyMeta.meta_uri;
+    const uri_prefix = this.getUriPrefix();
   
     const prevSynIdListJa =this.currentNode.language === 'ja'? this.currentNode.synonymIdList.concat(): this.currentLangDiffNode.synonymIdList.concat(); 
     const prevSynIdListEn =this.currentNode.language === 'en'? this.currentNode.synonymIdList.concat(): this.currentLangDiffNode.synonymIdList.concat(); 
@@ -2185,15 +2202,15 @@ isOtherVocSynUriChanged() {
     });
     // DEBUG
 
-    // tentative when broader term exist and broader uri does not exist, log it
-    updateList.forEach((item) => {
-      if(item.broader_term != '' && item.broader_uri==''){
-        console.log('something wrong');
-        console.log(item.id);
-        console.log(item.term);
-        console.log(item.broader_term);
-      }}
-    );
+    // // tentative when broader term exist and broader uri does not exist, log it
+    // updateList.forEach((item) => {
+    //   if(item.broader_term != '' && item.broader_uri==''){
+    //     console.log('something wrong');
+    //     console.log(item.id);
+    //     console.log(item.term);
+    //     console.log(item.broader_term);
+    //   }}
+    // );
 
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
@@ -2475,11 +2492,14 @@ isOtherVocSynUriChanged() {
   @observable equalUriPreferredLabel = '';
   @observable cycleBroaderTerm = [];
 
-  // URI //////////////////////
-  @observable tmpUri = {
-    id: '',
-    list: [],
-  };
+  // // URI //////////////////////
+  @computed get tmpUri(){
+    const obj = new Object;
+    obj.id = this.tmpIdofUri.id;
+    const uri_prefix = this.getUriPrefix();
+    obj.list = [uri_prefix + this.tmpIdofUri.list[0]];
+    return obj;
+  }
 
   /**
    * Create URI list for screen display
@@ -3028,10 +3048,19 @@ isOtherVocSynUriChanged() {
 
     if( this.tmpPreferredLabel.list['ja'].length == 1){ // Japanese PreferredLabel takes precedence
       const find = this.editingVocabulary.find((d)=>d.term==this.tmpPreferredLabel.list['ja'][0]);
-      this.tmpIdofUri.list = [ find?find.idofuri : this.tmpPreferredLabel.list['ja'][0] ];
+      this.tmpIdofUri.list = [ find?find.idofuri : this.tmpPreferredLabel.list['ja'][0] ]
+      this.tmpIdofUri.id = this.currentNode.id;
+      // DEBUG
+      console.log("updataPreferredLabel event");
+      console.log(this.tmpIdofUri.id);
+      console.log(this.tmpIdofUri.list);
     }else if(this.tmpPreferredLabel.list['ja'].length == 0 && this.tmpPreferredLabel.list['en'].length == 1){
       const find = this.editingVocabulary.find((d)=>d.term==this.tmpPreferredLabel.list['en'][0]);
       this.tmpIdofUri.list = [ find?find.idofuri : this.tmpPreferredLabel.list['en'][0] ];
+      // DEBUG
+      console.log("updataPreferredLabel event eng");
+      console.log(this.tmpIdofUri.id);
+      console.log(this.tmpIdofUri.list);
     }
   }
 
