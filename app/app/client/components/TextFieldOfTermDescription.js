@@ -69,10 +69,10 @@
   }
 
    render() {
-     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.list[this.props.editingVocabulary.tmpLanguage.list];
+     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.list[this.props.editingVocabulary.tmpLanguage.value];
      let currentTermDescription;
      // term description on the selected term
-     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
        currentTermDescription =
          this.props.editingVocabulary.currentNode.term_description;
      } else { // term description when switching with the  language radio button in the selected term

@@ -60,7 +60,7 @@ export default
   onChange(event, newValue) {
     const editingVocabulary =this.props.editingVocabulary;
     const inputText = event.target.value;
-    const displayLanguage = editingVocabulary.tmpLanguage.list;
+    const displayLanguage = editingVocabulary.tmpLanguage.value;
     // const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
     const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});  
     if( inputText != '' && inputText != undefined && !find){
@@ -74,9 +74,9 @@ export default
     }
     let inputTextUri = find? find.uri:''; // uri for inputText term
 
-    const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+    const currentNode = editingVocabulary.tmpLanguage.value == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
     let _currentNode = currentNode;
-    if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+    if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
       && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
       && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
         //DEBUG
@@ -115,10 +115,10 @@ export default
    * @return {element}
    */
   render() {
-    const synonym = this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list];
+    const synonym = this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.value];
     let currentSynonym;
     // synonym on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
       currentSynonym = this.props.editingVocabulary.currentNode.synonymList;
     } else { // synonym when switching with the  language radio button in the selected term
       currentSynonym = this.props.editingVocabulary.currentLangDiffNode.synonymList; 

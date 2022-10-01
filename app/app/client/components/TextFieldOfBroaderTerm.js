@@ -60,7 +60,7 @@ export default
   onChange(event, newValue) {
     const editingVocabulary = this.props.editingVocabulary;
     const inputText = event.target.value;
-    const displayLanguage = editingVocabulary.tmpLanguage.list;
+    const displayLanguage = editingVocabulary.tmpLanguage.value;
     const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});
     if( inputText != '' && inputText != undefined && !find){
       const errorMsg =  '\"' +inputText + '\" は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
@@ -141,10 +141,10 @@ export default
    * @return {element}
    */
   render() {
-    const broaderTerm = this.props.editingVocabulary.tmpBroaderTerm.list[this.props.editingVocabulary.tmpLanguage.list];
+    const broaderTerm = this.props.editingVocabulary.tmpBroaderTerm.list[this.props.editingVocabulary.tmpLanguage.value];
     let currentBroaderTerm;
     // broader term on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
+    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
       currentBroaderTerm =
         this.props.editingVocabulary.currentNode.broader_term;
     } else { // broader term when switching with the  language radio button in the selected term

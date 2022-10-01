@@ -1231,7 +1231,7 @@ export default
       // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
       if (!currentNode.preferred_label) {
         this.props.editingVocabulary.
-            tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list].push(currentNode.term);
+            tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.value].push(currentNode.term);
       }
     }
   }
