@@ -18,12 +18,17 @@ import editingVocabularyMetaStore from './EditingVocabularyMeta';
 class EditingVocabulary {
   // Editing vocabulary
   @observable editingVocabulary = [];
+  // {id: 11, {id:11, term:aa, ...}}
+  @observable editingVocWithId = new Map();
   // Reference vocabulary 1
   @observable referenceVocabulary1 = [];
   // Reference vocabulary 2
   @observable referenceVocabulary2 = [];
   // Reference vocabulary 3
   @observable referenceVocabulary3 = [];
+  // {id: 11, {id:11, term:aa, ...}}
+  @observable referenceVocWithId = [undefined, new Map(), new Map(), new Map()]; // padding th first element
+  
 
   // map for term to id & language
   // key is "term", value is [id, language]
@@ -183,6 +188,7 @@ class EditingVocabulary {
     const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
 
     this.editingVocabulary = editingVocabulary;
+    editingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
     this.initConfirmColor();
   }
 
@@ -229,6 +235,7 @@ class EditingVocabulary {
     const updatedEditingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
 
     this.editingVocabulary = unChangeVocabulary.concat(updatedEditingVocabulary);
+    updatedEditingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
     this.initConfirmColor();
   }
 
@@ -330,6 +337,7 @@ class EditingVocabulary {
     const referenceVocabulary = [];
     const uri_preferred_label_ja = {};
     const uri_preferred_label_en = {};
+    this.term2id[refid].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label}
       if (data.preferred_label && data.uri) {
@@ -411,19 +419,20 @@ class EditingVocabulary {
                 this.setReferenceVocabularyData(
                     response.data.ReferenceVocabulary, param
                 );
+                this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[1].set(data.id, data));
               if (1 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
                 this.deselectTermList();
                 this.fitToVisualArea();
               }
-
               break;
             case '2':
               this.referenceVocabulary2 =
                 this.setReferenceVocabularyData(
                     response.data.ReferenceVocabulary, param
                 );
+              this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[2].set(data.id, data));
               if (2 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -436,6 +445,7 @@ class EditingVocabulary {
                 this.setReferenceVocabularyData(
                     response.data.ReferenceVocabulary, param
                 );
+              this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[3].set(data.id, data));
               if (3 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -889,7 +899,6 @@ class EditingVocabulary {
     list = list.filter((term)=>{
       return this.editingVocabulary.find( (data) => data.term === term)?true:false;
     })
-
     return list.sort((a, b) => {
       const lowerA = a.toString().toLowerCase();
       const lowerB = b.toString().toLowerCase();
