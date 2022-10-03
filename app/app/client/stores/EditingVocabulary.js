@@ -18,6 +18,19 @@ import editingVocabularyMetaStore from './EditingVocabularyMeta';
 class EditingVocabulary {
   // Editing vocabulary
   @observable editingVocabulary = [];
+  // map for term to id & language
+  // key is "term", value is [id, language]
+  @observable term2id = new Map();
+  // get object by term and laguage
+  getIdbyTermandLang(term, language){
+    const iddata = this.term2id.get(term);
+    if(iddata.language=== language){
+      return iddata.id;
+    }else{
+      return undefined;
+    }
+  }
+
   // Reference vocabulary 1
   @observable referenceVocabulary1 = [];
   // Reference vocabulary 2
@@ -152,6 +165,7 @@ class EditingVocabulary {
   initializeEditingVocabularyData(dbData) {
     this.uri2preflabel['ja'] = {};
     this.uri2preflabel['en'] = {};
+    this.term2id.clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
@@ -161,7 +175,10 @@ class EditingVocabulary {
           this.uri2preflabel['en'][data.uri] = data.preferred_label;
         }
       }
+      // Make term2id
+      this.term2id.set(data.term,  {id: data.id, language: data.language});
     });
+
     const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
 
     this.editingVocabulary = editingVocabulary;
