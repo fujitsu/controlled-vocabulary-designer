@@ -203,7 +203,7 @@ class EditingHistory {
    * @param  {object} history - information of history
    */
   execChangeColor(type, history) {
-    const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
+    // const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
     let color;
     if (this.STR_UNDO === type) {
       color = history.previous;
@@ -285,7 +285,7 @@ class EditingHistory {
    * @param  {object} history - information of history
    */
   execConfirmChanged(type, history) {
-    const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
+    // const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
 
     let confirm;
     if (this.STR_UNDO === type) {
@@ -302,8 +302,7 @@ class EditingHistory {
     const EditingVocabulary = editingVocabularyStore;
     EditingVocabulary.setCurrentNodeById(history.targetId);
     
-
-    EditingVocabulary.toggleConfirm(currentTerm, isConfirm, true);
+    EditingVocabulary.toggleConfirmById(history.targetId, isConfirm, true);
   }
 
   /**

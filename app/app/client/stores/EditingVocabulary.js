@@ -18,25 +18,26 @@ import editingVocabularyMetaStore from './EditingVocabularyMeta';
 class EditingVocabulary {
   // Editing vocabulary
   @observable editingVocabulary = [];
-  // map for term to id & language
-  // key is "term", value is [id, language]
-  @observable term2id = new Map();
-  // get object by term and laguage
-  getIdbyTermandLang(term, language){
-    const iddata = this.term2id.get(term);
-    if(iddata.language=== language){
-      return iddata.id;
-    }else{
-      return undefined;
-    }
-  }
-
   // Reference vocabulary 1
   @observable referenceVocabulary1 = [];
   // Reference vocabulary 2
   @observable referenceVocabulary2 = [];
   // Reference vocabulary 3
   @observable referenceVocabulary3 = [];
+
+  // map for term to id & language
+  // key is "term", value is [id, language]
+  @observable term2id = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
+ 
+  // get object id by term and laguage
+  getIdbyTermandLang(term, language, selectedFileId = 0){
+    const iddata = this.term2id[selectedFileId].get(term);
+    if(iddata.language=== language){
+      return iddata.id;
+    }else{
+      return undefined;
+    }
+  }
 
   // Array for selected term on Visual vocabulary Tab
   @observable selectedTermList = [];
@@ -165,7 +166,7 @@ class EditingVocabulary {
   initializeEditingVocabularyData(dbData) {
     this.uri2preflabel['ja'] = {};
     this.uri2preflabel['en'] = {};
-    this.term2id.clear();
+    this.term2id[0].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
@@ -176,7 +177,7 @@ class EditingVocabulary {
         }
       }
       // Make term2id
-      this.term2id.set(data.term,  {id: data.id, language: data.language});
+      this.term2id[0].set(data.term,  {id: data.id, language: data.language});
     });
 
     const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
@@ -322,9 +323,10 @@ class EditingVocabulary {
   /**
    * Reference vocabulary data initialization
    * @param {array} dbData - list of reference vocabulary
-   * @return {array} - initialized list of reference vocabulary
+   * @param {number} refid 1 or 2 or 3 to identify reference vocabulary
+  * @return {array} - initialized list of reference vocabulary
    */
-  setReferenceVocabularyData(dbData) {
+  setReferenceVocabularyData(dbData, refid) {
     const referenceVocabulary = [];
     const uri_preferred_label_ja = {};
     const uri_preferred_label_en = {};
@@ -337,6 +339,8 @@ class EditingVocabulary {
           uri_preferred_label_en[data.uri] = data.preferred_label;
         }
       }
+      // Make term2id
+      this.term2id[refid].set(data.term,  {id: data.id, language: data.language});
     });
 
     dbData.forEach( (data) => {
@@ -384,7 +388,7 @@ class EditingVocabulary {
 
   /**
    * Get reference vocabulary data
-   * @param {number} param 1 or 2 or 3
+   * @param {number} param 1 or 2 or 3 for refid
    */
   @action getReferenceVocabularyDataFromDB(param) {
     const url = '/api/v1/vocabulary/reference_vocabulary' + param;
@@ -405,7 +409,7 @@ class EditingVocabulary {
             case '1':
               this.referenceVocabulary1 =
                 this.setReferenceVocabularyData(
-                    response.data.ReferenceVocabulary,
+                    response.data.ReferenceVocabulary, param
                 );
               if (1 == this.selectedFile.id) {
                 this.currentNodeClear();
@@ -418,7 +422,7 @@ class EditingVocabulary {
             case '2':
               this.referenceVocabulary2 =
                 this.setReferenceVocabularyData(
-                    response.data.ReferenceVocabulary,
+                    response.data.ReferenceVocabulary, param
                 );
               if (2 == this.selectedFile.id) {
                 this.currentNodeClear();
@@ -430,7 +434,7 @@ class EditingVocabulary {
             case '3':
               this.referenceVocabulary3 =
                 this.setReferenceVocabularyData(
-                    response.data.ReferenceVocabulary,
+                    response.data.ReferenceVocabulary, param
                 );
               if (3 == this.selectedFile.id) {
                 this.currentNodeClear();
@@ -2515,7 +2519,7 @@ isOtherVocSynUriChanged() {
 
   // // URI //////////////////////
   @computed get tmpUri(){
-    const obj = new Object;
+    const obj = {};
     obj.id = this.tmpIdofUri.id;
     const uri_prefix = this.getUriPrefix();
     obj.list = [uri_prefix + this.tmpIdofUri.list[0]];
@@ -2984,9 +2988,13 @@ isOtherVocSynUriChanged() {
       this.tmpSynonym.list[currentNode.language] = array.filter((val, i, self)=>{ return i === self.indexOf(val)});
       //tentative treatment
       const idArray = [];
+      // this.tmpSynonym.list[currentNode.language].forEach((term) =>{
+      //   const find = this.editingVocabulary.find((data)=> (data.term === term));
+      //   idArray.push(find.id);
+      // });
       this.tmpSynonym.list[currentNode.language].forEach((term) =>{
-        const find = this.editingVocabulary.find((data)=> (data.term === term));
-        idArray.push(find.id);
+        const foundid = this.getIdbyTermandLang(term, currentNode.language, 0);
+        idArray.push(foundid);
       });
       this.tmpSynonym.idList[currentNode.language] =idArray;
     })
@@ -3399,16 +3407,16 @@ isOtherVocSynUriChanged() {
   /**
    * Confirm change request
    * Switching term setting ON/OFF
-   * @param  {String} term - confirmed term
+   * @param  {number} id - confirmed term's id
    * @param  {Boolean} isConfirm - confirm ON/OFF
    * @param  {Boolean} [isHistory=false] - modified by undo/redo ?
    */
-  toggleConfirm(term, isConfirm, isHistoryOp = false) {
+  toggleConfirmById(id, isConfirm, isHistoryOp = false) {
     const currentNode = this.editingVocabulary.find((data) =>
-      data.term == term);
+      data.id == id);
 
     if (!currentNode) {
-      console.log(term + ' is not found from editingVocabulary.');
+      console.log('term with id=' + id + ' is not found from editingVocabulary.');
       return;
     }
 

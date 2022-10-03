@@ -164,7 +164,7 @@ export default
     // console.log('[toggleConfirm] change to ' + isConfirm);
     const currentNode = this.props.editingVocabulary.currentNode;
 
-    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
+    this.props.editingVocabulary.toggleConfirmById(currentNode.id, isConfirm);
     if (!isConfirm) {
       // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
       if (!currentNode.preferred_label) {
