@@ -223,7 +223,12 @@ class EditingVocabulary {
   calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) {
     // calculate values to update
     const editingVocabulary = [];
-    if(undefined == dbData || dbData.length == 0){
+    if(undefined === dbData || dbData.length === 0){
+      return [];
+    }
+    if(undefined === editingVocabularyMetaStore.editingVocabularyMeta){
+      // vocabulary meta should be non-empty, even if editing vocabulary data is empty, 
+      console.assert(false, "meta data is undefined.");
       return [];
     }
     const uri_prefix = this.getUriPrefix();
