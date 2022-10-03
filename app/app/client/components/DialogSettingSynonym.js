@@ -181,6 +181,11 @@ export default class DialogSettingSynonym extends React.Component {
       });
     }
 
+    this.preferredList['ja'] = this.preferredList['ja'].filter(( item)=>{ return !editingVocabulary.isBlankTerm(item)});
+    this.preferredList['en'] = this.preferredList['en'].filter(( item)=>{ return !editingVocabulary.isBlankTerm(item)});
+    this.broaderList['ja'] = this.broaderList['ja'].filter(( item)=>{ return !editingVocabulary.isBlankTerm(item)});
+    this.broaderList['en'] = this.broaderList['en'].filter(( item)=>{ return !editingVocabulary.isBlankTerm(item)});
+
     this.setState({ 
       selectBroader_Ja:selectBroader_Ja,
       selectBroader_En:selectBroader_En,
