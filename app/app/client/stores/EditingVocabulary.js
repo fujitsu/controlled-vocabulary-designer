@@ -277,7 +277,7 @@ class EditingVocabulary {
       } 
       
       //uri_prefix
-      data.idofuri = data.uri.replace(uri_prefix, ''); // delete first matched prefix
+      data.idofuri = data.uri.replace(uri_prefix, ''); // delete the first matched prefix
       
       // // If the parameter is not string (Set the empty string character)
       // if (!data.preferred_label) data.preferred_label = '';
