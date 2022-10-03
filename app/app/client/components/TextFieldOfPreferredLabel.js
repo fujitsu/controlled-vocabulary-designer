@@ -60,19 +60,12 @@ export default
   onChange(event, newValue) {
     const editingVocabulary = this.props.editingVocabulary;
     const inputText = event.target.value;
-    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
-    if( inputText != '' && inputText != undefined && !find){
-      const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
+    const displayLanguage = editingVocabulary.tmpLanguage.value;
+    // const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    const foundId = editingVocabulary.getIdbyTermandLang(inputText, displayLanguage);    
+    if( inputText != '' && inputText != undefined && !foundId){
+      const errorMsg =  '\"' +inputText + '\" は、'+(displayLanguage =='ja'?'日本語':'英語')+'では登録されていない用語です。¥n' +
                        '既存の用語を記入してください。';
-      const innerText = errorMsg.split('¥n').map((line, key) =>
-        <span key={key}>{line}<br /></span>);
-      this.openSnackbar(innerText);
-
-      return false;
-    }
-    if( find && find.language != editingVocabulary.tmpLanguage.value){
-      const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
-                       '現在選択されている言語の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
@@ -91,9 +84,9 @@ export default
       if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
         && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
         && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
-          const find = editingVocabulary.editingVocabulary.find((item)=>
+          const found = editingVocabulary.editingVocabulary.find((item)=>
               item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
-          _currentNode = find?find:currentNode;
+          _currentNode = found?found:currentNode;
       }
       if (newValue.length == 1) {
 

@@ -507,8 +507,10 @@ export default
         return;
       }
       const target = event.target.data();
-      const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
-      console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, find)
+      // const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
+      // console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, find)
+      const findObj = this.props.editingVocabulary.editingVocWithId.get(target.id);
+      console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, findObj);
 
       // other vocabulary node
       if(target.term == target.other_voc_syn_uri){ 
@@ -1226,7 +1228,7 @@ export default
     // console.log('[toggleConfirm] change to ' + isConfirm);
     const currentNode = this.props.editingVocabulary.currentNode;
 
-    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
+    this.props.editingVocabulary.toggleConfirmById(currentNode.id, isConfirm);
     if (!isConfirm) {
       // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
       if (!currentNode.preferred_label) {

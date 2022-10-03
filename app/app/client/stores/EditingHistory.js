@@ -97,12 +97,16 @@ class EditingHistory {
    * @return {string} - vocabulary
    */
   getTermFromEditingVocabulary(id) {
-    const editingVocabulary = editingVocabularyStore.editingVocabulary;
-
+    // const editingVocabulary = editingVocabularyStore.editingVocabulary;
+    // let term = '';
+    // const target = editingVocabulary.find( (data) => data.id === id);
+    // if (target) {
+    //   term = target.term;
+    // }
     let term = '';
-    const target = editingVocabulary.find( (data) => data.id === id);
-    if (target) {
-      term = target.term;
+    let foundObj = editingVocabularyStore.editingVocWithId.get(id);
+    if(undefined != foundObj){
+      term = foundObj.term;
     }
     return term;
   }
@@ -203,7 +207,7 @@ class EditingHistory {
    * @param  {object} history - information of history
    */
   execChangeColor(type, history) {
-    const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
+    // const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
     let color;
     if (this.STR_UNDO === type) {
       color = history.previous;
@@ -243,8 +247,10 @@ class EditingHistory {
       const upSynList = history.previous.filter((i) =>
         this.getIndexById(history.following, 'id', i.id) != -1);
       upSynList.forEach((data) => {
+        // const target =
+        //     EditingVocabulary.editingVocabulary.find((i) => i.id == data.id);
         const target =
-            EditingVocabulary.editingVocabulary.find((i) => i.id == data.id);
+            EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
           target.preferred_label = data.preferred_label;
           target.idofuri = data.idofuri;
@@ -261,8 +267,9 @@ class EditingHistory {
       const upSynList = history.following.filter((i) =>
         this.getIndexById(history.previous, 'id', i.id) != -1);
       upSynList.forEach((data) => {
-        const target = EditingVocabulary.editingVocabulary.find((i) =>
-          i.id == data.id);
+        // const target = EditingVocabulary.editingVocabulary.find((i) =>
+        //   i.id == data.id);
+        const target = EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
           target.preferred_label = data.preferred_label;
           target.idofuri = data.idofuri;
@@ -285,7 +292,7 @@ class EditingHistory {
    * @param  {object} history - information of history
    */
   execConfirmChanged(type, history) {
-    const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
+    // const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
 
     let confirm;
     if (this.STR_UNDO === type) {
@@ -302,8 +309,7 @@ class EditingHistory {
     const EditingVocabulary = editingVocabularyStore;
     EditingVocabulary.setCurrentNodeById(history.targetId);
     
-
-    EditingVocabulary.toggleConfirm(currentTerm, isConfirm, true);
+    EditingVocabulary.toggleConfirmById(history.targetId, isConfirm, true);
   }
 
   /**
@@ -562,9 +568,11 @@ class EditingHistory {
    * @return {string} - message
    */
   makeConfirmChangedMessage(type, history) {
-    const editingVocabulary = editingVocabularyStore.editingVocabulary;
-    const target =
-      editingVocabulary.find( (data) => data.id === history.targetId);
+    // const editingVocabulary = editingVocabularyStore.editingVocabulary;
+    // const target =
+    //   editingVocabulary.find( (data) => data.id === history.targetId);
+    const target = editingVocabularyStore.editingVocWithId.get(history.targetId);
+      
     if (!target) {
       console.log('target is not found. id: ' + history.targetId);
       return;

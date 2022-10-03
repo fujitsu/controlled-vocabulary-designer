@@ -61,9 +61,9 @@ export default
     const editingVocabulary =this.props.editingVocabulary;
     const inputText = event.target.value;
     const displayLanguage = editingVocabulary.tmpLanguage.value;
-    // const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
-    const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});  
-    if( inputText != '' && inputText != undefined && !find){
+    // const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});  
+    const foundId = editingVocabulary.getIdbyTermandLang(inputText, displayLanguage);  
+    if( inputText != '' && inputText != undefined && !foundId){
       const errorMsg =  '\"' +inputText + '\" は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
                        '既存の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
@@ -72,7 +72,8 @@ export default
 
       return false;
     }
-    let inputTextUri = find? find.uri:''; // uri for inputText term
+    const foundObj = editingVocabulary.editingVocWithId.get(foundId)
+    let inputTextUri = found? found.uri:''; // uri for inputText term
 
     const currentNode = editingVocabulary.tmpLanguage.value == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
     let _currentNode = currentNode;
@@ -81,9 +82,9 @@ export default
       && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
         //DEBUG
         console.assert(false, "something is wrong 245");
-        const find = editingVocabulary.editingVocabulary.find((item)=>
+        const found = editingVocabulary.editingVocabulary.find((item)=>
             item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
-        _currentNode = find?find:currentNode;
+        _currentNode = found?found:currentNode;
     }
     if (editingVocabulary.isRelationSynonym(_currentNode, newValue)) {
       const errorMsg = '下位語テキストボックスに、 \"' + _currentNode.term +

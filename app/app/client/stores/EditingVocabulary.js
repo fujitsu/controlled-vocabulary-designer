@@ -18,12 +18,31 @@ import editingVocabularyMetaStore from './EditingVocabularyMeta';
 class EditingVocabulary {
   // Editing vocabulary
   @observable editingVocabulary = [];
+  // {id: 11, {id:11, term:aa, ...}}
+  @observable editingVocWithId = new Map();
   // Reference vocabulary 1
   @observable referenceVocabulary1 = [];
   // Reference vocabulary 2
   @observable referenceVocabulary2 = [];
   // Reference vocabulary 3
   @observable referenceVocabulary3 = [];
+  // {id: 11, {id:11, term:aa, ...}}
+  @observable referenceVocWithId = [undefined, new Map(), new Map(), new Map()]; // padding th first element
+  
+
+  // map for term to id & language
+  // key is "term", value is [id, language]
+  @observable term2id = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
+ 
+  // get object id by term and laguage
+  getIdbyTermandLang(term, language, selectedFileId = 0){
+    const iddata = this.term2id[selectedFileId].get(term);
+    if(iddata.language=== language){
+      return iddata.id;
+    }else{
+      return undefined;
+    }
+  }
 
   // Array for selected term on Visual vocabulary Tab
   @observable selectedTermList = [];
@@ -152,6 +171,7 @@ class EditingVocabulary {
   initializeEditingVocabularyData(dbData) {
     this.uri2preflabel['ja'] = {};
     this.uri2preflabel['en'] = {};
+    this.term2id[0].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
@@ -161,10 +181,14 @@ class EditingVocabulary {
           this.uri2preflabel['en'][data.uri] = data.preferred_label;
         }
       }
+      // Make term2id
+      this.term2id[0].set(data.term,  {id: data.id, language: data.language});
     });
+
     const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
 
     this.editingVocabulary = editingVocabulary;
+    editingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
     this.initConfirmColor();
   }
 
@@ -211,6 +235,7 @@ class EditingVocabulary {
     const updatedEditingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
 
     this.editingVocabulary = unChangeVocabulary.concat(updatedEditingVocabulary);
+    updatedEditingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
     this.initConfirmColor();
   }
 
@@ -260,7 +285,7 @@ class EditingVocabulary {
       } 
       
       //uri_prefix
-      data.idofuri = data.uri.replace(uri_prefix, ''); // delete first matched prefix
+      data.idofuri = data.uri.replace(uri_prefix, ''); // delete the first matched prefix
       
       // // If the parameter is not string (Set the empty string character)
       // if (!data.preferred_label) data.preferred_label = '';
@@ -305,12 +330,14 @@ class EditingVocabulary {
   /**
    * Reference vocabulary data initialization
    * @param {array} dbData - list of reference vocabulary
-   * @return {array} - initialized list of reference vocabulary
+   * @param {number} refid 1 or 2 or 3 to identify reference vocabulary
+  * @return {array} - initialized list of reference vocabulary
    */
-  setReferenceVocabularyData(dbData) {
+  setReferenceVocabularyData(dbData, refid) {
     const referenceVocabulary = [];
     const uri_preferred_label_ja = {};
     const uri_preferred_label_en = {};
+    this.term2id[refid].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label}
       if (data.preferred_label && data.uri) {
@@ -320,11 +347,14 @@ class EditingVocabulary {
           uri_preferred_label_en[data.uri] = data.preferred_label;
         }
       }
+      // Make term2id
+      this.term2id[refid].set(data.term,  {id: data.id, language: data.language});
     });
 
     dbData.forEach( (data) => {
       // Convert broader_uri into broader_term
-      if (uri_preferred_label[data.broader_uri] != undefined) {
+      if (uri_preferred_label_ja[data.broader_uri] != undefined ||
+        uri_preferred_label_en[data.broader_uri] != undefined ) {
         if((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
           if(data.language === 'ja'){
             data.broader_term = uri_preferred_label_ja[data.broader_uri];
@@ -357,8 +387,6 @@ class EditingVocabulary {
       if (undefined == data.modified_time) console.assert(false, "refdatamodt");
       if (undefined == data.position_x) console.assert(false, "refdataposx");
       if (undefined == data.position_y) console.assert(false, "refdataposy");
-      if (undefined == data.color1) console.assert(false, "refdataco1");
-      if (undefined == data.color2) console.assert(false, "refdataco2");
 
       referenceVocabulary.push(data);
     });
@@ -368,7 +396,7 @@ class EditingVocabulary {
 
   /**
    * Get reference vocabulary data
-   * @param {number} param 1 or 2 or 3
+   * @param {number} param 1 or 2 or 3 for refid
    */
   @action getReferenceVocabularyDataFromDB(param) {
     const url = '/api/v1/vocabulary/reference_vocabulary' + param;
@@ -389,21 +417,22 @@ class EditingVocabulary {
             case '1':
               this.referenceVocabulary1 =
                 this.setReferenceVocabularyData(
-                    response.data.ReferenceVocabulary,
+                    response.data.ReferenceVocabulary, param
                 );
+                this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[1].set(data.id, data));
               if (1 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
                 this.deselectTermList();
                 this.fitToVisualArea();
               }
-
               break;
             case '2':
               this.referenceVocabulary2 =
                 this.setReferenceVocabularyData(
-                    response.data.ReferenceVocabulary,
+                    response.data.ReferenceVocabulary, param
                 );
+              this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[2].set(data.id, data));
               if (2 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -414,8 +443,9 @@ class EditingVocabulary {
             case '3':
               this.referenceVocabulary3 =
                 this.setReferenceVocabularyData(
-                    response.data.ReferenceVocabulary,
+                    response.data.ReferenceVocabulary, param
                 );
+              this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[3].set(data.id, data));
               if (3 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -869,7 +899,6 @@ class EditingVocabulary {
     list = list.filter((term)=>{
       return this.editingVocabulary.find( (data) => data.term === term)?true:false;
     })
-
     return list.sort((a, b) => {
       const lowerA = a.toString().toLowerCase();
       const lowerB = b.toString().toLowerCase();
@@ -2499,7 +2528,7 @@ isOtherVocSynUriChanged() {
 
   // // URI //////////////////////
   @computed get tmpUri(){
-    const obj = new Object;
+    const obj = {};
     obj.id = this.tmpIdofUri.id;
     const uri_prefix = this.getUriPrefix();
     obj.list = [uri_prefix + this.tmpIdofUri.list[0]];
@@ -2968,9 +2997,13 @@ isOtherVocSynUriChanged() {
       this.tmpSynonym.list[currentNode.language] = array.filter((val, i, self)=>{ return i === self.indexOf(val)});
       //tentative treatment
       const idArray = [];
+      // this.tmpSynonym.list[currentNode.language].forEach((term) =>{
+      //   const find = this.editingVocabulary.find((data)=> (data.term === term));
+      //   idArray.push(find.id);
+      // });
       this.tmpSynonym.list[currentNode.language].forEach((term) =>{
-        const find = this.editingVocabulary.find((data)=> (data.term === term));
-        idArray.push(find.id);
+        const foundid = this.getIdbyTermandLang(term, currentNode.language, 0);
+        idArray.push(foundid);
       });
       this.tmpSynonym.idList[currentNode.language] =idArray;
     })
@@ -3383,16 +3416,16 @@ isOtherVocSynUriChanged() {
   /**
    * Confirm change request
    * Switching term setting ON/OFF
-   * @param  {String} term - confirmed term
+   * @param  {number} id - confirmed term's id
    * @param  {Boolean} isConfirm - confirm ON/OFF
    * @param  {Boolean} [isHistory=false] - modified by undo/redo ?
    */
-  toggleConfirm(term, isConfirm, isHistoryOp = false) {
+  toggleConfirmById(id, isConfirm, isHistoryOp = false) {
     const currentNode = this.editingVocabulary.find((data) =>
-      data.term == term);
+      data.id == id);
 
     if (!currentNode) {
-      console.log(term + ' is not found from editingVocabulary.');
+      console.log('term with id=' + id + ' is not found from editingVocabulary.');
       return;
     }
 
