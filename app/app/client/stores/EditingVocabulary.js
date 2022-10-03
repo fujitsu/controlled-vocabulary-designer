@@ -341,7 +341,8 @@ class EditingVocabulary {
 
     dbData.forEach( (data) => {
       // Convert broader_uri into broader_term
-      if (uri_preferred_label[data.broader_uri] != undefined) {
+      if (uri_preferred_label_ja[data.broader_uri] != undefined ||
+        uri_preferred_label_en[data.broader_uri] != undefined ) {
         if((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
           if(data.language === 'ja'){
             data.broader_term = uri_preferred_label_ja[data.broader_uri];
@@ -374,8 +375,6 @@ class EditingVocabulary {
       if (undefined == data.modified_time) console.assert(false, "refdatamodt");
       if (undefined == data.position_x) console.assert(false, "refdataposx");
       if (undefined == data.position_y) console.assert(false, "refdataposy");
-      if (undefined == data.color1) console.assert(false, "refdataco1");
-      if (undefined == data.color2) console.assert(false, "refdataco2");
 
       referenceVocabulary.push(data);
     });
