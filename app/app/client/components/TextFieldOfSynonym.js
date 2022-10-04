@@ -72,25 +72,26 @@ export default
 
       return false;
     }
-    const foundObj = editingVocabulary.editingVocWithId.get(foundId)
-    let inputTextUri = found? found.uri:''; // uri for inputText term
+    // const foundObj = editingVocabulary.editingVocWithId.get(foundId)
+    // let inputTextUri = found? found.uri:''; // uri for inputText term
 
-    const currentNode = editingVocabulary.tmpLanguage.value == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
-    let _currentNode = currentNode;
-    if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+    const displayNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+    let _displayNode = displayNode;
+    if(  _displayNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
       && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
       && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
-        //DEBUG
-        console.assert(false, "something is wrong 245");
-        const found = editingVocabulary.editingVocabulary.find((item)=>
-            item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
-        _currentNode = found?found:currentNode;
+        // this condition is satisfied when the currentNode is ja/en and synonym en/ja term does not exist.
+        const foundId = editingVocabulary.getIdbyTermandLang(
+          editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0],
+          editingVocabulary.currentLangDiffNode.language);
+        const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+        _displayNode = foundObj?foundObj:displayNode;
     }
-    if (editingVocabulary.isRelationSynonym(_currentNode, newValue)) {
-      const errorMsg = '下位語テキストボックスに、 \"' + _currentNode.term +
-                       '\" あるいは \"' + _currentNode.term + '\" の代表語' +
-                       'あるいは \"' + _currentNode.term + '\" の同義語が記入されています。¥n' +
-                       '同義語テキストボックスには、 \"' + _currentNode.term +
+    if (editingVocabulary.isRelationSynonym(_displayNode, newValue)) {
+      const errorMsg = '下位語テキストボックスに、 \"' + _displayNode.term +
+                       '\" あるいは \"' + _displayNode.term + '\" の代表語' +
+                       'あるいは \"' + _displayNode.term + '\" の同義語が記入されています。¥n' +
+                       '同義語テキストボックスには、 \"' + _displayNode.term +
                        '\" と上下関係を持たないように、¥n' +
                        'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
@@ -101,7 +102,7 @@ export default
     // if the added term have diffrent preferred label the label is added to the Text Field of PrefLabel
     if (this.state.open == false) {
       const preferredLabelLength =
-        editingVocabulary.tmpPreferredLabel.list[_currentNode.language].length;
+        editingVocabulary.tmpPreferredLabel.list[_displayNode.language].length;
       if (preferredLabelLength > 1) {
         const errorMsg = '代表語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
