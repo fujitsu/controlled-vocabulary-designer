@@ -376,6 +376,7 @@ class EditingVocabulary {
     const uri_preferred_label_ja = {};
     const uri_preferred_label_en = {};
     this.term2id[refid].clear();
+    this.uri2synoid[refid].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label}
       if (data.preferred_label && data.uri) {
@@ -387,6 +388,12 @@ class EditingVocabulary {
       }
       // Make term2id
       this.term2id[refid].set(data.term,  {id: data.id, language: data.language});
+      // Make uri2synoid
+      if(this.uri2synoid[refid].has(data.uri)){
+        this.uri2synoid[refid].get(data.uri).add(data.id);
+      }else{
+        this.uri2synoid[refid].set(data.uri, new Set([data.id]));
+      }
     });
 
     dbData.forEach( (data) => {
@@ -1394,20 +1401,42 @@ isOtherVocSynUriChanged() {
     const current = new Proxy(target, handler);
     this.currentNode = current;
 
-    const synonymNode =
-        this.getTargetFileData(this.selectedFile.id).filter((node) =>
-          node.language === this.currentNode.language &&
-          node.uri === this.currentNode.uri
-        );
+    // const synonymNode =
+    //     this.getTargetFileData(this.selectedFile.id).filter((node) =>
+    //       node.language === this.currentNode.language &&
+    //       node.uri === this.currentNode.uri
+    //     );
+    const currentNodeLanguage = this.currentNode.language;
+    const synonymIdListWithMe =[...this.uri2synoid[this.selectedFile.id].get(this.currentNode.uri)];
+    const synonymIdList = synonymIdListWithMe.filter((id1)=> {return id1 !== this.currentNode.id});
+    // const synonymIdList = synonymIdListWithMe;
+    const synonymNode = [];
+    if(this.selectedFile.id === 0){
+      synonymIdList.forEach((id1)=>{
+        const tmpObj = this.editingVocWithId.get(id1);
+        if(tmpObj.laguage === currentNodeLanguage){
+          synonymNode.push(tmpObj);
+        }
+      }, this);
+    }else{
+      synonymIdList.forEach((id1)=>{
+        const tmpObj = this.referenceVocWithId[this.selectedFile.id].get(id1);
+        if(tmpObj.language === currentNodeLanguage){
+          synonymNode.push();
+        }
+      }, this);
+    }
+
     this.currentNode.synonymList =  [];
     this.currentNode.synonymIdList =  [];
     synonymNode.forEach((synonym) => {
-      //if (synonym.term != this.currentNode.term) {
       if (synonym.id != this.currentNode.id) {
         this.currentNode.synonymList.push(synonym.term);
         this.currentNode.synonymIdList.push(synonym.id);
       }
-    });
+    }, this);
+
+
 
     this.tmpDataClear();
 
@@ -1438,8 +1467,8 @@ isOtherVocSynUriChanged() {
       this.tmpPreferredLabel.list[this.currentNode.language].push(preferredLabel);
     }
 
-    this.tmpSynonym.list[this.currentNode.language] = this.currentNode.synonymList;
-    this.tmpSynonym.idList[this.currentNode.language] = this.currentNode.synonymIdList;
+    this.tmpSynonym.list[this.currentNode.language] = [...this.currentNode.synonymList];//shallow copy
+    this.tmpSynonym.idList[this.currentNode.language] = [...this.currentNode.synonymIdList];//shallow copy
 
     this.tmpTermDescription ={id: this.currentNode.id, list:{ja:[], en:[]}};
     if (this.currentNode.term_description) {
@@ -1551,15 +1580,33 @@ isOtherVocSynUriChanged() {
   }
 
   setCurrentLangDiffNode(){
-    let languageChangeNode = [];
-    // select terms with otherlang and with same uri 
-    this.getTargetFileData(this.selectedFile.id).forEach((data) => {
-      if(data.uri == this.currentNode.uri &&
-        data.language != this.currentNode.language ) {
-        languageChangeNode.push(data);
-      }
-    }); 
-
+    // let languageChangeNode = [];
+    // // select terms with otherlang and with same uri 
+    // this.getTargetFileData(this.selectedFile.id).forEach((data) => {
+    //   if(data.uri == this.currentNode.uri &&
+    //     data.language != this.currentNode.language ) {
+    //     languageChangeNode.push(data);
+    //   }
+    // }); 
+    const synonymIdList =[...this.uri2synoid[this.selectedFile.id].get(this.currentNode.uri)];
+    const languageChangeNode = [];
+    const currentNodeLanguage = this.currentNode.language;
+    if(this.selectedFile.id === 0){
+      synonymIdList.forEach((id1)=>{
+        const tmpObj = this.editingVocWithId.get(id1);
+        if(tmpObj.language !== currentNodeLanguage){
+          languageChangeNode.push(tmpObj);
+        }
+      }, this);
+    }else{
+      synonymIdList.forEach((id1)=>{
+        const tmpObj = this.referenceVocWithId[this.selectedFile.id].get(id1);
+        if(tmpObj.language !== currentNodeLanguage){
+          languageChangeNode.push(tmpObj);
+        }
+      }, this);
+    } 
+   
     if (languageChangeNode.length > 0){
       const otherlangsynonymList= [];
       const otherlangsynonymIdList= [];
@@ -1570,7 +1617,7 @@ isOtherVocSynUriChanged() {
         if(synonym.term == synonym.preferred_label){
           preferredNode = synonym;
         }
-      });
+      }, this);
       const languageChangeNodeData = preferredNode || languageChangeNode[0];
       this.currentLangDiffNode  = languageChangeNodeData;
 
@@ -1578,7 +1625,6 @@ isOtherVocSynUriChanged() {
       const broaderterm = [];
       let broader_uri = '';
       const termdescription = [];
-      const language = [];
     
       this.currentLangDiffNode.synonymList = otherlangsynonymList;
       this.currentLangDiffNode.synonymIdList = otherlangsynonymIdList;
@@ -1599,25 +1645,23 @@ isOtherVocSynUriChanged() {
         termdescription.push(languageChangeNodeData.term_description);
       }
 
-      language.push(languageChangeNodeData.language);
-
       let preferredLabel;
-      if (this.currentNode.preferred_label) {
-        preferredLabel = this.currentNode.preferred_label;
+      if (languageChangeNodeData.preferred_label) {
+        preferredLabel = languageChangeNodeData.preferred_label;
       } else {
         // If a preferred label is not defined, display the term in the preferred label column
         // Do not add for determined terms
-        if (this.currentNode.confirm == 0) {
-          preferredLabel = this.currentNode.term;
+        if (languageChangeNodeData.confirm == 0) {
+          preferredLabel = languageChangeNodeData.term;
         }
       }
       if (preferredLabel) {
        this.tmpPreferredLabel.list[languageChangeNodeData.language] = preferredlabel;
       }
 
-      this.tmpBroaderTerm.list[language] = broaderterm;
+      this.tmpBroaderTerm.list[languageChangeNodeData.language] = broaderterm;
       this.tmpBroaderTerm.broader_uri = broader_uri;
-      this.tmpTermDescription.list[language] = termdescription;
+      this.tmpTermDescription.list[languageChangeNodeData.language] = termdescription;
     }else{
       this.currentLangDiffNodeClear();
       this.currentLangDiffNode.language = this.currentNode.language=='ja'?'en':'ja';
