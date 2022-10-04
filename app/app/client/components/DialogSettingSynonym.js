@@ -267,8 +267,26 @@ export default class DialogSettingSynonym extends React.Component {
       list:{
         ja: this.preferredList['ja'],
         en: this.preferredList['en']
+      },
+      idList:{
+        ja: [],
+        en: []
       }
     }
+
+    let idArray = [];
+    this.preferredList['ja'].forEach((term) =>{
+      const foundId = this.props.editingVocabulary.getIdbyTermandLang(term, 'ja', 0);
+      idArray.push(foundId);
+    }, this);
+    this.props.editingVocabulary.tmpSynonym.idList['ja'] = idArray;
+    idArray=[];
+    this.preferredList['en'].forEach((term) =>{
+      const foundId = this.props.editingVocabulary.getIdbyTermandLang(term, 'en', 0);
+      idArray.push(foundId);
+    }, this);
+    this.props.editingVocabulary.tmpSynonym.idList['en'] = idArray;
+
 
     // Preferred
     this.props.editingVocabulary.tmpPreferredLabel={
