@@ -129,7 +129,7 @@ export default
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
-      } else if (!editingVocabulary.isValidSynonymBrdrTrm(_currentNode, nextBroaderTerm)) {
+      } else if (!editingVocabulary.isValidSynonymBrdrTrm(_displayNode, nextBroaderTerm)) {
         let errorMsg = '上位語テキストボックスに、日本語と英語で同義関係ではない用語が記入されています。¥n日本語と英語で同義関係の用語を記入してください。'
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
