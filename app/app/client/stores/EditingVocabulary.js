@@ -1414,7 +1414,7 @@ isOtherVocSynUriChanged() {
     if(this.selectedFile.id === 0){
       synonymIdList.forEach((id1)=>{
         const tmpObj = this.editingVocWithId.get(id1);
-        if(tmpObj.laguage === currentNodeLanguage){
+        if(tmpObj.language === currentNodeLanguage){
           synonymNode.push(tmpObj);
         }
       }, this);
@@ -1645,19 +1645,7 @@ isOtherVocSynUriChanged() {
         termdescription.push(languageChangeNodeData.term_description);
       }
 
-      let preferredLabel;
-      if (languageChangeNodeData.preferred_label) {
-        preferredLabel = languageChangeNodeData.preferred_label;
-      } else {
-        // If a preferred label is not defined, display the term in the preferred label column
-        // Do not add for determined terms
-        if (languageChangeNodeData.confirm == 0) {
-          preferredLabel = languageChangeNodeData.term;
-        }
-      }
-      if (preferredLabel) {
-       this.tmpPreferredLabel.list[languageChangeNodeData.language] = preferredlabel;
-      }
+      this.tmpPreferredLabel.list[languageChangeNodeData.language] = preferredlabel;
 
       this.tmpBroaderTerm.list[languageChangeNodeData.language] = broaderterm;
       this.tmpBroaderTerm.broader_uri = broader_uri;
@@ -2057,7 +2045,6 @@ isOtherVocSynUriChanged() {
       followObj.term = obj.term;// term as is 
       followObj.preferred_label = tmp1Pref.list[obj.language][0];
       followObj.language = obj.language;// language as is 
-      // idofuri will be changed only for object whose id is currentNode.id
       followObj.idofuri = tmp1IdofUri.list[0];
       followObj.uri = uri_prefix + tmp1IdofUri.list[0]; //tentative
       followObj.broader_uri = tmp1BroaderTerm.broader_uri; 
@@ -2740,14 +2727,14 @@ isOtherVocSynUriChanged() {
     //   array.push(newValue);
     // }
     if (this.currentNode.term) {
-      newValue.forEach((id) => {
-        array.push(id);
+      newValue.forEach((idofuri1) => {
+        array.push(idofuri1);
       });
     } else {
       if (this.tmpPreferredLabel.list[this.tmpLanguage.value].length > 0) {
         // Do not add terms that are not selected and have no title to the broader term
-        newValue.forEach((id) => {
-          array.push(id);
+        newValue.forEach((idofuri1) => {
+          array.push(idofuri1);
         });
       }
     } 
@@ -3096,7 +3083,6 @@ isOtherVocSynUriChanged() {
       this.tmpSynonym.idList[currentNode.language] =idArray;
     })
   }
-
   /**
    * Delete and update the end of the synonym list you are editing
    */
@@ -3173,20 +3159,15 @@ isOtherVocSynUriChanged() {
     this.tmpPreferredLabel.list[this.tmpLanguage.value] = array.filter((val, i, self)=>{ return i === self.indexOf(val)});
 
     if( this.tmpPreferredLabel.list['ja'].length == 1){ // Japanese PreferredLabel takes precedence
-      const find = this.editingVocabulary.find((d)=>d.term==this.tmpPreferredLabel.list['ja'][0]);
-      this.tmpIdofUri.list = [ find?find.idofuri : this.tmpPreferredLabel.list['ja'][0] ]
+      const foundId = this.getIdbyTermandLang(this.tmpPreferredLabel.list['ja'][0], 'ja');
+      const foundObj = this.editingVocWithId.get(foundId);
+      this.tmpIdofUri.list = [foundObj.idofuri];
       this.tmpIdofUri.id = this.currentNode.id;
-      // DEBUG
-      console.log("updataPreferredLabel event");
-      console.log(this.tmpIdofUri.id);
-      console.log(this.tmpIdofUri.list);
     }else if(this.tmpPreferredLabel.list['ja'].length == 0 && this.tmpPreferredLabel.list['en'].length == 1){
-      const find = this.editingVocabulary.find((d)=>d.term==this.tmpPreferredLabel.list['en'][0]);
-      this.tmpIdofUri.list = [ find?find.idofuri : this.tmpPreferredLabel.list['en'][0] ];
-      // DEBUG
-      console.log("updataPreferredLabel event eng");
-      console.log(this.tmpIdofUri.id);
-      console.log(this.tmpIdofUri.list);
+      const foundId = this.getIdbyTermandLang(this.tmpPreferredLabel.list['en'][0], 'en');
+      const foundObj = this.editingVocWithId.get(foundId);
+      this.tmpIdofUri.list = [foundObj.idofuri];
+      this.tmpIdofUri.id = this.currentNode.id;
     }
   }
 

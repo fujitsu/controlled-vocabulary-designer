@@ -73,29 +73,32 @@ export default
       return false;
     }
     
-    const currentNode = editingVocabulary.tmpLanguage.value == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+    const displayNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
 
     if (newValue.length > 1) {
       // When more than one preferred label is entered
       const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
       this.openSnackbar(errorMsg);
     } else{
-      let _currentNode = currentNode;
-      if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+      let _displayNode = displayNode;
+      if(  _displayNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
         && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
         && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
-          const found = editingVocabulary.editingVocabulary.find((item)=>
-              item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
-          _currentNode = found?found:currentNode;
+        // this condition is satisfied when the currentNode is ja/en and synonym en/ja term does not exist.
+        const foundId = editingVocabulary.getIdbyTermandLang(
+          editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0],
+          editingVocabulary.currentLangDiffNode.language);
+        const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+        _displayNode = foundObj?foundObj:displayNode;
       }
       if (newValue.length == 1) {
 
         // When a selected term or a term that is not a synonym is entered in the preferred label
-        if (editingVocabulary.isInvalidPreferredLabel(_currentNode, newValue[0])) {
+        if (editingVocabulary.isInvalidPreferredLabel(_displayNode, newValue[0])) {
           const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
-                          '\"' +_currentNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
+                          '\"' +_displayNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
                           '代表語テキストボックスには、¥n' +
-                          '\"' + _currentNode.term + '\" または同義語の中から選んで記入してください。';
+                          '\"' + _displayNodee.term + '\" または同義語の中から選んで記入してください。';
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
@@ -103,9 +106,9 @@ export default
       } else if (newValue.length == 0) {
         // Preferred label:Missing error
         let errorMsg = '代表語テキストボックスに、同義語の中から選んで記入してください。';
-        if (_currentNode.term) {
+        if (_displayNode.term) {
           // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
-          errorMsg = '代表語テキストボックスには \"' + _currentNode.term +
+          errorMsg = '代表語テキストボックスには \"' + _displayNode.term +
                             '\" または同義語の中から選んで記入してください。';
         }
         this.openSnackbar(errorMsg);

@@ -83,26 +83,27 @@ export default
       const nextBroaderTerm = newValue[0];
       
       // Check the validity of a broader term /////////////////////////////////////////
-      const currentNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
-      let _currentNode = currentNode;
-      if(  _currentNode.term == '' && displayLanguage !== editingVocabulary.currentNode.language
+      const displayNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+      let _displayNode = displayNode;
+      if(  _displayNode.term == '' && displayLanguage !== editingVocabulary.currentNode.language
         && editingVocabulary.currentLangDiffNode.term === '' // && editingVocabulary.currentLangDiffNode.language !== ''
         && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
-          const found = editingVocabulary.editingVocabulary.find((item)=>
-              item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
-          _currentNode = found?found:currentNode;
-          //DEBUG
-          console.assert(false, "something is wrong");
+          // this condition is satisfied when the currentNode is ja/en and synonym en/ja term does not exist.
+          const foundId = editingVocabulary.getIdbyTermandLang(
+             editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0],
+             editingVocabulary.currentLangDiffNode.language);
+          const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+          _displayNode = foundObj?foundObj:displayNode;
       }
-      if (!editingVocabulary.isValidBrdrTrm(_currentNode, nextBroaderTerm)) {
+      if (!editingVocabulary.isValidBrdrTrm(_displayNode, nextBroaderTerm)) {
         const errorMsg = '上位語テキストボックスに、¥n' +
-                       '\"' + _currentNode.term + '\" の代表語あるいは同義語が記入されています。¥n' +
+                       '\"' + _displayNode.term + '\" の代表語あるいは同義語が記入されています。¥n' +
                        '上位語テキストボックスには、¥n' +
-                       '\"' + _currentNode.term + '\" の代表語と同義語以外の値を記入してください。';
+                       '\"' + _displayNode.term + '\" の代表語と同義語以外の値を記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
-      } else if (editingVocabulary.isCycleBrdrTrm(_currentNode, nextBroaderTerm)) {
+      } else if (editingVocabulary.isCycleBrdrTrm(_displayNode, nextBroaderTerm)) {
         // Broader term loop check /////////////////////////////////////////
           const cycleBroaderTerm =
             editingVocabulary.cycleBroaderTerm;
@@ -135,7 +136,7 @@ export default
         this.openSnackbar(innerText);
       }
     }
-    editingVocabulary.updateBroaderTerm(newValue, newValueUri);
+    editingVocabulary.updateBroaderTerm(newValue);
   }
 
   /**
