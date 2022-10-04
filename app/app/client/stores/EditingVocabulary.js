@@ -37,12 +37,26 @@ class EditingVocabulary {
   // get object id by term and laguage
   getIdbyTermandLang(term, language, selectedFileId = 0){
     const iddata = this.term2id[selectedFileId].get(term);
-    if(iddata.language=== language){
-      return iddata.id;
-    }else{
+    if(undefined === iddata){
       return undefined;
+    }else{
+      if(iddata.language=== language){
+        return iddata.id;
+      }else{
+        return undefined;
+      }
     }
   }
+  // map for uri to ids which have same uri
+  // i.e. ids of the sysnonym terms
+  // key is "uri", value is set of id1, id2, ...
+  // values are got and converted to the ordinary array by the following
+  //   uri1 = "https://test/1"
+  //   fuga = this.uri2synoid[0].get(uri1)
+  //   idlist = [...fuga]
+  // simple print method is 
+  //   this.uri2synoid[0].forEach((value, key) => {console.log(key); console.log([...value]);})
+  @observable uri2synoid = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
 
   // Array for selected term on Visual vocabulary Tab
   @observable selectedTermList = [];
@@ -172,6 +186,7 @@ class EditingVocabulary {
     this.uri2preflabel['ja'] = {};
     this.uri2preflabel['en'] = {};
     this.term2id[0].clear();
+    this.uri2synoid[0].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
@@ -183,6 +198,12 @@ class EditingVocabulary {
       }
       // Make term2id
       this.term2id[0].set(data.term,  {id: data.id, language: data.language});
+      // Make uri2synoid
+      if(this.uri2synoid[0].has(data.uri)){
+        this.uri2synoid[0].get(data.uri).add(data.id);
+      }else{
+        this.uri2synoid[0].set(data.uri, new Set([data.id]));
+      }
     });
 
     const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
@@ -228,6 +249,23 @@ class EditingVocabulary {
           // uri_preferred_label_en[data.uri] = data.preferred_label;
           this.uri2preflabel['en'][data.uri] = data.preferred_label;
         }
+      }
+    });
+
+    dbData.forEach( (data) => {
+      // update uri2synoid {uri: preferred_label} 
+      const prevObj = this.editingVocWithId.get(data.id);
+      //delete previous uri 2 id information from set
+      this.uri2synoid[0].get(prevObj.uri).delete(prevObj.id);
+      if(this.uri2synoid[0].get(prevObj.uri).size === 0){
+        // if the sysnonym group with the uri is empty
+        this.uri2synoid[0].delete(prevObj.uri);
+      }
+      // add the new uri 2 id
+      if(this.uri2synoid[0].has(data.uri)){
+        this.uri2synoid[0].get(data.uri).add(data.id);
+      }else{
+        this.uri2synoid[0].set(data.uri, new Set([data.id]));
       }
     });
 

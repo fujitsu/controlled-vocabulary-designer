@@ -72,8 +72,8 @@ export default
 
       return false;
     }
-    const foundObj = editingVocabulary.editingVocWithId.get(foundId)
-    let inputTextUri = found? found.uri:''; // uri for inputText term
+    // const foundObj = editingVocabulary.editingVocWithId.get(foundId)
+    // let inputTextUri = found? found.uri:''; // uri for inputText term
 
     const currentNode = editingVocabulary.tmpLanguage.value == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
     let _currentNode = currentNode;

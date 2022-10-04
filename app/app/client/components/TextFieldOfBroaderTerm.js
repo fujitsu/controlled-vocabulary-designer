@@ -72,8 +72,8 @@ export default
 
       return false;
     }
-    const foundObj = editingVocabulary.editingVocWithId.get(foundId);
-    let newValueUri = foundObj.uri;
+    // const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+    // let newValueUri = foundObj.uri;
 
     if (newValue.length > 1) {
       // More than one broader term selected
