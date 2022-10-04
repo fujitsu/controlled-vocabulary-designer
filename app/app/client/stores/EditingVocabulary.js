@@ -2079,15 +2079,15 @@ isOtherVocSynUriChanged() {
       followingForHistory.push(this.makeVocabularyHistoryData(followObj));
     });
 
-    // if the uri or idofuri has been changed
+    // if the uri or idofuri has been changed or new terms are added to synonym
     // we need to update subordinate term's broader_uri
     const followSubGroupObjList = [];
-    if(this.tmpIdofUri.list[0]!= this.currentNode.idofuri){
+    const synonymUriSet = new Set(); // set for 'previous' uris in the sysnonym group
+    followSynGroup.forEach((obj)=>{
+      synonymUriSet.add(obj.uri);
+    });
+    if(this.tmpIdofUri.list[0]!= this.currentNode.idofuri || synonymUriSet.size !== 1){
       // collect uris in the sysnonym group
-      const synonymUriSet = new Set(); // set for 'previous' uris in the sysnonym group
-      followSynGroup.forEach((obj)=>{
-        synonymUriSet.add(obj.uri);
-      });
       // get new subordinate terms for all language
       const followSubGroup = this.editingVocabulary.filter((obj)=>{
         return (synonymUriSet.has(obj.broader_uri))
