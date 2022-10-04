@@ -1320,12 +1320,18 @@ isOtherVocSynUriChanged() {
    * @param {array} [synonymList=null] - configuration synonym list
    * @param {boolean} [isForce=false] - forced selection
    */
-  @action setCurrentNodeById(
-    id , isForce = false) {
+  @action setCurrentNodeById(id , isForce = false) {
+    //DEBUG
+    if(typeof id === "string"){
+      id = Number(id);
+      console.assert(false, "typeof id is string, wanted as number");
+    }
     let target = {};
-    target = this.getTargetFileData(this.selectedFile.id).find((obj) => {
-      return (obj.id == id);
-    });
+    if(this.selectedFile.id === 0){
+      target = this.editingVocWithId.get(id);
+    }else{
+      target = this.referenceVocWithId[this.selectedFile.id].get(id);
+    }
 
     if (undefined == target) {
       console.log('[setCurrentNodeById] Not Found term with id:' + id + '.');
