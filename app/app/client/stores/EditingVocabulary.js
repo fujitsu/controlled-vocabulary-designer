@@ -3289,78 +3289,58 @@ isOtherVocSynUriChanged() {
 
   /**
    * Create narrower term list for screen display
-   * @return {Array}
+   * collect all subordinate terms under tmpPreferredLabel for the display language
+   * @return {Array} list of terms
    */
-  @computed get tmpSubordinateTerm() {
-    const subordinateTerm = [];
+   @computed get tmpSubordinateTerm() {
+    // for all terms in tmpPreferredLabel
+    // they may have different uri
+    // we collect terms whose broader_uri is one of the uris 
+    const subordinateTermSet = new Set();
 
-    let keyList = [];
-    // Extract a narrower term, extract a preferred label in a preferred label column as key
-    if (this.tmpPreferredLabel.list[this.tmpLanguage.value].length > 0) {
-      keyList = this.tmpPreferredLabel.list[this.tmpLanguage.value].concat();
-
-      // If there is no current term in the list of preferred labels, the narrower term may designate a current term as a narrower term, so add it as key
-      if (this.currentNode.term) {
-        if (keyList.indexOf(this.currentNode.term) == -1) {
-          keyList.push(this.currentNode.term);
-        }
-      }
-    } else {
-      if (this.currentNode.term) {
-        keyList.push(this.currentNode.term);
-      }
+    const displayLanguage = this.tmpLanguage.value;
+    const keyTermSet = new Set(this.tmpPreferredLabel.list[displayLanguage].concat()); // shallowcopy
+    if(displayLanguage === this.currentNode.language){
+      keyTermSet.add(this.currentNode.term);
+    }else{
+      keyTermSet.add(this.currentLangDiffNode.term);
     }
-
-    const selectedFilesList = this.getTargetFileData(this.selectedFile.id);
-    // In order to extract a narrower term, the term as a preferred label among the terms in the synonym column is extracted as key
-    if (this.tmpSynonym.list[this.tmpLanguage.value].length > 0) {
-      this.tmpSynonym.list[this.tmpLanguage.value].forEach((synonym) => {
-        const objSynonym = selectedFilesList.find((data) =>
-          data.term === synonym);
-        // Synonyms not found in selectedFilesList are new terms
-        if (objSynonym) {
-          // Add a term to key that is labeled with the term specified in the synonym
-          if (objSynonym.preferred_label) {
-                // In some cases, the term may overlap with the term set in the preferred label
-              if (keyList.indexOf(objSynonym.preferred_label) == -1) {
-                keyList.push(objSynonym.preferred_label.toString());
-              }
-          } else {
-            // Add a term with no caption to key because it is also a broader term
-              // In some cases, the term may overlap with the term set in the peferred label
-            if (keyList.indexOf(objSynonym.term) == -1) {
-              keyList.push(synonym.toString());
-            }
-          }
+    if(this.selectedFile.id === 0){
+      keyTermSet.forEach((term)=>{
+        // term 2 id
+        const foundId = this.getIdbyTermandLang(term, displayLanguage, 0);
+        // id to data
+        const foundObj = this.editingVocWithId.get(foundId);
+        // uri 2 narrower
+        const foundIdSet = this.uri2narrowid[0].get(foundObj.uri);
+        if(undefined !== foundIdSet){
+          // narrower terms are found
+          foundIdSet.forEach((id1)=>{
+            const foundObj1 = this.editingVocWithId.get(id1);
+            subordinateTermSet.add(foundObj1.preferred_label);
+          },this);
         }
-      });
+      });  
+    }else{
+      const refif = this.selectedFile.id;
+      keyTermSet.forEach((term)=>{
+        // term 2 id
+        const foundId = this.getIdbyTermandLang(term, displayLanguage, refif);
+        // id to data
+        const foundObj = this.referenceVocWithId[refid].get(foundId);
+        // uri 2 narrower
+        const foundIdSet = this.uri2narrowid[refid].get(foundObj.uri);
+        if(undefined !== foundIdSet){
+          // narrower terms are found
+          foundIdSet.forEach((id1)=>{
+            const foundObj1 = this.referenceVocWithId[refid].get(id1);
+            subordinateTermSet.add(foundObj1.preferred_label);
+          },this);
+          
+        }
+      }, this);
     }
-
-    // Extract terms with the key term set to a narrower term
-    keyList.forEach((prfrdLbl) => {
-      selectedFilesList.forEach((data) => {
-        // Add a preferred label to a narrower term from the set of terms in the broader term
-        if (data.broader_term === prfrdLbl) {
-          // language data same from the selected term
-          if (data.preferred_label === data.term &&
-            this.tmpLanguage.value == this.currentNode.language) {
-              subordinateTerm.push(data.term);
-          }
-          // language data different from the selected term
-          if (data.preferred_label === data.term &&
-             data.preferred_label != this.currentNode.preferred_label &&
-             data.language != this.currentNode.language) {
-              subordinateTerm.push(data.term);
-          }
-          // Terms without preferred labels are also broader term
-          if (!data.preferred_label) {
-            subordinateTerm.push(data.term);
-          }
-        }
-      });
-    });
-
-    return subordinateTerm;
+    return [...subordinateTermSet];
   }
 
   // Term Description //////////////////////
