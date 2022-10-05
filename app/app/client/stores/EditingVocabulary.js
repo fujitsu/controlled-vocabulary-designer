@@ -2139,9 +2139,23 @@ isOtherVocSynUriChanged() {
     if(this.tmpIdofUri.list[0]!= this.currentNode.idofuri || synonymUriSet.size !== 1){
       // collect uris in the sysnonym group
       // get new subordinate terms for all language
-      const followSubGroup = this.editingVocabulary.filter((obj)=>{
-        return (synonymUriSet.has(obj.broader_uri))
-      });
+      const followSubGroup = [];
+      const followSubIdSet = new Set();
+      synonymUriSet.forEach((uri1)=>{
+        // uri -> narrow terms id
+        const idset = this.uri2narrowid[0].get(uri1);
+        if(undefined !== idset){
+          idset.forEach((id1)=>{
+            followSubIdSet.add(id1);
+          });
+        }
+      }, this);
+      // id -> data
+      followSubIdSet.forEach((id1)=>{
+        const foundObj = this.editingVocWithId.get(id1);
+        followSubGroup.push(foundObj);
+      }, this);
+
       const tmp2IdofUri = this.tmpIdofUri; // this rename is just to avoid variable name resolution problem 
       const tmp2Pref = this.tmpPreferredLabel; // this rename is just to avoid variable name resolution problem
       followSubGroup.forEach(obj => {
@@ -3254,38 +3268,7 @@ isOtherVocSynUriChanged() {
 
   // subordinateTerm //////////////////////
 
-  /**
-   * Create determined narrower term list
-   * @return {Array} - list of narrower term
-   */
-  @computed get currentSubordinateTerm() {
-    const subordinateTerm = [];
 
-    // Find out if a preferred label is set for a term that is set as a broader term of each vocabulary
-    let target = '';
-    if (this.currentNode.preferred_label) {
-      target = this.currentNode.preferred_label;
-    } else {
-      target = this.currentNode.term;
-    }
-
-    if ( target == '' ) {
-      return subordinateTerm;
-    }
-
-    const selectedFilesList = this.getTargetFileData(this.selectedFile.id);
-    selectedFilesList.forEach((node) => {
-      if (node.broader_term === target) {
-        // Add a preferred label vocabulary or a vocabulary with no preferred label to a narrower term
-        if (node.preferred_label === node.term ||
-          !node.preferred_label ) {
-          subordinateTerm.push(node.term);
-        }
-      }
-    });
-
-    return subordinateTerm;
-  }
 
   /**
    * Create narrower term list for screen display

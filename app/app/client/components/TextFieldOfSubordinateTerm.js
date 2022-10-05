@@ -25,15 +25,7 @@ export default
    */
   render() {
     const tmpSubordinateTerm = this.props.editingVocabulary.tmpSubordinateTerm;
-    // let currentSubordinateTerm;
-    // // subordinate term on the selected term
-    // if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
-    //   currentSubordinateTerm = this.props.editingVocabulary.currentSubordinateTerm;
-    // } else { // subordinate term when switching with the  language radio button in the selected term
-    //   currentSubordinateTerm =
-    //   this.props.editingVocabulary.tmpSubordinateTerm;
-    // }
-    let currentSubordinateTerm = this.props.editingVocabulary.tmpSubordinateTerm;
+    const currentSubordinateTerm = this.props.editingVocabulary.tmpSubordinateTerm;
   
 
     return (
