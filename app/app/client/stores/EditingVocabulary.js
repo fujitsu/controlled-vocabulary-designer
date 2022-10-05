@@ -58,6 +58,18 @@ class EditingVocabulary {
   //   this.uri2synoid[0].forEach((value, key) => {console.log(key); console.log([...value]);})
   @observable uri2synoid = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
 
+  // map for broader_uri to ids which have same broader_uri
+  // i.e. ids of the narrower terms that having the term whose uri is the uri as broader_uri
+  // key is "uri", value is set of id1, id2, ...
+  // values are got and converted to the ordinary array by the following
+  //   uri1 = "https://test/1"
+  //   fuga = this.uri2narrowid[0].get(uri1)
+  //   idlist = [...fuga]
+  // simple print method is 
+  //   this.uri2narrowid[0].forEach((value, key) => {console.log(key); console.log([...value]);})
+  @observable uri2narrowid = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
+
+
   // Array for selected term on Visual vocabulary Tab
   @observable selectedTermList = [];
 
@@ -187,6 +199,7 @@ class EditingVocabulary {
     this.uri2preflabel['en'] = {};
     this.term2id[0].clear();
     this.uri2synoid[0].clear();
+    this.uri2narrowid[0].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
@@ -203,6 +216,15 @@ class EditingVocabulary {
         this.uri2synoid[0].get(data.uri).add(data.id);
       }else{
         this.uri2synoid[0].set(data.uri, new Set([data.id]));
+      }
+      // Make uri2narrowid
+      if(data.broader_uri!== ''){
+        // if the term have broader
+        if(this.uri2narrowid[0].has(data.broader_uri)){
+          this.uri2narrowid[0].get(data.broader_uri).add(data.id);
+        }else{
+          this.uri2narrowid[0].set(data.broader_uri, new Set([data.id]));
+        }
       }
     });
 
@@ -253,8 +275,8 @@ class EditingVocabulary {
     });
 
     dbData.forEach( (data) => {
-      // update uri2synoid {uri: preferred_label} 
       const prevObj = this.editingVocWithId.get(data.id);
+      // update uri2synoid {uri: set of id} 
       //delete previous uri 2 id information from set
       this.uri2synoid[0].get(prevObj.uri).delete(prevObj.id);
       if(this.uri2synoid[0].get(prevObj.uri).size === 0){
@@ -266,6 +288,23 @@ class EditingVocabulary {
         this.uri2synoid[0].get(data.uri).add(data.id);
       }else{
         this.uri2synoid[0].set(data.uri, new Set([data.id]));
+      }
+      // update uri2narrowid {uri: set of id} 
+      //delete previous broader_uri 2 id information from set
+      if(prevObj.broader_uri !==''){
+        this.uri2narrowid[0].get(prevObj.broader_uri).delete(prevObj.id);
+        if(this.uri2narrowid[0].get(prevObj.broader_uri).size === 0){
+          // if the narrower group with the uri is empty
+          this.uri2narrowid[0].delete(prevObj.broader_uri);
+        }
+      }
+      // add the new broader uri 2 id
+      if(data.broader_uri !==''){
+        if(this.uri2narrowid[0].has(data.broader_uri)){
+          this.uri2narrowid[0].get(data.broader_uri).add(data.id);
+        }else{
+          this.uri2narrowid[0].set(data.broader_uri, new Set([data.id]));
+        }
       }
     });
 
@@ -377,6 +416,7 @@ class EditingVocabulary {
     const uri_preferred_label_en = {};
     this.term2id[refid].clear();
     this.uri2synoid[refid].clear();
+    this.uri2narrowid[refid].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label}
       if (data.preferred_label && data.uri) {
@@ -393,6 +433,15 @@ class EditingVocabulary {
         this.uri2synoid[refid].get(data.uri).add(data.id);
       }else{
         this.uri2synoid[refid].set(data.uri, new Set([data.id]));
+      }
+      // Make uri2narrowid
+      if(data.broader_uri!== ''){
+        // if the term have broader
+        if(this.uri2narrowid[refid].has(data.broader_uri)){
+          this.uri2narrowid[refid].get(data.broader_uri).add(data.id);
+        }else{
+          this.uri2narrowid[refid].set(data.broader_uri, new Set([data.id]));
+        }
       }
     });
 
@@ -2090,9 +2139,23 @@ isOtherVocSynUriChanged() {
     if(this.tmpIdofUri.list[0]!= this.currentNode.idofuri || synonymUriSet.size !== 1){
       // collect uris in the sysnonym group
       // get new subordinate terms for all language
-      const followSubGroup = this.editingVocabulary.filter((obj)=>{
-        return (synonymUriSet.has(obj.broader_uri))
-      });
+      const followSubGroup = [];
+      const followSubIdSet = new Set();
+      synonymUriSet.forEach((uri1)=>{
+        // uri -> narrow terms id
+        const idset = this.uri2narrowid[0].get(uri1);
+        if(undefined !== idset){
+          idset.forEach((id1)=>{
+            followSubIdSet.add(id1);
+          });
+        }
+      }, this);
+      // id -> data
+      followSubIdSet.forEach((id1)=>{
+        const foundObj = this.editingVocWithId.get(id1);
+        followSubGroup.push(foundObj);
+      }, this);
+
       const tmp2IdofUri = this.tmpIdofUri; // this rename is just to avoid variable name resolution problem 
       const tmp2Pref = this.tmpPreferredLabel; // this rename is just to avoid variable name resolution problem
       followSubGroup.forEach(obj => {
@@ -3205,113 +3268,67 @@ isOtherVocSynUriChanged() {
 
   // subordinateTerm //////////////////////
 
-  /**
-   * Create determined narrower term list
-   * @return {Array} - list of narrower term
-   */
-  @computed get currentSubordinateTerm() {
-    const subordinateTerm = [];
 
-    // Find out if a preferred label is set for a term that is set as a broader term of each vocabulary
-    let target = '';
-    if (this.currentNode.preferred_label) {
-      target = this.currentNode.preferred_label;
-    } else {
-      target = this.currentNode.term;
-    }
-
-    if ( target == '' ) {
-      return subordinateTerm;
-    }
-
-    const selectedFilesList = this.getTargetFileData(this.selectedFile.id);
-    selectedFilesList.forEach((node) => {
-      if (node.broader_term === target) {
-        // Add a preferred label vocabulary or a vocabulary with no preferred label to a narrower term
-        if (node.preferred_label === node.term ||
-          !node.preferred_label ) {
-          subordinateTerm.push(node.term);
-        }
-      }
-    });
-
-    return subordinateTerm;
-  }
 
   /**
    * Create narrower term list for screen display
-   * @return {Array}
+   * collect all subordinate terms under tmpPreferredLabel for the display language
+   * @return {Array} list of terms
    */
-  @computed get tmpSubordinateTerm() {
-    const subordinateTerm = [];
+   @computed get tmpSubordinateTerm() {
+    // for all terms in tmpPreferredLabel
+    // they may have different uri
+    // we collect terms whose broader_uri is one of the uris 
+    const subordinateTermSet = new Set();
 
-    let keyList = [];
-    // Extract a narrower term, extract a preferred label in a preferred label column as key
-    if (this.tmpPreferredLabel.list[this.tmpLanguage.value].length > 0) {
-      keyList = this.tmpPreferredLabel.list[this.tmpLanguage.value].concat();
-
-      // If there is no current term in the list of preferred labels, the narrower term may designate a current term as a narrower term, so add it as key
-      if (this.currentNode.term) {
-        if (keyList.indexOf(this.currentNode.term) == -1) {
-          keyList.push(this.currentNode.term);
-        }
-      }
-    } else {
-      if (this.currentNode.term) {
-        keyList.push(this.currentNode.term);
-      }
+    const displayLanguage = this.tmpLanguage.value;
+    const keyTermSet = new Set(this.tmpPreferredLabel.list[displayLanguage].concat()); // shallowcopy
+    if(displayLanguage === this.currentNode.language){
+      keyTermSet.add(this.currentNode.term);
+    }else{
+      keyTermSet.add(this.currentLangDiffNode.term);
     }
-
-    const selectedFilesList = this.getTargetFileData(this.selectedFile.id);
-    // In order to extract a narrower term, the term as a preferred label among the terms in the synonym column is extracted as key
-    if (this.tmpSynonym.list[this.tmpLanguage.value].length > 0) {
-      this.tmpSynonym.list[this.tmpLanguage.value].forEach((synonym) => {
-        const objSynonym = selectedFilesList.find((data) =>
-          data.term === synonym);
-        // Synonyms not found in selectedFilesList are new terms
-        if (objSynonym) {
-          // Add a term to key that is labeled with the term specified in the synonym
-          if (objSynonym.preferred_label) {
-                // In some cases, the term may overlap with the term set in the preferred label
-              if (keyList.indexOf(objSynonym.preferred_label) == -1) {
-                keyList.push(objSynonym.preferred_label.toString());
-              }
-          } else {
-            // Add a term with no caption to key because it is also a broader term
-              // In some cases, the term may overlap with the term set in the peferred label
-            if (keyList.indexOf(objSynonym.term) == -1) {
-              keyList.push(synonym.toString());
-            }
+    if(this.selectedFile.id === 0){
+      keyTermSet.forEach((term)=>{
+        if(term === ''){
+        }else{
+          // term 2 id
+          const foundId = this.getIdbyTermandLang(term, displayLanguage, 0);
+          // id to data
+          const foundObj = this.editingVocWithId.get(foundId);
+          // uri 2 narrower
+          const foundIdSet = this.uri2narrowid[0].get(foundObj.uri);
+          if(undefined !== foundIdSet){
+            // narrower terms are found
+            foundIdSet.forEach((id1)=>{
+              const foundObj1 = this.editingVocWithId.get(id1);
+              subordinateTermSet.add(foundObj1.preferred_label);
+            },this);
           }
         }
-      });
+      });  
+    }else{
+      const refif = this.selectedFile.id;
+      keyTermSet.forEach((term)=>{
+        if(term === ''){
+        }else{
+          // term 2 id
+          const foundId = this.getIdbyTermandLang(term, displayLanguage, refif);
+          // id to data
+          const foundObj = this.referenceVocWithId[refid].get(foundId);
+          // uri 2 narrower
+          const foundIdSet = this.uri2narrowid[refid].get(foundObj.uri);
+          if(undefined !== foundIdSet){
+            // narrower terms are found
+            foundIdSet.forEach((id1)=>{
+              const foundObj1 = this.referenceVocWithId[refid].get(id1);
+              subordinateTermSet.add(foundObj1.preferred_label);
+            },this);  
+          }
+        }
+      }, this);
     }
-
-    // Extract terms with the key term set to a narrower term
-    keyList.forEach((prfrdLbl) => {
-      selectedFilesList.forEach((data) => {
-        // Add a preferred label to a narrower term from the set of terms in the broader term
-        if (data.broader_term === prfrdLbl) {
-          // language data same from the selected term
-          if (data.preferred_label === data.term &&
-            this.tmpLanguage.value == this.currentNode.language) {
-              subordinateTerm.push(data.term);
-          }
-          // language data different from the selected term
-          if (data.preferred_label === data.term &&
-             data.preferred_label != this.currentNode.preferred_label &&
-             data.language != this.currentNode.language) {
-              subordinateTerm.push(data.term);
-          }
-          // Terms without preferred labels are also broader term
-          if (!data.preferred_label) {
-            subordinateTerm.push(data.term);
-          }
-        }
-      });
-    });
-
-    return subordinateTerm;
+    return [...subordinateTermSet];
   }
 
   // Term Description //////////////////////
