@@ -58,6 +58,18 @@ class EditingVocabulary {
   //   this.uri2synoid[0].forEach((value, key) => {console.log(key); console.log([...value]);})
   @observable uri2synoid = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
 
+  // map for broader_uri to ids which have same broader_uri
+  // i.e. ids of the narrower terms that having the term whose uri is the uri as broader_uri
+  // key is "uri", value is set of id1, id2, ...
+  // values are got and converted to the ordinary array by the following
+  //   uri1 = "https://test/1"
+  //   fuga = this.uri2narrowid[0].get(uri1)
+  //   idlist = [...fuga]
+  // simple print method is 
+  //   this.uri2narrowid[0].forEach((value, key) => {console.log(key); console.log([...value]);})
+  @observable uri2narrowid = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
+
+
   // Array for selected term on Visual vocabulary Tab
   @observable selectedTermList = [];
 
@@ -187,6 +199,7 @@ class EditingVocabulary {
     this.uri2preflabel['en'] = {};
     this.term2id[0].clear();
     this.uri2synoid[0].clear();
+    this.uri2narrowid[0].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
@@ -203,6 +216,15 @@ class EditingVocabulary {
         this.uri2synoid[0].get(data.uri).add(data.id);
       }else{
         this.uri2synoid[0].set(data.uri, new Set([data.id]));
+      }
+      // Make uri2narrowid
+      if(data.broader_uri!== ''){
+        // if the term have broader
+        if(this.uri2narrowid[0].has(data.broader_uri)){
+          this.uri2narrowid[0].get(data.broader_uri).add(data.id);
+        }else{
+          this.uri2narrowid[0].set(data.broader_uri, new Set([data.id]));
+        }
       }
     });
 
@@ -253,8 +275,8 @@ class EditingVocabulary {
     });
 
     dbData.forEach( (data) => {
-      // update uri2synoid {uri: preferred_label} 
       const prevObj = this.editingVocWithId.get(data.id);
+      // update uri2synoid {uri: set of id} 
       //delete previous uri 2 id information from set
       this.uri2synoid[0].get(prevObj.uri).delete(prevObj.id);
       if(this.uri2synoid[0].get(prevObj.uri).size === 0){
@@ -266,6 +288,23 @@ class EditingVocabulary {
         this.uri2synoid[0].get(data.uri).add(data.id);
       }else{
         this.uri2synoid[0].set(data.uri, new Set([data.id]));
+      }
+      // update uri2narrowid {uri: set of id} 
+      //delete previous broader_uri 2 id information from set
+      if(prevObj.broader_uri !==''){
+        this.uri2narrowid[0].get(prevObj.broader_uri).delete(prevObj.id);
+        if(this.uri2narrowid[0].get(prevObj.broader_uri).size === 0){
+          // if the narrower group with the uri is empty
+          this.uri2narrowid[0].delete(prevObj.broader_uri);
+        }
+      }
+      // add the new broader uri 2 id
+      if(data.broader_uri !==''){
+        if(this.uri2narrowid[0].has(data.broader_uri)){
+          this.uri2narrowid[0].get(data.broader_uri).add(data.id);
+        }else{
+          this.uri2narrowid[0].set(data.broader_uri, new Set([data.id]));
+        }
       }
     });
 
@@ -377,6 +416,7 @@ class EditingVocabulary {
     const uri_preferred_label_en = {};
     this.term2id[refid].clear();
     this.uri2synoid[refid].clear();
+    this.uri2narrowid[refid].clear();
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label}
       if (data.preferred_label && data.uri) {
@@ -393,6 +433,15 @@ class EditingVocabulary {
         this.uri2synoid[refid].get(data.uri).add(data.id);
       }else{
         this.uri2synoid[refid].set(data.uri, new Set([data.id]));
+      }
+      // Make uri2narrowid
+      if(data.broader_uri!== ''){
+        // if the term have broader
+        if(this.uri2narrowid[refid].has(data.broader_uri)){
+          this.uri2narrowid[refid].get(data.broader_uri).add(data.id);
+        }else{
+          this.uri2narrowid[refid].set(data.broader_uri, new Set([data.id]));
+        }
       }
     });
 
