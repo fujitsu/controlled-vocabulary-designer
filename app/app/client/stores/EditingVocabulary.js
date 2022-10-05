@@ -1714,6 +1714,7 @@ isOtherVocSynUriChanged() {
         )
         .then((response) => {
           console.log('request url:' + url + ' come response.');
+          this.updateEditingVocabularyData(response.data);
           if (!(isHistory)) {
             editingHistoryStore.addHistory(history);
           }
@@ -3542,6 +3543,7 @@ isOtherVocSynUriChanged() {
             },
         )
         .then((response) => {
+          this.updateEditingVocabularyData(response.data);
           // console.log('request url:' + url + ' come response.');
           // Reselect to reset tmp information
           this.setCurrentNodeById(currentNode.id, true);
