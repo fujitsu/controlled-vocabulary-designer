@@ -3307,36 +3307,41 @@ isOtherVocSynUriChanged() {
     }
     if(this.selectedFile.id === 0){
       keyTermSet.forEach((term)=>{
-        // term 2 id
-        const foundId = this.getIdbyTermandLang(term, displayLanguage, 0);
-        // id to data
-        const foundObj = this.editingVocWithId.get(foundId);
-        // uri 2 narrower
-        const foundIdSet = this.uri2narrowid[0].get(foundObj.uri);
-        if(undefined !== foundIdSet){
-          // narrower terms are found
-          foundIdSet.forEach((id1)=>{
-            const foundObj1 = this.editingVocWithId.get(id1);
-            subordinateTermSet.add(foundObj1.preferred_label);
-          },this);
+        if(term === ''){
+        }else{
+          // term 2 id
+          const foundId = this.getIdbyTermandLang(term, displayLanguage, 0);
+          // id to data
+          const foundObj = this.editingVocWithId.get(foundId);
+          // uri 2 narrower
+          const foundIdSet = this.uri2narrowid[0].get(foundObj.uri);
+          if(undefined !== foundIdSet){
+            // narrower terms are found
+            foundIdSet.forEach((id1)=>{
+              const foundObj1 = this.editingVocWithId.get(id1);
+              subordinateTermSet.add(foundObj1.preferred_label);
+            },this);
+          }
         }
       });  
     }else{
       const refif = this.selectedFile.id;
       keyTermSet.forEach((term)=>{
-        // term 2 id
-        const foundId = this.getIdbyTermandLang(term, displayLanguage, refif);
-        // id to data
-        const foundObj = this.referenceVocWithId[refid].get(foundId);
-        // uri 2 narrower
-        const foundIdSet = this.uri2narrowid[refid].get(foundObj.uri);
-        if(undefined !== foundIdSet){
-          // narrower terms are found
-          foundIdSet.forEach((id1)=>{
-            const foundObj1 = this.referenceVocWithId[refid].get(id1);
-            subordinateTermSet.add(foundObj1.preferred_label);
-          },this);
-          
+        if(term === ''){
+        }else{
+          // term 2 id
+          const foundId = this.getIdbyTermandLang(term, displayLanguage, refif);
+          // id to data
+          const foundObj = this.referenceVocWithId[refid].get(foundId);
+          // uri 2 narrower
+          const foundIdSet = this.uri2narrowid[refid].get(foundObj.uri);
+          if(undefined !== foundIdSet){
+            // narrower terms are found
+            foundIdSet.forEach((id1)=>{
+              const foundObj1 = this.referenceVocWithId[refid].get(id1);
+              subordinateTermSet.add(foundObj1.preferred_label);
+            },this);  
+          }
         }
       }, this);
     }
