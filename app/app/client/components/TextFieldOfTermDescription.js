@@ -9,6 +9,8 @@
  import Box from '@material-ui/core/Box';
  import Autocomplete from '@material-ui/lab/Autocomplete';
  import Snackbar from '@material-ui/core/Snackbar';
+ import IconButton from '@material-ui/core/IconButton';
+ import CloseIcon from '@material-ui/icons/Close';
  
  import {observer} from 'mobx-react';
  
@@ -20,11 +22,16 @@
   * @extends React
   */
  export default
- @observer class TextFieldOfTermDescription extends React.Component {
-   /**
-    * render
-    * @return {element}
-    */
+ @observer class TextFieldOfTermDescription extends React.Component {  
+
+  /**
+   * constructor
+   * @param {object} props
+   */
+  constructor(props) {
+    super(props);
+    this.state = {open: false, message: ''};
+  }
 
   /**
    * Key event registration
@@ -33,16 +40,36 @@
   }
 
   /**
+   * Warning displaying snackbar events
+   * @param {String} errorMsg - error message
+   */
+   openSnackbar(errorMsg) {
+    this.setState({open: true, message: errorMsg});
+  }
+
+  /**
+   * Warning hiding snackbar events
+   */
+  handleClose() {
+    this.setState({open: false, message: ''});
+  }
+
+  /**
    * Term description update event
    * @param  {object} event - information of event
    * @param  {array} newValue - list of term description
    */
    onChange(event, newValue) {
+    if (newValue.length > 1) {
+      // When more than one TermDescription is entered
+      const errorMsg = '用語の説明テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+      this.openSnackbar(errorMsg);
+    }
     this.props.editingVocabulary.updataTermDescription(newValue);
   }
 
    render() {
-     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.list;
+     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.list[this.props.editingVocabulary.tmpLanguage.list];
      let currentTermDescription;
      // term description on the selected term
      if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
@@ -52,6 +79,11 @@
        currentTermDescription =
          this.props.editingVocabulary.currentLangDiffNode.term_description;
      }
+     /* eslint-disable no-unused-vars */
+     // object for rendering
+     let length = this.props.editingVocabulary.tmpTermDescription.list['ja'].length;
+     length = this.props.editingVocabulary.tmpTermDescription.list['en'].length;
+     /* eslint-enable no-unused-vars */
 
 return (
     <div>
@@ -100,6 +132,27 @@ return (
           </Box>
         </Grid>
       </form>
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        open={this.state.open}
+        onClose={() => this.handleClose()}
+        message={this.state.message}
+        action={
+          <React.Fragment>
+            <IconButton
+              size="small"
+              aria-label="close"
+              color="inherit"
+              onClick={() => this.handleClose()}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </React.Fragment>
+        }
+      />
     </div>
   );
 

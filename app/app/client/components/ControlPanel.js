@@ -18,7 +18,7 @@ import ArrowRightIcon from '@material-ui/icons/ArrowRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 
-import DialogFileSelecter from './DialogFileSelecter';
+import DialogFileSelector from './DialogFileSelector';
 import DialogFileDownload from './DialogFileDownload';
 import DialogHistory from './DialogHistory';
 import editingHistoryStore from '../stores/EditingHistory';
@@ -368,7 +368,7 @@ export default class ControlPanel extends React.Component {
             className={this.props.classes.buttonsTop}> 
             <ExpandMoreIcon />語彙基本情報
           </Button>
-          <DialogFileSelecter
+          <DialogFileSelector
             open={this.state.uploadOpen}
             close={this.state.close}
             okCancel={this.state.okCancel}

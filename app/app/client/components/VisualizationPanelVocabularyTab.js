@@ -22,7 +22,6 @@ import {blue} from '@material-ui/core/colors';
 import {deepPurple} from '@material-ui/core/colors';
 import {purple} from '@material-ui/core/colors';
 
-import Slider from '@material-ui/core/Slider';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -30,8 +29,6 @@ import Popover from "@material-ui/core/Popover";
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
-import IndeterminateCheckBoxOutlinedIcon from "@material-ui/icons/IndeterminateCheckBoxOutlined";
 
 import {observer} from 'mobx-react';
 
@@ -64,25 +61,23 @@ export default
     this.fitCenterPan = true;
     this.situationArr = [];
     this.message = '';
-    this.synonymSource = null;
-    this.synonymTarget = null;
-    this.sliderStep = 20,
-    this.initSlider = 0;      // Initialize zoom (0% zoom value)
-    this.sliderPercent = 0;   // 1% of zoom range
+    this.source = null;
+    this.target = null;
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
-      anchorNewEl: false,         // Edit nNew Term Panel togle
       anchorElC: false,           // Confirm Color Setting popover togle
       anchorElColor: false,       // border color setting popover togle
       transformTogle: false,      // transform coordinate togle
+      dlgTmpDelOpen: false,       // dialog for tmpData Delete confirm
       dlgSynonymOpen: false,      // dialog for Synonym term
       dlgBroaderOpen: false,      // dialog for Broader term confirm
+      handleDisableButton: 0,     // disp buttons of dialog for Broader term error 
       dlgDeselectTermOpen: false, // dialog for deselect term confirm
+      dlgLangDiffOpen: false,     // dialog for language diff error message
       dlgErrOpen: false,          // dialog for Error
       popBorderColorOpen: false,  // popover for border color setting
-      reason: '',                 // Reason for Error 
-      sliderValue: 0,             // zoomSlider value
+      reason: null,               // Reason for Error 
     };
 
     this.ehTop = null;      // edgehandles top   object
@@ -122,8 +117,8 @@ export default
    */
    setCyMinMaxZoom() {
     const cy = this.cy;
-    cy.minZoom(0.0025);
-    cy.maxZoom(1.2);
+    // cy.minZoom(0.0025);
+    // cy.maxZoom(1.2);
     const cyw = cy.width();
     const cyh = cy.height();
     cy.viewport({zoom: 0.005, pan: {x: cyw/2, y: cyh/2}});
@@ -134,21 +129,9 @@ export default
    */
   setIniZoom(){
     const cy = this.cy;
-    const currentZoom = cy.zoom();
-
-    // maximum magnification
-    let maxZoom = cy.maxZoom();
-    const maxMagnf = 5;
-    maxZoom = (currentZoom*maxMagnf>maxZoom?maxZoom:currentZoom*maxMagnf);
-
-    // 1% of zoom range
-    this.sliderPercent = (maxZoom - currentZoom) / 100;
-
-    // Initialize zoom (0% zoom value)
-    this.initSlider = currentZoom;
-
-    cy.minZoom(currentZoom / 2);
-    cy.maxZoom(maxZoom);
+    let currentZoom = cy.zoom();
+    currentZoom = currentZoom>2.0?2.0:currentZoom;
+    cy.zoom(currentZoom);
 
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if(undefined == this.situationArr[ fileId]){
@@ -157,13 +140,6 @@ export default
         zoom: undefined,
       }
     }
-    if(undefined == this.situationArr[ fileId].sliderPercent && this.sliderPercent != 0){
-      this.situationArr[ fileId].sliderPercent = this.sliderPercent ? this.sliderPercent : 0 ;
-    }
-    if(undefined == this.situationArr[ fileId].initSlider && this.initSlider != 0){
-      this.situationArr[ fileId].initSlider = this.initSlider ? this.initSlider : 0;
-    }
-    this.setState({sliderValue:0});
   }
 
   /**
@@ -220,6 +196,7 @@ export default
         const confirmColor = this.props.editingVocabulary.confirmColor;
         let bgStyle;
         switch (confirmColor) {
+          case 'white': bgStyle = 'bgWhite'; break;
           case 'brown': bgStyle = 'bgBrown'; break;
           case 'red': bgStyle = 'bgRed'; break;
           case 'orange': bgStyle = 'bgOrange'; break;
@@ -230,7 +207,7 @@ export default
           case 'blue': bgStyle = 'bgBlue'; break;
           case 'deepPurple': bgStyle = 'bgDeepPurple'; break;
           case 'purple': bgStyle = 'bgPurple'; break;
-          default: bgStyle = 'bgBlack'; break;
+          default: bgStyle = 'bgGreen'; break;
         }
 
         if (bgStyle) {
@@ -238,7 +215,7 @@ export default
         }
       }
     } else {
-      eles.addClass('bgBlack');
+      eles.addClass('bgWhite');
     }
   }
 
@@ -251,14 +228,10 @@ export default
     
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if( undefined == this.situationArr[ fileId]){
-      cy.fit(cy.nodes,50 );
       this.setIniZoom();
+      cy.fit(cy.nodes ,50);
     }else{
       const initPan = {x: cy.width()/2, y: cy.height()/2};
-
-      this.sliderPercent = this.situationArr[ fileId].sliderPercent ? this.situationArr[ fileId].sliderPercent : 0 ;
-      this.initSlider    = this.situationArr[ fileId].initSlider ? this.situationArr[ fileId].initSlider : 0 ;
-
       cy.pan( this.situationArr[ fileId].pan || initPan);
       cy.zoom( this.situationArr[ fileId].zoom || 0.005);
     }
@@ -324,22 +297,22 @@ export default
 
       // term point size adjustment
       nodesInView.style({
-        "width": Math.max(5.0/zoom, 5.0),
-        "height": Math.max(5.0/zoom, 5.0),
+        "width": 5.0/zoom,
+        "height": 5.0/zoom,
       });
 
       // edges line width adjustment
       const edges = cy.edges();
       edges.style({
-        "width": Math.max(3.0/zoom, 3.0),
+        "width": 3.0/zoom,
       });
       
       const nodeInViewStyle = {        
         'width': 'label',
-        'height': 'label',
-        'font-size': Math.min(4800, Math.max(16/zoom, 16)),
-        'border-width': Math.max(2.0/zoom, 2.0),
-        'padding': Math.max(10.0/zoom, 10.0),
+        'height': 20.0/zoom,
+        'font-size': 16/zoom,
+        'border-width': 2.0/zoom,
+        'padding': 10.0/zoom,
       };
       nodesInViewLimit100.forEach((node, index)=>{
         const eles = cy.$id(node.data().id);
@@ -426,13 +399,13 @@ export default
 
     const cy = this.cy;    
     const zoom = cy.zoom();
-    const bdrWidth = Math.max((isAddTerm?4.0:2.0)/zoom, (isAddTerm?4.0:2.0));
+    const bdrWidth = (isAddTerm?4.0:2.0)/zoom;
     const nodeSelectedStyle = {        
       'width': 'label',
-      'height': 'label',
-      'font-size': Math.min(4800, Math.max(16/zoom, 16)),
+      'height': 20.0/zoom,
       'border-width': bdrWidth,
-      'padding': Math.max(10.0/zoom, 10.0),
+      'font-size': 16/zoom,
+      'padding': 10.0/zoom,
       'shape': 'rectangle',      
     };
     const eles = cy.$id(id);
@@ -534,6 +507,9 @@ export default
         return;
       }
       const target = event.target.data();
+      const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
+      console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, find)
+
       // other vocabulary node
       if(target.term == target.other_voc_syn_uri){ 
         return;
@@ -597,8 +573,6 @@ export default
       const zoom = Number( this.cy.zoom());
       this.situationArr[ fileId].zoom = zoom;
       this.onPanZoom();
-      this.setState({sliderValue : ((zoom - this.initSlider) / this.sliderPercent)});
-
       event.preventDefault();
     });
   }
@@ -606,7 +580,7 @@ export default
   /**
    * Event registration edgeHandles
    */
-   setUpListenersEdgeHandles() {
+  setUpListenersEdgeHandles() {
     this.cy.removeListener('ehcomplete');
     this.cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
       
@@ -619,12 +593,19 @@ export default
         return false;
       }
 
-      this.synonymSource = sourceNode.data();
-      this.synonymTarget = targetNode.data();
+      this.source = sourceNode.data();
+      this.target = targetNode.data();
 
       if( this.hitHandle == 1){
-        this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します\nよろしいですか？';
-        this.setState({dlgBroaderOpen: true});
+        let _disableButton = this.state.handleDisableButton;
+        if( sourceNode.data().language != targetNode.data().language){
+          this.message = '「'+sourceNode.data().term +'」と「'+targetNode.data().term +'」は、言語が異なるので上位語に設定できません。\n上位語には同じ言語の用語を設定してください。';
+          _disableButton = 1;// OK only buttons
+        }else{
+          this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します。\nよろしいですか？';
+          _disableButton = 0;// OK & CANCEL buttons
+        }
+        this.setState({handleDisableButton: _disableButton,dlgBroaderOpen: true});   
       } else{        
         this.setState({dlgSynonymOpen: true});   
       }
@@ -657,7 +638,7 @@ export default
         if(++cnt > 5) clearInterval(intervalId);
         const cy = this.cy;
         let ghostedges = cy.elements('.eh-ghost-edge');
-        const val = Math.max(5.0/cy.zoom(), 5.0);
+        const val = 5.0/cy.zoom();
         if( ghostedges.length > 0){
           
           if( this.ehTop.handleNode!== undefined && this.ehTop.handleNode.active()){
@@ -699,7 +680,7 @@ export default
       const cy = this.cy;
       
       let handles = cy.elements('.eh-handle');
-      const val = Math.max(10.0/cy.zoom(), 10.0);
+      const val = 10.0/cy.zoom();
         
       if( handles.length > 0){
         handles.style({
@@ -778,9 +759,9 @@ export default
    */
   setBroaderTerm(){
 
-    const source = this.synonymSource;
+    const source = this.source;
     
-    const nextBroaderTerm = this.synonymTarget.term;
+    const nextBroaderTerm = this.target.term;
 
     this.props.editingVocabulary.deselectTermList();
     this.props.editingVocabulary.setSelectedTermList(source.term);
@@ -789,7 +770,7 @@ export default
     this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
 
     const ret = this.props.editingVocabulary.updateVocabulary();
-    if (ret !== '') {
+    if (ret !== null) {
       this.setState({dlgErrOpen: true, reason : ret});  
     }
   }
@@ -887,7 +868,7 @@ export default
             'blue',
             'deepPurple',
             'purple',
-            'bgBlack',
+            'bgWhite',
             'bgBrown',
             'bgRed',
             'bgOrange',
@@ -932,7 +913,7 @@ export default
             'blue',
             'deepPurple',
             'purple',
-            'bgBlack',
+            'bgWhite',
             'bgBrown',
             'bgRed',
             'bgOrange',
@@ -1093,7 +1074,7 @@ export default
       this.props.editingVocabulary.tmpDataClear();
       this.props.editingVocabulary.deselectTermList();
 
-    }else if(ret !== ''){
+    }else if(ret !== null){
       // updateVocabulary() return error reason
       this.setState({dlgErrOpen: true, reason : ret});  
     }
@@ -1104,9 +1085,12 @@ export default
    */
   handleBroaderClose(){
     this.message = '';
-    this.setState({dlgBroaderOpen: false});   
-    
-    this.setBroaderTerm(); 
+
+    this.setState({dlgBroaderOpen: false});
+    if( this.state.handleDisableButton !== 1){
+      this.setBroaderTerm(); 
+    }
+    this.setState({handleDisableButton: 0});// OK & CANCEL buttons
   }
 
   /**
@@ -1114,14 +1098,17 @@ export default
    */
   handleBroaderCancelClose(){
     this.message = '';
-    this.setState({dlgBroaderOpen: false});
+    this.setState({ 
+      handleDisableButton: 0,   // OK & CANCEL buttons
+      dlgBroaderOpen: false
+    });
   }
 
   /**
    * close error dialog 
    */
   handleErrClose(){
-    this.setState({dlgErrOpen: false, reason: ''});   
+    this.setState({dlgErrOpen: false, reason: null});   
   }
 
   /**
@@ -1164,6 +1151,16 @@ export default
     this.setState({dlgDeselectTermOpen: false});
   }
 
+
+
+  /**
+   * All language diff  error dialog close
+   */
+   handleLangDiffClose(){
+    this.message = '';
+    this.setState({dlgLangDiffOpen: false});
+  }
+
   /**
    * Edit popover open
    */
@@ -1174,9 +1171,33 @@ export default
   /**
    * Edit popover Close
    */
-  handleEditPopoverClose(){
-    this.setState({anchorEl: null});
+  handleEditPopoverClose(saved=false){
+
+    if( !saved && this.props.editingVocabulary.isCurrentNodeChanged ){
+      this.message='編集中のデータを破棄して用語選択を実行します。\n\nよろしいですか？';
+      this.setState({ dlgTmpDelOpen: true});
+    }else{
+      this.setState({ anchorEl: null});
+    }
   }
+
+  /**
+   * Edit data delete popover ok Close
+   */
+  handleTmpDelClose(){
+    this.message = '';    
+    this.props.editingVocabulary.tmpDataClear();
+    this.setState({ anchorEl: null, dlgTmpDelOpen: false});
+  }
+  
+  /**
+   * Edit data delete popover Cancel
+   */
+   handleTmpDelCancelClose(){
+    this.message = '';
+    this.setState({ dlgTmpDelOpen: false});
+  }  
+
 
   /**
    * Confirm Color popover open
@@ -1195,66 +1216,6 @@ export default
   }
 
   /**
-   * new Term add popover Open
-   */
-  handleNewEditPopoverOpen(e){
-    this.setState({anchorNewEl: this.state.anchorNewEl ? null : e.currentTarget});
-  }
-
-  /**
-   * new Term add popover close
-   */
-  handleNewEditPopoverClose(){
-    this.setState({anchorNewEl: null});
-  }
-
-  /**
-   * zoom Slider Change
-   */
-   zoomSliderChange(event, newValue){
-    const cy = this.cy;
-    cy.zoom(this.sliderPercent * Number(newValue) + this.initSlider);
-  }
-  
-  sliderPlus() {
-    let plusValue = Number(this.state.sliderValue) + Number(this.sliderStep);
-    if( 1 > plusValue){
-      plusValue = 0;
-    }else if( 100 >= plusValue){
-      // 0.5 = Simple fine-tuning for integerization
-      plusValue = Math.ceil( plusValue / Number(this.sliderStep)-0.5 )*Number(this.sliderStep)
-    }else{
-      plusValue = 100;
-    }
-    this.setState({sliderValue: plusValue});
-    const cy = this.cy;
-    cy.zoom(this.sliderPercent * Number(plusValue) + this.initSlider);
-  }
-  sliderMinus() {
-    let minusValue = Number(this.state.sliderValue) - Number(this.sliderStep);
-    if( minusValue > 100){
-      minusValue = 100;
-    }else if( minusValue >= 0){
-      // 0.5 = Simple fine-tuning for integerization
-      minusValue = Math.floor( minusValue / Number(this.sliderStep)+0.5 )*Number(this.sliderStep)
-    }else{
-      minusValue = 0;
-    }
-    this.setState({sliderValue: minusValue});
-    const cy = this.cy;
-    cy.zoom(this.sliderPercent * Number(minusValue) + this.initSlider);
-  }
-
-  /**
-   * Fixed term color reflection
-   * @param  {String} color - string of changed color
-   */
-  //  seletConfirmColor(color) {
-  //   console.log('[seletConfirmColor] change to ', color);
-  //   this.props.editingVocabulary.seletConfirmColor(color);
-  // }
-
-  /**
    * Confirm switch
    * @param  {Boolean} isConfirm - confirm acceptance
    */
@@ -1267,7 +1228,7 @@ export default
       // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
       if (!currentNode.preferred_label) {
         this.props.editingVocabulary.
-            tmpPreferredLabel.list.push(currentNode.term);
+            tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list].push(currentNode.term);
       }
     }
   }
@@ -1287,9 +1248,6 @@ export default
     const anchorEl = this.state.anchorEl;
     const open = Boolean(anchorEl);
     const id = open ? "popover" : undefined;
-    const anchorNewEl = this.state.anchorNewEl;
-    const openNew = Boolean(anchorNewEl);
-    const idNew = openNew ? "popover-new" : undefined;
     const anchorElC = this.state.anchorElC;
     const openC = Boolean(anchorElC);
     const idC = openC ? "popover-c" : undefined;
@@ -1298,8 +1256,6 @@ export default
     const idColor = openColor ? "popover-color" : undefined;
     const editButtondisabled = editingVocabulary.currentNode.term ? true : false;
     const editButtonsDisableSwitchByFile  = editingVocabulary.selectedFile.id !== 0 ? true : false;
-
-    const sliderValue = editingVocabulary.getTargetFileData(editingVocabulary.selectedFile.id).length > 0 ? this.state.sliderValue: 0;
 
     // for Confirm Button
     let fileId = editingVocabulary.selectedFile.id;
@@ -1333,21 +1289,6 @@ export default
     if (disabledTextField) {
       confirmButtonText = '確定解除';
     }
-
-    const zoomMarks = [
-      {
-        value: 20,
-      },
-      {
-        value: 40,
-      },
-      {
-        value: 60,
-      },
-      {
-        value: 80,
-      },
-    ];
 
     return (
       <div>
@@ -1448,11 +1389,15 @@ export default
                 <Search
                   classes={this.props.classes}
                   editingVocabulary={this.props.editingVocabulary}
+                  key={'search_root_'+this.props.fileLoadCount}
                 />
               </Grid>
               <Grid item>
                 <Button
                   className={this.props.classes.buttons}
+                  style={{
+                    marginLeft: "10px",
+                  }}
                   ml={3}
                   variant="contained"
                   color="primary"
@@ -1496,7 +1441,7 @@ export default
                   <EditPanelVocabularyTab
                     classes={this.props.classes}
                     editingVocabulary={this.props.editingVocabulary}
-                    close={() =>this.handleEditPopoverClose()}
+                    close={this.handleEditPopoverClose.bind(this)}
                   />
                 </Popover>
               </Grid>
@@ -1508,12 +1453,20 @@ export default
           open={this.state.dlgSynonymOpen}
           editingVocabulary={this.props.editingVocabulary}
           classes={this.props.classes}
-          source={this.synonymSource}
-          target={this.synonymTarget}
+          source={this.source}
+          target={this.target}
+        />
+        <DialogOkCancel
+          onOkClose={() => this.handleTmpDelClose()}
+          onCancel={() =>this.handleTmpDelCancelClose()}  
+          open={this.state.dlgTmpDelOpen}
+          classes={this.props.classes}
+          message={this.message}
         />
         <DialogOkCancel
           onOkClose={() => this.handleBroaderClose()}
           onCancel={() =>this.handleBroaderCancelClose()}  
+          buttonsDisable={ this.state.handleDisableButton}
           open={this.state.dlgBroaderOpen}
           classes={this.props.classes}
           message={this.message}
@@ -1522,6 +1475,14 @@ export default
           onOkClose={() => this.handleDeselectTermClose()}
           onCancel={() =>this.handleDeselectTermCancelClose()}  
           open={this.state.dlgDeselectTermOpen}
+          classes={this.props.classes}
+          message={this.message}
+        />
+        <DialogOkCancel
+          onOkClose={() => this.handleLangDiffClose()}
+          onCancel={() =>this.handleLangDiffClose()}  
+          buttonsDisable={ 1}
+          open={this.state.dlgLangDiffOpen}
           classes={this.props.classes}
           message={this.message}
         />
@@ -1534,47 +1495,6 @@ export default
           isFromEditPanel={false}
           reason={this.state.reason}
         />
-
-        <div className={this.props.classes.sliderDivRoot}>          
-          <Typography id="slider-slider-plus">        
-            <IconButton
-              aria-label="slider-plus"
-              onClick={()=>this.sliderPlus()}
-            >
-              <AddBoxOutlinedIcon />
-            </IconButton>
-          </Typography>
-
-          <Slider
-            classes={{
-              root: this.props.classes.sliderRoot,
-              vertical: this.props.classes.sliderRoot,
-              rail: this.props.classes.sliderRail,
-              track: this.props.classes.sliderTrackt,
-              thumb: this.props.classes.sliderThumb,
-              mark: this.props.classes.sliderMark,
-            }}
-            orientation="vertical"
-            key={`slider-${this.state.sliderValue}`}
-            defaultValue={0}
-            // value={this.state.sliderValue}
-            value={sliderValue}
-            aria-labelledby="vertical-slider"
-            marks={zoomMarks}
-            step={this.sliderStep}
-            valueLabelDisplay="off"
-            onChangeCommitted={(event, newValue) =>this.zoomSliderChange(event, newValue)}
-            
-          />       
-          <Typography id="slider-slider-minus">        
-            <IconButton
-              aria-label="slider-minus"
-              onClick={()=>this.sliderMinus()}
-            >
-              <IndeterminateCheckBoxOutlinedIcon />
-            </IconButton>
-          </Typography>
-        </div>
 
         <CytoscapeComponent
           id="relation_term_graph_container"
@@ -1605,7 +1525,7 @@ export default
               selector: '.showText[term]',
               style: {
                 'width': 'label',
-                'height': 'label',
+                // 'height': 'label',
                 'color': 'black',
                 'text-background-shape': 'rectangle',
                 'text-max-width': '200000px',
@@ -1745,7 +1665,7 @@ export default
               },
             },
             {
-              selector: '.bgBlack',
+              selector: '.bgWhite',
               style: {
                 'background-color': 'white',
               },

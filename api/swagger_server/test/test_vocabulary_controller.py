@@ -17,20 +17,6 @@ from swagger_server.test import BaseTestCase
 class TestVocabularyController(BaseTestCase):
     """VocabularyController integration test stubs"""
 
-    def test_delete_vocabulary_term(self):
-        """Test case for delete_vocabulary_term
-
-        Delete editing vocabulary term
-        """
-        body = [56]
-        response = self.client.open(
-            '/vocabulary/{file_type}'.format(file_type='file_type_example'),
-            method='POST',
-            data=json.dumps(body),
-            content_type='application/json')
-        self.assert200(response,
-                       'Response body is : ' + response.data.decode('utf-8'))
-
     def test_get_vocabulary_data(self):
         """Test case for get_vocabulary_data
 

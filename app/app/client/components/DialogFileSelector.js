@@ -1,5 +1,5 @@
 /**
- * DialogFileSelecter.js COPYRIGHT FUJITSU LIMITED 2021
+ * DialogFileSelector.js COPYRIGHT FUJITSU LIMITED 2021
  */
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -21,15 +21,12 @@ import axios from 'axios';
 import $ from 'jquery';
 
 import DialogOkCancel from './DialogOkCancel';
-import EditPanelMetaTab from './EditPanelMetaTab';
-import DialogUpdateMetaError from './DialogUpdateMetaError';
-import DialogApiMetaError from './DialogApiMetaError';
 
 /**
  * File selection dialog
  * @extends React
  */
-export default class DialogFileSelecter extends React.Component {
+export default class DialogFileSelector extends React.Component {
   /**
    * constructor
    * @param {object} props
@@ -41,7 +38,6 @@ export default class DialogFileSelecter extends React.Component {
       open: false,
       errOpen: false,
       reason: '',
-      activeStep: 0,
       files: [
         {
           name: '',
@@ -73,27 +69,9 @@ export default class DialogFileSelecter extends React.Component {
   }
 
   /**
-   * NEXT button press event
-   */
-  handleNext(){
-    const step = this.state.activeStep;
-    // this.setState({activeStep: step + 1});
-    // temporary solution
-    setTimeout( ()=>{ this.setState({activeStep: step + 1});}, 1000 )
-  };
-
-  /**
-   * PREV button press event
-   */
-  handleBack(){
-    const step = this.state.activeStep;
-    this.setState({activeStep: step - 1});
-  };
-
-  /**
    * Determines if the file being uploaded is already uploaded
    * @param  {Object}  fileObj - upload file object
-   * @param  {string}  name - uploaded fail name
+   * @param  {string}  name - uploaded file name
    * @param  {string}  strSize - uploaded file size
    * @return {Boolean}         true:same file, false:other files
    */
@@ -115,16 +93,24 @@ export default class DialogFileSelecter extends React.Component {
   setUploadRequestBody() {
     const formData = new FormData();
 
-    if (undefined != this.state.files[0].file.name) {
-      const fileInfo = this.state.files[0];
+    if (undefined != this.state.files[0].file.name & undefined != this.state.files[4].file.name) {
+      const fileInfo0 = this.state.files[0];
+      const fileInfo4 = this.state.files[4];
       if (this.isSameFile(
-          fileInfo.file,
+          fileInfo0.file,
           localStorage.getItem('fileName0'),
-          localStorage.getItem('fileSize0'))) {
+          localStorage.getItem('fileSize0'))
+          & this.isSameFile(
+            fileInfo4.file,
+            localStorage.getItem('fileName4'),
+            localStorage.getItem('fileSize4'))) {
         console.log('[setUploadRequestBody] ' +
-          fileInfo.name + ' is already uploaded(not upload).');
+          fileInfo0.name + ' is already uploaded(not upload).');
+        console.log('[setUploadRequestBody] ' +
+          fileInfo4.name + ' is already uploaded(not upload).');
       } else {
-        formData.append('editing_vocabulary', fileInfo.file);
+        formData.append('editing_vocabulary', fileInfo0.file);
+        formData.append('editing_vocabulary_meta', fileInfo4.file);
       }
     }
     if (undefined != this.state.files[1].file.name) {
@@ -163,18 +149,6 @@ export default class DialogFileSelecter extends React.Component {
         formData.append('reference_vocabulary3', fileInfo.file);
       }
     }
-    if (undefined != this.state.files[4].file.name) {
-      const fileInfo = this.state.files[4];
-      if (this.isSameFile(
-          fileInfo.file,
-          localStorage.getItem('fileName4'),
-          localStorage.getItem('fileSize4'))) {
-        console.log('[setUploadRequestBody] ' +
-          fileInfo.name + ' is already uploaded(not upload).');
-      } else {
-        formData.append('editing_vocabulary_meta', fileInfo.file);
-      }
-    }
     return formData;
   }
 
@@ -191,7 +165,13 @@ export default class DialogFileSelecter extends React.Component {
    */
   fileUpload(e) {
 
-    if ( !this.state.files[0].name  ) {      
+    // parameter existence check for editing vocabulary
+    if ( undefined != this.state.files[0].file & !this.state.files[0].file.name  ) {      
+      this.setState({errOpen: true});
+      return false;
+    }
+    // parameter existence check for editing vocabulary meta
+    if ( undefined != this.state.files[4].file & !this.state.files[4].file.name  ) {
       this.setState({errOpen: true});
       return false;
     }
@@ -228,7 +208,7 @@ export default class DialogFileSelecter extends React.Component {
           if (undefined != this.state.files[4].file.name) {
             this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
           }
-          this.handleNext();
+          this.handleClose();
         }).catch((err) => {
           console.log('error callback.');
           this.uploadingEnd();
@@ -240,6 +220,13 @@ export default class DialogFileSelecter extends React.Component {
             errCode = errResponse.status;
             switch (errCode) {
               case 400:
+                // For errors defined in the API
+                if (err.response.data.message) {
+                  errMsg = err.response.data.message;
+                } else {
+                  errMsg = '不明なエラー発生';
+                }
+                break;
               case 404:
                 // For errors defined in the API
                 if (err.response.data.message) {
@@ -249,44 +236,152 @@ export default class DialogFileSelecter extends React.Component {
                 }
                 break;
               case 409:
-                if ( (errResponse.data.phase == 2) &&
+                let file_name=''
+                switch(errResponse.data.file_type){
+                  case 0:
+                    file_name = '編集語彙';
+                    break;
+                  case 1:
+                    file_name = '参照語彙1';
+                    break;
+                  case 2:
+                    file_name = '参照語彙2';
+                    break;
+                  case 3:
+                    file_name = '参照語彙3';
+                    break;
+                  case 4:
+                    file_name = '編集語彙メタ';
+                    break;
+                };
+                if ( (errResponse.data.phase == 1) &&
                      (errResponse.data.reason == 0)) {
-                  errMsg = '同義関係と思われる、用語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の代表語を1つに揃えてください。';
-                } else if ((errResponse.data.phase == 3) &&
-                    (errResponse.data.reason == 0)) {
-                  errMsg = '用語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の代表語のURIの個数を1つに絞ってください。';
-                } else if ((errResponse.data.phase == 3) &&
+                  errMsg = file_name+ 'で、条件を満たさない用語列が空白のものが有ります。代表語のURIは' +
+                  errResponse.data.terms[0] +
+                  'です。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 1) &&
                     (errResponse.data.reason == 1)) {
-                  errMsg = '用語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の代表語のURIを統一してください。';
-                } else if ((errResponse.data.phase == 3) &&
+                  errMsg = file_name+ 'で、用語名列で空白のものが存在条件を満たしていますが、複数行あります。代表語のURIは' +
+                  errResponse.data.terms[0] +
+                  'です。行を削除するか、用語を入力した後後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 1) &&
                     (errResponse.data.reason == 2)) {
-                  errMsg = '代表語「' +
-                  this.getErrorTerms(errResponse.data.terms, ',') +
-                  '」について、同じ代表語のURIが設定されています。代表語のURIを修正してください。';
-                } else if ((errResponse.data.phase == 3) &&
-                    (errResponse.data.reason == 3)) {
-                  errMsg = '用語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」の代表語のURIを1つに揃えてください。';
-                } else if ((errResponse.data.phase == 4) &&
+                  errMsg = file_name+ 'で、用語名列で空白のものが存在条件を満たしていますが、同一言語の同義グループに値のある行があります。代表語のURIは' +
+                  errResponse.data.terms[0] +
+                  'です。行を削除するか、用語を入力した後後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 1) &&
+                    (errResponse.data.reason == 5)) {
+                  errMsg = file_name+ 'で、用語名列で用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」が重複しています。行を削除など、重複しないように編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 2) &&
                     (errResponse.data.reason == 0)) {
-                  errMsg = '代表語「' +
-                    errResponse.data.terms[0] +
-                    '」の上位語の代表語が一致するように上位語を修正してください。';
-                } else if ((errResponse.data.phase == 4) &&
+                  errMsg = file_name+ 'で、同義関係と思われる、用語「' +
+                  this.getErrorTerms(errResponse.data.terms, ',') +
+                  '」の言語ごとの代表語を1つに揃えた後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 2) &&
                     (errResponse.data.reason == 1)) {
-                  errMsg = '代表語「' +
-                    this.getErrorTerms(errResponse.data.terms, ',') +
-                    '」は、関係性が循環しています。上位語を修正してください。';
+                  errMsg = file_name+ 'で、同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」の中に、どの言語にも代表語が無いです。いずれかの言語の代表語を設定した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 2) &&
+                    (errResponse.data.reason == 2)) {
+                  errMsg = file_name+ 'で、複数の同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で同じ代表語を持っています。異なる同義語では異なる代表語を持つようにした後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 2) &&
+                    (errResponse.data.reason == 3)) {
+                  errMsg = file_name+ 'で、用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」の代表語が同義語に存在しません。同義語の中から選択するようにした後に再読み込みしてください。'; 
+                } else if ((errResponse.data.phase == 3) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = file_name+ 'で、「言語」列がja, enもしくは空白以外が含まれています。ja, en, 空文字を記入した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 4) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = file_name+ 'で、「代表語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 5) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = file_name+ 'で、「上位語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 5) &&
+                  (errResponse.data.reason == 1)) {
+                  errMsg = file_name+ 'で、同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で上位語のURIが一つに揃っていません。一つになるように編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 5) &&
+                  (errResponse.data.reason == 2)) {
+                  errMsg = file_name+ 'で、同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で上位語のURIとして指定された用語が存在しません。URIを直すか削除するかして編集した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 5) &&
+                  (errResponse.data.reason == 3)) {
+                  errMsg = file_name+ 'で、用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、上下関係性が循環しています。上位語を修正した後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 6) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = file_name+ 'で、用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、他語彙体系の同義語のURIが同義語内で異なります。1つに揃えた後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 7) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = file_name+ 'で、同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、用語の説明が異なっています。1つに揃えた後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 8) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = file_name+ 'で、同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、作成日が異なっています。1つに揃えた後に再読み込みしてください。';
+                } else if ((errResponse.data.phase == 9) &&
+                  (errResponse.data.reason == 0)) {
+                  errMsg = file_name+ 'で、同義関係の用語「' +
+                  this.getErrorTermsWithLang(errResponse.data.terms, errResponse.data.langs, ',') +
+                  '」で、最終更新日が異なっています。1つに揃えた後に再読み込みしてください。';
                 }
                 break;
-              default:
+                case 411:
+                  if ( (errResponse.data.phase == 0) &&
+                       (errResponse.data.reason == 0)) {
+                    errMsg = '編集用語彙の、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == 1) &&
+                       (errResponse.data.reason == 0)) {
+                    errMsg = '編集用語彙_metaの、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 2)) {
+                    errMsg = '参照用語彙1の、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 3)) {
+                    errMsg = '参照用語彙2の、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 4)) {
+                    errMsg = '参照用語彙3の、列「' +
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」が無いためファイルが読み込めません。「'+
+                      this.getErrorTerms(errResponse.data.terms, '」,「') +
+                      '」を追加して再読み込みしてください。' ;
+                  } else if ( (errResponse.data.phase == -1) &&
+                      (errResponse.data.reason == 0)) {
+                    errMsg = errResponse.data.terms[0];
+                  }
+                  break;
+                default:
                 errMsg = '不明なエラー発生';
                 break;
             }
@@ -309,19 +404,38 @@ export default class DialogFileSelecter extends React.Component {
    */
   getErrorTerms(terms, split) {
     let errTerms = '';
-    terms.forEach( (term) => {
-      errTerms = errTerms + term + split;
-    });
-    errTerms = errTerms.slice(0, -1);
+    for (var i =0; i < terms.length; i++){
+      if(i != terms.length -1){
+        errTerms = errTerms + terms[i] + split;
+      }else{
+        errTerms = errTerms + terms[i]
+      }
+    }
     return errTerms;
   }
 
+  /**
+   * Combine vocabulary for error messages
+   * @param  {string} terms - error vocabulary
+   * @param  {string} split - delimiter character
+   * @return {string} - error message
+   */
+     getErrorTermsWithLang(terms, langs, split) {
+      let errTerms = '';
+      for (var i =0; i < terms.length; i++){
+        if(i != terms.length -1){
+          errTerms = errTerms + terms[i] + '@'+ langs[i] + split;
+        }else{
+          errTerms = errTerms + terms[i] + '@'+ langs[i]
+        }
+      }
+      return errTerms;
+    }
   /**
    * Dialog close event
 
    */
   handleClose() {
-    this.setState({activeStep: 0});
     this.props.onClose();
   };
 
@@ -329,15 +443,19 @@ export default class DialogFileSelecter extends React.Component {
    * Save file information to local storage
    */
   saveFileInfoToLocalstorage() {
-    this.state.files.forEach((file, index) => {
-      if (file.name != '') {
-        localStorage.setItem('fileName' + index, file.name);
-        localStorage.setItem('sFileName' + index, file.name);
-        localStorage.setItem('fileSize' + index, file.size);
+    for (let i = 0; i < this.state.files.length; i++) {
+      if (i ==0 | i ==4){
+        ;
+      }else{
+        if (this.state.files[i].name != '') {
+          localStorage.setItem('fileName' + i, this.state.files[i].name);
+          localStorage.setItem('sFileName' + i, this.state.files[i].name);
+          localStorage.setItem('fileSize' + i, this.state.files[i].size);
+        }
       }
       // Send to VisualizationPanel.js 
       this.props.onReadFileChange();
-    });
+    };
   }
 
   /**
@@ -347,9 +465,13 @@ export default class DialogFileSelecter extends React.Component {
     const array = [];
     for (let i = 0; i < this.state.files.length; i++) {
       const file = {name: '', size: 'サイズ：byte', file: {}};
-      if ( localStorage.getItem('fileName' + i) ) {
-        file.name = localStorage.getItem('fileName' + i);
-        file.size = localStorage.getItem('fileSize' + i);
+      if (i ==0 | i ==4){
+        ;
+      }else{
+        if ( localStorage.getItem('fileName' + i) ) {
+          file.name = localStorage.getItem('fileName' + i);
+          file.size = localStorage.getItem('fileSize' + i);
+        }
       }
       array.push(file);
     }
@@ -415,33 +537,6 @@ export default class DialogFileSelecter extends React.Component {
    */
   uploadingStart() {
     this.setState( {uploading: true} );
-  }
-
-  /**
-   * Error dialog open
-   * @param  {string} ret - error content
-   */
-   errorDialogOpen(ret) {
-    this.setState({open: true, reason: ret});
-  }
-
-  /**
-   * Error dialog close
-   */
-  errorDialogClose() {
-    this.setState({open: false, reason: ''});
-  }
-
-  /**
-   * Update edits
-   */
-  updateMetaData() {
-    const ret = this.props.editingVocabularyMeta.updateMetaData();
-    if (ret !== '') {
-      this.errorDialogOpen(ret);
-    }else{
-      this.handleClose();
-    }
   }
 
   /**
@@ -523,7 +618,7 @@ export default class DialogFileSelecter extends React.Component {
           <Grid container spacing={2}>
             <Grid item xs={6}>
               <Box component="span" display="inline">
-              編集用語彙_meta
+              編集用語彙_meta<span style={{color: 'red'}}>*</span>
               </Box>
             </Grid>
             <Grid item xs={6}>
@@ -797,35 +892,12 @@ export default class DialogFileSelecter extends React.Component {
             </DialogActions>
           </DialogTitle>
           <DialogContent style={{width: '450px', overflow:'hidden'}}>
-
-            {this.state.activeStep === 0 ? fileReadContent
-            : <EditPanelMetaTab 
-                classes={this.props.classes}
-                editingVocabulary={this.props.editingVocabulary}
-                editingVocabularyMeta={this.props.editingVocabularyMeta}
-                submitDisabled={true}
-                value={true}
-              />}
+            { fileReadContent }
           </DialogContent>
 
           <Grid container justify="center" spacing={1} style={{ marginBottom: '-20px'}}>
 
-            {this.state.activeStep === 0 ?(
-            
-            <Button
-            color="primary"
-            onClick={(e)=>{this.fileUpload(e)}}
-            className={this.props.classes.stepButton}
-            >NEXT</Button>
-                
-              ) :(
-            <Button
-            color="primary"
-            onClick={()=>this.handleBack()}
-            className={this.props.classes.stepButton}
-            >PREV</Button>)}  
-
-            <Button
+          <Button
               color="primary"
               onClick={()=>this.handleClose()}
               className={this.props.classes.stepButton}
@@ -833,13 +905,13 @@ export default class DialogFileSelecter extends React.Component {
               CANCEL
             </Button>
 
-            {this.state.activeStep === 1 && 
             <Button
               color="primary"
-              onClick={()=>this.updateMetaData()}
+              onClick={()=>this.fileUpload()}
               className={this.props.classes.stepButton}
-            >OK</Button>}
-
+            >
+              OK
+            </Button>
           </Grid>
         </Dialog>
 
@@ -856,30 +928,14 @@ export default class DialogFileSelecter extends React.Component {
           open={this.state.errOpen}
           buttonsDisable={2}
           classes={this.props.classes}
-          message="編集用語彙ファイルを指定してください。"
-        />
-        <DialogUpdateMetaError
-          onClose={() => this.errorDialogClose()}
-          open={this.state.open}
-          classes={this.props.classes}
-          editingVocabulary={this.props.editingVocabulary}
-          editingVocabularyMeta={this.props.editingVocabularyMeta}
-          isFromEditPanel={true}
-          reason={this.state.reason}
-        />
-        <DialogApiMetaError
-          open={this.props.editingVocabularyMeta.apiErrorDialog.open}
-          classes={this.props.classes}
-          editingVocabulary={this.props.editingVocabulary}
-          editingVocabularyMeta={this.props.editingVocabularyMeta}
-          close={() => this.props.editingVocabularyMeta.closeApiErrorDialog()}
+          message="編集用語彙ファイルと編集用語彙_metaファイルを指定してください。"
         />
       </div>
     );
   }
 }
 
-DialogFileSelecter.propTypes = {
+DialogFileSelector.propTypes = {
   classes: PropTypes.object,
   editingVocabulary: PropTypes.object,
   editingVocabularyMeta: PropTypes.object,

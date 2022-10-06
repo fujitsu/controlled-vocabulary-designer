@@ -23,8 +23,10 @@ paths:
       tags:
       - file
       summary: Upload the file to the server
-      description: "Uploads the file selected by the client to the server.  \n  When\
-        \ 'editing_vocabulary' uploaded, its check integrity.  \n"
+      description: |
+        Uploads the file selected by the client to the server.
+        When editing_vocabulary is uploaded, its check integrity.
+        When editing_vocabulary is uploaded, please upload editing_vocabulary_meta together.
       operationId: upload_file
       requestBody:
         description: Select the file to upload.
@@ -34,8 +36,9 @@ paths:
               $ref: '#/components/schemas/Upload'
       responses:
         "200":
-          description: "Upload is complete.  \nIf the client uploads the vocabulary\
-            \ data, call the load API.\n"
+          description: |
+            Upload is completed. 
+            If the client uploads the vocabulary data, call the load API.
           content:
             application/json:
               schema:
@@ -51,7 +54,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
               example:
                 result: 0
-                message: editing_vocabulary.xlsx
+                message: editing_vocabulary.csv
         "404":
           description: |
             Database Error.
@@ -59,7 +62,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/CheckErrorResponse'
               example:
                 result: 0
                 message: Database connection timeout.
@@ -67,25 +70,65 @@ paths:
           description: |
             Integrity check Error.
             phase : Returns the phase in which the error occurred.
+            "1" means it was in the term check phase error.
             "2" means it was in the preferred_label check phase error.
-            "3" means it was in the uri check phase error.
-            "4" means it was in the broader_term check phase error.
+            "3" means it was in the lang check phase error.
+            "4" means it was in the uri check phase error.
+            "5" means it was in the broader_term check phase error.
+            "6" means it was in the other_voc_syn_uri check phase error.
+            "7" means it was in the term_description check phase error.
+            "8" means it was in the created_time check phase error.
+            "9" means it was in the modified_time check phase error.
+            "10" means it was in the synonym_candidate check phase error.
+            "11" means it was in the broader_term_candidate check phase error.
+            "12" means it was in the position_x check phase error.
+            "13" means it was in the position_y check phase error.
+            "14" means it was in the color1 check phase error.
+            "15" means it was in the color2 check phase error.
+            "16" means it was in the confirm check phase error.
+            "90" means it was in the combination check phase error.
+            "99" means it was in the other_unknown check phase error.
             terms : Returns terms in which the error occurred.
+            langs : Returns language in which the error occurred.
             reason : Returns the check error reason code.
-            If phase is 2 and reason is 0, the client will display
-            "同義関係と思われる、用語a,b,cの代表語を1つに揃えてください".
-            If phase is 3 and reason is 0, the client will display
-            "用語a,b,cの代表語のURIの個数を1つに絞ってください".
-            If phase is 3 and reason is 1, the client will display
-            "用語a,b,cの代表語のURIを統一してください".
-            If phase is 3 and reason is 2, the client will display
-            "代表語a,b,cについて、同じ代表語のURIが設定されています。代表語のURIを修正してください".
-            If phase is 3 and reason is 3, the client will display
-            "用語a,b,cの代表語のURIを1つに揃えてください".
-            If phase is 4 and reason is 0, the client will display
-            "代表語aの上位語の代表語が一致するように上位語を修正してください".
-            If phase is 4 and reason is 1, the client will display
-            "代表語a,b,cは、関係性が循環しています。上位語を修正してください。".
+            file_type: Returns which file cause error. 0 editing volabulary, 1,2,3 reference vocabulary, 4 editing volabulary meta.
+            
+            phase 1, reason 0 (This returns only one error even if there are many)
+            条件を満たさない用語列が空白のものが有ります。代表語のURIはｘｘｘです。行を削除するか、空白の条件を満たすように編集した後に再読み込みしてください。
+            phase 1, reason 1 (This returns only one error even if there are many)
+            用語名列で空白のものが存在条件を満たしていますが、複数行あります。代表語のURIはｘｘｘです。行を削除するか、用語を入力した後に再読み込みしてください。
+            phase 1, reason 2 (This returns only one error even if there are many)
+            用語名列で空白のものが存在条件を満たしていますが、同一言語の同義グループに値のある行があります。代表語のURIはｘｘｘです。行を削除するか、用語を入力した後に再読み込みしてください。
+            phase 1, reason 5
+            用語名列で用語a, b, c @langが重複しています。行を削除など、重複しないように編集した後に再読み込みしてください。
+            phase 2, reason 0 (This returns only one error group even if there are many error group)
+            同義関係と思われる、用語a,b,cの言語ごとの代表語を1つに揃えた後に再読み込みしてください。
+            pahse 2, reason 1 (This returns only one error group even if there are many error group)
+            同義関係の用語a,b,cの中に、どの言語にも代表語が無いです。いずれかの言語の代表語を設定した後に再読み込みしてください。
+            pahse 2, reason 2 (This returns only one error group even if there are many error group)
+            複数の同義関係の用語a,b,c, @langで同じ代表語を持っています。異なる同義語では異なる代表語を持つようにした後に再読み込みしてください。
+            pahse 2, reason 3 (This returns only one error group even if there are many error group)
+            用語a,b,c, @langの代表語が同義語に存在しません。同義語の中から選択するようにした後に再読み込みしてください。
+            phase 3, reason 0
+            「言語」列がja, enもしくは空白以外が含まれています。ja, en, 空文字を記入した後に再読み込みしてください。
+            phase 4, reasn 0
+            「代表語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。
+            phase 5, reason 0
+            「上位語のURI」列に空白または異なる語彙体系のURIが含まれています。同じ語彙体系のURIを記入した後に再読み込みしてください。
+            phase 5, reason 1 (This returns only one error even if there are many)
+            用語a, b, c で上位語のURIが一つに揃っていません。一つになるように編集した後に再読み込みしてください。
+            phase 5, reason 2 (This returns only one error even if there are many)
+            用語a, b, c で上位語のURIとして指定された用語が存在しません。URIを直すか削除するかして編集した後に再読み込みしてください。
+            phase 5, reason 3 (This returns only one error even if there are many)
+            用語a, b, c で、上下関係性が循環しています。上位語を修正した後に再読み込みしてください。
+            phase 6, reason 0 (This returns only one error even if there are many)
+            同義関係の用語a,b,c で、他語彙体系の同義語のURIが同義語内で異なります。1つに揃えた後に再読み込みしてください。
+            phase 7, reason 0 (This returns only one error even if there are many)
+            同義関係の用語a@ja,b@ja,c@jaで、用語の説明が異なっています。1つに揃えた後に再読み込みしてください。
+            phase 8, reason 0 (This returns only one error even if there are many)
+            同義関係の用語a@ja,b@ja,c@jaで、作成日が異なっています。1つに揃えた後に再読み込みしてください。
+            phase 9, reason 0 (This returns only one error even if there are many)
+            同義関係の用語a@ja,b@ja,c@jaで、最終更新日が異なっています。1つに揃えた後に再読み込みしてください。
           content:
             application/json:
               schema:
@@ -97,6 +140,23 @@ paths:
                 - b
                 - c
                 reason: 0
+        "411":
+          description: |
+            File Format Error.
+            ex. Invalid file uploaded.
+            Set the error file name for the message.
+            phase -1, reason 0: Something is wrong.
+            phase 1, reason 0: for editing vocaburaly meta, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 1, reason 2: for reference vocaburaly1, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 1, reason 3: for reference vocaburaly2, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 1, reason 4: for reference vocaburaly3, some of a required columns are not found. Missing colmuns are in terms parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckErrorResponse'
+              example:
+                result: 0
+                message: editing_vocabulary.csv
       x-swagger-router-controller: swagger_server.controllers.file_controller
       x-codegen-request-body-name: body
       x-openapi-router-controller: swagger_server.controllers.file_controller
@@ -109,9 +169,9 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify for editing_vocabulary or controlled_vocabulary.  \n\
-          'editing_vocabulary' get editing vocabulary file.  \n'controlled_vocabulary'\
-          \ get controlled vocabulary file.  \n"
+        description: |
+          Specify for editing_vocabulary or editing_vocabulary_meta or controlled_vocabulary.
+          It downloads the selected file.
         required: true
         style: simple
         explode: false
@@ -119,9 +179,10 @@ paths:
           type: string
       - name: out_format
         in: query
-        description: "Specify the file format.  \nwhen editing_vocabulary, format\
-          \ is csv or xlsx.  \nwhen controlled_vocabulary, format is n3, nquads, nt,\
-          \ trix, turtle, xml, json-ld.\n"
+        description: |
+          Specify the file format.
+          When editing_vocabulary is set, the format is csv.
+          when controlled_vocabulary is set, the format is n3, nquads, nt, trix, turtle, xml, json-ld.
         required: true
         style: form
         explode: false
@@ -162,11 +223,12 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify for editing_vocabulary, reference_vocabulary1, etc.\
-          \  \n'editing_vocabulary' get editing vocabulary data.  \n'reference_vocabulary1'\
-          \ get reference vocabulary1 data.  \n'reference_vocabulary2' get reference\
-          \ vocabulary2 data.  \n'reference_vocabulary3' get reference vocabulary3\
-          \ data.  \n"
+        description: |
+          Specify for editing_vocabulary, reference_vocabulary1, etc.
+          When editing_vocabulary is set, it gets editing vocabulary data.
+          When reference_vocabulary1 is set, it gets reference vocabulary1 data.
+          When reference_vocabulary2 is set, it gets reference vocabulary2 data.
+          When reference_vocabulary3 is set, it gets reference vocabulary3 data.
         required: true
         style: simple
         explode: false
@@ -196,59 +258,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
       x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
       x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
-    post:
-      tags:
-      - vocabulary
-      summary: Delete editing vocabulary term
-      operationId: delete_vocabulary_term
-      parameters:
-      - name: file_type
-        in: path
-        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
-          \ editing vocabulary data.  \n"
-        required: true
-        style: simple
-        explode: false
-        schema:
-          type: string
-      requestBody:
-        description: |
-          Specify the term id to request.
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: integer
-        required: true
-      responses:
-        "200":
-          description: "Delete editing vocabulary data success.  \nReturn updated\
-            \ EditingVocabulary list.\n"
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/EditingVocabulary'
-                x-content-type: application/json
-        "400":
-          description: |
-            Bad Request
-            ex. Invalid parameter.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        "404":
-          description: "Not Found  \nex. Request term not found.\n"
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      x-swagger-router-controller: swagger_server.controllers.vocabulary_controller
-      x-openapi-router-controller: swagger_server.controllers.vocabulary_controller
-      x-codegen-request-body-name: body
   /vocabulary/{file_type}/{term}:
     get:
       tags:
@@ -258,8 +267,8 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
-          \ editing vocabulary data.  \n"
+        description: |
+          Specify only editing_vocabulary.  It gets editing vocabulary data.
         required: true
         style: simple
         explode: false
@@ -306,8 +315,8 @@ paths:
       parameters:
       - name: file_type
         in: path
-        description: "Specify only editing_vocabulary.  \n'editing_vocabulary' get\
-          \ editing vocabulary data.  \n"
+        description: |
+          Specify only editing_vocabulary. It gets editing vocabulary data. 
         required: true
         style: simple
         explode: false
@@ -365,23 +374,23 @@ components:
       properties:
         editing_vocabulary:
           type: string
-          description: editing_vocabulary is xlsx file
+          description: editing_vocabulary is a csv file
           format: binary
         editing_vocabulary_meta:
           type: string
-          description: editing_vocabulary_meta is xlsx file
+          description: editing_vocabulary_meta is a csv file
           format: binary
         reference_vocabulary1:
           type: string
-          description: reference_vocabulary1 is xlsx file
+          description: reference_vocabulary1 is a csv file
           format: binary
         reference_vocabulary2:
           type: string
-          description: reference_vocabulary2 is xlsx file
+          description: reference_vocabulary2 is a csv file
           format: binary
         reference_vocabulary3:
           type: string
-          description: reference_vocabulary3 is xlsx file
+          description: reference_vocabulary3 is a csv file
           format: binary
     EditingVocabulary:
       type: object
@@ -444,7 +453,7 @@ components:
         postion_x: "100"
         postion_y: "100"
         color1: black
-        color2: black
+        color2: green
     EditingVocabularyMeta:
       type: object
       properties:
@@ -551,7 +560,7 @@ components:
           postion_x: "100"
           postion_y: "100"
           color1: black
-          color2: black
+          color2: green
         EditingVocabularyMeta:
         - id: 1
           meta_name: 名称
@@ -598,5 +607,11 @@ components:
           type: array
           items:
             type: string
+        langs:
+          type: array
+          items:
+            type: string
         reason:
+          type: integer
+        file_type:
           type: integer

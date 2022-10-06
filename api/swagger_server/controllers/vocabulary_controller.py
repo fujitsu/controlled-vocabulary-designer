@@ -22,45 +22,12 @@ REFERENCE_VOCABULARY = ['reference_vocabulary1',
                         'reference_vocabulary3']
 TERM_BLANK_MARK = '_TERM_BLANK_'
 
-def delete_vocabulary_term(body, file_type):  # noqa: E501
-    """Delete editing vocabulary term
-     # noqa: E501
-    :param body: Specify the term id to request.
-    :type body: List[]
-    :param file_type: Specify only editing_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.
-    :type file_type: str
-    :rtype: List[EditingVocabulary]
-    """
-
-    print('[delete_vocabulary_term] file_type :', file_type, ', body :', body)
-
-    if not file_type == 'editing_vocabulary':
-        print('[post_vocabulary_term] error. invalid param', file_type)
-        return ErrorResponse(0, 'Invalid parameter.'), 400
-
-    for id in body:
-        delete_sql = _create_delete_sql(file_type, id)
-        print('[delete_vocabulary_term] delete_sql :', delete_sql)
-        exec_res, status_code = _exec_delete_postgrest(delete_sql)
-        if not status_code == 200:
-            return exec_res, status_code
-
-    editing_vocabulary = []
-    exec_res, status_code = _exec_get_postgrest('editing_vocabulary')
-    if not status_code == 200:
-        return ErrorResponse(0, exec_res['message']), status_code
-
-    editing_vocabulary = exec_res['result']
-
-    return editing_vocabulary, 200
-
-
 def get_vocabulary_data(file_type):  # noqa: E501
     """Get vocabulary data by type
 
      # noqa: E501
 
-    :param file_type: Specify for editing_vocabulary, reference_vocabulary1, etc.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.   &#x27;reference_vocabulary1&#x27; get reference vocabulary1 data.   &#x27;reference_vocabulary2&#x27; get reference vocabulary2 data.   &#x27;reference_vocabulary3&#x27; get reference vocabulary3 data.
+    :param file_type: Specify for editing_vocabulary, reference_vocabulary1, etc. When editing_vocabulary is set, it gets editing vocabulary data. When reference_vocabulary1 is set, it gets reference vocabulary1 data. When reference_vocabulary2 is set, it gets reference vocabulary2 data. When reference_vocabulary3 is set, it gets reference vocabulary3 data. 
     :type file_type: str
 
     :rtype: GetAllSuccessResponse
@@ -107,9 +74,9 @@ def get_vocabulary_term(file_type, term):  # noqa: E501
 
      # noqa: E501
 
-    :param file_type: Specify only editing_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.
+    :param file_type: Specify only editing_vocabulary.  It gets editing vocabulary data. 
     :type file_type: str
-    :param term: Specify the term to request.
+    :param term: Specify the term to request. 
     :type term: str
 
     :rtype: EditingVocabulary
@@ -152,37 +119,42 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
 
      # noqa: E501
 
-    :param body:
+    :param body: 
     :type body: list | bytes
-    :param file_type: Specify only editing_vocabulary.   &#x27;editing_vocabulary&#x27; get editing vocabulary data.
+    :param file_type: Specify only editing_vocabulary. It gets editing vocabulary data.   
     :type file_type: str
     :param term: Specify the update term
     :type term: str
 
     :rtype: List[EditingVocabulary]
     """
-
     if file_type == 'editing_vocabulary':
         # Objects may be included and numbering cannot be used     
         index = 0
+        id_list=[]
         for item in body:
             payload = _create_update_payload(item, index)
 
             if 'id' in item:
                 # update data.
                 update_sql = _create_update_sql(file_type, item['id'])
+                id_list.append(item['id'])
+                
                 exec_res, status_code = _exec_update_postgrest(payload, update_sql)
                 if not status_code == 200:
                     return exec_res, status_code
+            else:
+                # not exist data.
+                print('[post_vocabulary_term] invalid data id ', file_type)
+                return ErrorResponse(0, 'Invalid  data id.'), 400
             index = index + 1
 
         editing_vocabulary = []
-        exec_res, status_code = _exec_get_postgrest('editing_vocabulary')
+        exec_res, status_code = _exec_get_postgrest('editing_vocabulary', id_list)
         if not status_code == 200:
             return ErrorResponse(0, exec_res['message']), status_code
 
         editing_vocabulary = exec_res['result']
-
         return editing_vocabulary, 200
 
     elif file_type == 'editing_vocabulary_meta':
@@ -196,11 +168,9 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
                 if not status_code == 200:
                     return exec_res, status_code
             else:
-                # add data.
-                exec_res, status_code = \
-                    _exec_insert_postgrest(payload, 'editing_vocabulary_meta')
-                if not status_code == 200:
-                    return exec_res, status_code
+                # not exist data.
+                print('[post_vocabulary_meta_term] invalid data id ', file_type)
+                return ErrorResponse(0, 'Invalid data id.'), 400
 
         editing_vocabulary_meta = []
         exec_res, status_code = _exec_get_postgrest('editing_vocabulary_meta')
@@ -211,7 +181,7 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
 
         return editing_vocabulary_meta, 200
     else:
-        print('[post_vocabulary_term] invalid param ', file_type)
+        print('[post_vocabulary_meta_term] invalid param ', file_type)
         return ErrorResponse(0, 'Invalid parameter.'), 400
 
 def _create_select_sql(file_type, term=None):
@@ -262,14 +232,6 @@ def _create_update_sql(file_type, id):
     return ret_sql
 
 
-def _create_delete_sql(file_type, id):
-
-    ret_sql = ''
-    ret_sql = file_type + '?id=eq.' + str(id)
-
-    return ret_sql
-
-
 def _create_update_payload(target_data, index):
 
     update_data = {}
@@ -313,11 +275,21 @@ def _create_updatemeta_payload(target_data):
     return update_data
 
 
-def _exec_get_postgrest(target_table):
+def _exec_get_postgrest(target_table, id_list=None):
 
     response_data = {}
+    
+    if id_list is not None:
+        tmpstrlist = "("
+        for item in id_list:
+            tmpstrlist += str(item) + ','
+        tmpstrlist = tmpstrlist[:-1]
+        tmpstrlist += ')'
+        request_url = POSTGREST_BASE_URL + target_table + '?id=in.'+tmpstrlist
+    else:
+        request_url = POSTGREST_BASE_URL + target_table
 
-    psg_res = requests.get(POSTGREST_BASE_URL + target_table, headers=HEADER)
+    psg_res = requests.get(request_url, headers=HEADER)
     try:
         psg_res.raise_for_status()
     except requests.exceptions.RequestException as e:
@@ -331,7 +303,6 @@ def _exec_get_postgrest(target_table):
 
 
 def _exec_update_postgrest(payload, url):
-
     response_data = {}
 
     psg_res = requests.patch(POSTGREST_BASE_URL + url,
@@ -347,36 +318,3 @@ def _exec_update_postgrest(payload, url):
 
     return response_data, 200
 
-
-def _exec_insert_postgrest(payload, url):
-
-    response_data = {}
-
-    psg_res = requests.post(POSTGREST_BASE_URL + url,
-                            headers=HEADER,
-                            data=json.dumps(payload))
-    try:
-        psg_res.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print('[_exec_insert_postgrest] error code:', end="")
-        print(psg_res.status_code, ', reason:', psg_res.reason)
-        response_data['message'] = psg_res.reason
-        return response_data, psg_res.status_code
-
-    return response_data, 200
-
-
-def _exec_delete_postgrest(url):
-
-    response_data = {}
-
-    psg_res = requests.delete(POSTGREST_BASE_URL + url)
-    try:
-        psg_res.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        print('[_exec_delete_postgrest] error code:', end="")
-        print(psg_res.status_code, ', reason:', psg_res.reason)
-        response_data['message'] = psg_res.reason
-        return response_data, psg_res.status_code
-
-    return response_data, 200

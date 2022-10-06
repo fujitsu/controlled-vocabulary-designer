@@ -13,7 +13,7 @@ import {purple} from '@material-ui/core/colors';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 
-import ColorChartCheckBox from './ColorChartCheckBox';
+import ColorChartCheckBoxOfConfirm from './ColorChartCheckBoxOfConfirm';
 
 /**
  * Feature of color chart check boxes
@@ -43,7 +43,7 @@ export default class ColorChartCheckBoxesOfConfirm extends React.Component {
    */
   render() {
     const colorSet = {
-      black: false,
+      white: false,
       red: false,
       orange: false,
       green: false,
@@ -60,40 +60,7 @@ export default class ColorChartCheckBoxesOfConfirm extends React.Component {
         <FormGroup style={{ width: '132px', padding: '10px'}}>
           <FormControlLabel
             control={
-              <ColorChartCheckBox
-                selectColor={(event)=>this.selectColor(event)}
-                checked={colorSet.black}
-                name='black'
-                style={{'color': grey[900],}}
-                disabled={this.props.disabled}
-              />
-            }
-          />
-          <FormControlLabel
-            control={
-              <ColorChartCheckBox
-                selectColor={(event)=>this.selectColor(event)}
-                checked={colorSet.red}
-                name='red'
-                style={{ 'color': red[500],}}
-                disabled={this.props.disabled}
-              />
-            }
-          />
-          <FormControlLabel
-            control={
-              <ColorChartCheckBox
-                selectColor={(event)=>this.selectColor(event)}
-                checked={colorSet.orange}
-                name='orange'
-                style={{ 'color': orange[500],}}
-                disabled={this.props.disabled}
-              />
-            }
-          />
-          <FormControlLabel
-            control={
-              <ColorChartCheckBox
+              <ColorChartCheckBoxOfConfirm
                 selectColor={(event)=>this.selectColor(event)}
                 checked={colorSet.green}
                 name='green'
@@ -104,7 +71,40 @@ export default class ColorChartCheckBoxesOfConfirm extends React.Component {
           />
           <FormControlLabel
             control={
-              <ColorChartCheckBox
+              <ColorChartCheckBoxOfConfirm
+                selectColor={(event)=>this.selectColor(event)}
+                checked={colorSet.white}
+                name='white'
+                style={{'color': grey[900],}}
+                disabled={this.props.disabled}
+              />
+            }
+          />
+          <FormControlLabel
+            control={
+              <ColorChartCheckBoxOfConfirm
+                selectColor={(event)=>this.selectColor(event)}
+                checked={colorSet.red}
+                name='red'
+                style={{ 'color': red[500],}}
+                disabled={this.props.disabled}
+              />
+            }
+          />
+          <FormControlLabel
+            control={
+              <ColorChartCheckBoxOfConfirm
+                selectColor={(event)=>this.selectColor(event)}
+                checked={colorSet.orange}
+                name='orange'
+                style={{ 'color': orange[500],}}
+                disabled={this.props.disabled}
+              />
+            }
+          />
+          <FormControlLabel
+            control={
+              <ColorChartCheckBoxOfConfirm
                 selectColor={(event)=>this.selectColor(event)}
                 checked={colorSet.blue}
                 name='blue'
@@ -115,7 +115,7 @@ export default class ColorChartCheckBoxesOfConfirm extends React.Component {
           />
           <FormControlLabel
             control={
-              <ColorChartCheckBox
+              <ColorChartCheckBoxOfConfirm
                 selectColor={(event)=>this.selectColor(event)}
                 checked={colorSet.purple}
                 name='purple'

@@ -58,9 +58,10 @@ export default
    * @param  {array} newValue - list of broader terms
    */
   onChange(event, newValue) {
+    const editingVocabulary =this.props.editingVocabulary;
     const inputText = event.target.value;
-    const find = this.props.editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
-    if( inputText != undefined && !find){
+    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    if( inputText != '' && inputText != undefined && !find){
       const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
                        '既存の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
@@ -69,26 +70,45 @@ export default
 
       return false;
     }
-    
-    if (this.props.editingVocabulary.isRelationSynonym(newValue)) {
-      const currentTerm = this.props.editingVocabulary.currentNode.term;
-      const errorMsg = '下位語テキストボックスに、 \"' + currentTerm +
-                       '\" あるいは \"' + currentTerm + '\" の代表語' +
-                       'あるいは \"' + currentTerm + '\" の同義語が記入されています。¥n' +
-                       '同義語テキストボックスには、 \"' + currentTerm +
+    if( find && find.language != editingVocabulary.tmpLanguage.list){
+      const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
+                       '現在選択されている言語の用語を記入してください。';
+      const innerText = errorMsg.split('¥n').map((line, key) =>
+        <span key={key}>{line}<br /></span>);
+      this.openSnackbar(innerText);
+
+      return false;
+    }
+
+    const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+    let _currentNode = currentNode;
+    if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+      && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
+      && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
+        const find = editingVocabulary.editingVocabulary.find((item)=>
+            item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
+        _currentNode = find?find:currentNode;
+    }
+    if (editingVocabulary.isRelationSynonym(_currentNode, newValue)) {
+      const errorMsg = '下位語テキストボックスに、 \"' + _currentNode.term +
+                       '\" あるいは \"' + _currentNode.term + '\" の代表語' +
+                       'あるいは \"' + _currentNode.term + '\" の同義語が記入されています。¥n' +
+                       '同義語テキストボックスには、 \"' + _currentNode.term +
                        '\" と上下関係を持たないように、¥n' +
                        'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
     }
-    this.props.editingVocabulary.updataSynonym(newValue);
+    editingVocabulary.updataSynonym(newValue);
     if (this.state.open == false) {
       const preferredLabelLength =
-        this.props.editingVocabulary.tmpPreferredLabel.list.length;
+        editingVocabulary.tmpPreferredLabel.list[_currentNode.language].length;
       if (preferredLabelLength > 1) {
-        const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
-        this.openSnackbar(errorMsg);
+        const errorMsg = '代表語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+        const innerText = errorMsg.split('¥n').map((line, key) =>
+          <span key={key}>{line}<br /></span>);
+        this.openSnackbar(innerText);
       }
     }
   }
@@ -98,18 +118,18 @@ export default
    * @return {element}
    */
   render() {
-    const synonym = this.props.editingVocabulary.tmpSynonym.list;
+    const synonym = this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list];
     let currentSynonym;
     // synonym on the selected term
     if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
-      currentSynonym = this.props.editingVocabulary.currentSynonym.list;
+      currentSynonym = this.props.editingVocabulary.currentNode.synonymList;
     } else { // synonym when switching with the  language radio button in the selected term
-      currentSynonym = this.props.editingVocabulary.currentLangDiffSynonym.list; 
+      currentSynonym = this.props.editingVocabulary.currentLangDiffNode.synonymList; 
     }
-
     /* eslint-disable no-unused-vars */
     // object for rendering
-    const length = this.props.editingVocabulary.tmpSynonym.list.length;
+    let length = this.props.editingVocabulary.tmpSynonym.list['ja'].length;
+    length = this.props.editingVocabulary.tmpSynonym.list['en'].length;
     /* eslint-enable no-unused-vars */
 
     return (

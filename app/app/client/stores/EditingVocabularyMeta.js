@@ -73,7 +73,6 @@ class EditingVocabularyMeta {
     };
     if (this.currentNode.id) {
       dbData.id = Number(this.currentNode.id);
-      console.log(dbData.id);
     }
     return dbData;
   }
@@ -126,7 +125,7 @@ class EditingVocabularyMeta {
     // If reading the data
     if( data){
       this.currentNode = {
-        id: null,
+        id:  data.id || null,
         meta_name: data.meta_name || '',
         meta_enname: data.meta_enname || '',
         meta_version: data.meta_version || '',
@@ -275,7 +274,7 @@ class EditingVocabularyMeta {
     });
 
     if( updateTermList.length > 0){
-      editingVocabularyStore.updateRequest(updateTermList, [], updateTermList[0], null, null, false);
+      editingVocabularyStore.updateRequest(updateTermList, updateTermList[0], null, null, false);
     }
   }
 
