@@ -94,7 +94,7 @@ export default
       if (newValue.length == 1) {
 
         // When a selected term or a term that is not a synonym is entered in the preferred label
-        if (editingVocabulary.isInvalidPreferredLabel(_displayNode, newValue[0])) {
+        if (!editingVocabulary.isValidPreferredLabel(_displayNode, newValue[0], displayLanguage)) {
           const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
                           '\"' +_displayNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
                           '代表語テキストボックスには、¥n' +

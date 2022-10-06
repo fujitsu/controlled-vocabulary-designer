@@ -2516,7 +2516,44 @@ isOtherVocSynUriChanged() {
       language: this.currentNode.language,
     }
 
-    // More than one id of uri selected
+    // When multiple preferred labels are selected
+    if (this.tmpPreferredLabel.list['ja'].length > 1) {
+      console.log('[errorCheck] multiPreferredLabel.');
+      ret.errorKind = 'multiPreferredLabel';      
+      ret.language = 'ja';
+      return ret;
+    }
+    if (this.tmpPreferredLabel.list['en'].length > 1) {
+      console.log('[errorCheck] multiPreferredLabel.');
+      ret.errorKind = 'multiPreferredLabel';      
+      ret.language = 'en';
+      return ret;
+    }
+
+    // preferred label exist in the synonyms or is the term
+    if (!this.isValidPreferredLabel(this.currentNode, this.tmpPreferredLabel.list[this.currentNode.language][0], this.currentNode.language)) {
+      console.log('[errorCheck] invalidPreferredLabel.');
+      ret.errorKind = 'invalidPreferredLabel';
+      ret.term = this.currentNode.term;
+      ret.language = this.currentNode.language;
+      return ret;
+    }
+    if (!this.isValidPreferredLabel(this.currentLangDiffNode, this.tmpPreferredLabel.list[this.currentLangDiffNode.language][0], this.currentLangDiffNode.language)) {
+      console.log('[errorCheck] invalidPreferredLabel.');
+      ret.errorKind = 'invalidPreferredLabel';
+      ret.term = this.currentLangDiffNode.term;
+      ret.language = this.currentLangDiffNode.language;
+      return ret;
+    }
+    
+
+    // 　・代表語列空白条件を満たす
+    // 　　　どちらかの言語で代表語がある
+    // 　
+
+
+
+    // More than one id of uri are put
     if (this.tmpIdofUri.list.length > 1) {
       console.log('[errorCheck] multiIdofUri.');
       ret.errorKind = 'multiIdofUri';
@@ -2531,16 +2568,112 @@ isOtherVocSynUriChanged() {
       return ret;
     }
 
-    // Check Id of URL setting for other preferred labels /////////////////////////////////////////
-    if ((this.tmpIdofUri.list.length > 0) && (this.tmpIdofUri.list[0])) {
-      const idofuri = this.tmpIdofUri.list[0];
-      const prfrrdLbl = this.tmpPreferredLabel.list[this.currentNode.language][0];
-      if (this.isInvalidIdofUri(this.currentNode, idofuri, prfrrdLbl)) {
-        console.log('[errorCheck] equalIdofUri.');
-        ret.errorKind = 'equalIdofUri';
+    // Id of URI must be unique except synonym's idofuri
+    const idofuri = this.tmpIdofUri.list[0];
+    const synonymIdList = this.tmpSynonym.idList;
+    if(!isUniqueIdofUri(this.currentNode, idofuri, synonymIdList)){
+      console.log('[errorCheck] equalIdofUri.');
+      ret.errorKind = 'nonuniqueIdofUri';
+      return ret;
+    };
+
+    // synonyms must not be the subordinate terms
+    if (this.tmpSynonym.list[this.currentNode.language].length > 0) {
+      if (this.isNarrowerTerm(this.currentNode.term, this.currentNode.language, this.tmpSynonym.list[this.currentNode.language])) {
+        console.log('[errorCheck] narrowerSynonym.');
+        ret.errorKind = 'narrowerSynonym';
+        ret.term = currentNode.term;
+        ret.language = currentNode.language;
+        return ret;
+      };
+    }
+    // synonyms must not be the subordinate terms
+    if (this.tmpSynonym.list[this.currentLangDiffNode.language].length > 0) {
+      if (this.isNarrowerTerm(this.currentLangDiffNode.term, this.currentLangDiffNode.language, this.tmpSynonym.list[this.currentLangDiffNode.language])) {
+        console.log('[errorCheck] narrowerSynonym.');
+        ret.errorKind = 'narrowerSynonym';
+        ret.term = currentLangDiffNode.term;
+        ret.language = currentLangDiffNode.language;
+        return ret;
+      };
+    }
+    // No more than one broader term selected
+    if (this.tmpBroaderTerm.list['ja'].length > 1) {
+      console.log('[errorCheck] multiBroaderTerm.');
+      ret.errorKind = 'multiBroaderTerm';
+      ret.language = 'ja';
+      return ret;
+    }
+    if (this.tmpBroaderTerm.list['en'].length > 1) {
+      console.log('[errorCheck] multiBroaderTerm.');
+      ret.errorKind = 'multiBroaderTerm';
+      ret.language = 'en';
+      return ret;
+    }
+ 
+    //  broader term does not exist in the synonym nor is not the term /////////////////////////////////////////
+    if ((this.tmpBroaderTerm.list['ja'].length == 1)) {
+      const term = this.currentNode.language === 'ja'? this.currentNode.term:this.currentLangDiffNode.term;
+      const nextBroaderTerm = this.tmpBroaderTerm.list[this.currentNode.language][0];
+      if (this.isBroaderInSynonym(term, 'ja', nextBroaderTerm)) {
+        console.log('[errorCheck] broaderInSynonym.');
+        ret.errorKind = 'broaderInSynonym';
+        ret.term = term;
+        ret.language = 'ja';
         return ret;
       }
     }
+    if ((this.tmpBroaderTerm.list['en'].length == 1)) {
+      const term = this.currentNode.language === 'en'? this.currentNode.term:this.currentLangDiffNode.term;
+      const nextBroaderTerm = this.tmpBroaderTerm.list[currentNode.language][0];
+      if (this.isBroaderInSynonym(term, 'en', nextBroaderTerm)) {
+        console.log('[errorCheck] broaderInSynonym.');
+        ret.errorKind = 'broaderInSynonym';
+        ret.term = term;
+        ret.language = 'en';
+        return ret;
+      }
+    }
+
+  
+    // the broader term is not exist in the narrower terms
+    // this check will be detected by the loop check of the broader and narrow relation
+
+      
+    // 　・上下関係が循環してない
+    // 　　　// Broader term loop check /////////////////////////////////////////
+    // @action isCyclicBroaders(currentNode, broaderTerm) {
+    // isCyclicBroaders(currentNode, broaderTerm) {
+    // Broader term loop check /////////////////////////////////////////
+    if (this.tmpBroaderTerm.broader_uri !== '') {
+      if (isCyclicBroaders(this.currentNode, this.tmpBroaderTerm.list[this.tmpLanguage.value])) {
+      console.log('[errorCheck] cycleBroaderTerm.');
+      ret.errorKind = 'cycleBroaderTerm';
+      ret.term = this.csurrentNode.term;
+      ret.language = this.currentNode.language;
+      return ret;
+      }
+    }
+    // 　
+    // 　・各言語で用語説明の数が１以下
+    // 　　　// When multiple term description labels are selected
+    // 　
+    // 　・同義語が下位語に存在していない
+    // 　　　
+    // 　　　// Check for existing cycles of synonyms
+    // 　
+    // 　・termがそもそも編集語彙に存在している
+    // 　
+    // 　
+    // 　・用語空白条件を満たす。
+    // 　
+    // 　// If there is more than one synonym and no preferred label is set, it is an error.
+    // 　これエラーなの？？？？
+    // 　
+    // 　// Determine whether URIs between broader terms are common　　←今これは発生しない
+
+
+
 
     [ this.currentNode, this.currentLangDiffNode].forEach(( currentNode)=>{
       
@@ -2560,83 +2693,83 @@ isOtherVocSynUriChanged() {
 
       // Multiple selection check /////////////////////////////////////////
 
-      // When multiple preferred labels are selected
-      if (this.tmpPreferredLabel.list[currentNode.language].length > 1) {
-        console.log('[errorCheck] multiPreferredLabel.');
-        ret.errorKind = 'multiPreferredLabel';
-        ret.term = currentNode.term;
-        ret.language = currentNode.language;
-        return ret;
-      }
+      // // When multiple preferred labels are selected
+      // if (this.tmpPreferredLabel.list[currentNode.language].length > 1) {
+      //   console.log('[errorCheck] multiPreferredLabel.');
+      //   ret.errorKind = 'multiPreferredLabel';
+      //   ret.term = currentNode.term;
+      //   ret.language = currentNode.language;
+      //   return ret;
+      // }
 
-      // More than one broader term selected
-      if (this.tmpBroaderTerm.list[currentNode.language].length > 1) {
-        console.log('[errorCheck] multiBroaderTerm.');
-        ret.errorKind = 'multiBroaderTerm';
-        ret.term = currentNode.term;
-        ret.language = currentNode.language;
-        return ret;
-      }
+      // // More than one broader term selected
+      // if (this.tmpBroaderTerm.list[currentNode.language].length > 1) {
+      //   console.log('[errorCheck] multiBroaderTerm.');
+      //   ret.errorKind = 'multiBroaderTerm';
+      //   ret.term = currentNode.term;
+      //   ret.language = currentNode.language;
+      //   return ret;
+      // }
 
       // Effective term check for preferred label /////////////////////////////////////////
 
-      if (this.tmpPreferredLabel.list[currentNode.language].length == 1) {
-        if (this.isInvalidPreferredLabel(currentNode, this.tmpPreferredLabel.list[currentNode.language][0])) {
-          console.log('[errorCheck] invalidPreferredLabel.');
-          ret.errorKind = 'invalidPreferredLabel';
-          ret.term = currentNode.term;
-          ret.language = currentNode.language;
-          return ret;
-        }
-      }
+      // if (this.tmpPreferredLabel.list[currentNode.language].length == 1) {
+      //   if (!this.isValidPreferredLabel(currentNode, this.tmpPreferredLabel.list[currentNode.language][0])) {
+      //     console.log('[errorCheck] invalidPreferredLabel.');
+      //     ret.errorKind = 'invalidPreferredLabel';
+      //     ret.term = currentNode.term;
+      //     ret.language = currentNode.language;
+      //     return ret;
+      //   }
+      // }
 
-      // If there is more than one synonym and no preferred label is set, it is an error.
-      if ( this.tmpPreferredLabel.list[currentNode.language].length == 0) {
-        // && this.tmpSynonym.list[currentNode.language].length > 0) {
-        console.log('[errorCheck] needToPreferredLabel.');
-        ret.errorKind = 'needToPreferredLabel';
-        ret.term = currentNode.term;
-        ret.language = currentNode.language;
-        return ret;
-      }
+      // // If there is more than one synonym and no preferred label is set, it is an error.
+      // if ( this.tmpPreferredLabel.list[currentNode.language].length == 0) {
+      //   // && this.tmpSynonym.list[currentNode.language].length > 0) {
+      //   console.log('[errorCheck] needToPreferredLabel.');
+      //   ret.errorKind = 'needToPreferredLabel';
+      //   ret.term = currentNode.term;
+      //   ret.language = currentNode.language;
+      //   return ret;
+      // }
 
-      // Check for existing cycles of synonyms
-      if (this.tmpSynonym.list[currentNode.language].length > 0) {
-        if (this.isRelationSynonym(currentNode, this.tmpSynonym.list[currentNode.language])) {
-          console.log('[errorCheck] relationSynonym.');
-          ret.errorKind = 'relationSynonym';
-          ret.term = currentNode.term;
-          ret.language = currentNode.language;
-          return ret;
-        }
-      }
+      // // Check for existing cycles of synonyms
+      // if (this.tmpSynonym.list[currentNode.language].length > 0) {
+      //   if (this.isRelationSynonym(currentNode, this.tmpSynonym.list[currentNode.language])) {
+      //     console.log('[errorCheck] relationSynonym.');
+      //     ret.errorKind = 'relationSynonym';
+      //     ret.term = currentNode.term;
+      //     ret.language = currentNode.language;
+      //     return ret;
+      //   }
+      // }
 
 
-      // Check the validity of a broader term /////////////////////////////////////////
-      if ((this.tmpBroaderTerm.list && this.tmpBroaderTerm.list[currentNode.language].length > 0) &&
-          (this.tmpBroaderTerm.list[currentNode.language][0])) {
-        const nextBroaderTerm = this.tmpBroaderTerm.list[currentNode.language][0];
+      // // Check the validity of a broader term /////////////////////////////////////////
+      // if ((this.tmpBroaderTerm.list && this.tmpBroaderTerm.list[currentNode.language].length > 0) &&
+      //     (this.tmpBroaderTerm.list[currentNode.language][0])) {
+      //   const nextBroaderTerm = this.tmpBroaderTerm.list[currentNode.language][0];
 
-        if (!this.isValidBrdrTrm(currentNode, nextBroaderTerm)) {
-          console.log('[errorCheck] invalidBroaderTerm.');
-          ret.errorKind = 'invalidBroaderTerm';
-          ret.term = currentNode.term;
-          ret.language = currentNode.language;
-          return ret;
-        }
-      }
+      //   if (!this.isValidBrdrTrm(currentNode, nextBroaderTerm)) {
+      //     console.log('[errorCheck] invalidBroaderTerm.');
+      //     ret.errorKind = 'invalidBroaderTerm';
+      //     ret.term = currentNode.term;
+      //     ret.language = currentNode.language;
+      //     return ret;
+      //   }
+      // }
 
-      // Broader term loop check /////////////////////////////////////////
-      if ((this.tmpBroaderTerm.list && this.tmpBroaderTerm.list[currentNode.language].length > 0) &&
-          (this.tmpBroaderTerm.list[currentNode.language][0])) {
-        if (this.isCycleBrdrTrm(currentNode, this.tmpBroaderTerm.list[currentNode.language][0])) {
-          console.log('[errorCheck] cycleBroaderTerm.');
-          ret.errorKind = 'cycleBroaderTerm';
-          ret.term = currentNode.term;
-          ret.language = currentNode.language;
-          return ret;
-        }
-      }
+      // // Broader term loop check /////////////////////////////////////////
+      // if ((this.tmpBroaderTerm.list && this.tmpBroaderTerm.list[currentNode.language].length > 0) &&
+      //     (this.tmpBroaderTerm.list[currentNode.language][0])) {
+      //   if (this.isCycleBrdrTrm(currentNode, this.tmpBroaderTerm.list[currentNode.language][0])) {
+      //     console.log('[errorCheck] cycleBroaderTerm.');
+      //     ret.errorKind = 'cycleBroaderTerm';
+      //     ret.term = currentNode.term;
+      //     ret.language = currentNode.language;
+      //     return ret;
+      //   }
+      // }
       
       // When multiple term description labels are selected
       if (this.tmpTermDescription.list[currentNode.language].length > 1) {
@@ -2696,57 +2829,42 @@ isOtherVocSynUriChanged() {
   }
 
   /**
-   * Determine if the Id of URI is set to the appropriate  Id of URI
-   * @param  {object}  currentNode - check target node
+   * Determine if the Id of URI is unique except synonym's idofuri
+   * @param  {Object}  currentNode - check target node
    * @param  {String}  idofuri - Id of URI string
-   * @param  {String}  prfrrdLbl - preferred label of Id of URI
-   * @return {Boolean} - true: inappropriate, false: appropriate
+   * @param  {Object}  synonymIdList - {ja: [synonym], en: [synonym]} 
+   * @return {Boolean} - true: unique, false: non-unique
    */
-   isInvalidIdofUri(currentNode, idofuri, prfrrdLbl) {
-    let isSameIdofUri = false;
-
+   isUniqueIdofUri(currentNode, idofuri, synonymIdList) {
     if (!idofuri) {
-      return isSameIdofUri;
+      return false;
     }
 
-    const tmpPreferredLabel = prfrrdLbl;
-    const tmpIdofUri = idofuri;
-    const tmp4Language = currentNode.language;
-
-    // Extract vocabulary with same Id of URI and same language
-    let idofuriVocList = this.editingVocabulary.filter((data) =>
-      data.idofuri === tmpIdofUri && data.language === tmp4Language);
-    if (idofuriVocList) {
-      // Exclude terms and terms in preferred label being edited
-      if (tmpPreferredLabel) {
-        idofuriVocList = idofuriVocList.filter((data) =>
-          data.preferred_label !== tmpPreferredLabel);
+    const uri_prefix = this.getUriPrefix();
+    // candidate uri
+    const candUri = uri_prefix + idofuri;
+    const synonymIdListAllLangWithMe = [currentNode.id, ...synonymIdList['ja'], ...synonymIdList['en']];
+    const safeUri = new Set();
+    synonymIdListAllLangWithMe.forEach((id1)=>{
+      const foundObj = this.editingVocWithId.get(id1);
+      safeUri.add(foundObj.uri);
+    }, this);
+    
+    // if the candidate uri is contained in the safeuri 
+    if(safeUri.has(candUri)){
+      // it is ok
+      return true;
+    }else{
+      if(this.uri2synoid[0].has(candUri)){
+        // other term have the candidate uri
+        return false;
+      }else{
+        return true;
       }
-
-      idofuriVocList = idofuriVocList.filter((data) =>
-        data.term !== currentNode.term);
     }
-
-    idofuriVocList.forEach((data) => {
-      // If no synonyms are present, an error occurs if another Id of URI is set
-      if (this.tmpSynonym.list[data.language].length == 0) {
-        this.equalUriPreferredLabel = data.preferred_label;
-        console.log(
-            '[errorCheck] idofuri is not unmatch(' +
-            tmpPreferredLabel +
-            ' : ' +
-            tmpIdofUri +
-            ', ' +
-            data.preferred_label +
-            ' : ' +
-            data.idofuri +
-            ').',
-        );
-        isSameIdofUri = true;
-      }
-    });
-    return isSameIdofUri;
   }
+
+
 
   // ID of URI //////////////////////
   /**
@@ -2881,39 +2999,22 @@ isOtherVocSynUriChanged() {
   }
 
   /**
-   * Determine if it is a valid broader term
+   * Determine if broader term does not exist in the synonym or is not the term
    * @param  {object}  currentNode - check target node
    * @param  {String}  broaderTerm - broader term
    * @return {Boolean} - true: valid, false: invalid
    */
-  @action isValidBrdrTrm(currentNode, broaderTerm) {
-    // broaderTerm is the preferred label of this currentNode
-    if (this.tmpPreferredLabel && this.tmpPreferredLabel.list[currentNode.language].length == 1) {
-      if (broaderTerm === this.tmpPreferredLabel.list[currentNode.language][0]) {
-        console.log('[errorCheck] preferredLabel is set for broaderTerm.');
-        return false;
-      }
+  @action isBroaderInSynonym(term, language, broaderTerm) {
+    const synonymSet = new Set([...this.tmpSynonym.list[language]]);
+    if(term !== ''){
+      synonymSet.add(term);
     }
-
-    // Whether there are synonyms for the broaderTerm
-    if (this.tmpSynonym.list[currentNode.language].length > 0) {
-      const find = this.tmpSynonym.list[currentNode.language].find( (term) =>
-      term == broaderTerm);
-      if (find) {
-        console.log('[errorCheck] synonym is set for broaderTerm.');
-        return false;
-      }
-    }
-
-    // Whether or not the selected term is set in the broader term
-    if (broaderTerm == currentNode.term) {
-      console.log('[errorCheck] current term is set for broaderTerm.');
+    if(sysnonymSet.has(broaderTerm)){
+      return true; 
+    }else{
       return false;
     }
-
-    return true;
   }
-
   /**
    * Determine if a broader term is not looping
    * @param  {object}  currentNode - check target node
@@ -2994,7 +3095,90 @@ isOtherVocSynUriChanged() {
 
     return false;
   }
-  
+
+  /**
+ * Determine if a broader term is looping
+ * @param  {object}  currentNode - check target node
+ * @param  {String}  broaderTerm - broader term
+ * @return {Boolean} - true: loop (invalid), false: not a loop
+ */
+  @action isCyclicBroaders(currentNode, broaderTerm) {
+    if(broaderTerm ===''){
+      this.cycleBroaderTerm = [];
+      return false;
+    }
+ 
+    const displayLanguage = this.tmpLanguage.value;
+    const otherLanguage = displayLanguage === 'ja'? 'ja' : 'en';
+
+    const cycleBroaderTerm = []; // list of preflabels.
+    const goalUri = new Set();
+    
+    const foundBrodId =this.getIdbyTermandLang(broaderTerm, displayLanguage);
+    const foundBroadObj = this.editingVocWithId.get(foundBrodId);
+    
+    // initialization
+    let pref1 = '';
+    if(this.tmpPreferredLabel.list[displayLanguage].length !== 0){
+      pref1 = this.tmpPreferredLabel.list[displayLanguage][0];
+    }else{
+      pref1 = this.tmpPreferredLabel.list[otherLanguage][0];
+    }
+    cycleBroaderTerm.push(pref1);  
+    // const uri1 = currentNode.uri;
+    const uri_prefix = this.getUriPrefix();
+    const uri1 = uri_prefix + this.tmpIdofUri.list[0];
+    goalUri.add(uri1);
+    // collect uri from the tmpSynonym
+    const synonymIdWithMe = [currentNode.id, ...this.tmpSynonym.idList['ja'], ...this.tmpSynonym.idList['en']]; 
+    synonymIdWithMe.forEach((id1)=>{
+      const foundObj = this.editingVocWithId.get(id1);
+      goalUri.add(foundObj.uri);
+    }, this);
+
+
+
+    // loop
+    let continueFlag = true;
+    let isLoop = false;
+    // let nextBroaderUri = this.tmpBroaderTerm.broader_uri;
+    let nextBroaderUri = foundBroadObj.uri;
+    do{
+      // get id from uri2synoid. get the first id from the synonym list 
+      const id2 = this.uri2synoid[0].get(nextBroaderUri)[0];
+      // idからdataをとり、dataからbroader_uriを取る
+      const foundObj = this.editingVocWithId.get(id2);
+      // push preferred label
+      let pref2;
+      if(undefined !== this.uri2preflabel[displayLanguage][foundObj.uri]){
+        pref2 = this.uri2preflabel[displayLanguage][foundObj.uri];
+      }else{
+        pref2 = this.uri2preflabel[otherLanguage][foundObj.uri];
+      }
+      cycleBroaderTerm.push(pref2);
+
+      if(foundObj.broader_uri !==''){
+        // it have broader
+        if(goalUri.has(foundObj.broader_uri)){
+          // it is loop
+          isLoop = true;
+          continueFlag = false;
+        }else{
+          // next broader
+          nextBroaderUri = foundObj.broader_uri;
+        }
+      }else{
+        // it is the root
+        isLoop = false;
+        continueFlag = false;
+      }
+    } while (continueFlag);
+
+    this.cycleBroaderTerm = cycleBroaderTerm;
+    return isLoop;
+  }
+
+
   /**
    * Determine whether URIs between broader terms are common
    * @param  {object}  currentNode - check target node
@@ -3159,32 +3343,62 @@ isOtherVocSynUriChanged() {
     this.updateSynonym(newArray);
   }
 
+  // /**
+  //  * synonyms must not be the subordinate terms
+  //  * @param  {object}  currentNode - check target node
+  //  * @param  {Array}  list synonymList
+  //  * @return {Boolean}     true:relation, false:not relation
+  //  */
+  // @action isRelationSynonym(currentNode, list) {
+  //   const lblList = [];
+
+  //   list.forEach((synonym) => {
+  //     if (lblList.indexOf(synonym) == -1) {
+  //       lblList.push(synonym);
+  //     }
+  //   });
+
+  //   this.tmpPreferredLabel.list[currentNode.language].forEach((label) => {
+  //     if (lblList.indexOf(label) == -1) {
+  //       lblList.push(label);
+  //     }
+  //   });
+
+  //   if (lblList.indexOf(currentNode.term) == -1) {
+  //     lblList.push(currentNode.term);
+  //   }
+
+  //   if (this.tmpSubordinateTerm.some((sub) => lblList.indexOf(sub) != -1)) {
+  //     return true;
+  //   } else {
+  //     return false;
+  //   }
+  // }
   /**
-   * [isRelationSynonym description]
-   * @param  {object}  currentNode - check target node
+   * synonyms must not be the subordinate terms
+   * @param  {String}  term check target term
+   * @param  {String}  language  
    * @param  {Array}  list synonymList
-   * @return {Boolean}     true:relation, false:not relation
+   * @return {Boolean}     true: narrower, false: not narrower
    */
-  @action isRelationSynonym(currentNode, list) {
-    const lblList = [];
-
+   @action isNarrowerTerm(term, language, list) {
+    
+    const labelSet = new Set();
     list.forEach((synonym) => {
-      if (lblList.indexOf(synonym) == -1) {
-        lblList.push(synonym);
-      }
+      labelSet.add(synonym);
     });
 
-    this.tmpPreferredLabel.list[currentNode.language].forEach((label) => {
-      if (lblList.indexOf(label) == -1) {
-        lblList.push(label);
-      }
+    this.tmpPreferredLabel.list[language].forEach((label) => {
+      labelSet.add(label);
     });
 
-    if (lblList.indexOf(currentNode.term) == -1) {
-      lblList.push(currentNode.term);
-    }
+    labelSet.add(term);
 
-    if (this.tmpSubordinateTerm.some((sub) => lblList.indexOf(sub) != -1)) {
+    const subTerm = new Set(this.calcpSubordinateTerm(language));
+
+    const intersection = new Set([...labelSet].filter((label) => (subTerm.has(label))));
+
+    if (intersection.size !== 0) {
       return true;
     } else {
       return false;
@@ -3248,22 +3462,23 @@ isOtherVocSynUriChanged() {
   }
 
   /**
-   * Determine if a broader term is a term name or synonym
+   * Determine if a preferred label exist in the synonyms or is the term
    * @param  {object}  currentNode - check target node
    * @param  {string}  newValue - term set for the preferred label
-   * @return {Boolean} - true: inappropriate, false: appropriate
+   * @param  {string}  language - language
+   * @return {Boolean} - true: valid, false: inappropriate
    */
-  isInvalidPreferredLabel(currentNode, newValue) {
+  isValidPreferredLabel(currentNode, newValue, language) {
     if (currentNode.id) {
       if (newValue === currentNode.term) {
-        return false;
+        return true;
       }
-      const find = this.tmpSynonym.list[ currentNode.language].some((synonym) => synonym === newValue);
-      if (find) return false;
+      const find = this.tmpSynonym.list[language].some((synonym) => synonym === newValue);
+      if (find) return true;
 
-      return true;
+      return false;
     }
-    return false;
+    return true;
   }
 
   // subordinateTerm //////////////////////
@@ -3272,7 +3487,7 @@ isOtherVocSynUriChanged() {
 
   /**
    * Create narrower term list for screen display
-   * collect all subordinate terms under tmpPreferredLabel for the display language
+   * collect all subordinate terms under tmpSynonym for the display language
    * @return {Array} list of terms
    */
    @computed get tmpSubordinateTerm() {
@@ -3282,54 +3497,99 @@ isOtherVocSynUriChanged() {
     const subordinateTermSet = new Set();
 
     const displayLanguage = this.tmpLanguage.value;
-    const keyTermSet = new Set(this.tmpPreferredLabel.list[displayLanguage].concat()); // shallowcopy
+    const keyIdSet = new Set(this.tmpSynonym.idList[displayLanguage].concat()); // shallowcopy
     if(displayLanguage === this.currentNode.language){
-      keyTermSet.add(this.currentNode.term);
+      keyIdSet.add(this.currentNode.id);
     }else{
-      keyTermSet.add(this.currentLangDiffNode.term);
+      if(undefined !== this.currentLangDiffNode.id){
+        keyIdSet.add(this.currentLangDiffNode.id);
+      }
     }
     if(this.selectedFile.id === 0){
-      keyTermSet.forEach((term)=>{
-        if(term === ''){
-        }else{
-          // term 2 id
-          const foundId = this.getIdbyTermandLang(term, displayLanguage, 0);
-          // id to data
-          const foundObj = this.editingVocWithId.get(foundId);
-          // uri 2 narrower
-          const foundIdSet = this.uri2narrowid[0].get(foundObj.uri);
-          if(undefined !== foundIdSet){
-            // narrower terms are found
-            foundIdSet.forEach((id1)=>{
-              const foundObj1 = this.editingVocWithId.get(id1);
-              subordinateTermSet.add(foundObj1.preferred_label);
-            },this);
-          }
+      keyIdSet.forEach((id1)=>{
+        // id to data
+        const foundObj = this.editingVocWithId.get(id1);
+        // uri 2 narrower
+        const foundIdSet = this.uri2narrowid[0].get(foundObj.uri);
+        if(undefined !== foundIdSet){
+          // narrower terms are found
+          foundIdSet.forEach((id2)=>{
+            const foundObj1 = this.editingVocWithId.get(id2);
+            subordinateTermSet.add(foundObj1.preferred_label);
+          },this);
         }
       });  
     }else{
-      const refif = this.selectedFile.id;
-      keyTermSet.forEach((term)=>{
-        if(term === ''){
-        }else{
-          // term 2 id
-          const foundId = this.getIdbyTermandLang(term, displayLanguage, refif);
-          // id to data
-          const foundObj = this.referenceVocWithId[refid].get(foundId);
-          // uri 2 narrower
-          const foundIdSet = this.uri2narrowid[refid].get(foundObj.uri);
-          if(undefined !== foundIdSet){
-            // narrower terms are found
-            foundIdSet.forEach((id1)=>{
-              const foundObj1 = this.referenceVocWithId[refid].get(id1);
-              subordinateTermSet.add(foundObj1.preferred_label);
-            },this);  
-          }
+      const refid = this.selectedFile.id;
+      keyIdSet.forEach((id1)=>{
+        // id to data
+        const foundObj = this.referenceVocWithId[refid].get(id1);
+        // uri 2 narrower
+        const foundIdSet = this.uri2narrowid[refid].get(foundObj.uri);
+        if(undefined !== foundIdSet){
+          // narrower terms are found
+          foundIdSet.forEach((id2)=>{
+            const foundObj1 = this.referenceVocWithId[refid].get(id2);
+            subordinateTermSet.add(foundObj1.preferred_label);
+          },this);  
         }
       }, this);
     }
     return [...subordinateTermSet];
   }
+  /**
+   * Create narrower term list for screen display
+   * collect all subordinate terms under tmpSynonym for the display language
+   * @param {String} language
+   * @return {Array} list of terms
+   */
+  calcSubordinateTerm(language) {
+    // for all terms in tmpPreferredLabel
+    // they may have different uri
+    // we collect terms whose broader_uri is one of the uris 
+    const subordinateTermSet = new Set();
+
+    const keyIdSet = new Set(this.tmpSynonym.idList[language].concat()); // shallowcopy
+    if(language === this.currentNode.language){
+      keyIdSet.add(this.currentNode.id);
+    }else{
+      if(undefined !== this.currentLangDiffNode.id){
+        keyIdSet.add(this.currentLangDiffNode.id);
+      }
+    }
+    if(this.selectedFile.id === 0){
+      keyIdSet.forEach((id1)=>{
+        // id to data
+        const foundObj = this.editingVocWithId.get(id1);
+        // uri 2 narrower
+        const foundIdSet = this.uri2narrowid[0].get(foundObj.uri);
+        if(undefined !== foundIdSet){
+          // narrower terms are found
+          foundIdSet.forEach((id2)=>{
+            const foundObj1 = this.editingVocWithId.get(id2);
+            subordinateTermSet.add(foundObj1.preferred_label);
+          },this);
+        }
+      });  
+    }else{
+      const refid = this.selectedFile.id;
+      keyIdSet.forEach((id1)=>{
+        // id to data
+        const foundObj = this.referenceVocWithId[refid].get(id1);
+        // uri 2 narrower
+        const foundIdSet = this.uri2narrowid[refid].get(foundObj.uri);
+        if(undefined !== foundIdSet){
+          // narrower terms are found
+          foundIdSet.forEach((id2)=>{
+            const foundObj1 = this.referenceVocWithId[refid].get(id2);
+            subordinateTermSet.add(foundObj1.preferred_label);
+          },this);  
+        }
+      }, this);
+    }
+    return [...subordinateTermSet];
+  }
+  
 
   // Term Description //////////////////////
   @observable tmpTermDescription = {

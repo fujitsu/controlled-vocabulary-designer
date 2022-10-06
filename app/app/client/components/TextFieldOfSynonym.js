@@ -87,7 +87,8 @@ export default
         const foundObj = editingVocabulary.editingVocWithId.get(foundId);
         _displayNode = foundObj?foundObj:displayNode;
     }
-    if (editingVocabulary.isRelationSynonym(_displayNode, newValue)) {
+    // if (editingVocabulary.isRelationSynonym(_displayNode, newValue)) {
+    if (editingVocabulary.isNarrowerTerm(_displayNode.term, displayLanguage, newValue)) {
       const errorMsg = '下位語テキストボックスに、 \"' + _displayNode.term +
                        '\" あるいは \"' + _displayNode.term + '\" の代表語' +
                        'あるいは \"' + _displayNode.term + '\" の同義語が記入されています。¥n' +
