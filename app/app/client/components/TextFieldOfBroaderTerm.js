@@ -72,8 +72,11 @@ export default
 
       return false;
     }
-    // const foundObj = editingVocabulary.editingVocWithId.get(foundId);
-    // let newValueUri = foundObj.uri;
+    const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+    let newValueUri = '';
+    if(undefined !== foundObj){
+      newValueUri = foundObj.uri;
+    }
 
     if (newValue.length > 1) {
       // More than one broader term selected
@@ -95,7 +98,8 @@ export default
           const foundObj = editingVocabulary.editingVocWithId.get(foundId);
           _displayNode = foundObj?foundObj:displayNode;
       }
-      if (!editingVocabulary.isValidBrdrTrm(_displayNode, nextBroaderTerm)) {
+      //if (!editingVocabulary.isValidBrdrTrm(_displayNode, nextBroaderTerm)) {
+      if (editingVocabulary.isBroaderInSynonym(_displayNode.term, displayLanguage, nextBroaderTerm)) { 
         const errorMsg = '上位語テキストボックスに、¥n' +
                        '\"' + _displayNode.term + '\" の代表語あるいは同義語が記入されています。¥n' +
                        '上位語テキストボックスには、¥n' +
@@ -103,7 +107,8 @@ export default
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
-      } else if (editingVocabulary.isCycleBrdrTrm(_displayNode, nextBroaderTerm)) {
+      // } else if (editingVocabulary.isCycleBrdrTrm(_displayNode, nextBroaderTerm)) {
+      } else if (editingVocabulary.isCyclicBroaders(_displayNode, String(nextBroaderTerm))){
         // Broader term loop check /////////////////////////////////////////
           const cycleBroaderTerm =
             editingVocabulary.cycleBroaderTerm;
@@ -136,7 +141,7 @@ export default
         this.openSnackbar(innerText);
       }
     }
-    editingVocabulary.updateBroaderTerm(newValue);
+    editingVocabulary.updateBroaderTerm(newValue, newValueUri);
   }
 
   /**

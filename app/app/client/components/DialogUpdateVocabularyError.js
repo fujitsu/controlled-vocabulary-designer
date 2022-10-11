@@ -52,7 +52,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
       // Preferred label error /////////////////////////////
       // Preferred label:Multiple Input Error
       case 'multiPreferredLabel':
-        errorMsgEdt = '代表語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+        errorMsgEdt = (language==='ja'? '日本語':'英語') + 'の代表語テキストボックスに、複数の値が記入されています。¥n' + '代表語値を1つだけ記入してください。';
         errorMsgVoc = '代表語は、複数の値を設定できません。' ;
         break;
       // Preferred label:Invalid input error
@@ -76,13 +76,9 @@ export default class DialogUpdateVocabularyError extends React.Component {
 
       // Synonym error /////////////////////////////
       // Synonym:Synonym error registered in the hierarchical relationship
-      case 'relationSynonym':
-        errorMsgEdt = '下位語テキストボックスに、 \"' + term +
-                   '\" あるいは \"' + term + '\" の代表語' +
-                   'あるいは \"' + term + '\" の同義語が記入されています。¥n' +
-                   '同義語テキストボックスには、 \"' + term +
-                   '\" と上下関係を持たないように、¥n' +
-                   'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
+      case 'narrowerSynonym':
+        errorMsgEdt = (language==='ja'? '日本語':'英語') + 'の同義語テキストボックスに、 下位語が記入されています。¥n' 
+                   '同義語テキストボックスには、¥n上下関係を持たない用語を記入してください。';
         errorMsgVoc = '同義語には、 \"' + term +
                     '\" と上下関係を持たない用語を設定してください。';
         break;
@@ -118,11 +114,11 @@ export default class DialogUpdateVocabularyError extends React.Component {
       // Broader term error /////////////////////////////
       // Broader term:Multiple input error
       case 'multiBroaderTerm':
-        errorMsgEdt = '上位語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+        errorMsgEdt = (language==='ja'? '日本語':'英語') + 'の上位語テキストボックスには、複数の値が記入されています。¥n値を1つだけ記入してください。';
         errorMsgVoc = '上位語には、複数の値を設定できません。';
         break;
       // Broader term:Invalid input error
-      case 'invalidBroaderTerm':
+      case 'broaderInSynonym':
         errorMsgEdt = '上位語テキストボックスに、¥n' +
                    '\"' + term + '\" の代表語あるいは同義語が記入されています。¥n' +
                    '上位語テキストボックスには、¥n' +
