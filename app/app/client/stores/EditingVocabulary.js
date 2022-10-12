@@ -226,7 +226,7 @@ class EditingVocabulary {
           this.uri2narrowid[0].set(data.broader_uri, new Set([data.id]));
         }
       }
-    });
+    }, this);
 
     const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
 
@@ -260,7 +260,7 @@ class EditingVocabulary {
           this.uri2preflabel['en'][data.uri] = data.preferred_label;
         }
       }
-    });
+    }, this);
     unChangeVocabulary.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
@@ -270,7 +270,7 @@ class EditingVocabulary {
           this.uri2preflabel['en'][data.uri] = data.preferred_label;
         }
       }
-    });
+    }, this);
 
     dbData.forEach( (data) => {
       const prevObj = this.editingVocWithId.get(data.id);
@@ -304,7 +304,7 @@ class EditingVocabulary {
           this.uri2narrowid[0].set(data.broader_uri, new Set([data.id]));
         }
       }
-    });
+    }, this);
 
     // calculate values to update
     const updatedEditingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
@@ -708,6 +708,21 @@ class EditingVocabulary {
       case 2: return this.referenceVocabulary2;
       case 3: return this.referenceVocabulary3;
       default: return this.editingVocabulary;
+    }
+  }
+
+  /**
+   * Get displayed vocabulary data
+   * @param {number} fileId index
+   * @return {Map} - vocabulary data with id
+   */
+   getTargetWithId(fileId) {
+    switch (fileId) {
+      case 0: return this.editingVocWithId;
+      case 1: return this.referenceVocWithId[1];
+      case 2: return this.referenceVocWithId[2];
+      case 3: return this.referenceVocWithId[3];
+      default: return this.editingVocWithId;
     }
   }
 
@@ -2012,7 +2027,11 @@ isOtherVocSynUriChanged() {
       const followObj = new Object;
       followObj.id = obj.id; // id as is 
       followObj.term = obj.term;// term as is 
-      followObj.preferred_label = tmp1Pref.list[obj.language][0];
+      if(tmp1Pref.list[obj.language].length !==0){
+        followObj.preferred_label = tmp1Pref.list[obj.language][0];
+      }else{
+        followObj.preferred_label = '';
+      }
       followObj.language = obj.language;// language as is 
       followObj.idofuri = tmp1IdofUri.list[0];
       followObj.uri = uri_prefix + tmp1IdofUri.list[0]; //tentative
@@ -2445,19 +2464,23 @@ isOtherVocSynUriChanged() {
 
 
     // preferred label must exist in the synonyms or is the term
-    if (!this.isValidPreferredLabel(this.currentNode, this.tmpPreferredLabel.list[this.currentNode.language][0], this.currentNode.language)) {
-      console.log('[errorCheck] invalidPreferredLabel.');
-      ret.errorKind = 'invalidPreferredLabel';
-      ret.term = this.currentNode.term;
-      ret.language = this.currentNode.language;
-      return ret;
+    if(this.tmpPreferredLabel.list[this.currentNode.language].length !==0){
+      if (!this.isValidPreferredLabel(this.currentNode, this.tmpPreferredLabel.list[this.currentNode.language][0], this.currentNode.language)) {
+        console.log('[errorCheck] invalidPreferredLabel.');
+        ret.errorKind = 'invalidPreferredLabel';
+        ret.term = this.currentNode.term;
+        ret.language = this.currentNode.language;
+        return ret;
+      }
     }
-    if (!this.isValidPreferredLabel(this.currentLangDiffNode, this.tmpPreferredLabel.list[this.currentLangDiffNode.language][0], this.currentLangDiffNode.language)) {
-      console.log('[errorCheck] invalidPreferredLabel.');
-      ret.errorKind = 'invalidPreferredLabel';
-      ret.term = this.currentLangDiffNode.term;
-      ret.language = this.currentLangDiffNode.language;
-      return ret;
+    if(this.tmpPreferredLabel.list[this.currentLangDiffNode.language].length !==0){  
+      if (!this.isValidPreferredLabel(this.currentLangDiffNode, this.tmpPreferredLabel.list[this.currentLangDiffNode.language][0], this.currentLangDiffNode.language)) {
+        console.log('[errorCheck] invalidPreferredLabel.');
+        ret.errorKind = 'invalidPreferredLabel';
+        ret.term = this.currentLangDiffNode.term;
+        ret.language = this.currentLangDiffNode.language;
+        return ret;
+      }
     }
     
 

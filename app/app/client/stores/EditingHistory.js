@@ -332,9 +332,10 @@ class EditingHistory {
   execPosition(type, history) {
     
     const EditingVocabulary = editingVocabularyStore;
-    const target = EditingVocabulary.getTargetFileData(EditingVocabulary.selectedFile.id).find((obj) => {
-      return (obj.id == history.targetId);
-    });
+    // const target = EditingVocabulary.getTargetFileData(EditingVocabulary.selectedFile.id).find((obj) => {
+    //   return (obj.id == history.targetId);
+    // });
+    const target = EditingVocabulary.getTargetWithId(EditingVocabulary.selectedFile.id).get(Number(history.targetId));
     
     if (!target) {
       console.log('target is not found. id: ' + history.targetId);
