@@ -91,8 +91,8 @@ export default class DialogSettingSynonym extends React.Component {
     let selectBroader_Ja = editingVocabulary.currentNode.language=='ja'?editingVocabulary.currentNode.broader_term:editingVocabulary.currentLangDiffNode.broader_term;
     let selectBroader_En = editingVocabulary.currentNode.language=='en'?editingVocabulary.currentNode.broader_term:editingVocabulary.currentLangDiffNode.broader_term;
 
-    const targetNode = editingVocabulary.getTargetFileData(editingVocabulary.selectedFile.id).find(
-      (data)=>{ return data.term == target.term });
+    const targetNode = editingVocabulary.editingVocWithId.get(Number(target.id));
+        
 
     if( targetNode.language =='ja'){
       if( selectPreferred_Ja == '' && targetNode.preferred_label != ''){
@@ -298,14 +298,13 @@ export default class DialogSettingSynonym extends React.Component {
     }
 
     // idofuri
-    const term = this.state.selectPreferred_Ja?this.state.selectPreferred_Ja:
-                  this.state.selectPreferred_En?this.state.selectPreferred_En:'';
-    let idofuri = term;
-    if(term){
-      const targetNode = this.props.editingVocabulary.getTargetFileData(this.props.editingVocabulary.selectedFile.id).find(
-        (data)=>{ return data.term == term });
-      if( targetNode) idofuri = targetNode.idofuri;
-    }
+    // const term = this.state.selectPreferred_Ja?this.state.selectPreferred_Ja:
+    //               this.state.selectPreferred_En?this.state.selectPreferred_En:'';
+    const term = this.state.selectPreferred_Ja?this.state.selectPreferred_Ja:this.state.selectPreferred_En;
+    const tmp1lang = this.state.selectPreferred_Ja? 'ja':'en';
+    const foundId = this.props.editingVocabulary.getIdbyTermandLang(term, tmp1lang);
+    const foundNode = this.props.editingVocabulary.editingVocWithId.get(foundId);
+    const idofuri = foundNode.idofuri;    
     this.props.editingVocabulary.tmpIdofUri={
       id: this.props.editingVocabulary.currentNode.id, 
       list: [ idofuri ]
