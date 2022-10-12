@@ -509,7 +509,7 @@ export default
       const target = event.target.data();
       // const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
       // console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, find)
-      const findObj = this.props.editingVocabulary.editingVocWithId.get(target.id);
+      const findObj = this.props.editingVocabulary.editingVocWithId.get(Number(target.id));
       console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, findObj);
 
       // other vocabulary node
@@ -524,23 +524,23 @@ export default
         if( this.props.editingVocabulary.selectedTermList.length > 1){
           this.props.editingVocabulary.deselectTermList();
           isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
-          this.props.editingVocabulary.setCurrentNodeById(target.id, true);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id), true);
         }else{
           this.props.editingVocabulary.deselectTermList();
           if(this.props.editingVocabulary.currentNode.id !=  target.id){
             isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
           }
-          this.props.editingVocabulary.setCurrentNodeById(target.id);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }else{
         isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
         if(isAddTerm && this.props.editingVocabulary.selectedTermList.length == 1){
-          this.props.editingVocabulary.setCurrentNodeById(target.id);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length > 0){
           const firstSelectedTerm = this.props.editingVocabulary.selectedTermList.slice(0,1)[0];
-          this.props.editingVocabulary.setCurrentNodeById(firstSelectedTerm.id, true);
+          this.props.editingVocabulary.setCurrentNodeById(Number(firstSelectedTerm.id), true);
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length == 0){
-          this.props.editingVocabulary.setCurrentNodeById(target.id);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }
       this.fitCenterPan = true;
@@ -767,7 +767,7 @@ export default
 
     this.props.editingVocabulary.deselectTermList();
     this.props.editingVocabulary.setSelectedTermList(source.term);
-    this.props.editingVocabulary.setCurrentNodeById(source.id, true);
+    this.props.editingVocabulary.setCurrentNodeById(Number(source.id), true);
 
     //this.props.editingVocabulary.updateBroaderTerm( [ nextBroaderTerm ] );
     this.props.editingVocabulary.updateBroaderTerm( [ nextBroaderTerm ], this.target.uri);
