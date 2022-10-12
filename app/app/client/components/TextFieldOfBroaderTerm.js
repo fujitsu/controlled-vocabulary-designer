@@ -98,7 +98,6 @@ export default
           const foundObj = editingVocabulary.editingVocWithId.get(foundId);
           _displayNode = foundObj?foundObj:displayNode;
       }
-      //if (!editingVocabulary.isValidBrdrTrm(_displayNode, nextBroaderTerm)) {
       if (editingVocabulary.isBroaderInSynonym(_displayNode.term, displayLanguage, nextBroaderTerm)) { 
         const errorMsg = '上位語テキストボックスに、¥n' +
                        '\"' + _displayNode.term + '\" の代表語あるいは同義語が記入されています。¥n' +
@@ -107,7 +106,6 @@ export default
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
-      // } else if (editingVocabulary.isCycleBrdrTrm(_displayNode, nextBroaderTerm)) {
       } else if (editingVocabulary.isCyclicBroaders(_displayNode, String(nextBroaderTerm))){
         // Broader term loop check /////////////////////////////////////////
           const cycleBroaderTerm =

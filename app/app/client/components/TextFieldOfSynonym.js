@@ -72,8 +72,6 @@ export default
 
       return false;
     }
-    // const foundObj = editingVocabulary.editingVocWithId.get(foundId)
-    // let inputTextUri = found? found.uri:''; // uri for inputText term
 
     const displayNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
     let _displayNode = displayNode;
@@ -87,7 +85,6 @@ export default
         const foundObj = editingVocabulary.editingVocWithId.get(foundId);
         _displayNode = foundObj?foundObj:displayNode;
     }
-    // if (editingVocabulary.isRelationSynonym(_displayNode, newValue)) {
     if (editingVocabulary.isNarrowerTerm(_displayNode.term, displayLanguage, newValue)) {
       const errorMsg = '下位語テキストボックスに、 \"' + _displayNode.term +
                        '\" あるいは \"' + _displayNode.term + '\" の代表語' +
