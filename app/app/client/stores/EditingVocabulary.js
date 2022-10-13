@@ -31,19 +31,20 @@ class EditingVocabulary {
   
 
   // map for term to id & language
-  // key is "term", value is [id, language]
+  // key is "term", value is list of object whose properties are id and language
+  // "AA", [{id:11, language:ja}, {id:22, language:en}]
   @observable term2id = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
  
   // get object id by term and laguage
   getIdbyTermandLang(term, language, selectedFileId = 0){
-    const iddata = this.term2id[selectedFileId].get(term);
-    if(undefined === iddata){
+    const iddatalist = this.term2id[selectedFileId].get(term);
+    if(undefined === iddatalist){
       return undefined;
     }else{
-      if(iddata.language=== language){
-        return iddata.id;
+      if(iddatalist[0].language=== language){
+        return iddatalist[0].id;
       }else{
-        return undefined;
+        return iddatalist[1].id;
       }
     }
   }
@@ -210,7 +211,12 @@ class EditingVocabulary {
         }
       }
       // Make term2id
-      this.term2id[0].set(data.term,  {id: data.id, language: data.language});
+      if(this.term2id[0].has(data.term)){
+        const list1 = this.term2id[0].get(data.term);
+        list1.push({id: data.id, language: data.language});
+      }else{
+        this.term2id[0].set(data.term, [{id: data.id, language: data.language}]);
+      }      
       // Make uri2synoid
       if(this.uri2synoid[0].has(data.uri)){
         this.uri2synoid[0].get(data.uri).add(data.id);
@@ -410,7 +416,12 @@ class EditingVocabulary {
         }
       }
       // Make term2id
-      this.term2id[refid].set(data.term,  {id: data.id, language: data.language});
+      if(this.term2id[refid].has(data.term)){
+        const list1 = this.term2id[refid].get(data.term);
+        list1.push({id: data.id, language: data.language});
+      }else{
+        this.term2id[refid].set(data.term, [{id: data.id, language: data.language}]);
+      } 
       // Make uri2synoid
       if(this.uri2synoid[refid].has(data.uri)){
         this.uri2synoid[refid].get(data.uri).add(data.id);
