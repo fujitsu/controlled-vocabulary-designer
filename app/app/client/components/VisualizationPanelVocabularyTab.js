@@ -57,7 +57,6 @@ export default
     super();
     this.zoomTimeoutId = -1;
     this.updateElesTimeoutId = -1;
-    this.isReset = true;
     this.fitCenterPan = true;
     this.situationArr = [];
     this.message = '';
@@ -94,7 +93,6 @@ export default
     this.setUpListeners();
     this.updateElesClass();
     this.initEdgeHandles();
-    this.setCyMinMaxZoom();
   }
 
   /**
@@ -113,31 +111,23 @@ export default
   }
 
   /**
-   * Max min scale
+   * Set initial values for zoom and pan
    */
-   setCyMinMaxZoom() {
+  async setIniPanZoom(){
     const cy = this.cy;
-    // cy.minZoom(0.0025);
-    // cy.maxZoom(1.2);
-    const cyw = cy.width();
-    const cyh = cy.height();
-    cy.viewport({zoom: 0.005, pan: {x: cyw/2, y: cyh/2}});
-  }
 
-  /**
-   * zoomSlider settings
-   */
-  setIniZoom(){
-    const cy = this.cy;
-    let currentZoom = cy.zoom();
-    currentZoom = currentZoom>2.0?2.0:currentZoom;
-    cy.zoom(currentZoom);
+    await cy.fit(cy.nodes ,50);
+    let currentZoom = await cy.zoom();
+    currentZoom =  await currentZoom>2.0?2.0:currentZoom;
+    await cy.zoom(currentZoom);
+    await cy.center();
+    const iniPan = await cy.pan();
 
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if(undefined == this.situationArr[ fileId]){
       this.situationArr[ fileId] = {
-        pan: undefined, 
-        zoom: undefined,
+        pan: iniPan, 
+        zoom: currentZoom,
       }
     }
   }
@@ -161,28 +151,9 @@ export default
       const layout = cy.layout({name: 'preset'});
       layout.run();
 
-      // Update layout
-      const currentZoom = cy.zoom();
-      const currentPan = cy.pan();
-
-      if (this.isReset) {
-        this.isReset = false;
-        // At the first display, not the entire display, narrow down to a certain magnification.
-        cy.zoom(0.005);
-      } else {
-        this.fitByPanZoom(currentPan, currentZoom);
-      }
-
       this.onPanZoom();
 
     }, 300);
-  }
-
-  /**
-   * Pan, zoom reset notification by updating editing lexical data
-   */
-  doReset() {
-    this.isReset = true;
   }
 
   /**
@@ -225,15 +196,11 @@ export default
    */
   setPanZoom() {
     const cy = this.cy;
-    
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if( undefined == this.situationArr[ fileId]){
-      this.setIniZoom();
-      cy.fit(cy.nodes ,50);
+      this.setIniPanZoom();
     }else{
-      const initPan = {x: cy.width()/2, y: cy.height()/2};
-      cy.pan( this.situationArr[ fileId].pan || initPan);
-      cy.zoom( this.situationArr[ fileId].zoom || 0.005);
+      cy.viewport({zoom: this.situationArr[ fileId].zoom, pan: this.situationArr[ fileId].pan});
     }
   }
 
@@ -828,27 +795,6 @@ export default
     return !oldFlg;
   }
 
-
-  /**
-   * File selection event
-   * @param  {object} event - information of event
-   */
-  handleChange(event) {
-    this.props.editingVocabulary.selectFile(event.target.value);
-    if (event.target.value == 0) {
-      this.props.editingVocabulary.setSelected(0, true);
-      this.props.editingVocabulary.setSelected(1, false);
-    } else {
-      this.props.editingVocabulary.setSelected(0, true);
-      this.props.editingVocabulary.setSelected(1, true);
-    }
-
-    this.cy.one('render', (event) => {
-      setTimeout( () => {
-        this.onPanZoom();
-      }, 100);
-    });
-  };
 
   /**
    * Sytle initialization for node
