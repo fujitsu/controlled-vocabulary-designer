@@ -130,7 +130,6 @@ class EditingVocabulary {
             this.deselectTermList();
             editingHistoryStore.initUndoStack();
           }
-          this.resetLayoutForVocTab();
         }).catch((err) => {
           console.log('[Error] message : ' + err.message);
           let errMsg = '';
@@ -692,7 +691,6 @@ class EditingVocabulary {
     }
     this.currentNodeClear();
     this.tmpDataClear();
-    this.resetLayoutForVocTab();
     this.deselectTermList();
   }
 
@@ -1570,15 +1568,6 @@ isOtherVocSynUriChanged() {
       this.visualVocRef.current.cyDeselect();
     }
   }  
-  /**
-   * Reset the layout of the visualization screen vocabulary tabs
-   * (Update layout without taking over current pan, zoom)
-   */
-  resetLayoutForVocTab() {
-    if (this.visualVocRef.current) {
-      this.visualVocRef.current.doReset();
-    }
-  }
 
   // Dialog control on API error ////////////////////////////
   @observable apiErrorDialog = {
