@@ -28,8 +28,26 @@ export default class Search extends React.Component {
       term: '', 
       values: [],
       inputValue: '',
+      maxMenuHeight: (window.innerHeight - 300),
       selectMenuIsOpen: false,
     };
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', this.updateDimensions.bind(this) );
+  }
+  
+  /**
+   * Set menu box height from browser height
+   * 
+   */
+  updateDimensions() {
+    const documentElement = document.documentElement,
+          // cytoscape area element id = "relation_term_graph_container"
+          cyArea = document.getElementById('relation_term_graph_container');
+    let height = cyArea.clientHeight?cyArea.clientHeight-250: window.innerHeight?window.innerHeight-300: documentElement.clientHeight-300;
+    height = 50>height?50:height;
+    this.setState({maxMenuHeight: height});
   }
 
   /**
@@ -230,7 +248,7 @@ export default class Search extends React.Component {
               formatOptionLabel={formatOptionLabel}
               isMulti
               value={initValue}
-              maxMenuHeight={600}
+              maxMenuHeight={this.state.maxMenuHeight}
               
               height= '20px'
               
