@@ -90,7 +90,7 @@ export default class ControlPanel extends React.Component {
    * Key event registration
    */
   componentDidMount() {
-    // window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    window.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   /**
@@ -231,7 +231,7 @@ export default class ControlPanel extends React.Component {
     const leftPostion = (window.innerWidth - 480) / 2;
 
     return (
-      <div onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
+      <div>
         <Box>
           <Button
             aria-controls="customized-menu"
