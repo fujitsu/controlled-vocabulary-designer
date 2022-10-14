@@ -57,6 +57,7 @@ export default
   componentDidMount() {
     this.props.editingVocabulary.setCurrentNodeById(
       this.props.editingVocabulary.currentNode.id, true);
+    window.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   /**
@@ -238,7 +239,7 @@ export default
        ( !this.props.editingVocabulary.currentNode.id) ? false : true;
 
     return (
-      <div className={this.props.classes.editPanelVoc} onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
+      <div className={this.props.classes.editPanelVoc}>
         {/* <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}> */}
         <Grid container spacing={2}>
           <Box p={1} width="400px">
