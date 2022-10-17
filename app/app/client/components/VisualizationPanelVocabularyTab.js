@@ -196,6 +196,11 @@ export default
    */
   setPanZoom() {
     const cy = this.cy;
+    
+    // provisional processing
+    cy.minZoom(0.002);
+    cy.maxZoom(1.2);
+
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if( undefined == this.situationArr[ fileId]){
       this.setIniPanZoom();
