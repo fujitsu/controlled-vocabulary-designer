@@ -110,6 +110,7 @@ return (
                     {...getTagProps({index})}
                     label={option}
                     data={currentTermDescription}
+                    needblankcheck={'false'}
                   />
                 ));
               }}

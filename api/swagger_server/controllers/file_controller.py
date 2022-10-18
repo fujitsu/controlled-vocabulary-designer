@@ -44,7 +44,6 @@ WORK_PATH = '/tmp/work/'
 MAX_FILE_CNT = 5
 DEF_WORK_MEM = '65536'
 UPD_WORK_MEM = '524288'
-TERM_BLANK_MARK = '_TERM_BLANK_'
 
 def location(depth=0):
     frame = inspect.currentframe().f_back
@@ -662,7 +661,7 @@ def _make_bulk_data_editing_vocabulary(data_frame):
         insert_data = {}
         if '用語名' in item:
             insert_data['term'] = \
-            item['用語名'] if item['用語名'] != '' else TERM_BLANK_MARK + str(index)
+            item['用語名'] if item['用語名'] != '' else ''
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
@@ -705,7 +704,8 @@ def _make_bulk_data_editing_vocabulary(data_frame):
             item['色1'] if pd.notnull(item['色1']) else None
         insert_data['color2'] =\
             item['色2'] if pd.notnull(item['色2']) else None
-        insert_data['hidden'] = False
+        insert_data['hidden'] =\
+            False if item['用語名'] != '' else True
         if '確定済み用語' not in item:
             insert_data['confirm'] = 0
         else:
@@ -961,7 +961,7 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # get uri and term
     namelx = namelpl.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
-        if TERM_BLANK_MARK in str(name[0]):
+        if str(name[0]) == '':
             continue
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
         nameb = [
@@ -978,7 +978,7 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # get uri and term
     namelx = namelal.loc[:, ['term', 'uri', 'language']].values
     for name in namelx:
-        if TERM_BLANK_MARK in str(name[0]):
+        if str(name[0]) == '':
             continue
         # print('altLabel:' + str(name[0])+' '+str(name[1]))
         nameb = [
@@ -994,7 +994,7 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # get uri and broader_uri
     namelx = namelbt.loc[:, ['broader_uri', 'term', 'uri']].values
     for name in namelx:
-        if TERM_BLANK_MARK in str(name[1]):
+        if str(name[1]) == '':
             continue
         _add_check_term(name_bt, name[0], name[1], name[2])
 
@@ -1078,8 +1078,6 @@ def _download_file_ev_serialize(pl_simple, p_format):
     # print("--- printing "+p_format+" ---")
     df_org = df_json.copy()
     # delete word "[","]"
-    df_org['term'] =\
-            df_org['term'].str.replace(TERM_BLANK_MARK+'\d+', '',regex=True) 
     df_org['synonym_candidate'] =\
         df_org['synonym_candidate'].astype("string")
     df_org['broader_term_candidate'] =\

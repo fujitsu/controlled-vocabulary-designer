@@ -98,7 +98,7 @@ export default
           const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
                           '\"' +_displayNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
                           '代表語テキストボックスには、¥n' +
-                          '\"' + _displayNodee.term + '\" または同義語の中から選んで記入してください。';
+                          '\"' + _displayNode.term + '\" または同義語の中から選んで記入してください。';
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
@@ -205,6 +205,7 @@ export default
                       {...getTagProps({index})}
                       label={option}
                       data={currentPreferredLabel}
+                      needblankcheck={'true'}
                     />
                   ));
                 }}

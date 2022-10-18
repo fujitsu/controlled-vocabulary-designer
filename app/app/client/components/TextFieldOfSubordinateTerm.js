@@ -53,6 +53,7 @@ export default
                     label={option}
                     chipid={'0'}
                     currentlist={currentSubordinateTerm}
+                    needblankcheck={'true'}
                   />
                 ));
               }}

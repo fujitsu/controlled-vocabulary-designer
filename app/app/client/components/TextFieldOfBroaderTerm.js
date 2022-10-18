@@ -225,6 +225,7 @@ export default
                       {...getTagProps({index})}
                       label={option}
                       data={currentBroaderTerm}
+                      needblankcheck={'true'}
                     />
                   ));
                 }}

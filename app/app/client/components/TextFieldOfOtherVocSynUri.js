@@ -51,6 +51,7 @@
                      label={option}
                      chipid={'0'}
                      currentlist={tmpOtherVocSynUri}
+                     needblankcheck={'false'}
                    />
                  ));
                }}

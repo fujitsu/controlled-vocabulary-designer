@@ -74,6 +74,7 @@ export default
                         {...getTagProps({index})}
                         label={option}
                         data={currentUri}
+                        needblankcheck={'false'}
                       />
                     ));
                   }}

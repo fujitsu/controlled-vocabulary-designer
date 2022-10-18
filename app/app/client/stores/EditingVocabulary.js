@@ -1835,25 +1835,14 @@ isOtherVocSynUriChanged() {
   }
 
   /**
-   * For data with a blank "term name", the prefix of the (unique) term name indicating the blank is returned.
-   * '_TERM_BLANK_' cannot be changed because it is common to the file_controller.py and vocablary_controller.py
-   * 
-   * @return {string} - prefix string
-   */
-   @action getTermBlankPrefix(){
-    return '_TERM_BLANK_';
-  }
-  /**
    * Whether the term contains a prefix indicating a blank
    * 
    * @return {bool} - true=is blank term / false=not blank term
    */
-   @action isBlankTerm( term){
-    const blankPrefix = this.getTermBlankPrefix();
-    if(term && term.indexOf( blankPrefix) != -1){
-      return true;
-    }
-    return false;
+   @action isBlankTerm( term, language=this.tmpLanguage.value){
+    const targetId = this.getIdbyTermandLang(term, language);
+    const targetNode = targetId?this.editingVocWithId.get(targetId):false;
+    return targetNode?targetNode.hidden:false;
   }
 
   /**
@@ -1864,9 +1853,8 @@ isOtherVocSynUriChanged() {
     const targetData = this.getTargetFileData(this.selectedFile.id);
 
     const termListForVocabulary = [];
-    const blankPrefix = this.getTermBlankPrefix();
     targetData.forEach((data) => {
-      if(data.term.indexOf( blankPrefix)== -1){
+      if( !data.hidden ){
         // Editing vocabulary
         termListForVocabulary.push({
           data: {
@@ -2449,14 +2437,14 @@ isOtherVocSynUriChanged() {
     if (this.tmpTermDescription.list['ja'].length > 1) {
       console.log('[errorCheck] multiTermDescription.');
       ret.errorKind = 'multiTermDescription';
-      ret.term = currentNode.term;
+      ret.term = this.currentNode.term;
       ret.language = 'ja';
       return ret;
     }
     if (this.tmpTermDescription.list['en'].length > 1) {
       console.log('[errorCheck] multiTermDescription.');
       ret.errorKind = 'multiTermDescription';
-      ret.term = currentNode.term;
+      ret.term = this.currentNode.term;
       ret.language = 'en';
       return ret;
     }
@@ -2502,8 +2490,8 @@ isOtherVocSynUriChanged() {
       if (this.isNarrowerTerm(this.currentNode.term, this.currentNode.language, this.tmpSynonym.list[this.currentNode.language])) {
         console.log('[errorCheck] narrowerSynonym.');
         ret.errorKind = 'narrowerSynonym';
-        ret.term = currentNode.term;
-        ret.language = currentNode.language;
+        ret.term = this.currentNode.term;
+        ret.language = this.currentNode.language;
         return ret;
       };
     }
@@ -2512,8 +2500,8 @@ isOtherVocSynUriChanged() {
       if (this.isNarrowerTerm(this.currentLangDiffNode.term, this.currentLangDiffNode.language, this.tmpSynonym.list[this.currentLangDiffNode.language])) {
         console.log('[errorCheck] narrowerSynonym.');
         ret.errorKind = 'narrowerSynonym';
-        ret.term = currentLangDiffNode.term;
-        ret.language = currentLangDiffNode.language;
+        ret.term = this.currentLangDiffNode.term;
+        ret.language = this.currentLangDiffNode.language;
         return ret;
       };
     }
