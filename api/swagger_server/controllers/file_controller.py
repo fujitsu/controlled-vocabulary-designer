@@ -1282,7 +1282,8 @@ def _check_diff_synogroup_have_diff_pref(df, file_type_num=0):
     preferred_label_colname = '代表語' 
     lang_colname = '言語' 
     uri_colname = '代表語のURI' 
-    count_df = df.groupby([preferred_label_colname, lang_colname]).nunique(dropna= False) # this is a DataFrame　
+    # eliminate blank preferred labels
+    count_df = df[df[preferred_label_colname] != ''].groupby([preferred_label_colname, lang_colname]).nunique(dropna= False) # this is a DataFrame　
     count_df2 = count_df[count_df[uri_colname] != 1]
     if count_df2.size != 0:
         # there are different synonim group that have same preffered label
