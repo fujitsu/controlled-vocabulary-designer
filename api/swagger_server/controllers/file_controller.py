@@ -660,8 +660,7 @@ def _make_bulk_data_editing_vocabulary(data_frame):
     for index, item in data_frame.iterrows():
         insert_data = {}
         if '用語名' in item:
-            insert_data['term'] = \
-            item['用語名'] if item['用語名'] != '' else ''
+            insert_data['term'] = item['用語名']
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
