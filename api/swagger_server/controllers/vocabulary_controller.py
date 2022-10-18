@@ -20,7 +20,6 @@ POSTGREST_BASE_URL = 'http://dbrest:3000/'
 REFERENCE_VOCABULARY = ['reference_vocabulary1',
                         'reference_vocabulary2',
                         'reference_vocabulary3']
-TERM_BLANK_MARK = '_TERM_BLANK_'
 
 def get_vocabulary_data(file_type):  # noqa: E501
     """Get vocabulary data by type
@@ -235,8 +234,7 @@ def _create_update_sql(file_type, id):
 def _create_update_payload(target_data, index):
 
     update_data = {}
-    update_data['term'] = target_data['term']\
-        if len(target_data['term']) != 0 else TERM_BLANK_MARK + str(index)
+    update_data['term'] = target_data['term']
     update_data['preferred_label'] = target_data['preferred_label']
     update_data['language'] = target_data['language']
     update_data['uri'] = target_data['uri']

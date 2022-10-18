@@ -134,6 +134,7 @@ export default
                       {...getTagProps({index})}
                       label={option}
                       data={currentId}
+                      needblankcheck={'false'}
                     />
                   ));
                 }}
