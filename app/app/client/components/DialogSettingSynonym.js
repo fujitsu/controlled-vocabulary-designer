@@ -140,8 +140,8 @@ export default class DialogSettingSynonym extends React.Component {
       if( currentNode.broader_term){
         this.broaderList[ currentNode.language].push({ term:currentNode.broader_term, id:'currentNode' });
 
-        const pre = this.getPreferredFromBroadrByTerm( currentNode.broader_term, currentNode.language);
-        if(pre != ''){
+        const pre = this.getLangDiffBroadrByTerm( currentNode.broader_term, currentNode.language);
+        if(pre !== undefined){
           this.broaderList[ currentNode.language=='ja'?'en':'ja'].push( {term:pre, id:'currentNode'});    
           if(currentNode.language=='ja'){
             selectBroader_En = pre;
@@ -154,8 +154,8 @@ export default class DialogSettingSynonym extends React.Component {
         && currentNode.broader_term != targetNode.broader_term){
         this.broaderList[ currentNode.language].push( { term:targetNode.broader_term, id:'targetNode' });
 
-        const pre = this.getPreferredFromBroadrByTerm( targetNode.broader_term, targetNode.language);
-        if(pre != ''){
+        const pre = this.getLangDiffBroadrByTerm( targetNode.broader_term, targetNode.language);
+        if(pre !== undefined){
           this.broaderList[ currentNode.language=='ja'?'en':'ja'].push(  {term:pre, id:'targetNode'});   
           if(currentNode.language=='ja' && selectBroader_En == ''){
             selectBroader_En = pre;
@@ -189,28 +189,30 @@ export default class DialogSettingSynonym extends React.Component {
     // No selection is also an option, so if any language has broader terms, show the broader term selection
     if(  this.broaderList['ja'].length + this.broaderList['en'].length > 0 ){
       this.broaderClassName= this.props.classes.formControl;
+      
+      // deduplicating here due to timing issues
+      this.broaderList['ja'] =  this.broaderList['ja'].filter(
+        (element, index, self) => self.findIndex((e) => e.term === element.term) === index
+      );
+      this.broaderList['en'] =  this.broaderList['en'].filter(
+        (element, index, self) => self.findIndex((e) => e.term === element.term) === index
+      );
     }
   }
   
   /**
-   * Get the representative term from the broader term name
-   * @param  {string} term - broader term
+   * Get broader term in another language 
+   * @param  {string} brdTerm - broader term
    * @param  {string} lang - language
    * @return {string} preferred label
    */
-  getPreferredFromBroadrByTerm( term, lang){
+  getLangDiffBroadrByTerm( brdTerm, lang){
 
-    let ret = '';
-    const brdNode = this.props.editingVocabulary.editingVocabulary.find((data)=>{
-      return data.term == term ;
-    })
-    if( brdNode){
-      const find = this.props.editingVocabulary.editingVocabulary.find((data)=>{
-        return data.uri == brdNode.uri &&  data.language != lang;
-      })
-      if( find){
-        ret = find.preferred_label;
-      }
+    let ret = undefined;
+    const id = this.props.editingVocabulary.getIdbyTermandLang( brdTerm, lang);
+    const brdNode = this.props.editingVocabulary.editingVocWithId.get( id);
+    if( brdNode !== undefined){      
+      ret = this.props.editingVocabulary.uri2preflabel[lang==='ja'?'en':'ja'][brdNode.uri] ;
     }
     return ret;
   }
