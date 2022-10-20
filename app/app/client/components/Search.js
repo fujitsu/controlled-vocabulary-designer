@@ -88,7 +88,7 @@ export default class Search extends React.Component {
       node.term.toUpperCase() === convStr.toUpperCase());
     if (result !== undefined) {
       editingVocabulary.deselectTermList();
-      editingVocabulary.setSelectedTermList( result.term,);
+      editingVocabulary.setSelectedTermList( result.term, result.language);
       editingVocabulary.setCurrentNodeById( result.id, true);
     } else {
       

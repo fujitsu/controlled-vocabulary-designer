@@ -495,17 +495,17 @@ export default
       if( !withKey){
         if( this.props.editingVocabulary.selectedTermList.length > 1){
           this.props.editingVocabulary.deselectTermList();
-          isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+          isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
           this.props.editingVocabulary.setCurrentNodeById(Number(target.id), true);
         }else{
           this.props.editingVocabulary.deselectTermList();
           if(this.props.editingVocabulary.currentNode.id !=  target.id){
-            isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+            isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
           }
           this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }else{
-        isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+        isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
         if(isAddTerm && this.props.editingVocabulary.selectedTermList.length == 1){
           this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length > 0){
@@ -738,7 +738,7 @@ export default
     const nextBroaderTerm = this.target.term;
 
     this.props.editingVocabulary.deselectTermList();
-    this.props.editingVocabulary.setSelectedTermList(source.term);
+    this.props.editingVocabulary.setSelectedTermList(source.term, source.language);
     this.props.editingVocabulary.setCurrentNodeById(Number(source.id), true);
 
     //this.props.editingVocabulary.updateBroaderTerm( [ nextBroaderTerm ] );

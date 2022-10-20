@@ -84,11 +84,11 @@ class EditingVocabulary {
   /**
    * Set selected term array
    */
-  @action setSelectedTermList( term){
+  @action setSelectedTermList( term, language){
     let ret = false;
     let selectedTermList = this.selectedTermList;      
-    const termListForVocabulary = this.termListForVocabulary;
-    const selectedID = Number(this.getNodeIdByTerm( termListForVocabulary , term));
+    const selectedID = this.getIdbyTermandLang( term, language, this.selectedFile.id);
+
     const tmpSelectedTermList = selectedTermList.filter((item)=>{
       return item.id != selectedID;
     })
