@@ -241,20 +241,19 @@ class EditingHistory {
       const upSynList = history.previous.filter((i) =>
         this.getIndexById(history.following, 'id', i.id) != -1);
       upSynList.forEach((data) => {
-        // const target =
-        //     EditingVocabulary.editingVocabulary.find((i) => i.id == data.id);
         const target =
             EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
-          target.preferred_label = data.preferred_label;
-          target.idofuri = data.idofuri;
-          target.uri = data.uri;
-          target.broader_uri = data.broader_uri;
-          target.broader_term = data.broader_term;
-          target.other_voc_syn_uri = data.other_voc_syn_uri;
-          target.term_description = data.term_description;
-          target.modified_time = data.modified_time;
-          updateList.push(target);
+          const dataObj = EditingVocabulary.copyData(target);
+          dataObj.preferred_label = data.preferred_label;
+          dataObj.idofuri = data.idofuri;
+          dataObj.uri = data.uri;
+          dataObj.broader_uri = data.broader_uri;
+          dataObj.broader_term = data.broader_term;
+          dataObj.other_voc_syn_uri = data.other_voc_syn_uri;
+          dataObj.term_description = data.term_description;
+          dataObj.modified_time = data.modified_time;
+          updateList.push(dataObj);
         }
       });
     } else { // redo
@@ -263,15 +262,16 @@ class EditingHistory {
       upSynList.forEach((data) => {
         const target = EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
-          target.preferred_label = data.preferred_label;
-          target.idofuri = data.idofuri;
-          target.uri = data.uri;
-          target.broader_uri = data.broader_uri;
-          target.broader_term = data.broader_term;
-          target.other_voc_syn_uri = data.other_voc_syn_uri;
-          target.term_description = data.term_description;
-          target.modified_time = data.modified_time;
-          updateList.push(target);
+          const dataObj = EditingVocabulary.copyData(target);
+          dataObj.preferred_label = data.preferred_label;
+          dataObj.idofuri = data.idofuri;
+          dataObj.uri = data.uri;
+          dataObj.broader_uri = data.broader_uri;
+          dataObj.broader_term = data.broader_term;
+          dataObj.other_voc_syn_uri = data.other_voc_syn_uri;
+          dataObj.term_description = data.term_description;
+          dataObj.modified_time = data.modified_time;
+          updateList.push(dataObj);
         }
       });
     }
@@ -729,13 +729,6 @@ class EditingHistory {
         }
       });
     }
-
-    // console.log(
-    //     '[makeSynonymMessage] addSynList :' + JSON.stringify(addSynList),
-    // );
-    // console.log(
-    //     '[makeSynonymMessage] delSynList :' + JSON.stringify(delSynList),
-    // );
 
 
     let message = '';

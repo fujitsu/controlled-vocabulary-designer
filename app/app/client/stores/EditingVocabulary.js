@@ -1678,6 +1678,38 @@ isOtherVocSynUriChanged() {
     }
   }
 
+
+  /**
+   * Copy Vocabulary data
+   * @param  {object} indata vocabulary data
+   * @return {object} outdata copied object
+   */
+   copyData(indata) {
+    const outdata = new Object;
+    outdata.id = indata.id;
+    outdata.term = indata.term;
+    outdata.preferred_label = indata.preferred_label;
+    outdata.language = indata.language;
+    outdata.idofuri = indata.idofuri;
+    outdata.uri = indata.uri;
+    outdata.broader_uri = indata.broader_uri;
+    outdata.broader_term = indata.broader_term;
+    outdata.other_voc_syn_uri = indata.other_voc_syn_uri;
+    outdata.term_description = indata.term_description;
+    outdata.created_time = indata.created_time;
+    outdata.modified_time = indata.modified_time;
+    outdata.synonym_candidate = indata.synonym_candidate;
+    outdata.broader_term_candidate = indata.broader_term_candidate;
+    outdata.hidden = indata.hidden;
+    outdata.position_x = indata.position_x;
+    outdata.position_y = indata.position_y;
+    outdata.color1 = indata.color1;
+    outdata.color2 = indata.color2;
+    outdata.confirm = indata.confirm;
+    return outdata;
+  }
+
+
   /**
    * Changing the color of related terms and vocabulary
    * @param  {string}  currentId - selected term id
@@ -1703,7 +1735,6 @@ isOtherVocSynUriChanged() {
 
   tmpUpdateColor(currentId, colorId, tmpColor, isHistory = false) {
     const requestBody = [];
-
     const updateCurrent = this.editingVocWithId.get(currentId);
 
     if (updateCurrent === undefined) {
@@ -1711,18 +1742,20 @@ isOtherVocSynUriChanged() {
       return;
     }
     const history = new History(colorId, currentId);
-
+    let dataObj;
     if ('color1' == colorId) {
       history.previous = updateCurrent.color1;
       history.following = tmpColor;
-      updateCurrent.color1 = tmpColor;
+      dataObj = this.copyData(updateCurrent);
+      dataObj.color1 = tmpColor;
     } else { // color2
       history.previous = updateCurrent.color2;
       history.following = tmpColor;
-      updateCurrent.color2 = tmpColor;
+      dataObj = this.copyData(updateCurrent);
+      dataObj.color2 = tmpColor;
     }
 
-    requestBody.push(updateCurrent);
+    requestBody.push(dataObj);
     const url = '/api/v1/vocabulary/editing_vocabulary/' + updateCurrent.term;
     axios
         .post(url,
@@ -2646,27 +2679,6 @@ isOtherVocSynUriChanged() {
     list: [],
   };
 
-  // /**
-  //  * Create ID of URI list for screen display
-  //  * @return {Array} - ID of URI list
-  //  */
-  // @computed get currentIdofUri() {
-  //   if (!(this.currentNode.id)) {
-  //     return [];
-  //   }
-  //   let filterList = [];
-  //   if (this.tmpIdofUri.id == this.currentNode.id) {
-  //     if ( this.tmpIdofUri.list.length > 0 ) {
-  //       filterList = this.tmpIdofUri.list;
-  //     }
-  //   } else {
-  //     if ( this.currentNode.idofuri != '' ) {
-  //       filterList = [this.currentNode.idofuri];
-  //     }
-  //   }
-  //   return filterList;
-  // }
-
   /**
    * ID of URI update event
    * @param  {string} newValue ID of URI
@@ -3442,43 +3454,30 @@ isOtherVocSynUriChanged() {
    * @param  {Boolean} [isHistory=false] - modified by undo/redo ?
    */
   toggleConfirmById(id, isConfirm, isHistoryOp = false) {
-    const currentNode = this.editingVocabulary.find((data) =>
-      data.id == id);
-
+    const currentNode = this.editingVocWithId.get(id);    
     if (currentNode === undefined) {
       console.log('term with id=' + id + ' is not found from editingVocabulary.');
       return;
     }
-
     let targetList = [];
-    if (currentNode.preferred_label) {
-      // When changing confirmation information for a term with a preferred label, update all terms with the same preferred label
-      targetList = this.editingVocabulary.filter((data) =>
-        data.preferred_label == currentNode.preferred_label);
-      targetList.forEach((data) => {
-        if (isConfirm) {
-          data.confirm = 1;
-          data.color2 = this.confirmColor;
-        } else {
-          data.confirm = 0;
-          data.color2 = 'green';
-        }
-      });
-    } else {
-      // When changing confirmed information for a term without a preferred label, update only that term
+    const synoidWithMe = [...this.uri2synoid[0].get(currentNode.uri)];
+    synoidWithMe.forEach((id1)=>{
+      const foundObj = this.editingVocWithId.get(id1);
+      const dataObj = this.copyData(foundObj);
       if (isConfirm) {
-        currentNode.confirm = 1;
-        currentNode.color2 = this.confirmColor;
-      } else {
-        currentNode.confirm = 0;
-        currentNode.color2 = 'green';
-      }
-      targetList.push(currentNode);
-    }
+          dataObj.confirm = 1;
+          dataObj.color2 = this.confirmColor;
+        } else {
+          dataObj.confirm = 0;
+          dataObj.color2 = this.confirmColor;
+        }
+      targetList.push(dataObj);
+    }, this);
 
     const history = new History(
         'confirmChanged',
         currentNode.id,
+        null,
         !isConfirm,
         isConfirm,
     );
