@@ -55,6 +55,12 @@ export default class DialogUpdateVocabularyError extends React.Component {
         errorMsgEdt = (language==='ja'? '日本語':'英語') + 'の代表語テキストボックスに、複数の値が記入されています。¥n' + '代表語値を1つだけ記入してください。';
         errorMsgVoc = '代表語は、複数の値を設定できません。' ;
         break;
+      // Preferred label:No Input Error
+      case 'blankPreferredLabel':
+        errorMsgEdt = '代表語テキストボックス全言語で空です。¥n' + '日本語もしくは英語の代表語テキストボックスに、少なくとも一つの代表語値を1つだけ記入してください。';
+        errorMsgVoc = '代表語は、少なくとも一つは値を設定してください。' ;
+        break;
+        
       // Preferred label:Invalid input error
       case 'invalidPreferredLabel':
         const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[language][0];
