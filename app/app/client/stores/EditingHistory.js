@@ -97,12 +97,6 @@ class EditingHistory {
    * @return {string} - vocabulary
    */
   getTermFromEditingVocabulary(id) {
-    // const editingVocabulary = editingVocabularyStore.editingVocabulary;
-    // let term = '';
-    // const target = editingVocabulary.find( (data) => data.id === id);
-    // if (target) {
-    //   term = target.term;
-    // }
     let term = '';
     let foundObj = editingVocabularyStore.editingVocWithId.get(id);
     if(undefined != foundObj){
@@ -247,8 +241,6 @@ class EditingHistory {
       const upSynList = history.previous.filter((i) =>
         this.getIndexById(history.following, 'id', i.id) != -1);
       upSynList.forEach((data) => {
-        // const target =
-        //     EditingVocabulary.editingVocabulary.find((i) => i.id == data.id);
         const target =
             EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
@@ -268,8 +260,6 @@ class EditingHistory {
       const upSynList = history.following.filter((i) =>
         this.getIndexById(history.previous, 'id', i.id) != -1);
       upSynList.forEach((data) => {
-        // const target = EditingVocabulary.editingVocabulary.find((i) =>
-        //   i.id == data.id);
         const target = EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
           const dataObj = EditingVocabulary.copyData(target);
@@ -334,9 +324,6 @@ class EditingHistory {
   execPosition(type, history) {
     
     const EditingVocabulary = editingVocabularyStore;
-    // const target = EditingVocabulary.getTargetFileData(EditingVocabulary.selectedFile.id).find((obj) => {
-    //   return (obj.id == history.targetId);
-    // });
     const target = EditingVocabulary.getTargetWithId(EditingVocabulary.selectedFile.id).get(Number(history.targetId));
     
     if (!target) {
@@ -571,9 +558,6 @@ class EditingHistory {
    * @return {string} - message
    */
   makeConfirmChangedMessage(type, history) {
-    // const editingVocabulary = editingVocabularyStore.editingVocabulary;
-    // const target =
-    //   editingVocabulary.find( (data) => data.id === history.targetId);
     const target = editingVocabularyStore.editingVocWithId.get(history.targetId);
       
     if (!target) {
@@ -745,13 +729,6 @@ class EditingHistory {
         }
       });
     }
-
-    // console.log(
-    //     '[makeSynonymMessage] addSynList :' + JSON.stringify(addSynList),
-    // );
-    // console.log(
-    //     '[makeSynonymMessage] delSynList :' + JSON.stringify(delSynList),
-    // );
 
 
     let message = '';

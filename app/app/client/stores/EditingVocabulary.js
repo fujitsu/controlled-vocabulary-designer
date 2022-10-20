@@ -2684,27 +2684,6 @@ isOtherVocSynUriChanged() {
     list: [],
   };
 
-  // /**
-  //  * Create ID of URI list for screen display
-  //  * @return {Array} - ID of URI list
-  //  */
-  // @computed get currentIdofUri() {
-  //   if (!(this.currentNode.id)) {
-  //     return [];
-  //   }
-  //   let filterList = [];
-  //   if (this.tmpIdofUri.id == this.currentNode.id) {
-  //     if ( this.tmpIdofUri.list.length > 0 ) {
-  //       filterList = this.tmpIdofUri.list;
-  //     }
-  //   } else {
-  //     if ( this.currentNode.idofuri != '' ) {
-  //       filterList = [this.currentNode.idofuri];
-  //     }
-  //   }
-  //   return filterList;
-  // }
-
   /**
    * ID of URI update event
    * @param  {string} newValue ID of URI
