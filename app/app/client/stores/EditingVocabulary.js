@@ -2433,7 +2433,7 @@ isOtherVocSynUriChanged() {
       ret.language = 'en';
       return ret;
     }
-    // preferred label must not be emply at least some of the language
+    // at least one preferred label are set at some language
     if (this.tmpPreferredLabel.list['ja'].length == 0 && this.tmpPreferredLabel.list['en'].length == 0) {
       console.log('[errorCheck] blankPreferredLabel.');
       ret.errorKind = 'blankPreferredLabel';      
@@ -2507,13 +2507,6 @@ isOtherVocSynUriChanged() {
         return ret;
       }
     }
-    
-
-    // TOBE
-    // conditions for empty preferred label
-    // at least one preferred label are set at some language
-
-
 
     // Id of URI must be unique except synonym's idofuri
     const idofuri = this.tmpIdofUri.list[0];
