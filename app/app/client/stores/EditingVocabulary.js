@@ -3482,43 +3482,31 @@ isOtherVocSynUriChanged() {
    * @param  {Boolean} [isHistory=false] - modified by undo/redo ?
    */
   toggleConfirmById(id, isConfirm, isHistoryOp = false) {
-    const currentNode = this.editingVocabulary.find((data) =>
-      data.id == id);
-
+    const currentNode = this.editingVocWithId.get(id);
+    
     if (!currentNode) {
       console.log('term with id=' + id + ' is not found from editingVocabulary.');
       return;
     }
-
     let targetList = [];
-    if (currentNode.preferred_label) {
-      // When changing confirmation information for a term with a preferred label, update all terms with the same preferred label
-      targetList = this.editingVocabulary.filter((data) =>
-        data.preferred_label == currentNode.preferred_label);
-      targetList.forEach((data) => {
-        if (isConfirm) {
-          data.confirm = 1;
-          data.color2 = this.confirmColor;
-        } else {
-          data.confirm = 0;
-          data.color2 = 'green';
-        }
-      });
-    } else {
-      // When changing confirmed information for a term without a preferred label, update only that term
+    const synoidWithMe = [...this.uri2synoid[0].get(currentNode.uri)];
+    synoidWithMe.forEach((id1)=>{
+      const foundObj = this.editingVocWithId.get(id1);
+      const dataObj = this.copyData(foundObj);
       if (isConfirm) {
-        currentNode.confirm = 1;
-        currentNode.color2 = this.confirmColor;
-      } else {
-        currentNode.confirm = 0;
-        currentNode.color2 = 'green';
-      }
-      targetList.push(currentNode);
-    }
+          dataObj.confirm = 1;
+          dataObj.color2 = this.confirmColor;
+        } else {
+          dataObj.confirm = 0;
+          dataObj.color2 = this.confirmColor;
+        }
+      targetList.push(dataObj);
+    }, this);
 
     const history = new History(
         'confirmChanged',
         currentNode.id,
+        null,
         !isConfirm,
         isConfirm,
     );
