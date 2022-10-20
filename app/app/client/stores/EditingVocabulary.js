@@ -1680,6 +1680,38 @@ isOtherVocSynUriChanged() {
     }
   }
 
+
+  /**
+   * Copy Vocabulary data
+   * @param  {object} indata vocabulary data
+   * @return {object} outdata copied object
+   */
+   copyData(indata) {
+    const outdata = new Object;
+    outdata.id = indata.id;
+    outdata.term = indata.term;
+    outdata.preferred_label = indata.preferred_label;
+    outdata.language = indata.language;
+    outdata.idofuri = indata.idofuri;
+    outdata.uri = indata.uri;
+    outdata.broader_uri = indata.broader_uri;
+    outdata.broader_term = indata.broader_term;
+    outdata.other_voc_syn_uri = indata.other_voc_syn_uri;
+    outdata.term_description = indata.term_description;
+    outdata.created_time = indata.created_time;
+    outdata.modified_time = indata.modified_time;
+    outdata.synonym_candidate = indata.synonym_candidate;
+    outdata.broader_term_candidate = indata.broader_term_candidate;
+    outdata.hidden = indata.hidden;
+    outdata.position_x = indata.position_x;
+    outdata.position_y = indata.position_y;
+    outdata.color1 = indata.color1;
+    outdata.color2 = indata.color2;
+    outdata.confirm = indata.confirm;
+    return outdata;
+  }
+
+
   /**
    * Changing the color of related terms and vocabulary
    * @param  {string}  currentId - selected term id
@@ -1706,26 +1738,29 @@ isOtherVocSynUriChanged() {
   tmpUpdateColor(currentId, colorId, tmpColor, isHistory = false) {
     const requestBody = [];
 
-    const updateCurrent = this.editingVocabulary.find((data) =>
-      data.id == currentId);
+    // const updateCurrent = this.editingVocabulary.find((data) =>
+    //   data.id == currentId);
+    const updateCurrent = this.editingVocWithId.get(currentId);
 
     if (!updateCurrent) {
       console.log('id: ' + currentId + 'is not found.');
       return;
     }
     const history = new History(colorId, currentId);
-
+    let dataObj
     if ('color1' == colorId) {
       history.previous = updateCurrent.color1;
       history.following = tmpColor;
-      updateCurrent.color1 = tmpColor;
+      dataObj = this.copyData(updateCurrent);
+      dataObj.color1 = tmpColor;
     } else { // color2
       history.previous = updateCurrent.color2;
       history.following = tmpColor;
-      updateCurrent.color2 = tmpColor;
+      dataObj = this.copyData(updateCurrent);
+      dataObj.color2 = tmpColor;
     }
 
-    requestBody.push(updateCurrent);
+    requestBody.push(dataObj);
     const url = '/api/v1/vocabulary/editing_vocabulary/' + updateCurrent.term;
     axios
         .post(url,
