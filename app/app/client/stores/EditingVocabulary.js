@@ -751,7 +751,7 @@ class EditingVocabulary {
     broaderTermObj= termListForVocabulary.find((item) => {
       return item.data.term == broaderTermObj.broader_term
     })
-    return broaderTermObj?broaderTermObj:false;
+    return broaderTermObj!==undefined?broaderTermObj:false;
   }
 
   /**
@@ -917,7 +917,7 @@ class EditingVocabulary {
             const eqTerm =
                 referenceVocabulary.find((refNode) =>
                   refNode.term == this.currentNode.term );
-            if (eqTerm) {
+            if (eqTerm !== undefined) {
               if (eqTerm.broader_term &&
                   (list.indexOf(eqTerm.broader_term) == -1)) {
                 list.push(eqTerm.broader_term);
@@ -937,7 +937,7 @@ class EditingVocabulary {
               // Search for the same term in the reference vocabulary
               const eqTerm = referenceVocabulary.find((refNode) =>
                 refNode.term == this.currentNode.term );
-              if (eqTerm) {
+              if (eqTerm !== undefined) {
                 // Extract terms from same heading
                 const eqPreferredLabel = referenceVocabulary.filter((refNode) =>
                   refNode.preferred_label == eqTerm.preferred_label );
@@ -960,7 +960,7 @@ class EditingVocabulary {
               // Search for the same term in the reference vocabulary
               const eqTerm = referenceVocabulary.find((refNode) =>
                 refNode.term == this.currentNode.term );
-              if (eqTerm) {
+              if (eqTerm !== undefined) {
                 // Extract terms from same preferred label
                 const eqPreferredLabel = referenceVocabulary.filter((refNode) =>
                   refNode.preferred_label == eqTerm.preferred_label );
@@ -988,7 +988,7 @@ class EditingVocabulary {
       }
     }
     list = list.filter((term)=>{
-      return this.editingVocabulary.find( (data) => data.term === term)?true:false;
+      return this.editingVocabulary.find( (data) => data.term === term)!==undefined?true:false;
     })
     return list.sort((a, b) => {
       const lowerA = a.toString().toLowerCase();
@@ -1286,17 +1286,15 @@ class EditingVocabulary {
       if( nodeObj.language==''){
       }else if (nodeObj.synonymList.length != this.tmpSynonym.list[nodeObj.language].length) {
         ret =  true;
-      }else{          
+      }else{
         this.tmpSynonym.list[nodeObj.language].forEach((languageCurrent) => {
-          const find = nodeObj.synonymList.find((tmp) => tmp == languageCurrent);
-          if (!find) {
-            ret =  true;
+          if ( !nodeObj.synonymList.includes(languageCurrent)) {
+            ret = true;
           }
         });
         nodeObj.synonymList.forEach((languageCurrent) => {
-          const find = this.tmpSynonym.list[nodeObj.language].find((tmp) => tmp == languageCurrent);
-          if (!find) {
-            ret =  true;
+          if ( !this.tmpSynonym.list[nodeObj.language].includes(languageCurrent)) {
+            ret = true;
           }
         });
       }
@@ -1706,10 +1704,9 @@ isOtherVocSynUriChanged() {
   tmpUpdateColor(currentId, colorId, tmpColor, isHistory = false) {
     const requestBody = [];
 
-    const updateCurrent = this.editingVocabulary.find((data) =>
-      data.id == currentId);
+    const updateCurrent = this.editingVocWithId.get(currentId);
 
-    if (!updateCurrent) {
+    if (updateCurrent === undefined) {
       console.log('id: ' + currentId + 'is not found.');
       return;
     }
@@ -1887,7 +1884,7 @@ isOtherVocSynUriChanged() {
       const findNode = otherVocSynonymUri.find((item) => { 
         return item.data.term == data.other_voc_syn_uri 
       })
-      if( !findNode && data.other_voc_syn_uri
+      if( findNode===undefined && data.other_voc_syn_uri
         && ((data.other_voc_syn_uri.indexOf("http://") != -1) 
         || (data.other_voc_syn_uri.indexOf("https://") != -1))){
         // Editing vocabulary
@@ -2233,7 +2230,7 @@ isOtherVocSynUriChanged() {
       // Add if not in the array
       objSynonym.forEach(( obj) => {
         const findObj = updateTermList.find((item2) =>obj.id == item2.id);
-        if( !findObj){          
+        if( findObj === undefined){          
           updateTermList.push(obj);
         }   
       });  
@@ -2309,7 +2306,7 @@ isOtherVocSynUriChanged() {
               history.targetId = this.currentNode.id;
               const find = history.following.find((data) =>
                 data.term === current.term);
-              if (find) {
+              if (find !== undefined) {
                 find.id = this.currentNode.id;
                 //DEBUG
                 console.assert(false, "something wrong at updateRequest");
@@ -2738,9 +2735,9 @@ isOtherVocSynUriChanged() {
       //DEBUG
       console.assert(false, "something is wrong 9");
       // find newValue-term's uri
-      const currentLang = this.currentNode.language;
-      const find = this.editingVocabulary.find((data)=> (data.term===newValue[0]) && (data.language == currentLang) );
-      if(find){newValueUri = find.uri};
+      const targetId = this.getIdbyTermandLang(newValue[0], this.currentNode.language);
+      const find = this.editingVocWithId.get( targetId)
+      if(find !== undefined){newValueUri = find.uri};
     }
 
     const newLangDiffValue = [];
@@ -2899,13 +2896,11 @@ isOtherVocSynUriChanged() {
     const tmpBroaderTerm_j = currentNode.language=='ja'?broaderTerm:this.tmpBroaderTerm.list['ja'][0];
     const tmpBroaderTerm_e = currentNode.language=='en'?broaderTerm:this.tmpBroaderTerm.list['en'][0];
 
-    const find_j = this.editingVocabulary.find((data) => {
-      return (data.term == tmpBroaderTerm_j && data.language == 'ja') 
-    });
-    const find_e = this.editingVocabulary.find((data) => {
-      return (data.term == tmpBroaderTerm_e && data.language == 'en')
-    });
-    if( find_j && find_e && find_j.uri != find_e.uri){
+    const findJaId = this.getIdbyTermandLang(tmpBroaderTerm_j, 'ja');
+    const find_j = this.editingVocWithId.get(findJaId);
+    const findEnId = this.getIdbyTermandLang(tmpBroaderTerm_e, 'en');
+    const find_e = this.editingVocWithId.get(findEnId);
+    if( (findJaId !== undefined) && (findEnId !== undefined) && find_j.uri != find_e.uri){
       ret = false;
     }
     return ret;
@@ -2978,7 +2973,7 @@ isOtherVocSynUriChanged() {
 
           // Terms associated with the preferred labels of additional synonyms
           let targetList = [];
-          if (synonymData) {
+          if (synonymData !== undefined) {
             if (synonymData.preferred_label) {
               // For items with preferred label, extract all relevant terms
               targetList =
@@ -3450,7 +3445,7 @@ isOtherVocSynUriChanged() {
     const currentNode = this.editingVocabulary.find((data) =>
       data.id == id);
 
-    if (!currentNode) {
+    if (currentNode === undefined) {
       console.log('term with id=' + id + ' is not found from editingVocabulary.');
       return;
     }

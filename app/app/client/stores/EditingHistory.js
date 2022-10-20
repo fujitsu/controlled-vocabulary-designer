@@ -97,12 +97,6 @@ class EditingHistory {
    * @return {string} - vocabulary
    */
   getTermFromEditingVocabulary(id) {
-    // const editingVocabulary = editingVocabularyStore.editingVocabulary;
-    // let term = '';
-    // const target = editingVocabulary.find( (data) => data.id === id);
-    // if (target) {
-    //   term = target.term;
-    // }
     let term = '';
     let foundObj = editingVocabularyStore.editingVocWithId.get(id);
     if(undefined != foundObj){
@@ -267,8 +261,6 @@ class EditingHistory {
       const upSynList = history.following.filter((i) =>
         this.getIndexById(history.previous, 'id', i.id) != -1);
       upSynList.forEach((data) => {
-        // const target = EditingVocabulary.editingVocabulary.find((i) =>
-        //   i.id == data.id);
         const target = EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
           target.preferred_label = data.preferred_label;
@@ -332,9 +324,6 @@ class EditingHistory {
   execPosition(type, history) {
     
     const EditingVocabulary = editingVocabularyStore;
-    // const target = EditingVocabulary.getTargetFileData(EditingVocabulary.selectedFile.id).find((obj) => {
-    //   return (obj.id == history.targetId);
-    // });
     const target = EditingVocabulary.getTargetWithId(EditingVocabulary.selectedFile.id).get(Number(history.targetId));
     
     if (!target) {
@@ -499,7 +488,7 @@ class EditingHistory {
     const followingLangDiffTarget = history.following.find((data) =>
       data.id === history.targetLangDiffId);
 
-    if (!previousTarget && followingTarget) {
+    if (previousTarget === undefined && followingTarget !== undefined) {
       // If the change deletes the edited vocabulary
       if (this.STR_UNDO === type) {
         return '用語 : ' + followingTarget.term + 'が削除されました。';
@@ -569,9 +558,6 @@ class EditingHistory {
    * @return {string} - message
    */
   makeConfirmChangedMessage(type, history) {
-    // const editingVocabulary = editingVocabularyStore.editingVocabulary;
-    // const target =
-    //   editingVocabulary.find( (data) => data.id === history.targetId);
     const target = editingVocabularyStore.editingVocWithId.get(history.targetId);
       
     if (!target) {
@@ -702,7 +688,7 @@ class EditingHistory {
     if (this.STR_UNDO === type) {
       previous.forEach((pre) => {
         const find = following.find((fllw) => fllw.term == pre.term);
-        if (find) {
+        if (find !== undefined) {
           if (find.preferred_label != currentFlwData.preferred_label) {
             addSynList.push(pre);
           }
@@ -713,7 +699,7 @@ class EditingHistory {
 
       following.forEach((fllw) => {
         const find = previous.find((pre) => pre.term == fllw.term);
-        if (find) {
+        if (find !== undefined) {
           if (find.preferred_label != currentPreData.preferred_label) {
             delSynList.push(fllw);
           }
@@ -724,7 +710,7 @@ class EditingHistory {
     } else { // redo
       following.forEach((fllw) => {
         const find = previous.find((pre) => pre.term == fllw.term);
-        if (find) {
+        if (find !== undefined) {
           if (find.preferred_label != currentPreData.preferred_label) {
             addSynList.push(fllw);
     }
@@ -734,7 +720,7 @@ class EditingHistory {
       });
       previous.forEach((pre) => {
         const find = following.find((fllw) => fllw.term == pre.term);
-        if (find) {
+        if (find !== undefined) {
           if (find.preferred_label != currentFlwData.preferred_label) {
             delSynList.push(pre);
           }
