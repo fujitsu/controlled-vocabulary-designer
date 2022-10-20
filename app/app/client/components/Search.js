@@ -86,7 +86,7 @@ export default class Search extends React.Component {
     const targetFileData = editingVocabulary.getTargetFileData( editingVocabulary.selectedFile.id);
     result = targetFileData.find((node) => // Case-insensitive comparison
       node.term.toUpperCase() === convStr.toUpperCase());
-    if (result) {
+    if (result !== undefined) {
       editingVocabulary.deselectTermList();
       editingVocabulary.setSelectedTermList( result.term,);
       editingVocabulary.setCurrentNodeById( result.id, true);

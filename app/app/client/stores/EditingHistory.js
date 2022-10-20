@@ -488,7 +488,7 @@ class EditingHistory {
     const followingLangDiffTarget = history.following.find((data) =>
       data.id === history.targetLangDiffId);
 
-    if (!previousTarget && followingTarget) {
+    if (previousTarget === undefined && followingTarget !== undefined) {
       // If the change deletes the edited vocabulary
       if (this.STR_UNDO === type) {
         return '用語 : ' + followingTarget.term + 'が削除されました。';
@@ -688,7 +688,7 @@ class EditingHistory {
     if (this.STR_UNDO === type) {
       previous.forEach((pre) => {
         const find = following.find((fllw) => fllw.term == pre.term);
-        if (find) {
+        if (find !== undefined) {
           if (find.preferred_label != currentFlwData.preferred_label) {
             addSynList.push(pre);
           }
@@ -699,7 +699,7 @@ class EditingHistory {
 
       following.forEach((fllw) => {
         const find = previous.find((pre) => pre.term == fllw.term);
-        if (find) {
+        if (find !== undefined) {
           if (find.preferred_label != currentPreData.preferred_label) {
             delSynList.push(fllw);
           }
@@ -710,7 +710,7 @@ class EditingHistory {
     } else { // redo
       following.forEach((fllw) => {
         const find = previous.find((pre) => pre.term == fllw.term);
-        if (find) {
+        if (find !== undefined) {
           if (find.preferred_label != currentPreData.preferred_label) {
             addSynList.push(fllw);
     }
@@ -720,7 +720,7 @@ class EditingHistory {
       });
       previous.forEach((pre) => {
         const find = following.find((fllw) => fllw.term == pre.term);
-        if (find) {
+        if (find !== undefined) {
           if (find.preferred_label != currentFlwData.preferred_label) {
             delSynList.push(pre);
           }
