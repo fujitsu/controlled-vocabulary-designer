@@ -291,17 +291,17 @@ export default class ControlPanel extends React.Component {
             <MenuItem onClick={(fileType) =>
               this.downloadDialogOpen('editing_vocabulary')}
             >
-              編集用語彙
+              CSV（用語一覧）
             </MenuItem>
             <MenuItem onClick={(fileType) =>
               this.downloadDialogOpen('editing_vocabulary_meta')}
             >
-              編集用語彙_meta
+              CSV（語彙基本情報）
             </MenuItem>
             <MenuItem onClick={(fileType) =>
               this.downloadDialogOpen('controlled_vocabulary')}
             >
-              統制語彙
+              RDF
             </MenuItem>
           </Menu>
           <Button 
