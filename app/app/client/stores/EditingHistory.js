@@ -252,15 +252,28 @@ class EditingHistory {
         const target =
             EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
-          target.preferred_label = data.preferred_label;
-          target.idofuri = data.idofuri;
-          target.uri = data.uri;
-          target.broader_uri = data.broader_uri;
-          target.broader_term = data.broader_term;
-          target.other_voc_syn_uri = data.other_voc_syn_uri;
-          target.term_description = data.term_description;
-          target.modified_time = data.modified_time;
-          updateList.push(target);
+          const dataObj = new Object;
+          dataObj.id = target.id;  
+          dataObj.term = target.term;  
+          dataObj.preferred_label = data.preferred_label;
+          dataObj.language = target.language;  
+          dataObj.idofuri = data.idofuri;
+          dataObj.uri = data.uri; 
+          dataObj.broader_uri = data.broader_uri;// broader_uri as is 
+          dataObj.broader_term = data.broader_term;// broader_term as is  // optional
+          dataObj.other_voc_syn_uri = data.other_voc_syn_uri; // the other_voc_syn_uri should be exist in the remaining synonym group
+          dataObj.term_description = data.term_description; // 
+          dataObj.created_time = target.created_time; // created_time as is
+          dataObj.modified_time = data.modified_time; // modified_time as is. this will be changed in updateRequest-method.
+          dataObj.synonym_candidate = target.synonym_candidate; // synonym_candidate as is
+          dataObj.broader_term_candidate = target.broader_term_candidate; // broader_term_candidate as is
+          dataObj.hidden = target.hidden; // hidden as is
+          dataObj.position_x = target.position_x; // position_x as is
+          dataObj.position_y = target.position_y; // position_y as is
+          dataObj.color1 = target.color1; // color1 as is
+          dataObj.color2 = target.color2; // color2 as is
+          dataObj.confirm = target.confirm; // confirm as is
+          updateList.push(dataObj);
         }
       });
     } else { // redo
@@ -271,15 +284,28 @@ class EditingHistory {
         //   i.id == data.id);
         const target = EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
-          target.preferred_label = data.preferred_label;
-          target.idofuri = data.idofuri;
-          target.uri = data.uri;
-          target.broader_uri = data.broader_uri;
-          target.broader_term = data.broader_term;
-          target.other_voc_syn_uri = data.other_voc_syn_uri;
-          target.term_description = data.term_description;
-          target.modified_time = data.modified_time;
-          updateList.push(target);
+          const dataObj = new Object;
+          dataObj.id = target.id;  
+          dataObj.term = target.term;  
+          dataObj.preferred_label = data.preferred_label;
+          dataObj.language = target.language;  
+          dataObj.idofuri = data.idofuri;
+          dataObj.uri = data.uri; 
+          dataObj.broader_uri = data.broader_uri;// broader_uri as is 
+          dataObj.broader_term = data.broader_term;// broader_term as is  // optional
+          dataObj.other_voc_syn_uri = data.other_voc_syn_uri; // the other_voc_syn_uri should be exist in the remaining synonym group
+          dataObj.term_description = data.term_description; // 
+          dataObj.created_time = target.created_time; // created_time as is
+          dataObj.modified_time = data.modified_time; // modified_time as is. this will be changed in updateRequest-method.
+          dataObj.synonym_candidate = target.synonym_candidate; // synonym_candidate as is
+          dataObj.broader_term_candidate = target.broader_term_candidate; // broader_term_candidate as is
+          dataObj.hidden = target.hidden; // hidden as is
+          dataObj.position_x = target.position_x; // position_x as is
+          dataObj.position_y = target.position_y; // position_y as is
+          dataObj.color1 = target.color1; // color1 as is
+          dataObj.color2 = target.color2; // color2 as is
+          dataObj.confirm = target.confirm; // confirm as is
+          updateList.push(dataObj);
         }
       });
     }
