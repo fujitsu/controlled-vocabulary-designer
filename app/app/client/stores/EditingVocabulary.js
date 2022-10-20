@@ -1742,7 +1742,7 @@ isOtherVocSynUriChanged() {
       return;
     }
     const history = new History(colorId, currentId);
-    let dataObj
+    let dataObj;
     if ('color1' == colorId) {
       history.previous = updateCurrent.color1;
       history.following = tmpColor;
