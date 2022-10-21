@@ -25,7 +25,7 @@
    constructor(props) {
      super(props);
      this.message='編集中のデータを破棄して用語選択を実行します。\n\nよろしいですか？';
-     this.changeTerm='';
+     this.changeId=undefined;
      this.state = {
        tabIndex: this.props.editingVocabulary.currentNode.id ? this.props.editingVocabulary.currentNode.id : '', 
        open: false,
@@ -50,22 +50,24 @@
     */
    handleConfirmClose(){
      
-    const targetTerm = this.props.editingVocabulary.sortedNodeList;
-    let id = ';'
-    for (let i = 0; i < targetTerm.length; i++) {
-      if (targetTerm[i].term == this.changeTerm ) {
+    const targetList = this.props.editingVocabulary.sortedNodeList;
+    let id = undefined;
+    for (let i = 0; i < targetList.length; i++) {
+      if (targetList[i].id == this.changeId ) {
         this.setState({tabIndex: i});
-        this.props.change( targetTerm[i].language);
-        id = targetTerm[i].id;
+        this.props.change( targetList[i].language);
+        id = targetList[i].id;
         break;
       }
     }
 
-    this.props.editingVocabulary.setCurrentNodeById( id );
-    this.props.editingVocabulary.deselectTermList();
-    if( this.props.editingVocabulary.currentNode.id){
-     this.props.editingVocabulary.setSelectedTermList( this.props.editingVocabulary.currentNode.term,
-                                                       this.props.editingVocabulary.currentNode.language );
+    if( id !== undefined){
+      this.props.editingVocabulary.setCurrentNodeById( id );
+      this.props.editingVocabulary.deselectTermList();
+      if( this.props.editingVocabulary.currentNode.id){
+       this.props.editingVocabulary.setSelectedTermList( this.props.editingVocabulary.currentNode.term,
+                                                         this.props.editingVocabulary.currentNode.language );
+      }
     }
 
     this.setState({ dlgConfirmOpen: false });
@@ -87,9 +89,8 @@
      if (event.keyCode == 32) {
        return;
      }
-
-     this.changeTerm = event.target.textContent;
-     if(  this.props.editingVocabulary.currentNode.term != event.target.textContent 
+     this.changeId = event.target.dataset.id;
+     if(  this.props.editingVocabulary.currentNode.id !== event.target.dataset.id
        && this.props.editingVocabulary.isCurrentNodeChanged){
        this.setState({ dlgConfirmOpen: true });
      }else{
@@ -118,7 +119,7 @@
               SelectDisplayProps={{ style: { paddingTop: 0, paddingBottom: 0 , paddingLeft: '20px'} }}
             >
             {sortedNodeList.map((item, i) => (
-              <MenuItem key={i} value={item.id} 
+              <MenuItem key={i} value={item.id}  data-id={item.id} 
               onClick={(event) => this.selectCurrentTerm(event)}>{item.term}</MenuItem>
             ))}
             </Select>

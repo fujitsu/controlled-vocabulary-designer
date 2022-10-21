@@ -77,15 +77,20 @@ export default class Search extends React.Component {
     if ( !value || !value.value) return;
     
     const newValue = value.value;
+    const newId = value.id;
     this.setState({values: [value]});
 
     this.errTerm='';
     const editingVocabulary = this.props.editingVocabulary;
     const convStr = this.hankana2Zenkana(newValue);
-    let result;
-    const targetFileData = editingVocabulary.getTargetFileData( editingVocabulary.selectedFile.id);
-    result = targetFileData.find((node) => // Case-insensitive comparison
-      node.term.toUpperCase() === convStr.toUpperCase());
+    
+    let result=undefined;
+    if(editingVocabulary.selectedFile.id === 0){
+      result = editingVocabulary.editingVocWithId.get(newId);
+    }else{
+      result = editingVocabulary.referenceVocWithId[editingVocabulary.selectedFile.id].get(newId);
+    }
+
     if (result !== undefined) {
       editingVocabulary.deselectTermList();
       editingVocabulary.setSelectedTermList( result.term, result.language);
@@ -177,6 +182,7 @@ export default class Search extends React.Component {
     }
     let selectData = this.props.editingVocabulary.sortedNodeList.map((d) => ({
       value: d.term,
+      id: d.id,
       label: d.term,
       hidden: d.hidden,
       fontweight: d.term==this.props.editingVocabulary.currentNode.term?'bold':'default',
