@@ -106,7 +106,7 @@ export default
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
-      } else if (editingVocabulary.isCyclicBroaders(_displayNode, String(nextBroaderTerm))){
+      } else if (editingVocabulary.isCyclicBroaders(editingVocabulary.currentNode, String(nextBroaderTerm))){
         // Broader term loop check /////////////////////////////////////////
           const cycleBroaderTerm =
             editingVocabulary.cycleBroaderTerm;

@@ -572,13 +572,8 @@ export default
 
       if( this.hitHandle == 1){
         let _disableButton = this.state.handleDisableButton;
-        if( sourceNode.data().language != targetNode.data().language){
-          this.message = '「'+sourceNode.data().term +'」と「'+targetNode.data().term +'」は、言語が異なるので上位語に設定できません。\n上位語には同じ言語の用語を設定してください。';
-          _disableButton = 1;// OK only buttons
-        }else{
-          this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します。\nよろしいですか？';
-          _disableButton = 0;// OK & CANCEL buttons
-        }
+        this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します。\nよろしいですか？';
+        _disableButton = 0;// OK & CANCEL buttons
         this.setState({handleDisableButton: _disableButton,dlgBroaderOpen: true});   
       } else{        
         this.setState({dlgSynonymOpen: true});   

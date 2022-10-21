@@ -43,8 +43,10 @@ class EditingVocabulary {
     }else{
       if(iddatalist[0].language=== language){
         return iddatalist[0].id;
-      }else{
+      }else if(iddatalist.length ===2){
         return iddatalist[1].id;
+      }else{
+        return undefined;
       }
     }
   }
@@ -194,9 +196,9 @@ class EditingVocabulary {
    * Editing vocabulary data initialization
    * @param {array} dbData - list of editing vocabulary
    */
-  initializeEditingVocabularyData(dbData) {
-    this.uri2preflabel['ja'] = {};
-    this.uri2preflabel['en'] = {};
+   @action initializeEditingVocabularyData(dbData) {
+    this.uri2preflabel[0]['ja'] = {};
+    this.uri2preflabel[0]['en'] = {};
     this.term2id[0].clear();
     this.uri2synoid[0].clear();
     this.uri2narrowid[0].clear();
@@ -204,9 +206,9 @@ class EditingVocabulary {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
         if (data.language === 'ja') { // If the language is Japanese
-          this.uri2preflabel['ja'][data.uri] = data.preferred_label;
+          this.uri2preflabel[0]['ja'][data.uri] = data.preferred_label;
         } else { // If the language is English
-          this.uri2preflabel['en'][data.uri] = data.preferred_label;
+          this.uri2preflabel[0]['en'][data.uri] = data.preferred_label;
         }
       }
       // Make term2id
@@ -233,7 +235,7 @@ class EditingVocabulary {
       }
     }, this);
 
-    const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
+    const editingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel[0]['ja'], this.uri2preflabel[0]['en']) ;
 
     this.editingVocabulary = editingVocabulary;
     editingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
@@ -244,7 +246,7 @@ class EditingVocabulary {
    * Editing vocabulary data update
    * @param {array} dbData - list of editing vocabulary
    */
-  updateEditingVocabularyData(dbData) {
+   @action updateEditingVocabularyData(dbData) {
     // make id_list with whome terms are updated
     let id_list=[];
     for( let item of dbData){
@@ -254,15 +256,15 @@ class EditingVocabulary {
     // filter unrelated terms
     let unChangeVocabulary = this.editingVocabulary.filter((item) => {return (!id_list.includes(item['id']))}) ;
 
-    this.uri2preflabel['ja'] = {};
-    this.uri2preflabel['en'] = {};
+    this.uri2preflabel[0]['ja'] = {};
+    this.uri2preflabel[0]['en'] = {};
     dbData.forEach( (data) => {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
         if (data.language === 'ja') { // If the language is Japanese
-          this.uri2preflabel['ja'][data.uri] = data.preferred_label;
+          this.uri2preflabel[0]['ja'][data.uri] = data.preferred_label;
         } else { // If the language is English
-          this.uri2preflabel['en'][data.uri] = data.preferred_label;
+          this.uri2preflabel[0]['en'][data.uri] = data.preferred_label;
         }
       }
     }, this);
@@ -270,9 +272,9 @@ class EditingVocabulary {
       // Make dictionary {uri: preferred_label} 
       if (data.preferred_label && data.uri && data.language) {
         if (data.language === 'ja') { // If the language is Japanese
-          this.uri2preflabel['ja'][data.uri] = data.preferred_label;
+          this.uri2preflabel[0]['ja'][data.uri] = data.preferred_label;
         } else { // If the language is English
-          this.uri2preflabel['en'][data.uri] = data.preferred_label;
+          this.uri2preflabel[0]['en'][data.uri] = data.preferred_label;
         }
       }
     }, this);
@@ -312,7 +314,7 @@ class EditingVocabulary {
     }, this);
 
     // calculate values to update
-    const updatedEditingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel['ja'], this.uri2preflabel['en']) ;
+    const updatedEditingVocabulary = this.calcEditingVocValues(dbData, this.uri2preflabel[0]['ja'], this.uri2preflabel[0]['en']) ;
 
     this.editingVocabulary = unChangeVocabulary.concat(updatedEditingVocabulary);
     updatedEditingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
@@ -325,7 +327,7 @@ class EditingVocabulary {
    * @param {dictinary} uri_preferred_label_ja
    * @param {dictinary} uri_preferred_label_en
    */
-  calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) {
+   @action calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) {
     // calculate values to update
     const editingVocabulary = [];
     if(undefined === dbData || dbData.length === 0){
@@ -400,8 +402,8 @@ class EditingVocabulary {
    */
   setReferenceVocabularyData(dbData, refid) {
     const referenceVocabulary = [];
-    const uri_preferred_label_ja = {};
-    const uri_preferred_label_en = {};
+    this.uri2preflabel[refid]['ja'] = {};
+    this.uri2preflabel[refid]['en'] = {};
     this.term2id[refid].clear();
     this.uri2synoid[refid].clear();
     this.uri2narrowid[refid].clear();
@@ -409,9 +411,9 @@ class EditingVocabulary {
       // Make dictionary {uri: preferred_label}
       if (data.preferred_label && data.uri) {
         if(data.language === 'ja'){
-          uri_preferred_label_ja[data.uri] = data.preferred_label;
+          this.uri2preflabel[refid]['ja'][data.uri] = data.preferred_label;
         }else{
-          uri_preferred_label_en[data.uri] = data.preferred_label;
+          this.uri2preflabel[refid]['en'][data.uri] = data.preferred_label;
         }
       }
       // Make term2id
@@ -436,17 +438,17 @@ class EditingVocabulary {
           this.uri2narrowid[refid].set(data.broader_uri, new Set([data.id]));
         }
       }
-    });
+    }, this);
 
     dbData.forEach( (data) => {
       // Convert broader_uri into broader_term
-      if (uri_preferred_label_ja[data.broader_uri] != undefined ||
-        uri_preferred_label_en[data.broader_uri] != undefined ) {
+      if (this.uri2preflabel[refid]['ja'][data.broader_uri] != undefined ||
+          this.uri2preflabel[refid]['en'][data.broader_uri] != undefined ) {
         if((data.broader_uri.indexOf("http://") != -1) || (data.broader_uri.indexOf("https://") != -1)) {
           if(data.language === 'ja'){
-            data.broader_term = uri_preferred_label_ja[data.broader_uri];
+            data.broader_term = this.uri2preflabel[refid]['ja'][data.broader_uri];
           }else{
-            data.broader_term = uri_preferred_label_en[data.broader_uri];
+            data.broader_term = this.uri2preflabel[refid]['en'][data.broader_uri];
           }
         }else{
           data.broader_term = '';
@@ -466,7 +468,7 @@ class EditingVocabulary {
       if (undefined == data.position_y) console.assert(false, "refdataposy");
 
       referenceVocabulary.push(data);
-    });
+    }, this);
 
     return referenceVocabulary;
   }
@@ -725,7 +727,7 @@ class EditingVocabulary {
    * @param {number} fileId index
    * @return {Map} - vocabulary data with id
    */
-   getTargetWithId(fileId) {
+  getTargetWithId(fileId) {
     switch (fileId) {
       case 0: return this.editingVocWithId;
       case 1: return this.referenceVocWithId[1];
@@ -736,132 +738,104 @@ class EditingVocabulary {
   }
 
   /**
-   * Is there a broadterm in the diff language
-   * @param {object} node node
-   * @return {bool} exist=targetNode / nothing=false
-   */
-  isExistDiffBroaderTerm( node){
-    const termListForVocabulary = this.termListForVocabulary;
-    let broaderTermObj= termListForVocabulary.find((item) => {
-      return item.data.uri == node.data.uri &&
-      item.data.language != node.data.language
-    })
-    if( !broaderTermObj) return false;
-
-    broaderTermObj= termListForVocabulary.find((item) => {
-      return item.data.term == broaderTermObj.broader_term
-    })
-    return broaderTermObj!==undefined?broaderTermObj:false;
-  }
-
-  /**
-   * Is there a preferredterm in the diff language
-   * @param {object} node node
-   * @return {bool} exist=targetNode / nothing=false
-   */
-  isExistDiffPreferredTerm( node){
-    const termListForVocabulary = this.termListForVocabulary;
-    let ret=false;
-    termListForVocabulary.forEach((item) => {
-      if( item.data.uri == node.data.uri && 
-          item.data.term == item.data.preferred_label &&
-          item.data.language != node.data.language){
-            ret =true;
-      }
-    })
-    return ret;
-  }
-
-  /**
    * edgesList generation computed
    * @return {array} EdgesList for the visualization screen panel vocabulary tab
    */
   @computed get edgesList() {
-    const termListForVocabulary = this.termListForVocabulary;
+    const fileId = this.selectedFile.id;
+    const termListForVocWithId = this.getTargetWithId(fileId);
 
     const broaderTermEdges = [];
     const synonymEdges = [];
 
-    termListForVocabulary.forEach((node) => {
-      // Broader term edge data
-      if (node.broader_term) {
-        // Is there a broadterm in the diff language
-        const find = this.isExistDiffBroaderTerm(node);
-        const drawEdge = node.data.language=='ja'?true: !find;
-        if (!node.data.preferred_label) {
-          // A vocabulary without a preferred label is an independent vocabulay without synonyms and so is mapped as a broader term
-          const sourceId =
-            this.getNodeIdByTerm(termListForVocabulary, node.broader_term);
-          if ( '' != sourceId && drawEdge ) {
-            broaderTermEdges.push({
-              data: {
-                type: 'broader_term',
-                target: node.data.id,
-                source: sourceId,
-                label: '',
-                arrow: 'triangle',
-              },
-              classes: ['broader_term'],
-            });
-          }
-        } else {
-          // Create edge data for preferred term with broader term
-          if (node.data.term == node.data.preferred_label) {
-            const sourceId =
-              this.getNodeIdByTerm(termListForVocabulary, node.broader_term);
-            if ( '' != sourceId && drawEdge ) {
-              broaderTermEdges.push({
-                data: {
-                  type: 'broader_term',
-                  target: node.data.id,
-                  source: sourceId,
-                  label: '',
-                  arrow: 'triangle',
-                },
-                classes: ['broader_term'],
-              });
-            }
+    this.uri2synoid[fileId].forEach((ids, uri)=>{
+      // 
+      let preid_ja;
+      let preid_en;
+      let broader_uri = '';
+      
+      ids.forEach((id1)=>{
+        const data1 = termListForVocWithId.get(id1);
+        if(data1.term === data1.preferred_label && !data1.hidden){
+          // get data who is the preferred label
+          if(data1.language === 'ja'){
+            preid_ja = id1;
+            broader_uri = data1.broader_uri;
+          }else{
+            preid_en = id1;
+            broader_uri = data1.broader_uri;
           }
         }
+      },this);
+
+      // set target node id
+      let preid; // we prefer ja if it exist
+      if(undefined !== preid_ja){
+        preid = preid_ja;
+      }else if(undefined !== preid_en){
+        preid = preid_en;
       }
 
-      // Synonym edge data
-      if (node.data.preferred_label) {
-        // Extract vocabulary with same preferred term (= Synonym)
-        const synonymList =
-            termListForVocabulary.filter( (data) =>
-              data.data.uri == node.data.uri );
-        if (undefined != synonymList) {
-          synonymList.forEach( (synonym) => {
-            if (synonym.data.id != node.data.id) {
-              // Add to EdgesList if not already registered
-              const find =
-                synonymEdges.find( (edge) =>
-                  this.isSynonymExist(
-                      edge, synonym.data.id, node.data.id) == true);
-              if (undefined == find) {
-                // Do not create edges for non-preferred terms (synonymous)
-                
-                let langDiffPreferredNode = node.data.language=='ja'?false:this.isExistDiffPreferredTerm(node);
-                if (node.data.term === node.data.preferred_label && !langDiffPreferredNode) {
-                  synonymEdges.push({
-                    data: {
-                      type: 'synonym',
-                      target: synonym.data.id,
-                      source: node.data.id, label: '',
-                    },
-                    classes: ['synonym'],
-                  });
-                }
-              }
-            }
-          });
+      // set synonym edges
+      ids.forEach((id1)=>{
+        if(id1 !== preid){
+          // hidden check
+          const dataObj = termListForVocWithId.get(id1);
+          if(dataObj.hidden){
+            // the data is hidden
+            // nothing to do
+          }else{
+            synonymEdges.push({
+              data: {
+                type: 'synonym',
+                target: id1,
+                source: preid,
+                label: ''
+              },
+              classes: ['synonym'],
+            });  
+          }
         }
+      }, this);
+
+      // set broader edges
+      if(broader_uri !== ''){
+        let preidbro_ja;
+        let preidbro_en;
+        let preidbro;
+        // for synonym group
+        this.uri2synoid[fileId].get(broader_uri).forEach((id2)=>{
+          const data2 = termListForVocWithId.get(id2);
+          if(data2.term === data2.preferred_label && !data2.hidden){
+            // get data who is the preferred label
+            if(data2.language === 'ja'){
+              preidbro_ja = id2;
+            }else{
+              preidbro_en = id2;
+            }
+          }
+        },this);
+        if(undefined !== preidbro_ja){
+          preidbro = preidbro_ja;
+        }else{
+          preidbro = preidbro_en;
+        }
+        broaderTermEdges.push({
+          data: {
+            type: 'broader_term',
+            target: preid,
+            source: preidbro,
+            label: '',
+            arrow: 'triangle',
+          },
+          classes: ['broader_term'],
+        });
       }
-    });
+
+    }, this);
 
     return [...broaderTermEdges, ...synonymEdges];
-  }
+  };
 
   /**
    * Duplicate checking of synonym edge
@@ -1484,9 +1458,9 @@ isOtherVocSynUriChanged() {
 
     this.tmpBroaderTerm = {id: this.currentNode.id, list:{ja:[], en:[]},  broader_uri: ''};
     if (this.currentNode.broader_uri) {
-      if(this.uri2preflabel[this.currentNode.language][this.currentNode.broader_uri]){
+      if(this.uri2preflabel[0][this.currentNode.language][this.currentNode.broader_uri]){
         this.tmpBroaderTerm.list[this.currentNode.language].push(
-          this.uri2preflabel[this.currentNode.language][this.currentNode.broader_uri]);  
+          this.uri2preflabel[0][this.currentNode.language][this.currentNode.broader_uri]);  
       }
     }
     this.tmpBroaderTerm.broader_uri = this.currentNode.broader_uri;
@@ -1658,8 +1632,8 @@ isOtherVocSynUriChanged() {
         preferredlabel.push(languageChangeNodeData.preferred_label);
       }
 
-      if (undefined !== this.uri2preflabel[languageChangeNodeData.language][languageChangeNodeData.broader_uri]) {
-        broaderterm.push(this.uri2preflabel[languageChangeNodeData.language][languageChangeNodeData.broader_uri]);        
+      if (undefined !== this.uri2preflabel[0][languageChangeNodeData.language][languageChangeNodeData.broader_uri]) {
+        broaderterm.push(this.uri2preflabel[0][languageChangeNodeData.language][languageChangeNodeData.broader_uri]);        
       }
       broader_uri = languageChangeNodeData.broader_uri;
 
@@ -1896,9 +1870,9 @@ isOtherVocSynUriChanged() {
             uri: data.uri,
             vocabularyColor: data.color1?data.color1:'',
             other_voc_syn_uri: data.other_voc_syn_uri,
-            term_description: data.term_description,
-            created_time: data.created_time,
-            modified_time: data.modified_time,
+            // term_description: data.term_description,
+            // created_time: data.created_time,
+            // modified_time: data.modified_time,
             confirm: data.confirm?data.confirm:'',
           },
           position: {
@@ -1931,9 +1905,9 @@ isOtherVocSynUriChanged() {
             uri: data.uri,
             vocabularyColor: '',
             other_voc_syn_uri: data.other_voc_syn_uri,
-            term_description: '',
-            created_time: '',
-            modified_time: '',
+            // term_description: '',
+            // created_time: '',
+            // modified_time: '',
             confirm:'',
           },
           position: {
@@ -2818,7 +2792,10 @@ isOtherVocSynUriChanged() {
     const cycleBroaderTerm = []; // list of preflabels.
     const goalUri = new Set();
     
-    const foundBrodId =this.getIdbyTermandLang(broaderTerm, displayLanguage);
+    let foundBrodId =this.getIdbyTermandLang(broaderTerm, displayLanguage);
+    if(undefined === foundBrodId){
+      foundBrodId =this.getIdbyTermandLang(broaderTerm, otherLanguage);
+    }
     const foundBroadObj = this.editingVocWithId.get(foundBrodId);
     
     // initialization
@@ -2869,10 +2846,10 @@ isOtherVocSynUriChanged() {
       const foundObj = this.editingVocWithId.get(id2);
       // push preferred label
       let pref2;
-      if(undefined !== this.uri2preflabel[displayLanguage][foundObj.uri]){
-        pref2 = this.uri2preflabel[displayLanguage][foundObj.uri];
+      if(undefined !== this.uri2preflabel[0][displayLanguage][foundObj.uri]){
+        pref2 = this.uri2preflabel[0][displayLanguage][foundObj.uri];
       }else{
-        pref2 = this.uri2preflabel[otherLanguage][foundObj.uri];
+        pref2 = this.uri2preflabel[0][otherLanguage][foundObj.uri];
       }
       cycleBroaderTerm.push(pref2);
 
@@ -3094,11 +3071,30 @@ isOtherVocSynUriChanged() {
   };
   // uri to preferred  
   // dictinary for uri to preferred_label
-  @observable uri2preflabel = {
-    ja:{},
-    en:{}
-  };
-
+  // @observable uri2preflabel = {
+  //   ja:{},
+  //   en:{}
+  // };
+  // uri to preferred  
+  // dictinary for uri to preferred_label. edit, ref1, ref2, ref3
+  @observable uri2preflabel = [
+    {
+      ja:{},
+      en:{}
+    },
+    {
+      ja:{},
+      en:{}  
+    },
+    {
+      ja:{},
+      en:{}  
+    },
+    {
+      ja:{},
+      en:{}  
+    }
+  ];
 
 
   /**
