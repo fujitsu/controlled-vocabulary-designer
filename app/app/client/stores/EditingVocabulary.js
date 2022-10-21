@@ -411,10 +411,8 @@ class EditingVocabulary {
       // Make dictionary {uri: preferred_label}
       if (data.preferred_label && data.uri) {
         if(data.language === 'ja'){
-          // uri_preferred_label_ja[data.uri] = data.preferred_label;
           this.uri2preflabel[refid]['ja'][data.uri] = data.preferred_label;
         }else{
-          // uri_preferred_label_en[data.uri] = data.preferred_label;
           this.uri2preflabel[refid]['en'][data.uri] = data.preferred_label;
         }
       }
