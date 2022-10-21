@@ -212,7 +212,7 @@ export default class DialogSettingSynonym extends React.Component {
     const id = this.props.editingVocabulary.getIdbyTermandLang( brdTerm, lang);
     const brdNode = this.props.editingVocabulary.editingVocWithId.get( id);
     if( brdNode !== undefined){      
-      ret = this.props.editingVocabulary.uri2preflabel[lang==='ja'?'en':'ja'][brdNode.uri] ;
+      ret = this.props.editingVocabulary.uri2preflabel[0][lang==='ja'?'en':'ja'][brdNode.uri] ;
     }
     return ret;
   }
