@@ -738,9 +738,9 @@ class EditingVocabulary {
   }
 
   /**
-  * edgesList generation computed
-  * @return {array} EdgesList for the visualization screen panel vocabulary tab
-  */
+   * edgesList generation computed
+   * @return {array} EdgesList for the visualization screen panel vocabulary tab
+   */
   @computed get edgesList() {
     const fileId = this.selectedFile.id;
     const termListForVocWithId = this.getTargetWithId(fileId);
