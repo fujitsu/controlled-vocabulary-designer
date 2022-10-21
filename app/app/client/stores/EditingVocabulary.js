@@ -43,8 +43,10 @@ class EditingVocabulary {
     }else{
       if(iddatalist[0].language=== language){
         return iddatalist[0].id;
-      }else{
+      }else if(iddatalist.length ===2){
         return iddatalist[1].id;
+      }else{
+        return undefined;
       }
     }
   }
@@ -194,7 +196,7 @@ class EditingVocabulary {
    * Editing vocabulary data initialization
    * @param {array} dbData - list of editing vocabulary
    */
-  initializeEditingVocabularyData(dbData) {
+   @action initializeEditingVocabularyData(dbData) {
     this.uri2preflabel[0]['ja'] = {};
     this.uri2preflabel[0]['en'] = {};
     this.term2id[0].clear();
@@ -244,7 +246,7 @@ class EditingVocabulary {
    * Editing vocabulary data update
    * @param {array} dbData - list of editing vocabulary
    */
-  updateEditingVocabularyData(dbData) {
+   @action updateEditingVocabularyData(dbData) {
     // make id_list with whome terms are updated
     let id_list=[];
     for( let item of dbData){
@@ -325,7 +327,7 @@ class EditingVocabulary {
    * @param {dictinary} uri_preferred_label_ja
    * @param {dictinary} uri_preferred_label_en
    */
-  calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) {
+   @action calcEditingVocValues(dbData, uri_preferred_label_ja, uri_preferred_label_en) {
     // calculate values to update
     const editingVocabulary = [];
     if(undefined === dbData || dbData.length === 0){
@@ -727,7 +729,7 @@ class EditingVocabulary {
    * @param {number} fileId index
    * @return {Map} - vocabulary data with id
    */
-   getTargetWithId(fileId) {
+  getTargetWithId(fileId) {
     switch (fileId) {
       case 0: return this.editingVocWithId;
       case 1: return this.referenceVocWithId[1];
@@ -738,132 +740,104 @@ class EditingVocabulary {
   }
 
   /**
-   * Is there a broadterm in the diff language
-   * @param {object} node node
-   * @return {bool} exist=targetNode / nothing=false
-   */
-  isExistDiffBroaderTerm( node){
-    const termListForVocabulary = this.termListForVocabulary;
-    let broaderTermObj= termListForVocabulary.find((item) => {
-      return item.data.uri == node.data.uri &&
-      item.data.language != node.data.language
-    })
-    if( !broaderTermObj) return false;
-
-    broaderTermObj= termListForVocabulary.find((item) => {
-      return item.data.term == broaderTermObj.broader_term
-    })
-    return broaderTermObj!==undefined?broaderTermObj:false;
-  }
-
-  /**
-   * Is there a preferredterm in the diff language
-   * @param {object} node node
-   * @return {bool} exist=targetNode / nothing=false
-   */
-  isExistDiffPreferredTerm( node){
-    const termListForVocabulary = this.termListForVocabulary;
-    let ret=false;
-    termListForVocabulary.forEach((item) => {
-      if( item.data.uri == node.data.uri && 
-          item.data.term == item.data.preferred_label &&
-          item.data.language != node.data.language){
-            ret =true;
-      }
-    })
-    return ret;
-  }
-
-  /**
-   * edgesList generation computed
-   * @return {array} EdgesList for the visualization screen panel vocabulary tab
-   */
-  @computed get edgesList() {
-    const termListForVocabulary = this.termListForVocabulary;
+ * edgesList generation computed
+ * @return {array} EdgesList for the visualization screen panel vocabulary tab
+ */
+    @computed get edgesList() {
+    const fileId = this.selectedFile.id;
+    const termListForVocWithId = this.getTargetWithId(fileId);
 
     const broaderTermEdges = [];
     const synonymEdges = [];
 
-    termListForVocabulary.forEach((node) => {
-      // Broader term edge data
-      if (node.broader_term) {
-        // Is there a broadterm in the diff language
-        const find = this.isExistDiffBroaderTerm(node);
-        const drawEdge = node.data.language=='ja'?true: !find;
-        if (!node.data.preferred_label) {
-          // A vocabulary without a preferred label is an independent vocabulay without synonyms and so is mapped as a broader term
-          const sourceId =
-            this.getNodeIdByTerm(termListForVocabulary, node.broader_term);
-          if ( '' != sourceId && drawEdge ) {
-            broaderTermEdges.push({
-              data: {
-                type: 'broader_term',
-                target: node.data.id,
-                source: sourceId,
-                label: '',
-                arrow: 'triangle',
-              },
-              classes: ['broader_term'],
-            });
-          }
-        } else {
-          // Create edge data for preferred term with broader term
-          if (node.data.term == node.data.preferred_label) {
-            const sourceId =
-              this.getNodeIdByTerm(termListForVocabulary, node.broader_term);
-            if ( '' != sourceId && drawEdge ) {
-              broaderTermEdges.push({
-                data: {
-                  type: 'broader_term',
-                  target: node.data.id,
-                  source: sourceId,
-                  label: '',
-                  arrow: 'triangle',
-                },
-                classes: ['broader_term'],
-              });
-            }
+    this.uri2synoid[fileId].forEach((ids, uri)=>{
+      // 
+      let preid_ja;
+      let preid_en;
+      let broader_uri = '';
+      
+      ids.forEach((id1)=>{
+        const data1 = termListForVocWithId.get(id1);
+        if(data1.term === data1.preferred_label && !data1.hidden){
+          // get data who is the preferred label
+          if(data1.language === 'ja'){
+            preid_ja = id1;
+            broader_uri = data1.broader_uri;
+          }else{
+            preid_en = id1;
+            broader_uri = data1.broader_uri;
           }
         }
+      },this);
+
+      // set target node id
+      let preid; // we prefer ja if it exist
+      if(undefined !== preid_ja){
+        preid = preid_ja;
+      }else if(undefined !== preid_en){
+        preid = preid_en;
       }
 
-      // Synonym edge data
-      if (node.data.preferred_label) {
-        // Extract vocabulary with same preferred term (= Synonym)
-        const synonymList =
-            termListForVocabulary.filter( (data) =>
-              data.data.uri == node.data.uri );
-        if (undefined != synonymList) {
-          synonymList.forEach( (synonym) => {
-            if (synonym.data.id != node.data.id) {
-              // Add to EdgesList if not already registered
-              const find =
-                synonymEdges.find( (edge) =>
-                  this.isSynonymExist(
-                      edge, synonym.data.id, node.data.id) == true);
-              if (undefined == find) {
-                // Do not create edges for non-preferred terms (synonymous)
-                
-                let langDiffPreferredNode = node.data.language=='ja'?false:this.isExistDiffPreferredTerm(node);
-                if (node.data.term === node.data.preferred_label && !langDiffPreferredNode) {
-                  synonymEdges.push({
-                    data: {
-                      type: 'synonym',
-                      target: synonym.data.id,
-                      source: node.data.id, label: '',
-                    },
-                    classes: ['synonym'],
-                  });
-                }
-              }
-            }
-          });
+      // set synonym edges
+      ids.forEach((id1)=>{
+        if(id1 !== preid){
+          // hidden check
+          const dataObj = termListForVocWithId.get(id1);
+          if(dataObj.hidden){
+            // the data is hidden
+            // nothing to do
+          }else{
+            synonymEdges.push({
+              data: {
+                type: 'synonym',
+                target: id1,
+                source: preid,
+                label: ''
+              },
+              classes: ['synonym'],
+            });  
+          }
         }
+      }, this);
+
+      // set broader edges
+      if(broader_uri !== ''){
+        let preidbro_ja;
+        let preidbro_en;
+        let preidbro;
+        // for synonym group
+        this.uri2synoid[fileId].get(broader_uri).forEach((id2)=>{
+          const data2 = termListForVocWithId.get(id2);
+          if(data2.term === data2.preferred_label && !data2.hidden){
+            // get data who is the preferred label
+            if(data2.language === 'ja'){
+              preidbro_ja = id2;
+            }else{
+              preidbro_en = id2;
+            }
+          }
+        },this);
+        if(undefined !== preidbro_ja){
+          preidbro = preidbro_ja;
+        }else{
+          preidbro = preidbro_en;
+        }
+        broaderTermEdges.push({
+          data: {
+            type: 'broader_term',
+            target: preid,
+            source: preidbro,
+            label: '',
+            arrow: 'triangle',
+          },
+          classes: ['broader_term'],
+        });
       }
-    });
+
+    }, this);
 
     return [...broaderTermEdges, ...synonymEdges];
-  }
+  };
 
   /**
    * Duplicate checking of synonym edge
@@ -2820,7 +2794,10 @@ isOtherVocSynUriChanged() {
     const cycleBroaderTerm = []; // list of preflabels.
     const goalUri = new Set();
     
-    const foundBrodId =this.getIdbyTermandLang(broaderTerm, displayLanguage);
+    let foundBrodId =this.getIdbyTermandLang(broaderTerm, displayLanguage);
+    if(undefined === foundBrodId){
+      foundBrodId =this.getIdbyTermandLang(broaderTerm, otherLanguage);
+    }
     const foundBroadObj = this.editingVocWithId.get(foundBrodId);
     
     // initialization
