@@ -2543,7 +2543,7 @@ isOtherVocSynUriChanged() {
 
     // broader and narrower relation must not be a loop 
     if (this.tmpBroaderTerm.broader_uri !== '') {
-      if (this.isCyclicBroaders(this.currentNode, String(this.tmpBroaderTerm.list[this.tmpLanguage.value]))) {
+      if (this.isCyclicBroaders(this.currentNode, String(this.tmpBroaderTerm.list[this.tmpLanguage.value]), this.tmpBroaderTerm.broader_uri)) {
       console.log('[errorCheck] cycleBroaderTerm.');
       ret.errorKind = 'cycleBroaderTerm';
       ret.term = this.csurrentNode.term;
@@ -2780,8 +2780,8 @@ isOtherVocSynUriChanged() {
  * @param  {String}  broaderTerm - broader term
  * @return {Boolean} - true: loop (invalid), false: not a loop
  */
-  @action isCyclicBroaders(currentNode, broaderTerm) {
-    if(broaderTerm ===''){
+  @action isCyclicBroaders(currentNode, broaderTerm, broader_uri) {
+    if(broader_uri ===''){
       this.cycleBroaderTerm = [];
       return false;
     }
@@ -2792,10 +2792,7 @@ isOtherVocSynUriChanged() {
     const cycleBroaderTerm = []; // list of preflabels.
     const goalUri = new Set();
     
-    let foundBrodId =this.getIdbyTermandLang(broaderTerm, displayLanguage);
-    if(undefined === foundBrodId){
-      foundBrodId =this.getIdbyTermandLang(broaderTerm, otherLanguage);
-    }
+    let foundBrodId = [...this.uri2synoid[0].get(broader_uri)][0];
     const foundBroadObj = this.editingVocWithId.get(foundBrodId);
     
     // initialization

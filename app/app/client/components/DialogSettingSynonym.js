@@ -176,59 +176,65 @@ export default class DialogSettingSynonym extends React.Component {
 
     // Synonym
     // conbine source synonym and target synonym
-    let synoList = [...this.props.editingVocabulary.uri2synoid[0].get(sourceNode.uri),
-                      ...this.props.editingVocabulary.uri2synoid[0].get(targetNode.uri)];
+    let synoList = [...editingVocabulary.uri2synoid[0].get(sourceNode.uri),
+                      ...editingVocabulary.uri2synoid[0].get(targetNode.uri)];
     synoList = [...(new Set(synoList))]; // deduplicate 
-    this.props.editingVocabulary.tmpSynonym.id = sourceNode.id;
-    this.props.editingVocabulary.tmpSynonym.list['ja'] = [];
-    this.props.editingVocabulary.tmpSynonym.list['en'] = [];
-    this.props.editingVocabulary.tmpSynonym.idList['ja'] = [];
-    this.props.editingVocabulary.tmpSynonym.idList['en'] = [];
+    editingVocabulary.tmpSynonym.id = sourceNode.id;
+    editingVocabulary.tmpSynonym.list['ja'] = [];
+    editingVocabulary.tmpSynonym.list['en'] = [];
+    editingVocabulary.tmpSynonym.idList['ja'] = [];
+    editingVocabulary.tmpSynonym.idList['en'] = [];
     synoList.forEach((id1)=>{
-      const tmpObj = this.props.editingVocabulary.editingVocWithId.get(id1);
+      const tmpObj = editingVocabulary.editingVocWithId.get(id1);
       if(tmpObj.language === 'ja'){
-        this.props.editingVocabulary.tmpSynonym.list['ja'].push(tmpObj.term);
-        this.props.editingVocabulary.tmpSynonym.idList['ja'].push(tmpObj.id);
+        editingVocabulary.tmpSynonym.list['ja'].push(tmpObj.term);
+        editingVocabulary.tmpSynonym.idList['ja'].push(tmpObj.id);
       }else{
-        this.props.editingVocabulary.tmpSynonym.list['en'].push(tmpObj.term);
-        this.props.editingVocabulary.tmpSynonym.idList['en'].push(tmpObj.id);
+        editingVocabulary.tmpSynonym.list['en'].push(tmpObj.term);
+        editingVocabulary.tmpSynonym.idList['en'].push(tmpObj.id);
       }
 
     }, this);
     
     // set the pref label
-    this.props.editingVocabulary.tmpPreferredLabel.id = sourceNode.id;
-    this.props.editingVocabulary.tmpPreferredLabel.list['ja'] = [];
-    this.props.editingVocabulary.tmpPreferredLabel.list['en'] = [];
+    editingVocabulary.tmpPreferredLabel.id = sourceNode.id;
+    editingVocabulary.tmpPreferredLabel.list['ja'] = [];
+    editingVocabulary.tmpPreferredLabel.list['en'] = [];
     if(selectPreferred_Ja !== ''){
-      this.props.editingVocabulary.tmpPreferredLabel.list['ja'].push(selectPreferred_Ja);
+      editingVocabulary.tmpPreferredLabel.list['ja'].push(selectPreferred_Ja);
     }
     if(selectPreferred_En !== ''){
-      this.props.editingVocabulary.tmpPreferredLabel.list['en'].push(selectPreferred_En);
+      editingVocabulary.tmpPreferredLabel.list['en'].push(selectPreferred_En);
     }
     
     // set the idofuri
-    this.props.editingVocabulary.tmpIdofUri.id = sourceNode.id;
-    this.props.editingVocabulary.tmpIdofUri.list = [targetNode.idofuri];
+    editingVocabulary.tmpIdofUri.id = sourceNode.id;
+    editingVocabulary.tmpIdofUri.list = [targetNode.idofuri];
 
     //set the broader
-    this.props.editingVocabulary.tmpBroaderTerm.id = sourceNode.id; 
-    this.props.editingVocabulary.tmpBroaderTerm.list['ja'] = ["hoge"];
-    this.props.editingVocabulary.tmpBroaderTerm.list['en'] = ["hoge"];
-    this.props.editingVocabulary.tmpBroaderTerm.broader_uri = selectBroader_Uri;
+    editingVocabulary.tmpBroaderTerm.id = sourceNode.id; 
+    editingVocabulary.tmpBroaderTerm.list['ja'] = [];
+    editingVocabulary.tmpBroaderTerm.list['en'] = [];
+    if(editingVocabulary.uri2preflabel[0]['ja'][selectBroader_Uri]){
+      editingVocabulary.tmpBroaderTerm.list['ja'] = [editingVocabulary.uri2preflabel[0]['ja'][selectBroader_Uri]];
+    }
+    if(editingVocabulary.uri2preflabel[0]['en'][selectBroader_Uri]){
+      editingVocabulary.tmpBroaderTerm.list['en'] = [editingVocabulary.uri2preflabel[0]['en'][selectBroader_Uri]];
+    }
+    editingVocabulary.tmpBroaderTerm.broader_uri = selectBroader_Uri;
 
     // set the term description
-    this.props.editingVocabulary.tmpTermDescription.id = sourceNode.id; 
-    this.props.editingVocabulary.tmpTermDescription.list['ja'] = [];
-    this.props.editingVocabulary.tmpTermDescription.list['en'] = [];
+    editingVocabulary.tmpTermDescription.id = sourceNode.id; 
+    editingVocabulary.tmpTermDescription.list['ja'] = [];
+    editingVocabulary.tmpTermDescription.list['en'] = [];
     if(undefined !== selectTermDesc_Ja){
-      this.props.editingVocabulary.tmpTermDescription.list['ja'] = [selectTermDesc_Ja];
+      editingVocabulary.tmpTermDescription.list['ja'] = [selectTermDesc_Ja];
     }
     if(undefined !== selectTermDesc_En){
-      this.props.editingVocabulary.tmpTermDescription.list['en'] = [selectTermDesc_En];
+      editingVocabulary.tmpTermDescription.list['en'] = [selectTermDesc_En];
     }
 
-    const ret = this.props.editingVocabulary.updateVocabulary(null, 333);
+    const ret = editingVocabulary.updateVocabulary(null, 333);
 
     this.crearDatas();
     this.props.onClose( ret);
