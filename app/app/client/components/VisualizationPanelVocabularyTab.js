@@ -965,7 +965,8 @@ export default
       }
       // currentNode clear
       await this.props.editingVocabulary.deselectTermList();       
-      await this.props.editingVocabulary.setCurrentNodeById('');
+      await this.props.editingVocabulary.currentNodeClear();
+      await this.props.editingVocabulary.tmpDataClear();
   }
   /**
    * When setting a synonym, select a Preferred term and then close the dialog 
