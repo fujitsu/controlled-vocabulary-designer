@@ -436,8 +436,6 @@ export default
         return;
       }
       const target = event.target.data();
-      // const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
-      // console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, find)
       const findObj = this.props.editingVocabulary.editingVocWithId.get(Number(target.id));
       console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, findObj);
 
