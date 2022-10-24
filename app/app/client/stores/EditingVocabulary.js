@@ -511,7 +511,7 @@ class EditingVocabulary {
                 this.setReferenceVocabularyData(
                     response.data.ReferenceVocabulary, param
                 );
-              this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[2].set(data.id, data));
+              this.referenceVocabulary2.forEach((data)=> this.referenceVocWithId[2].set(data.id, data));
               if (2 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -524,7 +524,7 @@ class EditingVocabulary {
                 this.setReferenceVocabularyData(
                     response.data.ReferenceVocabulary, param
                 );
-              this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[3].set(data.id, data));
+              this.referenceVocabulary3.forEach((data)=> this.referenceVocWithId[3].set(data.id, data));
               if (3 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -1865,9 +1865,9 @@ isOtherVocSynUriChanged() {
             id: data.id,
             term: data.term,
             language: data.language,
-            preferred_label: data.preferred_label,
-            idofuri: data.idofuri,
-            uri: data.uri,
+            // preferred_label: data.preferred_label,
+            // idofuri: data.idofuri,
+            // uri: data.uri,
             vocabularyColor: data.color1?data.color1:'',
             other_voc_syn_uri: data.other_voc_syn_uri,
             // term_description: data.term_description,
@@ -1900,9 +1900,9 @@ isOtherVocSynUriChanged() {
             id: data.id * -1,
             term: data.other_voc_syn_uri,
             language: data.language,
-            preferred_label: data.preferred_label,
-            idofuri: data.idofuri,
-            uri: data.uri,
+            // preferred_label: data.preferred_label,
+            // idofuri: data.idofuri,
+            // uri: data.uri,
             vocabularyColor: '',
             other_voc_syn_uri: data.other_voc_syn_uri,
             // term_description: '',

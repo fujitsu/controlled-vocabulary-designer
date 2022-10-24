@@ -317,49 +317,6 @@ export default
 
         // Setting of confirmation information
         this.setConfirmStyle(selectedele, selectedele.data().confirm);
-
-        // Newly added terms may not appear in the view because their coordinate values remain at their initial values.
-        // In that case, it can be forced into the view by showText.
-        if (currentNode.broader_term) {
-          const brdrTrmNode = cy.nodes().filter((n) => {
-            return n.data().term == currentNode.broader_term;
-          });
-          if (brdrTrmNode.length > 0) {
-            if (!brdrTrmNode.hasClass('showText')) {
-              brdrTrmNode.addClass('showText');
-              const eles = cy.$id(brdrTrmNode.data().id);
-              // Setting of color information
-              if (brdrTrmNode.data().vocabularyColor) {
-                eles.addClass(brdrTrmNode.data().vocabularyColor);
-              }
-
-              // Setting of confirmation information
-              this.setConfirmStyle(eles, brdrTrmNode.data().confirm);
-            }
-          }
-        }
-        if (currentNode.preferred_label) {
-          const synonymNode = cy.nodes().filter((n) => {
-            return n.data().preferred_label == currentNode.preferred_label &&
-                   n.data().term != currentNode.term;
-          });
-          if (synonymNode.length > 0) {
-            synonymNode.forEach((node) => {
-              if (!node.hasClass('showText')) {
-                node.addClass('showText');
-
-                const eles = cy.$id(node.data().id);
-                // Setting of color information
-                if (node.data().vocabularyColor) {
-                  eles.addClass(node.data().vocabularyColor);
-                }
-
-                // Setting of confirmation information
-                this.setConfirmStyle(eles, node.data().confirm);
-              }
-            });
-          }
-        }
       }
 
       // Hide inactive handles 
@@ -479,8 +436,6 @@ export default
         return;
       }
       const target = event.target.data();
-      // const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
-      // console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, find)
       const findObj = this.props.editingVocabulary.editingVocWithId.get(Number(target.id));
       console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, findObj);
 

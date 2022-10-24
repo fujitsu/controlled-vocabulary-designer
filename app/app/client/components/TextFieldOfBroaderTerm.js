@@ -55,13 +55,12 @@ export default
   /**
    * Broader term update event
    * @param  {object} event - information of event
-   * @param  {array} newValue - broader term list
+   * @param  {array} newValues - broader term list
    */
-  onChange(event, newValue) {
+  onChange(event, newValues) {
     const editingVocabulary = this.props.editingVocabulary;
     const inputText = event.target.value;
     const displayLanguage = editingVocabulary.tmpLanguage.value;
-    // const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});
     const foundId = editingVocabulary.getIdbyTermandLang(inputText, displayLanguage);
     if( inputText != '' && inputText != undefined && !foundId){
       const errorMsg =  '\"' +inputText + '\" は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
@@ -72,18 +71,23 @@ export default
 
       return false;
     }
-    const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+
+    // const foundObj = editingVocabulary.editingVocWithId.get(foundId);
     let newValueUri = '';
-    if(undefined !== foundObj){
-      newValueUri = foundObj.uri;
+    if(newValues.length !==0){
+      const foundId2 = editingVocabulary.getIdbyTermandLang(newValues[0], displayLanguage);
+      const foundObj2 = editingVocabulary.editingVocWithId.get(foundId2);
+      if(undefined !== foundObj2){
+        newValueUri = foundObj2.uri;
+      }
     }
 
-    if (newValue.length > 1) {
+    if (newValues.length > 1) {
       // More than one broader term selected
       const errorMsg = '上位語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
       this.openSnackbar(errorMsg);
-    } else if (newValue.length == 1) {
-      const nextBroaderTerm = newValue[0];
+    }else if (newValues.length == 1) {
+      const nextBroaderTerm = newValues[0];
       
       // Check the validity of a broader term /////////////////////////////////////////
       const displayNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
@@ -139,7 +143,7 @@ export default
         this.openSnackbar(innerText);
       }
     }
-    editingVocabulary.updateBroaderTerm(newValue, newValueUri);
+    editingVocabulary.updateBroaderTerm(newValues, newValueUri);
   }
 
   /**
