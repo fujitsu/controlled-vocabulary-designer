@@ -119,14 +119,14 @@ export default class DialogSettingSynonym extends React.Component {
       
       // preferred
       const targetSynonymList = editingVocabulary.editingVocabulary.filter((data)=>{
-        return data.idofuri == target.idofuri && data.language == currentNode.language;
+        return data.idofuri == targetNode.idofuri && data.language == currentNode.language;
       })
 
       const targetSynonymTermList = targetSynonymList.map((data)=>{ return data.term})
 
       this.preferredList[ currentNode.language] = [...currentNode.synonymList, currentNode.term];
-      if( currentNode.language == target.language){
-        this.preferredList[ currentNode.language] = [...this.preferredList[ currentNode.language] , target.term]
+      if( currentNode.language == targetNode.language){
+        this.preferredList[ currentNode.language] = [...this.preferredList[ currentNode.language] , targetNode.term]
       }
       if(targetSynonymTermList.length > 0){
         this.preferredList[ currentNode.language] = [...this.preferredList[ currentNode.language] , ...targetSynonymTermList];
@@ -262,6 +262,7 @@ export default class DialogSettingSynonym extends React.Component {
       this.setState({dlgOpen: true})
       return;
     }    
+    const targetNode = this.props.editingVocabulary.editingVocWithId.get(Number(this.props.target.id));
 
     // Synonym
     this.props.editingVocabulary.tmpSynonym={
@@ -323,9 +324,9 @@ export default class DialogSettingSynonym extends React.Component {
     }
     
     // langDiff termDescript
-    if( this.props.target.language != this.props.editingVocabulary.currentNode.language
-      && this.props.editingVocabulary.tmpTermDescription.list[this.props.target.language] == ''){
-      this.props.editingVocabulary.tmpTermDescription.list[this.props.target.language][0] = this.props.target.term_description;
+    if( targetNode.language != this.props.editingVocabulary.currentNode.language
+      && this.props.editingVocabulary.tmpTermDescription.list[targetNode.language] == ''){
+      this.props.editingVocabulary.tmpTermDescription.list[targetNode.language][0] = targetNode.term_description;
     }
 
     //const ret = this.props.editingVocabulary.updateVocabulary();
