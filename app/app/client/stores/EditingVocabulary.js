@@ -582,9 +582,7 @@ class EditingVocabulary {
     if ((0 == this.selectedFile.id) && (this.currentNode.id)) {
       switch (type) {
         case 'broader_term':
-          if (undefined !=
-              this.currentNode.broader_term_candidate.find((broaderTerm) =>
-                broaderTerm == term)) {
+          if ( this.currentNode.broader_term_candidate.includes( term)) {
             str += 'AI ';
           }
           if (undefined !=
@@ -604,9 +602,7 @@ class EditingVocabulary {
           }
           break;
         case 'Synonym':
-          if (undefined !=
-              this.currentNode.synonym_candidate.find((synonym) =>
-                synonym == term)) {
+          if ( this.currentNode.synonym_candidate.includes( term)) {
             str += 'AI ';
           }
           if (undefined !=
@@ -626,21 +622,6 @@ class EditingVocabulary {
           }
           break;
         default:
-          if (undefined !=
-              this.referenceVocabulary1.find((node) =>
-                node.term == term)) {
-            str += '参照用語彙1 ';
-          }
-          if (undefined !=
-              this.referenceVocabulary2.find((node) =>
-                node.term == term)) {
-            str += '参照用語彙2 ';
-          }
-          if (undefined !=
-              this.referenceVocabulary3.find((node) =>
-                node.term == term)) {
-            str += '参照用語彙3 ';
-          }
           break;
       }
     }
@@ -872,97 +853,75 @@ class EditingVocabulary {
    */
   @action getCandidateTermList(type) {
     let list = [];
-    if ((0 == this.selectedFile.id) && (this.currentNode.id)) {
-      const referenceVocabularyList = [
-        this.referenceVocabulary1,
-        this.referenceVocabulary2,
-        this.referenceVocabulary3,
-      ];
-      switch (type) {
-        case 'broader_term':
-          if (this.currentNode.broader_term_candidate) {
-            this.currentNode.broader_term_candidate.forEach((term) => {
-              if (list.indexOf(term) == -1) list.push(term);
-            });
-          }
+    if ( 0 !== this.selectedFile.id || this.currentNode.id === null) return list;
 
-          referenceVocabularyList.forEach((referenceVocabulary) => {
+    const term = this.currentNode.term;
+    switch (type) {
+      case 'broader_term':
+        if ( this.currentNode.broader_term_candidate) {
+          this.currentNode.broader_term_candidate.forEach((term) => {
+            if ( !list.includes(term)) list.push(term);
+          });
+        }
+        this.referenceVocWithId.forEach((vocWithId, fileId) => {
+          if( vocWithId === undefined) return;  // same processing as continue
+          // Search for the same term in the reference vocabulary
+          let target =  this.term2id[fileId].get(term);
+          if( target === undefined || 1 > target.length) return; // same processing as continue
+          
+          const node = target.find((item)=>{item.language === this.currentNode.language});            
+          if( node === undefined) return; // same processing as continue
+
+          const eqTerm = vocWithId.get( node.id );        
+          if( eqTerm === undefined) return; // same processing as continue
+          
+          if ( eqTerm.broader_term && !list.includes(eqTerm.broader_term) ) {
+            list.push(eqTerm.broader_term);
+          }
+        });
+        break;
+      case 'Synonym':
+        if (this.currentNode.synonym_candidate) {
+          this.currentNode.synonym_candidate.forEach((term) => {
+            if ( !list.includes(term)) list.push(term);
+          });
+        }
+        if (this.currentNode.preferred_label) {
+          this.referenceVocWithId.forEach((vocWithId, fileId) => {
+            if( vocWithId === undefined) return;   // same processing as continue
             // Search for the same term in the reference vocabulary
-            const eqTerm =
-                referenceVocabulary.find((refNode) =>
-                  refNode.term == this.currentNode.term );
-            if (eqTerm !== undefined) {
-              if (eqTerm.broader_term &&
-                  (list.indexOf(eqTerm.broader_term) == -1)) {
-                list.push(eqTerm.broader_term);
-              }
+
+            let target = this.term2id[fileId].get(term);
+            if( target === undefined || 1 > target.length) return; 
+            
+            const node = target.find((item)=>{item.language === this.currentNode.language});            
+            if( node === undefined) return; 
+
+            const eqTerm = vocWithId.get( node.id );
+            if ( eqTerm !== undefined) {
+              // Extract terms from same heading
+              const eqPreferredLabel = this.uri2synoid[fileId].get(eqTerm.uri);
+              eqPreferredLabel.forEach((id) => {
+                const node = vocWithId.get(id);
+                // The term is not a preferred label and other terms are extracted as synonyms
+                if ( node !== undefined && node.term && ( !list.includes(node.term))) {
+                  if ( node.term != node.preferred_label &&
+                      node.term != this.currentNode.term) {
+                    list.push(node.term);
+                  }
+                }
+              });
             }
           });
-          break;
-        case 'Synonym':
-          if (this.currentNode.synonym_candidate) {
-            this.currentNode.synonym_candidate.forEach((term) => {
-              if (list.indexOf(term) == -1) list.push(term);
-            });
-          }
-
-          if (this.currentNode.preferred_label) {
-            referenceVocabularyList.forEach((referenceVocabulary) => {
-              // Search for the same term in the reference vocabulary
-              const eqTerm = referenceVocabulary.find((refNode) =>
-                refNode.term == this.currentNode.term );
-              if (eqTerm !== undefined) {
-                // Extract terms from same heading
-                const eqPreferredLabel = referenceVocabulary.filter((refNode) =>
-                  refNode.preferred_label == eqTerm.preferred_label );
-                eqPreferredLabel.forEach((node) => {
-                  // The term is not a preferred label and other terms are extracted as synonyms
-                  if (node.term && (list.indexOf(node.term) == -1)) {
-                    if (node.term != node.preferred_label &&
-                        node.term != this.currentNode.term) {
-                      list.push(node.term);
-                    }
-                  }
-                });
-              }
-            });
-          }
-          break;
-        case 'preferred_label':
-          referenceVocabularyList.forEach((referenceVocabulary) => {
-            referenceVocabulary.forEach((refNode) => {
-              // Search for the same term in the reference vocabulary
-              const eqTerm = referenceVocabulary.find((refNode) =>
-                refNode.term == this.currentNode.term );
-              if (eqTerm !== undefined) {
-                // Extract terms from same preferred label
-                const eqPreferredLabel = referenceVocabulary.filter((refNode) =>
-                  refNode.preferred_label == eqTerm.preferred_label );
-                eqPreferredLabel.forEach((node) => {
-                  // Extract synonyms where term is not a preferred label (including oneself)
-                  if (list.indexOf(node.term) == -1) {
-                    if (node.term != node.preferred_label) {
-                      list.push(node.term);
-                    }
-                  }
-                });
-              }
-            });
-          });
-          break;
-         case '':
-          break;
-        default:
-          referenceVocabularyList.forEach((referenceVocabulary) => {
-            referenceVocabulary.forEach((node) => {
-              if (list.indexOf(node.term) == -1) list.push(node.term);
-            });
-          });
-          break;
-      }
+        }
+        break;
+      default:
+        break;
     }
-    list = list.filter((term)=>{
-      return this.editingVocabulary.find( (data) => data.term === term)!==undefined?true:false;
+    list = list.filter((trm)=>{
+      return this.editingVocabulary.find( (data) =>{ 
+        return data.term === trm && data.language === this.tmpLanguage.value
+      });
     })
     return list.sort((a, b) => {
       const lowerA = a.toString().toLowerCase();

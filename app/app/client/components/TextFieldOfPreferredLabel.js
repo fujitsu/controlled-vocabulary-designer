@@ -158,46 +158,7 @@ export default
                   }
                 }
                 id="text-field-of-preferred_label-input"
-                options={
-                  this.props.editingVocabulary.getCandidateTermList(
-                      'preferred_label',
-                  )
-                }
-                getOptionLabel={(option) => option}
-                renderOption={(option, {selected}) => (
-                  <React.Fragment>
-                    <div style={{width: '100%'}}>
-                      
-                      <Box display="flex" flexDirection="row" alignItems="center">
-                        <Box
-                          component="span"
-                          display="inline"
-                          style={{fontSize: '16px',whiteSpace: 'nowrap'}}
-                        >
-                          {option}
-                        </Box>
-                        <Box
-                          component="span"
-                          display="inline"
-                          title={
-                            this.props.editingVocabulary.getReferenceFromData(
-                                option,
-                                '',
-                            )
-                          }
-                          style={{fontSize: '10px',whiteSpace: 'nowrap',textOverflow: 'ellipsis', overflowX: 'hidden', marginLeft: '10px'}}
-                        >
-                          {
-                            this.props.editingVocabulary.getReferenceFromData(
-                                option,
-                                '',
-                            )
-                          }
-                        </Box>
-                      </Box>
-                    </div>
-                  </React.Fragment>
-                )}
+                options={[]}
                 renderTags={(tagValue, getTagProps) => {
                   return tagValue.map((option, index) => (
                     <EditPanelChipForOneChip
