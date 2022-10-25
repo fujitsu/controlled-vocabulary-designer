@@ -101,8 +101,7 @@ return (
                 }
               }
               id="text-field-of-term_description-input"
-              options={this.props.editingVocabulary.getCandidateTermList('')}
-              getOptionLabel={(option) => option}
+              options={[]}
               renderTags={(tagValue, getTagProps) => {
                 return tagValue.map((option, index) => (
                   <EditPanelChipForOneChip
