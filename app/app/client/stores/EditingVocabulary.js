@@ -587,17 +587,17 @@ class EditingVocabulary {
           }
           if (undefined !=
               this.referenceVocabulary1.find((node) =>
-                node.broader_term == term)) {
+                node.term == term)) {
             str += '参照用語彙1 ';
           }
           if (undefined !=
               this.referenceVocabulary2.find((node) =>
-                node.broader_term == term)) {
+                node.term == term)) {
             str += '参照用語彙2 ';
           }
           if (undefined !=
               this.referenceVocabulary3.find((node) =>
-                node.broader_term == term)) {
+                node.term == term)) {
             str += '参照用語彙3 ';
           }
           break;
