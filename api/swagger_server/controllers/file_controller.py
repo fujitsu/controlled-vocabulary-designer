@@ -44,6 +44,7 @@ WORK_PATH = '/tmp/work/'
 MAX_FILE_CNT = 5
 DEF_WORK_MEM = '65536'
 UPD_WORK_MEM = '524288'
+TERM_BLANK_MARK = '_TERM_BLANK_'
 
 def location(depth=0):
     frame = inspect.currentframe().f_back
@@ -660,7 +661,8 @@ def _make_bulk_data_editing_vocabulary(data_frame):
     for index, item in data_frame.iterrows():
         insert_data = {}
         if '用語名' in item:
-            insert_data['term'] = item['用語名']
+            insert_data['term'] = \
+                item['用語名'] if item['用語名'] != '' else TERM_BLANK_MARK + str(index)
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
@@ -962,9 +964,9 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # JSON query Get Concept, prefLabel and narrower base
     namelpl = nm.query('term == preferred_label and uri != ""')
     # get uri and term
-    namelx = namelpl.loc[:, ['term', 'uri', 'language']].values
+    namelx = namelpl.loc[:, ['term', 'uri', 'language', 'hidden']].values
     for name in namelx:
-        if str(name[0]) == '':
+        if name[3] == 1: # hidden is true
             continue
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
         nameb = [
@@ -979,9 +981,9 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # query altLabel
     namelal = nm.query('term != preferred_label and uri != ""')
     # get uri and term
-    namelx = namelal.loc[:, ['term', 'uri', 'language']].values
+    namelx = namelal.loc[:, ['term', 'uri', 'language', 'hidden']].values
     for name in namelx:
-        if str(name[0]) == '':
+        if name[3] == 1: # hidden is true
             continue
         # print('altLabel:' + str(name[0])+' '+str(name[1]))
         nameb = [
@@ -995,9 +997,9 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # query broader_uri
     namelbt = nm.query('broader_uri != "" and uri != ""')
     # get uri and broader_uri
-    namelx = namelbt.loc[:, ['broader_uri', 'term', 'uri']].values
+    namelx = namelbt.loc[:, ['broader_uri', 'term', 'uri', 'hidden']].values
     for name in namelx:
-        if str(name[1]) == '':
+        if name[3] == 1: # hidden is true
             continue
         _add_check_term(name_bt, name[0], name[1], name[2])
 
@@ -1083,7 +1085,10 @@ def _download_file_ev_serialize(pl_simple, p_format):
     # delete blank terms that do not satisfy blank term condition
     delIdx = get_idx_blank_term_non_condition(df_org)
     df_org = df_org.drop(index = [*delIdx])
-    
+
+    # delete artificial 'terms' 
+    df_org.loc[df_org['hidden'] ==1, 'term'] = ''
+
     # delete word "[","]"
     df_org['synonym_candidate'] =\
         df_org['synonym_candidate'].astype("string")
