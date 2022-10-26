@@ -1183,8 +1183,9 @@ def get_idx_blank_term_non_condition(df):
     uri_colname = 'uri' 
     term_description_colname = 'term_description' 
     # to avoid unhashable columns
-    df = df[[term_colname, preferred_label_colname, lang_colname, uri_colname, term_description_colname, 'hidden']]
+    df = df[[term_colname, preferred_label_colname, lang_colname, uri_colname, term_description_colname, 'hidden']].copy()
     #
+    df.loc[(df['hidden'] == 1),  term_colname] = ''    
     # get rows with blank terms
     empty_term_df= df[df['hidden'] == 1]
     #
@@ -1206,7 +1207,7 @@ def get_idx_blank_term_non_condition(df):
         # if there are blank terms
         for tmplang, tmpuri in count_df2.index: # get the uri and lang
             tmp = empty_term_df[(empty_term_df[uri_colname] == tmpuri) & (empty_term_df[lang_colname] == tmplang)]
-            delIdx.update([*tmp.index[1:]])
+            delIdx.update([*tmp.index[1:]]) # remove blank term except the first one
     #
     # check blank and non blank term existence in a synonym group
     for idx, row in empty_term_df.iterrows():
@@ -1217,6 +1218,7 @@ def get_idx_blank_term_non_condition(df):
         if count_series[term_colname] != 1:
             # blank and non blank term are existed
             delIdx.update([*empty_term_df[(empty_term_df[uri_colname] == uri)&(empty_term_df[lang_colname] == lang)].index])
+    
     return delIdx
 
 
