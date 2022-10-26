@@ -460,12 +460,12 @@ def _check_inconsistencies_vocs(df, file_type_num):
    
     # At here, sysnominus relations must be valid.
 
-    # check blanck term existence condition
+    # check blank term existence condition
     # 409 phase 1, reason 0 
-    exec_res, status_code = _check_blanck_term_condition(df, file_type_num)
+    exec_res, status_code = _check_blank_term_condition(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
-                '[Error] failed _check_blanck_term_condition',
+                '[Error] failed _check_blank_term_condition',
                 location())
         return exec_res, status_code, df
 
@@ -898,6 +898,10 @@ def _download_file_make(pl_simple, pl_simple_meta):
     nm = pd.json_normalize(pl_simple)
     nm_meta = pd.json_normalize(pl_simple_meta)
 
+    # delete blank terms that do not satisfy blank term condition
+    delIdx = get_idx_blank_term_non_condition(nm)
+    nm = nm.drop(index = [*delIdx])
+
     g.bind(nm_meta["meta_prefix"][0], nm_meta["meta_uri"][0])
 
     # replace nan with ""
@@ -1076,6 +1080,10 @@ def _download_file_ev_serialize(pl_simple, p_format):
     df_json = pd.json_normalize(pl_simple)
     # print("--- printing "+p_format+" ---")
     df_org = df_json.copy()
+    # delete blank terms that do not satisfy blank term condition
+    delIdx = get_idx_blank_term_non_condition(df_org)
+    df_org = df_org.drop(index = [*delIdx])
+    
     # delete word "[","]"
     df_org['synonym_candidate'] =\
         df_org['synonym_candidate'].astype("string")
@@ -1161,6 +1169,52 @@ def _download_meta_file_ev_serialize(pl_simple, p_format):
         pass
 
 
+# get index of rows whose term is blank and the blank term condition is not satisfied
+# retrun set of index
+def get_idx_blank_term_non_condition(df):
+    term_colname = 'term'  
+    preferred_label_colname = 'preferred_label' 
+    lang_colname = 'language' 
+    uri_colname = 'uri' 
+    term_description_colname = 'term_description' 
+    # to avoid unhashable columns
+    df = df[[term_colname, preferred_label_colname, lang_colname, uri_colname, term_description_colname, 'hidden']]
+    #
+    # get rows with blank terms
+    empty_term_df= df[df['hidden'] == 1]
+    #
+    delIdx = set()
+    # check preferred label are empty, term description are not empty
+    for idx, row in empty_term_df.iterrows():
+        if row[preferred_label_colname].strip() != '':
+            # term is blank but preferred label is not empty
+            delIdx.add(idx)
+        if row[term_description_colname].strip() == '':
+            # term description is empty
+            delIdx.add(idx)
+    #
+    # check duplicate rows with blank terms
+    count_df = empty_term_df.groupby([lang_colname, uri_colname]).count() # this is a DataFrame　
+    # this count blank string
+    count_df2 = count_df[count_df[term_colname] != 1]
+    if count_df2.size != 0:
+        # if there are blank terms
+        for tmplang, tmpuri in count_df2.index: # get the uri and lang
+            tmp = empty_term_df[(empty_term_df[uri_colname] == tmpuri) & (empty_term_df[lang_colname] == tmplang)]
+            delIdx.update([*tmp.index[1:]])
+    #
+    # check blank and non blank term existence in a synonym group
+    for idx, row in empty_term_df.iterrows():
+        lang = row[lang_colname]
+        uri = row[uri_colname]
+        tmpdf = df[(df[uri_colname] == uri) & (df[lang_colname] == lang)]
+        count_series = tmpdf.nunique()
+        if count_series[term_colname] != 1:
+            # blank and non blank term are existed
+            delIdx.update([*empty_term_df[(empty_term_df[uri_colname] == uri)&(empty_term_df[lang_colname] == lang)].index])
+    return delIdx
+
+
 
 #########################################################################################################
 #########################################################################################################
@@ -1237,7 +1291,7 @@ def _check_pref_label_val(df, file_type_num=0):
     df = df[[term_colname,uri_colname, lang_colname, preferred_label_colname]]
     # count distinct pref_label in eeach group 
     count_df = df.groupby([lang_colname, uri_colname]).nunique(dropna= False) # this is a DataFrame　
-    # this count blanck string
+    # this count blank string
     count_df2 = count_df[count_df[preferred_label_colname] != 1]
     if count_df2.size != 0:
         # if there are distinct pref_labels
@@ -1294,10 +1348,10 @@ def _check_diff_synogroup_have_diff_pref(df, file_type_num=0):
 
 
 # 409 phase 1, reason 0, 1, 2
-def _check_blanck_term_condition(df, file_type_num=0):
-    # check blanck term existence condition
-    # preferred label must be blanck for the row
-    # term description must not be blanck for the row
+def _check_blank_term_condition(df, file_type_num=0):
+    # check blank term existence condition
+    # preferred label must be blank for the row
+    # term description must not be blank for the row
     # 
     # empty terms that have same uri and lang are not allowed
     # empty term and no empty term that have same uri and lang are not allowed
@@ -1312,12 +1366,12 @@ def _check_blanck_term_condition(df, file_type_num=0):
     lang_colname = '言語' 
     uri_colname = '代表語のURI' 
     term_description_colname = '用語の説明' 
-    # get rows with blanck terms
+    # get rows with blank terms
     empty_term_df= df[df[term_colname].str.strip() == '']
     # check preferred label are empty, term description are not empty
     for idx, row in empty_term_df.iterrows():
         if row[preferred_label_colname].strip() != '':
-            # term is blanck but preferred label is not empty
+            # term is blank but preferred label is not empty
             term_list = [row[uri_colname]]
             lang_list = [row[lang_colname]]
             return CheckErrorResponse(1, term_list, lang_list, 0, file_type_num), 409
@@ -1327,12 +1381,12 @@ def _check_blanck_term_condition(df, file_type_num=0):
             lang_list = [row[lang_colname]]
             return CheckErrorResponse(1, term_list, lang_list, 0, file_type_num), 409
     ### 1-1
-    # check duplicate rows with blanck terms
+    # check duplicate rows with blank terms
     count_df = empty_term_df.groupby([lang_colname, uri_colname]).count() # this is a DataFrame　
-    # this count blanck string
+    # this count blank string
     count_df2 = count_df[count_df[term_colname] != 1]
     if count_df2.size != 0:
-        # if there are blanck terms
+        # if there are blank terms
         tmplang, tmpuri = count_df2.index[0] # get the first uri and lang
         term_list = [tmpuri]
         lang_list = [tmplang]
@@ -1344,7 +1398,7 @@ def _check_blanck_term_condition(df, file_type_num=0):
         tmpdf = df[(df[uri_colname] == uri) & (df[lang_colname] == lang)]
         count_series = tmpdf.nunique()
         if count_series[term_colname] != 1:
-            # blanck and non blanck term are existed
+            # blank and non blank term are existed
             term_list = [uri]
             lang_list = [lang]
             return CheckErrorResponse(1, term_list, lang_list, 2, file_type_num), 409
@@ -1355,7 +1409,7 @@ def _check_duplicated_terms(df, file_type_num=0):
     # check duplicated terms
     term_colname = '用語名'  
     lang_colname = '言語'
-    # get rows with non-blanck terms
+    # get rows with non-blank terms
     nonempty_term_df= df[df[term_colname].str.strip() != '']
     # detect duplicated terms
     tmpdf = nonempty_term_df[nonempty_term_df.duplicated(subset=term_colname)][[term_colname, lang_colname]]
