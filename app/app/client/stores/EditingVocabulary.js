@@ -2593,6 +2593,21 @@ isOtherVocSynUriChanged() {
     }else{
       if(this.uri2synoid[0].has(candUri)){
         // other term have the candidate uri
+        const list = [...this.uri2synoid[0].get(candUri)];
+        this.equalUriPreferredLabel = '';
+        if( list.length > 0){
+          list.some((id)=>{
+            const _item = this.editingVocWithId.get(id);
+            this.equalUriPreferredLabel = _item.hidden===false?
+                                            _item.language===currentNode.language?
+                                              _item.term:
+                                                this.equalUriPreferredLabel===''?_item.term:this.equalUriPreferredLabel:
+                                              this.equalUriPreferredLabel;
+            if(_item.hidden===false && _item.language===currentNode.language){
+              return true; // same role as break
+            }
+          })
+        }
         return false;
       }else{
         return true;
