@@ -1424,19 +1424,9 @@ isOtherVocSynUriChanged() {
     }
     this.tmpBroaderTerm.broader_uri = this.currentNode.broader_uri;
 
-    let preferredLabel;
-    if (this.currentNode.preferred_label) {
-      preferredLabel = this.currentNode.preferred_label;
-    } else {
-      // If a preferred label is not defined, display the term in the preferred label column
-      // Do not add for determined terms
-      if (this.currentNode.confirm == 0) {
-        preferredLabel = this.currentNode.term;
-      }
-    }
     this.tmpPreferredLabel = {id: this.currentNode.id, list: {ja:[], en:[]}};
-    if (preferredLabel) {
-      this.tmpPreferredLabel.list[this.currentNode.language].push(preferredLabel);
+    if (this.currentNode.preferred_label) {
+      this.tmpPreferredLabel.list[this.currentNode.language].push(this.currentNode.preferred_label);
     }
 
     this.tmpSynonym.list[this.currentNode.language] = [...this.currentNode.synonymList];//shallow copy
