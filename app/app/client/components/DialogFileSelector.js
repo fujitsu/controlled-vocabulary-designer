@@ -158,6 +158,28 @@ export default class DialogFileSelector extends React.Component {
   handleErrCancel(){   
     this.setState({errOpen: false});
   }
+
+  /**
+   * read all data from DB
+   */
+  async getDatasFromDB(){
+    
+    if (undefined != this.state.files[4].file.name) {
+      await this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
+    }
+    if (undefined != this.state.files[1].file.name) {
+      await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('1');
+    }
+    if (undefined != this.state.files[2].file.name) {
+      await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('2');
+    }
+    if (undefined != this.state.files[3].file.name) {
+      await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('3');
+    }
+    if (undefined != this.state.files[0].file.name) {
+      await this.props.editingVocabulary.getEditingVocabularyDataFromDB();
+    }
+  }
   
   /**
    * File upload run
@@ -193,21 +215,7 @@ export default class DialogFileSelector extends React.Component {
           console.log('success response.');
           this.saveFileInfoToLocalstorage();
           this.uploadingEnd();
-          if (undefined != this.state.files[0].file.name) {
-            this.props.editingVocabulary.getEditingVocabularyDataFromDB();
-          }
-          if (undefined != this.state.files[1].file.name) {
-            this.props.editingVocabulary.getReferenceVocabularyDataFromDB('1');
-          }
-          if (undefined != this.state.files[2].file.name) {
-            this.props.editingVocabulary.getReferenceVocabularyDataFromDB('2');
-          }
-          if (undefined != this.state.files[3].file.name) {
-            this.props.editingVocabulary.getReferenceVocabularyDataFromDB('3');
-          }
-          if (undefined != this.state.files[4].file.name) {
-            this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
-          }
+          this.getDatasFromDB();
           this.handleClose();
         }).catch((err) => {
           console.log('error callback.');
