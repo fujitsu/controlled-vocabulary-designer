@@ -2425,7 +2425,11 @@ isOtherVocSynUriChanged() {
       if (!this.isValidPreferredLabel(this.currentLangDiffNode, this.tmpPreferredLabel.list[this.currentLangDiffNode.language][0], this.currentLangDiffNode.language)) {
         console.log('[errorCheck] invalidPreferredLabel.');
         ret.errorKind = 'invalidPreferredLabel';
-        ret.term = this.currentLangDiffNode.term;
+        if(this.currentLangDiffNode.term !== '' & !this.currentLangDiffNode.hidden){
+          ret.term = this.currentLangDiffNode.term;
+        }else{
+          ret.term = '';
+        }
         ret.language = this.currentLangDiffNode.language;
         return ret;
       }
@@ -2480,7 +2484,11 @@ isOtherVocSynUriChanged() {
       if (this.isBroaderInSynonym(term, 'en', nextBroaderTerm)) {
         console.log('[errorCheck] broaderInSynonym.');
         ret.errorKind = 'broaderInSynonym';
-        ret.term = term;
+        if(this.currentLangDiffNode.term !== '' & !this.currentLangDiffNode.hidden){
+          ret.term = this.currentLangDiffNode.term;
+        }else{
+          ret.term = '';
+        }
         ret.language = 'en';
         return ret;
       }

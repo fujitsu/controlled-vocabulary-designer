@@ -64,20 +64,23 @@ export default class DialogUpdateVocabularyError extends React.Component {
       // Preferred label:Invalid input error
       case 'invalidPreferredLabel':
         const prfrrdlbl = editingVocabulary.tmpPreferredLabel.list[language][0];
-        errorMsgEdt =  '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
-                   '\"' + term + '\" または同義語のいずれにも含まれていません。¥n' +
-                   '代表語テキストボックスには、¥n' +
-                   '\"' + term +'\" または同義語の中から選んで記入してください。';
-        
-        errorMsgVoc = '代表語に設定された \"' + prfrrdlbl + '\" は、¥n' +
-                    '\"' + term + '\" または同義語のいずれにも含まれていません。¥n' +
-                    '代表語には、¥n\"' + term +'\" または同義語の中から選んで設定してください。';
-        break;
-      // Preferred label:Missing error
-      case 'needToPreferredLabel':
-        errorMsgEdt = '代表語テキストボックスには \"' + term +
-                   '\" または同義語の中から選んで記入してください。';
-        errorMsgVoc = '代表語には \"' + term +'\" または同義語の中から選んで設定してください。';
+        if(term !==''){
+          errorMsgEdt =  '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
+            '\"' + term + '\" または同義語のいずれにも含まれていません。¥n' +
+            '代表語テキストボックスには、¥n' +
+            '\"' + term +'\" または同義語の中から選んで記入してください。';
+          errorMsgVoc = '代表語に設定された \"' + prfrrdlbl + '\" は、¥n' +
+           '\"' + term + '\" または同義語のいずれにも含まれていません。¥n' +
+           '代表語には、¥n\"' + term +'\" または同義語の中から選んで設定してください。';
+        }else{
+          errorMsgEdt =  '代表語テキストボックスに記入された \"' + prfrrdlbl + '\" は、¥n' +
+            '同義語のいずれにも含まれていません。¥n' +
+            '代表語テキストボックスには、¥n' +
+            '同義語の中から選んで記入してください。';
+          errorMsgVoc = '代表語に設定された \"' + prfrrdlbl + '\" は、¥n' +
+           '同義語のいずれにも含まれていません。¥n' +
+           '代表語は、¥n同義語の中から選んで設定してください。';
+        }
         break;
 
       // Synonym error /////////////////////////////
@@ -85,8 +88,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
       case 'narrowerSynonym':
         errorMsgEdt = (language==='ja'? '日本語':'英語') + 'の同義語テキストボックスに、 下位語が記入されています。¥n' 
                    '同義語テキストボックスには、¥n上下関係を持たない用語を記入してください。';
-        errorMsgVoc = '同義語には、 \"' + term +
-                    '\" と上下関係を持たない用語を設定してください。';
+        errorMsgVoc = '同義語には、上下関係を持たない用語を設定してください。';
         break;
 
       // Id of URI error /////////////////////////////
@@ -125,15 +127,25 @@ export default class DialogUpdateVocabularyError extends React.Component {
         break;
       // Broader term:Invalid input error
       case 'broaderInSynonym':
-        errorMsgEdt = '上位語テキストボックスに、¥n' +
-                   '\"' + term + '\" の代表語あるいは同義語が記入されています。¥n' +
-                   '上位語テキストボックスには、¥n' +
-                   '\"' + term + '\" の代表語と同義語以外の値を記入してください。';
-
-        errorMsgVoc = '上位語に、¥n' +
-                    '\"' + term + '\" の代表語あるいは同義語が設定されています。¥n' +
-                    '上位語には、¥n' +
-                    '\"' + term + '\" の代表語と同義語以外の値を設定してください。';
+        if(term !==''){
+          errorMsgEdt = '上位語テキストボックスに、¥n' +
+            '\"' + term + '\" あるいは同義語が記入されています。¥n' +
+            '上位語テキストボックスには、¥n' +
+            '\"' + term + '\" もしくは同義語ではない値を記入してください。';
+          errorMsgVoc = '上位語に、¥n' +
+           '\"' + term + '\" あるいは同義語が設定されています。¥n' +
+           '上位語には、¥n' +
+           '\"' + term + '\" もしくは同義語ではない値を設定してください。';
+        }else{
+          errorMsgEdt = '上位語テキストボックスに、¥n' +
+            '同義語が記入されています。¥n' +
+            '上位語テキストボックスには、¥n' +
+            '同義語ではない値を記入してください。';
+          errorMsgVoc = '上位語に、¥n' +
+           '同義語が設定されています。¥n' +
+           '上位語には、¥n' +
+           '同義語ではない値を設定してください。';
+        }
         break;
       // Broader term:synonym error
       case 'invalidSynonymBroaderTerm':
