@@ -3105,16 +3105,17 @@ isOtherVocSynUriChanged() {
    * @return {Boolean} - true: valid, false: inappropriate
    */
   isValidPreferredLabel(currentNode, newValue, language) {
-    if (currentNode.id) {
+    if (currentNode.id & !currentNode.hidden) {
       if (newValue === currentNode.term) {
         return true;
       }
-      const find = this.tmpSynonym.list[language].some((synonym) => synonym === newValue);
-      if (find) return true;
-
-      return false;
     }
-    return true;
+    // const find = this.tmpSynonym.list[language].some((synonym) => synonym === newValue);
+    if (this.tmpSynonym.list[language].includes(newValue)){
+      return true;
+    } 
+
+    return false;
   }
 
   // subordinateTerm //////////////////////
