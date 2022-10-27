@@ -3113,7 +3113,7 @@ isOtherVocSynUriChanged() {
    * @return {Boolean} - true: valid, false: inappropriate
    */
   isValidPreferredLabel(currentNode, newValue, language) {
-    if (currentNode.id & !currentNode.hidden) {
+    if (currentNode.id !== null & !currentNode.hidden) {
       if (newValue === currentNode.term) {
         return true;
       }
