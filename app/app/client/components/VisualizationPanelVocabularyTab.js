@@ -65,7 +65,6 @@ export default
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
-      anchorElC: false,           // Confirm Color Setting popover togle
       anchorElColor: false,       // border color setting popover togle
       transformTogle: false,      // transform coordinate togle
       dlgTmpDelOpen: false,       // dialog for tmpData Delete confirm
@@ -1106,22 +1105,6 @@ export default
 
 
   /**
-   * Confirm Color popover open
-   */
-  handleConfirmColorPopoverOpen(e){
-    // e.stopPropagation();
-    // e.preventDefault();
-    this.setState({anchorElC: this.state.anchorElC ? null : e.currentTarget});
-  }
-
-  /**
-   * Confirm Color popover Close
-   */
-   handleConfirmColorPopoverClose(e){
-    this.setState({anchorElC: null});
-  }
-
-  /**
    * Confirm switch
    * @param  {Boolean} isConfirm - confirm acceptance
    */
@@ -1154,9 +1137,6 @@ export default
     const anchorEl = this.state.anchorEl;
     const open = Boolean(anchorEl);
     const id = open ? "popover" : undefined;
-    const anchorElC = this.state.anchorElC;
-    const openC = Boolean(anchorElC);
-    const idC = openC ? "popover-c" : undefined;
     const anchorElColor = this.state.anchorElColor;
     const openColor = Boolean(anchorElColor);
     const idColor = openColor ? "popover-color" : undefined;
@@ -1173,9 +1153,7 @@ export default
     }
 
     // Firm button disabled condition
-    // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
-    const isCurrentNodeChanged = editingVocabulary.isCurrentNodeChanged;
-    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
+    const disabledConfirm = disabledColor;
 
     const confirmed = editingVocabulary.currentNode.confirm;
     let isConfirm = false;
