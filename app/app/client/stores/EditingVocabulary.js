@@ -2668,9 +2668,10 @@ isOtherVocSynUriChanged() {
   /**
    * Broader term update event
    * @param  {string} newValue - list of broader term whose length 0 or 1 
+   * @param  {string} language - langage for the terms 
    * @param  {string} newValueUri - broader uri
    */
-  @action updateBroaderTerm(newValue, newValueUri='') {
+  @action updateBroaderTerm(newValue, language, newValueUri='') {
     // newValue must be one string or empty
     if(newValue.length===0){
       // clear tmpBroaderTerm
@@ -2685,24 +2686,21 @@ isOtherVocSynUriChanged() {
       //DEBUG
       console.assert(false, "something is wrong 9");
       // find newValue-term's uri
-      const targetId = this.getIdbyTermandLang(newValue[0], this.currentNode.language);
+      const targetId = this.getIdbyTermandLang(newValue[0], language);
       const find = this.editingVocWithId.get( targetId)
       if(find !== undefined){newValueUri = find.uri};
     }
 
-    const newLangDiffValue = [];
-    const langDiffFilters=this.editingVocabulary.filter((item)=>{
-      return item.uri == newValueUri && item.language != this.tmpLanguage.value
-    })
-    langDiffFilters.forEach((node)=>{
-      if(node.preferred_label != '' && node.term===node.preferred_label){
-        newLangDiffValue.push(node.preferred_label);
-      } 
-    });
+    const otherLanguage = language === 'ja' ? 'en': 'ja';
+    const otherLangTerm = this.uri2preflabel[0][otherLanguage][newValueUri];
 
     this.tmpBroaderTerm.id = this.currentNode.id; 
-    this.tmpBroaderTerm.list[this.tmpLanguage.value] = newValue;
-    this.tmpBroaderTerm.list[this.tmpLanguage.value=='ja'?'en':'ja'] =newLangDiffValue;
+    this.tmpBroaderTerm.list[language] = newValue;
+    if(otherLangTerm !== undefined){
+      this.tmpBroaderTerm.list[otherLanguage] = [otherLangTerm];
+    }else{
+      this.tmpBroaderTerm.list[otherLanguage] = [];
+    }
     this.tmpBroaderTerm.broader_uri = newValueUri;
   }
 
