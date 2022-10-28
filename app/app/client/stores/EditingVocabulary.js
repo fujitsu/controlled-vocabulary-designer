@@ -1913,7 +1913,25 @@ isOtherVocSynUriChanged() {
     const followSynIdListEn = this.tmpSynonym.idList['en'].concat();
     const followSynIdListWithMe = [...followSynIdListJa, ...followSynIdListEn, this.currentNode.id];
     
-    
+    // calc modifiled time
+    // time 0 fill
+    const toDoubleDigits = function(num) {
+      num += "";
+      if (num.length === 1) {
+        num = "0" + num;
+      }
+      return num;     
+    };
+    // Get current time
+    const dateTmp = new Date();
+    const dateNow = dateTmp.getFullYear() + "-" + 
+                    toDoubleDigits((dateTmp.getMonth() + 1))  + "-" + 
+                    toDoubleDigits(dateTmp.getDate()) + "T" + 
+                    toDoubleDigits(dateTmp.getHours()) + ":" + 
+                    toDoubleDigits(dateTmp.getMinutes()) + ":" + 
+                    toDoubleDigits(dateTmp.getSeconds()) + "Z";
+
+
     // find deleted terms and ids from sysnonyms
     let deletedIdJa = prevSynIdListJa.filter((term)=>{return !followSynIdListJa.includes(term)});
     let deletedIdEn = prevSynIdListEn.filter((term)=>{return !followSynIdListEn.includes(term)});
@@ -1938,7 +1956,7 @@ isOtherVocSynUriChanged() {
       followObj.other_voc_syn_uri = ''; // the other_voc_syn_uri should be exist in the remaining synonym group
       followObj.term_description = ''; // 
       followObj.created_time = obj.created_time; // created_time as is
-      followObj.modified_time = obj.modified_time; // modified_time as is. this will be changed in updateRequest-method.
+      followObj.modified_time = dateNow; // modified_time is now
       followObj.synonym_candidate = obj.synonym_candidate; // synonym_candidate as is
       followObj.broader_term_candidate = obj.broader_term_candidate; // broader_term_candidate as is
       followObj.hidden = obj.hidden; // hidden as is
@@ -1993,7 +2011,7 @@ isOtherVocSynUriChanged() {
         followObj.term_description =''
       }
       followObj.created_time = obj.created_time; // created_time as is
-      followObj.modified_time = obj.modified_time; // modified_time as is. this will be changed in updateRequest-method.
+      followObj.modified_time = dateNow; // modified_time is now
       followObj.synonym_candidate = obj.synonym_candidate; // synonym_candidate as is
       followObj.broader_term_candidate = obj.broader_term_candidate; // broader_term_candidate as is
       followObj.hidden = obj.hidden; // hidden as is
@@ -2057,7 +2075,7 @@ isOtherVocSynUriChanged() {
         followObj.other_voc_syn_uri = obj.other_voc_syn_uri; // other_voc_syn_uri as is
         followObj.term_description = obj.term_description; // term_description as is
         followObj.created_time = obj.created_time; // created_time as is
-        followObj.modified_time = obj.modified_time; // modified_time as is. this will be changed in updateRequest-method.
+        followObj.modified_time = dateNow; // modified_time is now
         followObj.synonym_candidate = obj.synonym_candidate; // synonym_candidate as is
         followObj.broader_term_candidate = obj.broader_term_candidate; // broader_term_candidate as is
         followObj.hidden = obj.hidden; // hidden as is
@@ -2211,34 +2229,6 @@ isOtherVocSynUriChanged() {
 
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
     let requestBody = updateList;
-
-    // updating created_time and modified_time  //////////////////
-    const editingVocabularyTerm = [];
-    this.editingVocabulary.forEach((data) => {
-      editingVocabularyTerm.push(data.term);
-    });
-
-    // time 0 fill
-    const toDoubleDigits = function(num) {
-      num += "";
-      if (num.length === 1) {
-        num = "0" + num;
-      }
-      return num;     
-    };
-    // Get current time
-    const dateTmp = new Date();
-    const dateNow = dateTmp.getFullYear() + "-" + 
-                    toDoubleDigits((dateTmp.getMonth() + 1))  + "-" + 
-                    toDoubleDigits(dateTmp.getDate()) + "T" + 
-                    toDoubleDigits(dateTmp.getHours()) + ":" + 
-                    toDoubleDigits(dateTmp.getMinutes()) + ":" + 
-                    toDoubleDigits(dateTmp.getSeconds()) + "Z";
-
-    // updating created_time and modified_time
-    requestBody.forEach((data) => {
-      data.modified_time = dateNow;
-    });
 
     axios
         .post(updeteUrl,
