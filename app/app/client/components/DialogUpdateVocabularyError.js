@@ -98,7 +98,7 @@ export default class DialogUpdateVocabularyError extends React.Component {
         errorMsgVoc = 'IDは、複数の値を設定できません。' ;
         break;
       // Id of URI:Duplicate input error
-      case 'equalIdofUri':
+      case 'nonuniqueIdofUri':
         errorMsgEdt = '代表語のURIテキストボックスに、¥n' +
                    '同義関係でない別の代表語 \"' + editingVocabulary.equalUriPreferredLabel +
                    '\" と同じ代表語のURIが記入されています。¥n' +
