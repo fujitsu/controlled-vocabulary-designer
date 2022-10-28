@@ -2429,7 +2429,7 @@ isOtherVocSynUriChanged() {
     const idofuri = this.tmpIdofUri.list[0];
     const synonymIdList = this.tmpSynonym.idList;
     if(!this.isUniqueIdofUri(this.currentNode, idofuri, synonymIdList)){
-      console.log('[errorCheck] equalIdofUri.');
+      console.log('[errorCheck] nonuniqueIdofUri.');
       ret.errorKind = 'nonuniqueIdofUri';
       return ret;
     };
@@ -2583,18 +2583,16 @@ isOtherVocSynUriChanged() {
     }else{
       if(this.uri2synoid[0].has(candUri)){
         // other term have the candidate uri
-        const list = [...this.uri2synoid[0].get(candUri)];
+        const idList = [...this.uri2synoid[0].get(candUri)];
         this.equalUriPreferredLabel = '';
-        if( list.length > 0){
-          list.some((id)=>{
+        if( idList.length > 0){
+          idList.some((id)=>{
             const _item = this.editingVocWithId.get(id);
-            this.equalUriPreferredLabel = _item.hidden===false?
-                                            _item.language===currentNode.language?
-                                              _item.term:
-                                                this.equalUriPreferredLabel===''?_item.term:this.equalUriPreferredLabel:
-                                              this.equalUriPreferredLabel;
-            if(_item.hidden===false && _item.language===currentNode.language){
+            if( _item.hidden===false && _item.language===currentNode.language){
+              this.equalUriPreferredLabel = _item.term;
               return true; // same role as break
+            }else if( _item.hidden===false && this.equalUriPreferredLabel===''){
+              this.equalUriPreferredLabel = _item.term;
             }
           })
         }
