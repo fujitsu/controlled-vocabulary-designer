@@ -941,8 +941,6 @@ export default
     cy.nodes().forEach((node1)=>{
       if(undefined !== node1.data().term){ // there may exist several unknown nodes
         idList.push(Number(node1.id()));
-        //DEBUG
-        console.log(node1.id());
       }
     }, this);
 
