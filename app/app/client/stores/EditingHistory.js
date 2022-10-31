@@ -322,23 +322,34 @@ class EditingHistory {
   }
 
   execPosition(type, history) {
-    
     const EditingVocabulary = editingVocabularyStore;
-    const target = EditingVocabulary.getTargetWithId(EditingVocabulary.selectedFile.id).get(Number(history.targetId));
+    const dataWithId = EditingVocabulary.getTargetWithId(EditingVocabulary.selectedFile.id);
+    let currentData = dataWithId.get(history.previous[0].id);
+    if(undefined === currentData){
+      currentData = dataWithId.get(history.following[0].id);
+    }
     
-    if (!target) {
-      console.log('target is not found. id: ' + history.targetId);
-      return;
+    const updateList = [];
+    if (this.STR_UNDO === type) {
+      // undo
+      history.previous.forEach((histData)=>{
+        const targetObj = dataWithId.get(Number(histData.id));
+        const dbData = EditingVocabulary.copyData(targetObj);
+        dbData.position_x = histData.position_x;
+        dbData.position_y = histData.position_y;
+        updateList.push(dbData);
+      }, this);
+    } else { // redo
+      history.following.forEach((histData)=>{
+        const targetObj = dataWithId.get(Number(histData.id));
+        const dbData = EditingVocabulary.copyData(targetObj);
+        dbData.position_x = histData.position_x;
+        dbData.position_y = histData.position_y;
+        updateList.push(dbData);
+      }, this);
     }
 
-    let position;
-    if (this.STR_UNDO === type) {
-      position = history.previous;
-    } else { // redo
-      position = history.following;
-    }
-    target.position_x = position.position_x;
-    target.position_y = position.position_y;
+    EditingVocabulary.updateRequest(updateList, currentData, null, null);
   }
 
   // Display message function /////////////////////////////////////////////
@@ -947,7 +958,7 @@ class EditingHistory {
     targetId : 0,
     previous : [
       {
-        id : 0,
+        id : 0, // number
         term : "",
         preferred_label : "",
         idofuri: '',
@@ -997,6 +1008,24 @@ class EditingHistory {
     targetId : 000,
     previous : { position_x:0.001, position_y: 0.001 },
     following :{ position_x:0.001, position_y: 0.001 },
+  };
+  history = {
+    action : "position",
+    targetId : 000,
+    previous : [
+      {
+        id : 0, // number
+        position_x:0.001,
+        position_y: 0.111
+      }, ...
+    ],
+    following : [
+      {
+        id : 0, // number
+        position_x:0.002,
+        position_y: 0.222
+      }, ...
+    ],
   };
   ///////////////////////////////////////////////////////////////////////
  */
