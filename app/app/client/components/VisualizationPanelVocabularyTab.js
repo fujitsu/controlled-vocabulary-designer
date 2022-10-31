@@ -62,6 +62,7 @@ export default
     this.message = '';
     this.source = null;
     this.target = null;
+    this.selectedIdStr = []; ///////
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
@@ -424,8 +425,24 @@ export default
    * Event registration
    */
   setUpListeners() {
-    this.cy.on('dragfreeon', 'node', (event) => {      
-      this.updateVocabularies( true);
+    this.cy.on('dragfreeon', 'node', (event) => {
+      const idSet = new Set();
+      if(event.target.id()){
+        idSet.add(Number(event.target.id()));
+      }
+      this.selectedIdStr.forEach((id1)=>{
+        idSet.add(Number(id1));
+      }, this);
+      this.updateVocabularies([...idSet], true);
+    });
+    
+    this.cy.on('select', 'node', (event) => {
+      // add selected list
+      this.selectedIdStr.push(event.target.id());
+    });
+    this.cy.on('unselect', 'node', (event) => {
+      // remove from selected list
+      this.selectedIdStr = this.selectedIdStr.filter((id)=>{return id !== event.target.id()});
     });
 
     this.cy.on('click', 'node', (event) => {
@@ -882,9 +899,10 @@ export default
   
     const saveRoots = await this.getSaveRoot();
 
-    if( !saveRoots || 1 > saveRoots.length)
+    if( !saveRoots || 1 > saveRoots.length){
       return;
-    
+    }
+
     // [ dagre ] layout options
     const defaults={      
       name: "dagre",
@@ -918,6 +936,16 @@ export default
       }),
     }
 
+    // get all ids
+    const idList = [];//number
+    cy.nodes().forEach((node1)=>{
+      if(undefined !== node1.data().term){ // there may exist several unknown nodes
+        idList.push(Number(node1.id()));
+        //DEBUG
+        console.log(node1.id());
+      }
+    }, this);
+
     // Extend the minimum length of edge 
     // const zoom = cy.zoom();
     // if( zoom > 0.007){
@@ -927,21 +955,23 @@ export default
     
     await cy.elements().layout( defaults).run();
     
-    await this.updateVocabularies();
+    await this.updateVocabularies(idList);
     
     await cy.nodes().unlock();
   }
   
   /**
    * Update coordinate transform
+   * @param {List} idList ids (list of numbers) to be update
+   * @param {bool} isDrag is this operation occur from drag of terms
    */
-  async updateVocabularies( isDrag=false) {
+  async updateVocabularies(idList,  isDrag=false) {
     
     const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
     const saveCurrentNodeId = await this.props.editingVocabulary.currentNode.id;
     
     this.fitCenterPan = false;
-    const ret = await this.props.editingVocabulary.updateVocabularies( this.cy.nodes(), isDrag);
+    const ret = await this.props.editingVocabulary.updateVocabularies( this.cy, idList, isDrag);
     this.fitCenterPan = true;
 
     if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){

@@ -1339,7 +1339,6 @@ isOtherVocSynUriChanged() {
   /**
    * Select vocabulary
    * @param {number} id id
-   * @param {array} [synonymList=null] - configuration synonym list
    * @param {boolean} [isForce=false] - forced selection
    */
   @action setCurrentNodeById(id , isForce = false) {
@@ -1621,8 +1620,8 @@ isOtherVocSynUriChanged() {
     outdata.term_description = indata.term_description;
     outdata.created_time = indata.created_time;
     outdata.modified_time = indata.modified_time;
-    outdata.synonym_candidate = indata.synonym_candidate;
-    outdata.broader_term_candidate = indata.broader_term_candidate;
+    outdata.synonym_candidate = [...indata.synonym_candidate];//copy
+    outdata.broader_term_candidate = [...indata.broader_term_candidate];//copy
     outdata.hidden = indata.hidden;
     outdata.position_x = indata.position_x;
     outdata.position_y = indata.position_y;
@@ -2109,109 +2108,58 @@ isOtherVocSynUriChanged() {
    * @param  {object} nodes - cytoscape nodes
    * @return {string} - error message
    */
-  @action updateVocabularies( nodes, isDrag=false) {
+  @action updateVocabularies(cy, idList, isDrag=false) {
+
+    // tentative treatment
+    if(this.selectedFile.id !== 0){
+      return;
+      // this method can not treat reference voc
+    }
+
+    const dataWithId = this.getTargetWithId(this.selectedFile.id);
 
     // Get coordinate information from the visualization panel
     const updateTermList = [];
-    const threshold = 0.00001;
-    for (let item of this.editingVocabulary) {
-
-      let position_x = null;
-      let position_y = null;
-      let tmpData = null;
-      for (let node of nodes) {
-        const posi = node.position();
-        if( item.term === node.data().term){
-          position_x = this.calcReversePosition( posi.x, isDrag);
-          position_y = this.calcReversePosition( posi.y, isDrag);
-
-          if(( threshold > Math.abs( Number( item.position_x) - position_x))
-          || ( threshold > Math.abs( Number( item.position_y) - position_y))){
-            position_x = null;
-          }else{
-            tmpData = node.data();
-          }
-          break;
-        }
-      }
-      if( !tmpData || position_x === null){
-        continue;
-      }
-      
-      const history = new History('position', item.id);
-      history.previous = { position_x: Number(item.position_x), position_y: Number(item.position_y)};
-      history.following ={ position_x:             position_x , position_y:             position_y };
-      history.targetId = item.id;
-   
-      editingHistoryStore.addHistory(history);
-
-      item.position_x = position_x;
-      item.position_y = position_y;
-      item.color1 = tmpData.vocabularyColor;
-      item.color2 = this.confirmColor;
-      item.confirm = tmpData.confirm==''? 0:1;
-
-      const dbData = {
-        term: item.term,
-        preferred_label: '',
-        language:'',
-        uri: '',
-        broader_term: '',
-        broader_uri: '',
-        other_voc_syn_uri: '',
-        term_description: '',
-        created_time: '',
-        modified_time: '',
-        synonym_candidate: [],
-        broader_term_candidate: [],
-        position_x: String( position_x),
-        position_y: String( position_y),
-        color1: item.color1,
-        color2: item.color2,
-        hidden: item.hidden,
-        confirm: item.confirm,
-      };
-      if (item.id) {
-        dbData.id = Number(item.id);
-      }
-      dbData.preferred_label = item.preferred_label;
-      dbData.uri = item.uri;
-      dbData.language = item.language;
-      dbData.other_voc_syn_uri = item.other_voc_syn_uri;
-      dbData.term_description = item.term_description;
-      dbData.created_time = item.created_time;
-      dbData.modified_time = item.modified_time;
-
-      if (item.synonym_candidate) {
-        item.synonym_candidate.forEach((term) => {
-          dbData.synonym_candidate.push(term);
-        });
-      }
-      dbData.broader_term = item.broader_term;
-      dbData.broader_uri = item.broader_uri;
-      if (item.broader_term_candidate) {
-        item.broader_term_candidate.forEach((term) => {
-          dbData.broader_term_candidate.push(term);
-        });
-      }
+    const previousForHistory = [];
+    const followingForHistory = [];
+     
+    idList.forEach((id1)=>{
+      const node = cy.getElementById(String(id1));
+      const posi = node.position();
+      let position_x = null; // number
+      let position_y = null; // number
+      position_x = this.calcReversePosition( posi.x, isDrag);
+      position_y = this.calcReversePosition( posi.y, isDrag);
+      const dataObj = dataWithId.get(id1);
+      // history
+      previousForHistory.push({
+        id: id1,
+        position_x: dataObj.position_x,
+        position_y: dataObj.position_y,
+      });
+      // update data
+      const dbData = this.copyData(dataObj); // copy
+      dbData.position_x = String(position_x);
+      dbData.position_y = String(position_y);
+      dbData.color1 = node.data().vocabularyColor;
+      dbData.color2 = this.confirmColor;
+      dbData.confirm = node.data().confirm ==''? 0:1;
       updateTermList.push( dbData);
-    }
+      // history
+      followingForHistory.push({
+        id: id1,
+        position_x: String(position_x),
+        position_y: String(position_y),
+      });
+    },this);
 
-    updateTermList.forEach((item) => {
-      // synonym list
-      const objSynonym = this.editingVocabulary.filter((data) =>data.uri == item.uri);
-
-      // Add if not in the array
-      objSynonym.forEach(( obj) => {
-        const findObj = updateTermList.find((item2) =>obj.id == item2.id);
-        if( findObj === undefined){          
-          updateTermList.push(obj);
-        }   
-      });  
-    });
+    const history = new History('position', 0);
+    history.previous = previousForHistory;
+    history.following = followingForHistory;
+    history.targetId = 0;
 
     if( updateTermList.length > 0){
-      this.updateRequest(updateTermList, updateTermList[0], null, null, false);
+      this.updateRequest(updateTermList, updateTermList[0], history, null, false);
     }
     
     return '';
@@ -2222,8 +2170,8 @@ isOtherVocSynUriChanged() {
    * @param  {array} updateList - updated vocabulary list
    * @param  {object} current - vocabulary data to be updated
    * @param  {object} history - history data 
-   * @param  {string} oldNodeTerm - vocabulary old data to be updated
-   * @param  {bool} setCurrent - do setCurrentNodeByTerm() 
+   * @param  {string} oldNodeId - vocabulary old data to be updated
+   * @param  {bool} setCurrent - do setCurrentNodeById() 
    */
   updateRequest(updateList, current, history = null, oldNodeId = null, setCurrent=true) {
 
