@@ -143,7 +143,7 @@ export default
         this.openSnackbar(innerText);
       }
     }
-    editingVocabulary.updateBroaderTerm(newValues, newValueUri);
+    editingVocabulary.updateBroaderTerm(newValues, displayLanguage, newValueUri);
   }
 
   /**

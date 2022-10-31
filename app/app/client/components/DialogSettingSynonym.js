@@ -88,8 +88,8 @@ export default class DialogSettingSynonym extends React.Component {
     if (languageChangeNode.length > 0){
       targetLangDiffNode = languageChangeNode[0];
     }
-    let selectPreferred_Ja;
-    let selectPreferred_En;
+    let selectPreferred_Ja = '';
+    let selectPreferred_En = '';
     let selectBroader_Uri;
     let selectTermDesc_Ja;
     let selectTermDesc_En;    
@@ -99,8 +99,8 @@ export default class DialogSettingSynonym extends React.Component {
       selectPreferred_Ja = targetNode.term;
       if(targetLangDiffNode !== undefined && targetLangDiffNode.preferred_label !== ''){
         selectPreferred_En = targetLangDiffNode.preferred_label;
-      }else{
-        selectPreferred_En = sourceNode.preferred_label;
+      }else if(editingVocabulary.tmpPreferredLabel.list['en'][0]){ 
+        selectPreferred_En = editingVocabulary.tmpPreferredLabel.list['en'][0];
       }
       if(targetNode.term_description !== ''){
         selectTermDesc_Ja = targetNode.term_description;
@@ -118,8 +118,8 @@ export default class DialogSettingSynonym extends React.Component {
       selectPreferred_En = targetNode.term;
       if(targetLangDiffNode !== undefined && targetLangDiffNode.preferred_label !== ''){
         selectPreferred_Ja = targetLangDiffNode.preferred_label;
-      }else{
-        selectPreferred_Ja = sourceNode.preferred_label;
+      }else if(editingVocabulary.tmpPreferredLabel.list['ja'][0]){ 
+        selectPreferred_Ja = editingVocabulary.tmpPreferredLabel.list['ja'][0];
       }
       if(targetNode.term_description !== ''){
         selectTermDesc_En = targetNode.term_description;
