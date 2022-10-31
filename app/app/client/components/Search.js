@@ -42,10 +42,14 @@ export default class Search extends React.Component {
    * 
    */
   updateDimensions() {
-    const documentElement = document.documentElement,
-          // cytoscape area element id = "relation_term_graph_container"
-          cyArea = document.getElementById('relation_term_graph_container');
-    let height = cyArea.clientHeight?cyArea.clientHeight-250: window.innerHeight?window.innerHeight-300: documentElement.clientHeight-300;
+    // cytoscape area element id = "relation_term_graph_container"
+    const cyArea = document.getElementById('relation_term_graph_container');
+    let height = document.documentElement.clientHeight-300;
+    if( cyArea && cyArea.clientHeight){
+      height = cyArea.clientHeight-250;
+    }else if( window.innerHeight){
+      height = window.innerHeight-300;
+    }
     height = 50>height?50:height;
     this.setState({maxMenuHeight: height});
   }
