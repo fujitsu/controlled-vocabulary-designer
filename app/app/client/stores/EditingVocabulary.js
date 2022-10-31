@@ -2668,7 +2668,7 @@ isOtherVocSynUriChanged() {
   /**
    * Broader term update event
    * @param  {string} newValue - list of broader term whose length 0 or 1 
-   * @param  {string} language - langage for the terms 
+   * @param  {string} language - language for the terms 
    * @param  {string} newValueUri - broader uri
    */
   @action updateBroaderTerm(newValue, language, newValueUri='') {
