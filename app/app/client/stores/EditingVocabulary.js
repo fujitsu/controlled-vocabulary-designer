@@ -2441,7 +2441,7 @@ isOtherVocSynUriChanged() {
       if (this.isCyclicBroaders(this.currentNode, String(this.tmpBroaderTerm.list[this.tmpLanguage.value]), this.tmpBroaderTerm.broader_uri)) {
       console.log('[errorCheck] cycleBroaderTerm.');
       ret.errorKind = 'cycleBroaderTerm';
-      ret.term = this.csurrentNode.term;
+      ret.term = this.currentNode.term;
       ret.language = this.currentNode.language;
       return ret;
       }

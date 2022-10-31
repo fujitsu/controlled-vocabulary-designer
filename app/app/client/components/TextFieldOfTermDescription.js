@@ -62,7 +62,9 @@
    onChange(event, newValue) {
     if (newValue.length > 1) {
       // When more than one TermDescription is entered
-      const errorMsg = '用語の説明テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+      let errorMsg = '用語の説明テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+      errorMsg = errorMsg.split('¥n').map((line, key) =>
+      <span key={key}>{line}<br /></span>);
       this.openSnackbar(errorMsg);
     }
     this.props.editingVocabulary.updataTermDescription(newValue);

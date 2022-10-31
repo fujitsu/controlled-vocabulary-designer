@@ -64,8 +64,8 @@ export default
     // const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});  
     const foundId = editingVocabulary.getIdbyTermandLang(inputText, displayLanguage);  
     if( inputText != '' && inputText != undefined && !foundId){
-      const errorMsg =  '\"' +inputText + '\" は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
-                       '既存の用語を記入してください。';
+      const errorMsg =  '「' +inputText + '」 は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
+                       '登録済みの用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
@@ -86,12 +86,8 @@ export default
         _displayNode = foundObj?foundObj:displayNode;
     }
     if (editingVocabulary.isNarrowerTerm(_displayNode.term, displayLanguage, newValue)) {
-      const errorMsg = '下位語テキストボックスに、 \"' + _displayNode.term +
-                       '\" あるいは \"' + _displayNode.term + '\" の代表語' +
-                       'あるいは \"' + _displayNode.term + '\" の同義語が記入されています。¥n' +
-                       '同義語テキストボックスには、 \"' + _displayNode.term +
-                       '\" と上下関係を持たないように、¥n' +
-                       'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
+      const errorMsg = '同義語テキストボックスに上位語（下位語）が記入されています。¥n' +
+                       '同義語テキストボックスには、上位語・下位語以外の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
@@ -102,7 +98,7 @@ export default
       const preferredLabelLength =
         editingVocabulary.tmpPreferredLabel.list[_displayNode.language].length;
       if (preferredLabelLength > 1) {
-        const errorMsg = '代表語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+        const errorMsg = '代表語テキストボックスに、複数の用語が記入されています。¥n用語を1つだけ記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);

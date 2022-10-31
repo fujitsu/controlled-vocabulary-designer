@@ -63,14 +63,15 @@ export default
 
     if (newValue.length > 1) {
       // When more than one id is entered
-      const errorMsg = 'IDテキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+      let errorMsg = 'IDテキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+      errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
       if (!this.props.editingVocabulary.isUniqueIdofUri(displayNode, newValue[0], synonymIdList)) {
         const errorMsg = '代表語のURIテキストボックスに、¥n' +
-                       '同義関係でない別の代表語 \"' +
+                       '同義関係でない別の代表語 「' +
                        this.props.editingVocabulary.equalUriPreferredLabel +
-                       '\" と同じ代表語のURIが記入されています。¥n' +
+                       '」 と同じ代表語のURIが記入されています。¥n' +
                        '代表語のURIテキストボックスには、¥n' +
                        '既に登録されている他の代表語のURIとは異なる値が入るように、¥n' +
                        'IDテキストボックスの値を変更してください。';
@@ -83,8 +84,8 @@ export default
       if (this.props.editingVocabulary.tmpIdofUri.list.length > 0) {
         const currentIdofUri = this.props.editingVocabulary.currentNode.idofuri;
         if (currentIdofUri) {
-          const errorMsg = 'IDテキストボックスには \"' + currentIdofUri +
-                           '\" または既に登録されている他の代表語のURIとは異なる値が入るように、¥n' +
+          const errorMsg = 'IDテキストボックスには 「' + currentIdofUri +
+                           '」 または既に登録されている他の代表語のURIとは異なる値が入るように、¥n' +
                            'IDテキストボックスの値を変更してください。';
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
