@@ -63,8 +63,8 @@ export default
     const displayLanguage = editingVocabulary.tmpLanguage.value;
     const foundId = editingVocabulary.getIdbyTermandLang(inputText, displayLanguage);
     if( inputText != '' && inputText != undefined && !foundId){
-      const errorMsg =  '\"' +inputText + '\" は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
-                       '既存の用語を記入してください。';
+      const errorMsg =  '「' +inputText + '」 は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
+                       '登録済みの用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
@@ -84,7 +84,8 @@ export default
 
     if (newValues.length > 1) {
       // More than one broader term selected
-      const errorMsg = '上位語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+      let errorMsg = '上位語テキストボックスには、複数の用語を記入できません。¥n用語を1つだけ記入してください。';
+      errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);
       this.openSnackbar(errorMsg);
     }else if (newValues.length == 1) {
       const nextBroaderTerm = newValues[0];
@@ -104,9 +105,9 @@ export default
       }
       if (editingVocabulary.isBroaderInSynonym(_displayNode.term, displayLanguage, nextBroaderTerm)) { 
         const errorMsg = '上位語テキストボックスに、¥n' +
-                       '\"' + _displayNode.term + '\" の代表語あるいは同義語が記入されています。¥n' +
+                       '「' + _displayNode.term + '」 の代表語あるいは同義語が記入されています。¥n' +
                        '上位語テキストボックスには、¥n' +
-                       '\"' + _displayNode.term + '\" の代表語と同義語以外の値を記入してください。';
+                       '「' + _displayNode.term + '」 の代表語と同義語以外の用語を記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
@@ -115,21 +116,21 @@ export default
           const cycleBroaderTerm =
             editingVocabulary.cycleBroaderTerm;
 
-          let errorMsg = '上位語テキストボックスに \"'+
-                         nextBroaderTerm +'\" を記入することで、¥n';
+          let errorMsg = '上位語テキストボックスに 「'+
+                         nextBroaderTerm +'」 を記入することで、¥n';
           errorMsg += '代表語 ';
           cycleBroaderTerm.forEach((term) => {
-            errorMsg += '\"';
+            errorMsg += '「';
             errorMsg += term;
-            errorMsg += '\", ';
+            errorMsg += '」, ';
           });
           errorMsg = errorMsg.slice( 0, -2 );
           errorMsg += ' は、¥n上下関係が循環してしまいます。¥n';
           errorMsg += '上位語テキストボックスには、¥n';
           cycleBroaderTerm.forEach((term) => {
-            errorMsg += '\"';
+            errorMsg += '「';
             errorMsg += term;
-            errorMsg += '\", ';
+            errorMsg += '」, ';
           });
           errorMsg = errorMsg.slice( 0, -2 );
           errorMsg += ' 以外の代表語を持つ用語を記入してください。';
