@@ -445,6 +445,12 @@ export default
       this.selectedIdStr = this.selectedIdStr.filter((id)=>{return id !== event.target.id()});
     });
 
+    this.cy.on('mousedown',  (event) => {
+      if( event.target === this.cy ){
+        this.props.editingVocabulary.deselectTermList();
+      }
+    });
+
     this.cy.on('click', 'node', (event) => {
       
       // excluding edgehandle 
