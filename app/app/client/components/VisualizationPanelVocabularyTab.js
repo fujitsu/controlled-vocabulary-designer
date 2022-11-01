@@ -956,6 +956,8 @@ export default
     await this.updateVocabularies(idList);
     
     await cy.nodes().unlock();
+
+    await this.fitToVisualArea();
   }
   
   /**
