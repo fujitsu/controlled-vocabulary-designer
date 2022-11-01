@@ -83,8 +83,7 @@ export default
       this.openSnackbar(innerText);
     } else{
       let _displayNode = displayNode;
-      if(  _displayNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
-        && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
+      if(  _displayNode.id === null && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
         && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
         // this condition is satisfied when the currentNode is ja/en and synonym en/ja term does not exist.
         const foundId = editingVocabulary.getIdbyTermandLang(
@@ -113,18 +112,11 @@ export default
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
         }
-      } else if (newValue.length == 0) {
+      } else if (newValue.length === 0 && editingVocabulary.tmpPreferredLabel.list[_displayNode.language==='ja'?'en':'ja'].length === 0) {
         // Preferred label:Missing error
-        let errorMsg;
-        if (!_displayNode.hidden & _displayNode.term !== '' ) {
-          // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
-          errorMsg = '代表語テキストボックスに用語が記入されていません。¥n代表語テキストボックスには、 ¥n「' + _displayNode.term +
-                            '」または同義語の中から選んで記入してください。';
-          errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);
-        }else{
-          errorMsg = '代表語テキストボックスに用語が記入されていません。¥n代表語テキストボックスには、同義語の中から選んで記入してください。';
-          errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);          
-        }        
+        let errorMsg = '日本語と英語の代表語テキストボックスに用語が記入されていません。¥n' +
+                     '日本語もしくは英語の代表語テキストボックスに、用語を記入してください。';
+          errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);      
         this.openSnackbar(errorMsg);
       }
     }

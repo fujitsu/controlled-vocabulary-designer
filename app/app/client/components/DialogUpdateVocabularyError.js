@@ -57,8 +57,8 @@ export default class DialogUpdateVocabularyError extends React.Component {
         break;
       // Preferred label:No Input Error
       case 'blankPreferredLabel':
-        errorMsgEdt = '代表語テキストボックス全言語で空です。¥n' + '日本語もしくは英語の代表語テキストボックスに、少なくとも一つの用語を記入してください。';
-        errorMsgVoc = '代表語は、少なくとも一つは用語を設定してください。' ;
+        errorMsgEdt = '日本語と英語の代表語テキストボックスに用語が記入されていません。¥n' + '日本語もしくは英語の代表語テキストボックスに、用語を記入してください。';
+        errorMsgVoc = '日本語もしくは英語の代表語に、用語を設定してください。' ;
         break;
         
       // Preferred label:Invalid input error
