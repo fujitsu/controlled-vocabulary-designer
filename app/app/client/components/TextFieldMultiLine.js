@@ -63,7 +63,6 @@
  
  TextFieldMultiLine.propTypes = {
    editingVocabulary: PropTypes.object,
-   editingVocabularyMeta: PropTypes.object,
    classes: PropTypes.object,
    value: PropTypes.string,
    change: PropTypes.func,

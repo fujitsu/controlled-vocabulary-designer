@@ -1053,7 +1053,7 @@ class EditingVocabulary {
     this.tmpSynonym = {id: '', list: {ja:[], en:[]}, idList: {ja:[], en:[]}};
     this.tmpPreferredLabel = {id: '', list: {ja:[], en:[]}};
     this.tmpOtherVocSynUri = {id: '', list: []};
-    this.tmpTermDescription = {id: '', list: {ja:[], en:[]}};
+    this.tmpTermDescription = {id: '', list: {ja:'', en:''}};
     this.tmpCreatedTime = {id: '', list: []};
     this.tmpModifiedTime = {id: '', list: []};
     this.tmpBorderColor =
@@ -1243,16 +1243,8 @@ class EditingVocabulary {
    isTermDescriptionChanged() {
      
     let ret = false;    
-    [ this.currentNode, this.currentLangDiffNode].forEach((nodeObj)=>{
-      if( nodeObj.language==''){
-      }else if( this.tmpTermDescription.list[ nodeObj.language ].length > 1 ){ // 2
-        ret =  true;
-      }else if( this.tmpTermDescription.list[ nodeObj.language ].length == 1 ){ // 1
-        if( this.tmpTermDescription.list[ nodeObj.language ][0] != nodeObj.term_description ){ ret =  true;}
-      }else if( 1 > this.tmpTermDescription.list[ nodeObj.language ].length ){ // 0
-        if( nodeObj.term_description != '' ){ ret =  true;}
-      }
-    });
+    if( this.currentNode.term_description !== this.tmpTermDescription.list[this.currentNode.language] ){ ret =  true;}
+    if( this.currentLangDiffNode.term_description != this.tmpTermDescription.list[this.currentLangDiffNode.language] ){ ret =  true;}
     return ret;
   }
 
@@ -1431,9 +1423,9 @@ isOtherVocSynUriChanged() {
     this.tmpSynonym.list[this.currentNode.language] = [...this.currentNode.synonymList];//shallow copy
     this.tmpSynonym.idList[this.currentNode.language] = [...this.currentNode.synonymIdList];//shallow copy
 
-    this.tmpTermDescription ={id: this.currentNode.id, list:{ja:[], en:[]}};
+    this.tmpTermDescription ={id: this.currentNode.id, list: {ja:'', en:''}};
     if (this.currentNode.term_description) {
-      this.tmpTermDescription.list[this.currentNode.language].push(this.currentNode.term_description);
+      this.tmpTermDescription.list[this.currentNode.language] = this.currentNode.term_description;
     }
 
     this.tmpLanguage = {id: this.currentNode.id, value: this.currentNode.language};
@@ -1568,7 +1560,7 @@ isOtherVocSynUriChanged() {
       const preferredlabel = [];
       const broaderterm = [];
       let broader_uri = '';
-      const termdescription = [];
+      let termdescription = '';
     
       this.currentLangDiffNode.synonymList = otherlangsynonymList;
       this.currentLangDiffNode.synonymIdList = otherlangsynonymIdList;
@@ -1586,7 +1578,7 @@ isOtherVocSynUriChanged() {
       broader_uri = languageChangeNodeData.broader_uri;
 
       if (languageChangeNodeData.term_description.length > 0) {
-        termdescription.push(languageChangeNodeData.term_description);
+        termdescription = languageChangeNodeData.term_description;
       }
 
       this.tmpPreferredLabel.list[languageChangeNodeData.language] = preferredlabel;
@@ -2004,8 +1996,8 @@ isOtherVocSynUriChanged() {
       }else{
         followObj.other_voc_syn_uri =''
       }
-      if(tmp1TermDescription.list[followObj.language].length!==0){
-        followObj.term_description = tmp1TermDescription.list[followObj.language][0];
+      if(tmp1TermDescription.list[followObj.language]!==''){
+        followObj.term_description = tmp1TermDescription.list[followObj.language];
       }else{
         followObj.term_description =''
       }
@@ -2331,23 +2323,6 @@ isOtherVocSynUriChanged() {
       ret.language = 'en';
       return ret;
     }
-    // term description must be at most one for each language
-    if (this.tmpTermDescription.list['ja'].length > 1) {
-      console.log('[errorCheck] multiTermDescription.');
-      ret.errorKind = 'multiTermDescription';
-      ret.term = this.currentNode.term;
-      ret.language = 'ja';
-      return ret;
-    }
-    if (this.tmpTermDescription.list['en'].length > 1) {
-      console.log('[errorCheck] multiTermDescription.');
-      ret.errorKind = 'multiTermDescription';
-      ret.term = this.currentNode.term;
-      ret.language = 'en';
-      return ret;
-    }
-    // end number check
-
 
     // preferred label must exist in the synonyms or is the term
     if(this.tmpPreferredLabel.list[this.currentNode.language].length !==0){
@@ -2905,10 +2880,10 @@ isOtherVocSynUriChanged() {
 
         // add termdescription for each language
         if(addedData.term_description !==''){
-          if(addedData.language === 'ja'){
-            this.tmpTermDescription.list['ja'].push(addedData.term_description);
-          }else{
-            this.tmpTermDescription.list['en'].push(addedData.term_description);
+          if(addedData.language === 'ja' && this.tmpTermDescription.list['ja'] === ''){
+            this.tmpTermDescription.list['ja'] = addedData.term_description;
+          }else if( this.tmpTermDescription.list['en'] === ''){
+            this.tmpTermDescription.list['en'] = addedData.term_description;
           }
         }
       }
@@ -3194,7 +3169,7 @@ isOtherVocSynUriChanged() {
   // Term Description //////////////////////
   @observable tmpTermDescription = {
     id: '',
-    list: {ja:[], en:[]},
+    list:{ ja:'', en:''},
   };
 
   /**
@@ -3206,30 +3181,8 @@ isOtherVocSynUriChanged() {
 
     const currentNode = this.tmpLanguage.value == this.currentNode.language ? this.currentNode: this.currentLangDiffNode;
  
-    if (currentNode.term) {
-      newValue.forEach((term) => {
-        array.push(term);
-      });
-    } else {
-      // Do not add terms that are not selected and have no title to the term description
-      newValue.forEach((term) => {
-        array.push(term);
-      });
-    }
     this.tmpTermDescription.id = currentNode.id;
-    this.tmpTermDescription.list[currentNode.language] = array;
-  }
-
-  /**
-   * Delete and update the end of the term description list you are editing
-   */
-   @action popTermDescription() {
-    const newArray = [];
-    this.tmpTermDescription.list[this.tmpLanguage.value].forEach((data) => {
-      newArray.push(data);
-    });
-    newArray.pop();
-    this.updataTermDescription(newArray);
+    this.tmpTermDescription.list[currentNode.language] = newValue;
   }
 
   // Language //////////////////////

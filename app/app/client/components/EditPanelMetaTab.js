@@ -320,7 +320,6 @@ export default
               <TextFieldMultiLine
                 classes={this.props.classes}
                 editingVocabulary={this.props.editingVocabulary}
-                editingVocabularyMeta={this.props.editingVocabularyMeta} 
                 disabled={disabledTextField}
                 value={metaDescription}
                 change={(value) => this.changeMetaDescription(value) }

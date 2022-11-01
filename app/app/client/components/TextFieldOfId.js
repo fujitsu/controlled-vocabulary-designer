@@ -106,7 +106,7 @@ export default
         this.props.editingVocabulary.currentNode.idofuri;
 
     return (
-      <div>
+      <div onKeyDown={(e)=>{e.keyCode===13&&e.preventDefault()}}>
         <form noValidate autoComplete="off">
           <Grid item xs={12}>
             <Box border={1}>
