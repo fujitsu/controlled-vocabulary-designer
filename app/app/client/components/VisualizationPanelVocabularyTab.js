@@ -1112,7 +1112,8 @@ export default
    */
   handleEditPopoverClose(saved=false){
 
-    if( !saved && this.props.editingVocabulary.isCurrentNodeChanged ){
+    const ret = this.props.editingVocabulary.getNodesStateChanged;
+    if( !saved && ( ret['ja'] || ret['en'] ) ){
       this.message='編集中のデータを破棄して用語選択を実行します。\n\nよろしいですか？';
       this.setState({ dlgTmpDelOpen: true});
     }else{
