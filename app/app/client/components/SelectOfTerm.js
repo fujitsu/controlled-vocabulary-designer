@@ -90,8 +90,9 @@
        return;
      }
      this.changeId = event.target.dataset.id;
+     const ret = this.props.editingVocabulary.getNodesStateChanged;
      if(  this.props.editingVocabulary.currentNode.id !== event.target.dataset.id
-       && this.props.editingVocabulary.isCurrentNodeChanged){
+       && ( ret['ja'] || ret['en'] )){
        this.setState({ dlgConfirmOpen: true });
      }else{
        this.handleConfirmClose();
