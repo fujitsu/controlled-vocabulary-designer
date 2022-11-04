@@ -225,11 +225,11 @@ export default class DialogSettingSynonym extends React.Component {
 
     // set the term description
     editingVocabulary.tmpTermDescription.id = sourceNode.id; 
-    if(undefined !== selectTermDesc_Ja && editingVocabulary.tmpTermDescription.list['ja'] === ''){
-      editingVocabulary.tmpTermDescription.list['ja'] = selectTermDesc_Ja;
+    if(undefined !== selectTermDesc_Ja && editingVocabulary.tmpTermDescription.values['ja'] === ''){
+      editingVocabulary.tmpTermDescription.values['ja'] = selectTermDesc_Ja;
     }
-    if(undefined !== selectTermDesc_En && editingVocabulary.tmpTermDescription.list['en'] === ''){
-      editingVocabulary.tmpTermDescription.list['en'] = selectTermDesc_En;
+    if(undefined !== selectTermDesc_En && editingVocabulary.tmpTermDescription.values['en'] === ''){
+      editingVocabulary.tmpTermDescription.values['en'] = selectTermDesc_En;
     }
 
     const ret = editingVocabulary.updateVocabulary(null, 333);
