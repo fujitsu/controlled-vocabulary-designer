@@ -1913,23 +1913,9 @@ isOtherVocSynUriChanged() {
     const followSynIdListWithMe = [...followSynIdListJa, ...followSynIdListEn, this.currentNode.id];
     
     // calc modifiled time
-    // time 0 fill
-    const toDoubleDigits = function(num) {
-      num += "";
-      if (num.length === 1) {
-        num = "0" + num;
-      }
-      return num;     
-    };
     // Get current time
     const dateTmp = new Date();
-    const dateNow = dateTmp.getFullYear() + "-" + 
-                    toDoubleDigits((dateTmp.getMonth() + 1))  + "-" + 
-                    toDoubleDigits(dateTmp.getDate()) + "T" + 
-                    toDoubleDigits(dateTmp.getHours()) + ":" + 
-                    toDoubleDigits(dateTmp.getMinutes()) + ":" + 
-                    toDoubleDigits(dateTmp.getSeconds()) + "Z";
-
+    const dateNow = dateTmp.toISOString().replace(/\.\d+Z/,'Z'); // get UTC time without milliseconds, e.g. "2022-11-04T07:32:18Z"
 
     // find deleted terms and ids from sysnonyms
     let deletedIdJa = prevSynIdListJa.filter((term)=>{return !followSynIdListJa.includes(term)});

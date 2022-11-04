@@ -564,10 +564,15 @@ def _check_inconsistencies_vocs(df, file_type_num):
         # fills cells without 0 are replaced to 1
         df = _fill_confirm_val(df)
 
+        # parse created_time modified_time
+        # if create time is blank or unparsable string, it will be filled by now time
+        df = _fill_create_time_val(df)
+        # if modified time is blank or unparsable string, it will be filled by now time
+        df = _fill_modifiled_time_val(df)
+
     # fill values for position_x_colname and position_y_colname
     df = _fill_pos_val(df)
 
-    # parse created_time modified_time
 
     return SuccessResponse('request is success.'), 200, df
 
@@ -1060,7 +1065,7 @@ def _download_file_serialize(g, p_format):
     # n3, nt, turtle, xml, trix, nquads
     if p_format in REFERENCE_FORMAT:
         response = make_response()
-        response.data = g.serialize(format=p_format).decode("utf-8")
+        response.data = g.serialize(format=p_format)
         response.headers['Content-Type'] = 'application/octet-stream'
         response.headers['Content-Disposition'] =\
             'attachment; filename=test_sample.' + p_format
@@ -1068,7 +1073,7 @@ def _download_file_serialize(g, p_format):
     elif p_format in REFERENCE_FORMAT_JSON:
         df_json = []
         wk_format = "json-ld"
-        df_json = g.serialize(format=wk_format, indent=4).decode("utf-8")
+        df_json = g.serialize(format=wk_format, indent=4)
         response = make_response(jsonify(df_json))
         response.headers['Content-Type'] = 'application/ld+json'
         response.headers['Content-Disposition'] =\
@@ -1651,3 +1656,38 @@ def _fill_confirm_val(df):
     tmp_bool = df[confirm_colname] != '0'
     df.loc[tmp_bool, confirm_colname] = '1'
     return df
+
+# convert datetime to ISO 8601 at most "second", '2021-04-02T12:43:02Z'
+def _convert_datetime2cvdtimestr(indatetime):
+    return indatetime.isoformat(timespec='seconds').replace('+00:00', 'Z')
+
+# input {string} timeStr ISO 8601 '2021-04-02T12:43:02Z'
+# input {string} vnowStr value with which fill blank or unparcable data ISO 8601 '2021-04-02T12:43:02Z'
+# return datetime
+def _convert_isostr2datetime(timeStr, nowStr):
+    try:
+        return datetime.datetime.fromisoformat(timeStr)
+    except:
+        return datetime.datetime.fromisoformat(nowStr)
+
+def _fill_create_time_val(df):
+    # if create time is blank or unparsable string, it will be filled by now time
+    created_time_colname = '作成日'
+    nowTime =  datetime.datetime.now(datetime.timezone.utc) 
+    nowStr = nowTime.isoformat()
+    df["tmp"] = df[created_time_colname].apply(_convert_isostr2datetime, args=(nowStr, ) )
+    df[created_time_colname] = df["tmp"].apply(_convert_datetime2cvdtimestr)
+    df = df.drop("tmp", axis=1)
+    return df
+
+def _fill_modifiled_time_val(df):
+    # if create time is blank or unparsable string, it will be filled by now time
+    modified_time_colname = '最終更新日'
+    nowTime =  datetime.datetime.now(datetime.timezone.utc) 
+    nowStr = nowTime.isoformat()
+    df["tmp"] = df[modified_time_colname].apply(_convert_isostr2datetime, args=(nowStr, ) )
+    df[modified_time_colname] = df["tmp"].apply(_convert_datetime2cvdtimestr)
+    df = df.drop("tmp", axis=1)
+    return df
+
+
