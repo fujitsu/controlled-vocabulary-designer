@@ -59,14 +59,7 @@ export default
     this.props.editingVocabulary.setCurrentNodeById(
       this.props.editingVocabulary.currentNode.id, true);
     this.rootElm = document.getElementById('vocabulary_edit_panel');
-    if( this.rootElm){
-      this.rootElm.addEventListener('keydown', this.handleKeyDown.bind(this));
-    }
-  }
-  componentWillUnmount(){
-    if( this.rootElm){
-      this.rootElm.removeEventListener('keydown', this.handleKeyDown);
-    }
+    this.rootElm&&this.rootElm.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   /**
@@ -87,12 +80,6 @@ export default
       if (this.state.broadertermact) {
         this.props.editingVocabulary.popBroaderTerm();
       }
-      if (this.state.termdescriptionact) { 
-        this.props.editingVocabulary.popTermDescription(); 
-      }
-    }
-    if (event.keyCode === 13) {
-      event.preventDefault();
     }
   }
 
@@ -117,9 +104,8 @@ export default
         break;
       case 'TermDescription': 
         this.setState({termdescriptionact: value}); 
-          break;
         break;
-        defalut:
+      default:
         break;
     }
   }
