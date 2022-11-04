@@ -276,7 +276,7 @@ export default
       // edges line width adjustment
       const edges = cy.edges();
       edges.style({
-        "width": 3.0/zoom,
+        "width": 5.0/zoom,
       });
       
       const nodeInViewStyle = {        
@@ -602,7 +602,7 @@ export default
             ghostedges.style({
               'width': val,
               'line-color': 'blue',
-              'line-style': 'dotted',
+              'line-style': 'solid',
               'target-arrow-shape': 'none',
               'target-arrow-color': '',
               'curve-style': 'straight',
@@ -626,7 +626,7 @@ export default
       const cy = this.cy;
       
       let handles = cy.elements('.eh-handle');
-      const val = 10.0/cy.zoom();
+      const val = 15.0/cy.zoom();
         
       if( handles.length > 0){
         handles.style({
@@ -1465,7 +1465,7 @@ export default
             {
               selector: 'edge',
               style: {
-                'width': 3,
+                'width': 5,
                 'curve-style': 'straight',
               },
             },
@@ -1502,7 +1502,7 @@ export default
             {
               selector: '.eh-ghost-edge',
               style: {
-                width: 10,
+                width: 15,
                 'line-color': 'yellow',
                 'line-style': 'solid',
                 'target-arrow-shape': 'vee',
