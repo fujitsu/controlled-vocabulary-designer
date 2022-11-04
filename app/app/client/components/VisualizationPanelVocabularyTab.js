@@ -276,7 +276,7 @@ export default
       // edges line width adjustment
       const edges = cy.edges();
       edges.style({
-        "width": 10.0/zoom,
+        "width": 5.0/zoom,
       });
       
       const nodeInViewStyle = {        
@@ -584,7 +584,7 @@ export default
         if(++cnt > 5) clearInterval(intervalId);
         const cy = this.cy;
         let ghostedges = cy.elements('.eh-ghost-edge');
-        const val = 8.0/cy.zoom();
+        const val = 5.0/cy.zoom();
         if( ghostedges.length > 0){
           
           if( this.ehTop.handleNode!== undefined && this.ehTop.handleNode.active()){
@@ -626,7 +626,7 @@ export default
       const cy = this.cy;
       
       let handles = cy.elements('.eh-handle');
-      const val = 20.0/cy.zoom();
+      const val = 15.0/cy.zoom();
         
       if( handles.length > 0){
         handles.style({
@@ -1464,7 +1464,7 @@ export default
             {
               selector: 'edge',
               style: {
-                'width': 10,
+                'width': 5,
                 'curve-style': 'straight',
               },
             },
@@ -1501,7 +1501,7 @@ export default
             {
               selector: '.eh-ghost-edge',
               style: {
-                width: 20,
+                width: 15,
                 'line-color': 'yellow',
                 'line-style': 'solid',
                 'target-arrow-shape': 'vee',
