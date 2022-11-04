@@ -297,13 +297,12 @@ const useStyles = (theme) => ({
     left: 0,
     width: "100%",
     padding: "2px 4px",
-    minWidth: "15vw",
-    backgroundColor: 'red',
+    minWidth: "325px",
+    boxSizing: "unset",
   },
   'inputTextItem': {
     position: "relative",
     display: "inline-block",
-    backgroundCplor: "red"
   },
   'inputTextDummy': {
     position: "relative",

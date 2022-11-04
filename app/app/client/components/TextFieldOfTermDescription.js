@@ -42,16 +42,31 @@
   }
 
    render() {
-     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.values[this.props.editingVocabulary.tmpLanguage.value];
+    const editingVocabulary = this.props.editingVocabulary;
+    const tmpTermDescription = editingVocabulary.tmpTermDescription.values[editingVocabulary.tmpLanguage.value];
 
-return (
+    // preferred label when switching with the  language radio button in the selected term
+    let currentTermDescription = editingVocabulary.currentLangDiffNode.term_description;
+    // preferred label on the selected term
+    if ( editingVocabulary.currentNode.language == editingVocabulary.tmpLanguage.value) {
+      currentTermDescription = editingVocabulary.currentNode.term_description;
+    }
+     let backColor = 'rgba(0, 0, 0, 0)';
+     if( this.props.disabled){
+       backColor = 'rgba(0, 0, 0, 0.09)';
+     }else if( currentTermDescription !== '' && tmpTermDescription === ''){
+       backColor = 'lavenderblush';
+     }
+
+    return (
     <div>
       <Grid item xs={12}>
-        <Box border={1}>
+        <Box>
           <TextFieldMultiLine
             classes={this.props.classes}
             editingVocabulary={this.props.editingVocabulary}
             disabled={this.props.disabled}
+            backcolor={backColor}
             value={tmpTermDescription}
             change={(value) => this.onChange(value) }
           />

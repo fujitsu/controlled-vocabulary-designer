@@ -128,20 +128,27 @@ export default
    * @return {element}
    */
   render() {
-    const preferredLabel = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.value];
-    let currentPreferredLabel;
+    const editingVocabulary = this.props.editingVocabulary;
+    const preferredLabel = editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.value];
+
+    // preferred label when switching with the  language radio button in the selected term
+    let currentPreferredLabel = editingVocabulary.currentLangDiffNode.preferred_label;
     // preferred label on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
-      currentPreferredLabel =
-        this.props.editingVocabulary.currentNode.preferred_label;
-    } else { // preferred label when switching with the  language radio button in the selected term
-      currentPreferredLabel =
-        this.props.editingVocabulary.currentLangDiffNode.preferred_label;
+    if (editingVocabulary.currentNode.language == editingVocabulary.tmpLanguage.value) {
+      currentPreferredLabel = editingVocabulary.currentNode.preferred_label;
     }
+
+    let backColor = 'rgba(0, 0, 0, 0)';
+    if(this.props.disabled){
+      backColor = 'rgba(0, 0, 0, 0.09)';
+    }else if( currentPreferredLabel !== '' && 0 === preferredLabel.length){
+      backColor = 'lavenderblush';
+    }
+
     /* eslint-disable no-unused-vars */
     // object for rendering
-    let length = this.props.editingVocabulary.tmpPreferredLabel.list['ja'].length;
-    length = this.props.editingVocabulary.tmpPreferredLabel.list['en'].length;
+    let length = editingVocabulary.tmpPreferredLabel.list['ja'].length;
+    length = editingVocabulary.tmpPreferredLabel.list['en'].length;
     /* eslint-enable no-unused-vars */
 
     return (
@@ -180,11 +187,7 @@ export default
                   <TextField
                     {...params}
                     variant="standard"
-                    style={
-                        this.props.disabled?
-                        {backgroundColor: 'rgba(0, 0, 0, 0.09)'}:
-                        {backgroundColor: 'rgba(0, 0, 0, 0)'}
-                    }
+                    style={{backgroundColor: backColor}}
                   />
                 )}
               />

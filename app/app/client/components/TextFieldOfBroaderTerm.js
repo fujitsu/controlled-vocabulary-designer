@@ -152,15 +152,21 @@ export default
    * @return {element}
    */
   render() {
-    const broaderTerm = this.props.editingVocabulary.tmpBroaderTerm.list[this.props.editingVocabulary.tmpLanguage.value];
-    let currentBroaderTerm;
+    const editingVocabulary = this.props.editingVocabulary;
+    const broaderTerm = editingVocabulary.tmpBroaderTerm.list[editingVocabulary.tmpLanguage.value];
+    
+    // broader term when switching with the  language radio button in the selected term
+    let currentBroaderTerm = editingVocabulary.currentLangDiffNode.broader_term;
     // broader term on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
-      currentBroaderTerm =
-        this.props.editingVocabulary.currentNode.broader_term;
-    } else { // broader term when switching with the  language radio button in the selected term
-      currentBroaderTerm =
-        this.props.editingVocabulary.currentLangDiffNode.broader_term;
+    if (editingVocabulary.currentNode.language == editingVocabulary.tmpLanguage.value) {
+      currentBroaderTerm = editingVocabulary.currentNode.broader_term;
+    }
+    
+    let backColor = 'rgba(0, 0, 0, 0)';
+    if(this.props.disabled){
+      backColor = 'rgba(0, 0, 0, 0.09)';
+    }else if( currentBroaderTerm !== '' && 0 === broaderTerm.length){
+      backColor = 'lavenderblush';
     }
     
     return (
@@ -238,11 +244,7 @@ export default
                   <TextField
                     {...params}
                     variant="standard"
-                    style={
-                        this.props.disabled?
-                        {backgroundColor: 'rgba(0, 0, 0, 0.09)'}:
-                        {backgroundColor: 'rgba(0, 0, 0, 0)'}
-                    }
+                    style={{backgroundColor: backColor}}
                   />
                 )}
               />
