@@ -1053,7 +1053,7 @@ class EditingVocabulary {
     this.tmpSynonym = {id: '', list: {ja:[], en:[]}, idList: {ja:[], en:[]}};
     this.tmpPreferredLabel = {id: '', list: {ja:[], en:[]}};
     this.tmpOtherVocSynUri = {id: '', list: []};
-    this.tmpTermDescription = {id: '', list: {ja:'', en:''}};
+    this.tmpTermDescription = {id: '', values: {ja:'', en:''}};
     this.tmpCreatedTime = {id: '', list: []};
     this.tmpModifiedTime = {id: '', list: []};
     this.tmpBorderColor =
@@ -1215,10 +1215,10 @@ class EditingVocabulary {
   */
   getTermDescriptionChanged() {
     const ret = {ja:false, en: false};
-    if( this.currentNode.term_description !== this.tmpTermDescription.list[this.currentNode.language] ){
+    if( this.currentNode.term_description !== this.tmpTermDescription.values[this.currentNode.language] ){
       ret.ja =  true;
     }
-    if( this.currentLangDiffNode.term_description != this.tmpTermDescription.list[this.currentLangDiffNode.language] ){
+    if( this.currentLangDiffNode.term_description != this.tmpTermDescription.values[this.currentLangDiffNode.language] ){
       ret.en =  true;
     }
     return ret;
@@ -1319,9 +1319,9 @@ class EditingVocabulary {
     this.tmpSynonym.list[this.currentNode.language] = [...this.currentNode.synonymList];//shallow copy
     this.tmpSynonym.idList[this.currentNode.language] = [...this.currentNode.synonymIdList];//shallow copy
 
-    this.tmpTermDescription ={id: this.currentNode.id, list: {ja:'', en:''}};
+    this.tmpTermDescription ={id: this.currentNode.id, values: {ja:'', en:''}};
     if (this.currentNode.term_description) {
-      this.tmpTermDescription.list[this.currentNode.language] = this.currentNode.term_description;
+      this.tmpTermDescription.values[this.currentNode.language] = this.currentNode.term_description;
     }
 
     this.tmpLanguage = {id: this.currentNode.id, value: this.currentNode.language};
@@ -1481,7 +1481,7 @@ class EditingVocabulary {
 
       this.tmpBroaderTerm.list[languageChangeNodeData.language] = broaderterm;
       this.tmpBroaderTerm.broader_uri = broader_uri;
-      this.tmpTermDescription.list[languageChangeNodeData.language] = termdescription;
+      this.tmpTermDescription.values[languageChangeNodeData.language] = termdescription;
     }else{
       this.currentLangDiffNodeClear();
       this.currentLangDiffNode.language = this.currentNode.language=='ja'?'en':'ja';
@@ -1892,8 +1892,8 @@ class EditingVocabulary {
       }else{
         followObj.other_voc_syn_uri =''
       }
-      if(tmp1TermDescription.list[followObj.language]!==''){
-        followObj.term_description = tmp1TermDescription.list[followObj.language];
+      if(tmp1TermDescription.values[followObj.language]!==''){
+        followObj.term_description = tmp1TermDescription.values[followObj.language];
       }else{
         followObj.term_description =''
       }
@@ -2776,10 +2776,10 @@ class EditingVocabulary {
 
         // add termdescription for each language
         if(addedData.term_description !==''){
-          if(addedData.language === 'ja' && this.tmpTermDescription.list['ja'] === ''){
-            this.tmpTermDescription.list['ja'] = addedData.term_description;
-          }else if( this.tmpTermDescription.list['en'] === ''){
-            this.tmpTermDescription.list['en'] = addedData.term_description;
+          if(addedData.language === 'ja' && this.tmpTermDescription.values['ja'] === ''){
+            this.tmpTermDescription.values['ja'] = addedData.term_description;
+          }else if( this.tmpTermDescription.values['en'] === ''){
+            this.tmpTermDescription.values['en'] = addedData.term_description;
           }
         }
       }
@@ -3065,7 +3065,7 @@ class EditingVocabulary {
   // Term Description //////////////////////
   @observable tmpTermDescription = {
     id: '',
-    list:{ ja:'', en:''},
+    values:{ ja:'', en:''},
   };
 
   /**
@@ -3078,7 +3078,7 @@ class EditingVocabulary {
     const currentNode = this.tmpLanguage.value == this.currentNode.language ? this.currentNode: this.currentLangDiffNode;
  
     this.tmpTermDescription.id = currentNode.id;
-    this.tmpTermDescription.list[currentNode.language] = newValue;
+    this.tmpTermDescription.values[currentNode.language] = newValue;
   }
 
   // Language //////////////////////

@@ -42,7 +42,7 @@
   }
 
    render() {
-     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.list[this.props.editingVocabulary.tmpLanguage.value];
+     const tmpTermDescription = this.props.editingVocabulary.tmpTermDescription.values[this.props.editingVocabulary.tmpLanguage.value];
 
 return (
     <div>
