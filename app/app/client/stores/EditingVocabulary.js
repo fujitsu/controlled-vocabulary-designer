@@ -1064,107 +1064,72 @@ class EditingVocabulary {
    * Whether the selected term has been edited and is pending
    * @return {boolean} - true: contain changes, false: not contain changes
    */
-  @computed get isCurrentNodeChanged() {
-
+  @computed get getNodesStateChanged() {
+    
+    let ret = {ja:false, en:false};
+    let eachRet = {ja:false, en:false};
     if( !this.currentNode || !this.currentNode.id ){
-      return false;
+      return ret;
     }
 
     // Id of URI
-    if (this.isIdofUriChanged()) {
-      return true;
-    }
-
-    // URI ---> Not currently editable, no confirmation of changes
-    // if (this.isUriChanged()) {
-    //   return true;
-    // }
+    eachRet = this.getIdofUriChanged();
+    ret['ja'] = ret['ja']||eachRet['ja'];
+    ret['en'] = ret['en']||eachRet['en'];
 
     // Preferred label
-    if (this.isPrfrdLblChanged()) {
-      return true;
-    }
+    eachRet = this.getPrfrdLblChanged();
+    ret['ja'] = ret['ja']||eachRet['ja'];
+    ret['en'] = ret['en']||eachRet['en'];
 
     // Broader term
-    if (this.isBrdrTermChanged()) {
-      return true;
-    }
+    eachRet = this.getBrdrTermChanged();
+    ret['ja'] = ret['ja']||eachRet['ja'];
+    ret['en'] = ret['en']||eachRet['en'];
 
     // Broader term
-    if (this.isSynonymChanged()) {
-      return true;
-    }
+    eachRet = this.getSynonymChanged();
+    ret['ja'] = ret['ja']||eachRet['ja'];
+    ret['en'] = ret['en']||eachRet['en'];
 
     // Term description
-    if (this.isTermDescriptionChanged()) {
-      return true;
-    }
+    eachRet = this.getTermDescriptionChanged();
+    ret['ja'] = ret['ja']||eachRet['ja'];
+    ret['en'] = ret['en']||eachRet['en'];
 
-    // Created time ---> Not currently editable, no confirmation of changes
-    // if (this.isCreatedTimeChanged()) {
-    //   return true;
-    // }
-
-    // Modified time ---> Not currently editable, no confirmation of changes
-    // if (this.isModifiedTimeChanged()) {
-    //   return true;
-    // }
-
-    // Other Voc Syn Uri ---> Not currently editable, no confirmation of changes
-    // if (this.isOtherVocSynUriChanged()) {
-    //   return true;
-    // }
-
-    return false;
+    return ret;
   }
 
   /**
    * Determine if Id of URI is changed
    * @return {boolean} - true: contain changes, false: not contain changes
    */
-   isIdofUriChanged() {
+   getIdofUriChanged() {
+    
+    const ret = {ja:false, en: false};
     if (this.currentNode.idofuri) {
       if (this.tmpIdofUri.list.length == 1) {
         if (this.currentNode.idofuri === this.tmpIdofUri.list[0]) {
-          return false;
+          return ret;
         } else {
-          return true;
+          ret['ja'] = true;
+          ret['en'] = true;
+          return ret;
         }
       } else {
         // Modified if not one Id of URI being edited
-        return true;
+        ret['ja'] = true;
+        ret['en'] = true;
+        return ret;
       }
     } else {
       if (this.tmpIdofUri.list.length == 0) {
-        return false;
+        return ret;
       } else {
         // If it is not set, even one is changed if it is being edited
-        return true;
-      }
-    }
-  }
-  /**
-   * Determine if URI is changed
-   * @return {boolean} - true: contain changes, false: not contain changes
-   */
-  isUriChanged() {
-    if (this.currentNode.uri) {
-      if (this.tmpUri.list.length == 1) {
-        if (this.currentNode.uri === this.tmpUri.list[0]) {
-          return false;
-        } else {
-          return true;
-        }
-      } else {
-        // Modified if not one URI being edited
-        return true;
-      }
-    } else {
-      if (this.tmpUri.list.length == 0) {
-        return false;
-      } else {
-        // If it is not set, even one is changed if it is being edited
-        return true;
+        ret['ja'] = true;
+        ret['en'] = true;
+        return ret;
       }
     }
   }
@@ -1173,17 +1138,21 @@ class EditingVocabulary {
    * Determine if the heading has been changed
    * @return {boolean} - true: contain changes, false; not contain changes
    */
-  isPrfrdLblChanged() {
+  getPrfrdLblChanged() {
     
-    let ret = false;    
+    const ret = {ja:false, en: false};
     [ this.currentNode, this.currentLangDiffNode].forEach((nodeObj)=>{
       if( nodeObj.language==''){
       }else if( this.tmpPreferredLabel.list[ nodeObj.language ].length > 1 ){ // 2
-        ret =  true;
+        ret[ nodeObj.language ] = true;
       }else if( this.tmpPreferredLabel.list[ nodeObj.language ].length == 1 ){ // 1
-        if( this.tmpPreferredLabel.list[ nodeObj.language ][0] != nodeObj.preferred_label ){ ret =  true;}
+        if( this.tmpPreferredLabel.list[ nodeObj.language ][0] != nodeObj.preferred_label ){
+          ret[ nodeObj.language ] = true;
+        }
       }else if( 1 > this.tmpPreferredLabel.list[ nodeObj.language ].length ){ // 0
-        if( nodeObj.preferred_label != '' ){ ret =  true;}
+        if( nodeObj.preferred_label != '' ){
+          ret[ nodeObj.language ] = true;
+        }
       }
     });
     return ret;
@@ -1193,16 +1162,21 @@ class EditingVocabulary {
    * Determine if the broader term is changed
    * @return {boolean} - true: contain changes, false: not contain changes
    */
-  isBrdrTermChanged() {
-    let ret = false;    
+  getBrdrTermChanged() {
+
+    const ret = {ja:false, en: false};
     [ this.currentNode, this.currentLangDiffNode].forEach((nodeObj)=>{
       if( nodeObj.language==''){
       }else if( this.tmpBroaderTerm.list[ nodeObj.language ].length > 1 ){ // 2
-        ret =  true;
+        ret[ nodeObj.language ] = true;
       }else if( this.tmpBroaderTerm.list[ nodeObj.language ].length == 1 ){ // 1
-        if( this.tmpBroaderTerm.list[ nodeObj.language ][0] != nodeObj.broader_term ){ ret =  true;}
+        if( this.tmpBroaderTerm.list[ nodeObj.language ][0] != nodeObj.broader_term ){
+          ret[ nodeObj.language ] = true;
+        }
       }else if( 1 > this.tmpBroaderTerm.list[ nodeObj.language ].length ){ // 0
-        if( nodeObj.broader_term != '' ){ ret =  true;}
+        if( nodeObj.broader_term != '' ){
+          ret[ nodeObj.language ] = true;
+        }
       }
     });
     return ret;
@@ -1212,22 +1186,22 @@ class EditingVocabulary {
    * Determine if synonyms are changed
    * @return {boolean} - true: contain changes, false: not contain changes
    */
-  isSynonymChanged() {
+  getSynonymChanged() {
     
-    let ret = false;
+    const ret = {ja:false, en: false};
     [ this.currentNode, this.currentLangDiffNode].forEach((nodeObj)=>{
       if( nodeObj.language==''){
       }else if (nodeObj.synonymList.length != this.tmpSynonym.list[nodeObj.language].length) {
-        ret =  true;
+        ret[ nodeObj.language ] = true;
       }else{
         this.tmpSynonym.list[nodeObj.language].forEach((languageCurrent) => {
           if ( !nodeObj.synonymList.includes(languageCurrent)) {
-            ret = true;
+            ret[ nodeObj.language ] = true;
           }
         });
         nodeObj.synonymList.forEach((languageCurrent) => {
           if ( !this.tmpSynonym.list[nodeObj.language].includes(languageCurrent)) {
-            ret = true;
+            ret[ nodeObj.language ] = true;
           }
         });
       }
@@ -1238,95 +1212,17 @@ class EditingVocabulary {
   /**
    * Determine if the term description has been changed
    * @return {boolean} - true: contain changes, false; not contain changes
-   */
-
-   isTermDescriptionChanged() {
-     
-    let ret = false;    
-    if( this.currentNode.term_description !== this.tmpTermDescription.list[this.currentNode.language] ){ ret =  true;}
-    if( this.currentLangDiffNode.term_description != this.tmpTermDescription.list[this.currentLangDiffNode.language] ){ ret =  true;}
+  */
+  getTermDescriptionChanged() {
+    const ret = {ja:false, en: false};
+    if( this.currentNode.term_description !== this.tmpTermDescription.list[this.currentNode.language] ){
+      ret.ja =  true;
+    }
+    if( this.currentLangDiffNode.term_description != this.tmpTermDescription.list[this.currentLangDiffNode.language] ){
+      ret.en =  true;
+    }
     return ret;
   }
-
-
-/**
- * Determine if the created time has been changed
- * @return {boolean} - true: contain changes, false; not contain changes
- */
- isCreatedTimeChanged() {
-  if (this.currentNode.created_time) {
-    if (this.tmpCreatedTime.list.length == 1) {
-      if (this.currentNode.created_time === this.tmpCreatedTime.list[0]) {
-        return false;
-      } else {
-        return true;
-      }
-    } else {
-      // Modified if not one is being edited
-      return true;
-    }
-  } else {
-    if (this.tmpCreatedTime.list.length == 0) {
-      return false;
-    } else {
-      // If it is not set, even one is changed if it is being edited
-      return true;
-    }
-  }
-}
-
-/**
- * Determine if the modified time has been changed
- * @return {boolean} - true: contain changes, false; not contain changes
- */
- isModifiedTimeChanged() {
-  if (this.currentNode.modified_time) {
-    if (this.tmpModifiedTime.list.length == 1) {
-      const tmpModifiedTime = this.tmpModifiedTime.list[0];
-      if (this.currentNode.modified_time === tmpModifiedTime) {
-        return false;
-      } else {
-        return true;
-      }
-    } else {
-      // Modified if not one is being edited
-      return true;
-    }
-  } else {
-    if (this.tmpModifiedTime.list.length == 0) {
-      return false;
-    } else {
-      // If it is not set, even one is changed if it is being edited
-      return true;
-    }
-  }
-}
-
-/**
- * Determine if the other voc syn uri has been changed
- * @return {boolean} - true: contain changes, false; not contain changes
- */
-isOtherVocSynUriChanged() {
-  if (this.currentNode.other_voc_syn_uri) {
-    if (this.tmpOtherVocSynUri.list.length == 1) {
-      if (this.currentNode.other_voc_syn_uri === this.tmpOtherVocSynUri.list[0]) {
-        return false;
-      } else {
-        return true;
-      }
-    } else {
-      // Modified if not one is being edited
-      return true;
-    }
-  } else {
-    if (this.tmpOtherVocSynUri.list.length == 0) {
-      return false;
-    } else {
-      // If it is not set, even one is changed if it is being edited
-      return true;
-    }
-  }
-}
 
   /**
    * Select vocabulary

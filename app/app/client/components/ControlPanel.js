@@ -217,11 +217,6 @@ export default class ControlPanel extends React.Component {
       disabledColor = false;
     }
 
-    // Firm button disabled condition
-    // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
-    const isCurrentNodeChanged = editingVocabulary.isCurrentNodeChanged;
-    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
-    
     const anchorElC = this.state.anchorElC;
     const openC = Boolean(anchorElC);
     const idC = openC ? "popover-c" : undefined;

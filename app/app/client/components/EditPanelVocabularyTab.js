@@ -216,9 +216,7 @@ export default
 
     // Firm button disabled condition
     // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
-    const isCurrentNodeChanged =
-      this.props.editingVocabulary.isCurrentNodeChanged;
-    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
+    const nodesStateChanged = this.props.editingVocabulary.getNodesStateChanged;
 
     const confirmed = this.props.editingVocabulary.currentNode.confirm;
     let isConfirm = false;
@@ -253,28 +251,47 @@ export default
             <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
               {/* <Box border={1} p={1} width="430px" height='400px' style={{ overflowX: 'hidden', overflowY: 'auto'}}> */}
                 <Grid container spacing={2}>
-                  <Grid item xs={3}>
+                  <Grid item xs={2}>
                   </Grid>
-                  <Grid item xs={9}>
-                    <FormControl component="fieldset">
-                      <RadioGroup row 
-                        onChange={(e)=>this.handleRadioChange(e)}
-                        aria-label="language" 
-                        name="language" 
-                        value={this.state.defalutValue}
+                  <Grid item xs={10}>
+                    <Box py={1} pl={2}>
+                      <FormControl component="fieldset">
+                        <RadioGroup row 
+                          onChange={(e)=>this.handleRadioChange(e)}
+                          aria-label="language" 
+                          name="language" 
+                          value={this.state.defalutValue}
+                        >
+                          <FormControlLabel
+                            value="ja" 
+                            control={<Radio color="primary" />} 
+                            style={{color: nodesStateChanged['ja']?'red':'inherit'}}
+                            label="日本語" 
+                          />
+                          <FormControlLabel
+                            value="en" 
+                            control={<Radio color="primary" />} 
+                            style={{color: nodesStateChanged['en']?'red':'inherit'}}
+                            label="英語" 
+                          />
+                        </RadioGroup>
+                      </FormControl>  
+                      
+                      <Button
+                        className={this.props.classes.buttonPrimary}
+                        style={{
+                          marginTop:'5px',
+                          marginLeft:'50px',
+                        }}
+                        variant="contained"
+                        color="primary"
+                        size={'small'}
+                        onClick={()=>this.updateVocabulary()}
+                        disabled={!( nodesStateChanged['ja'] || nodesStateChanged['en'])}
                       >
-                        <FormControlLabel
-                          value="ja" 
-                          control={<Radio color="primary" />} 
-                          label="日本語" 
-                        />
-                        <FormControlLabel
-                          value="en" 
-                          control={<Radio color="primary" />} 
-                          label="英語" 
-                        />
-                      </RadioGroup>
-                    </FormControl>  
+                        反映
+                      </Button>
+                    </Box>
                   </Grid> 
                 </Grid>
               {/* </Box> */}
@@ -430,29 +447,14 @@ export default
                 </Box>
               </Grid>
             </Grid>
-
-            <Grid container justify="center">
-              <Grid item>
-                <Button
-                  className={this.props.classes.buttonPrimary}
-                  variant="contained"
-                  color="primary"
-                  size={'small'}
-                  onClick={()=>this.updateVocabulary()}
-                  disabled={!isCurrentNodeChanged}
-                >
-                  反映
-                </Button>
-                <DialogUpdateVocabularyError
-                  onClose={() => this.errorDialogClose()}
-                  open={this.state.open}
-                  classes={this.props.classes}
-                  editingVocabulary={this.props.editingVocabulary}
-                  isFromEditPanel={true}
-                  reason={this.state.reason}
-                />
-              </Grid>
-            </Grid>
+            <DialogUpdateVocabularyError
+              onClose={() => this.errorDialogClose()}
+              open={this.state.open}
+              classes={this.props.classes}
+              editingVocabulary={this.props.editingVocabulary}
+              isFromEditPanel={true}
+              reason={this.state.reason}
+            />
           </Box>
         </Grid>
       </div>
