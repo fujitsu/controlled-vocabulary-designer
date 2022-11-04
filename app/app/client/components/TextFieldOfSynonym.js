@@ -111,18 +111,27 @@ export default
    * @return {element}
    */
   render() {
-    const synonym = this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.value];
-    let currentSynonym;
+    const editingVocabulary = this.props.editingVocabulary;
+    const synonym = editingVocabulary.tmpSynonym.list[editingVocabulary.tmpLanguage.value];
+
+    // synonym when switching with the  language radio button in the selected term
+    let currentSynonym = editingVocabulary.currentLangDiffNode.synonymList; 
     // synonym on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.value) {
-      currentSynonym = this.props.editingVocabulary.currentNode.synonymList;
-    } else { // synonym when switching with the  language radio button in the selected term
-      currentSynonym = this.props.editingVocabulary.currentLangDiffNode.synonymList; 
+    if (editingVocabulary.currentNode.language == editingVocabulary.tmpLanguage.value) {
+      currentSynonym = editingVocabulary.currentNode.synonymList;
     }
+    
+    let backColor = 'rgba(0, 0, 0, 0)';
+    if(this.props.disabled){
+      backColor = 'rgba(0, 0, 0, 0.09)';
+    }else if( currentSynonym.length > 0 && 0 === synonym.length){
+      backColor = 'lavenderblush';
+    }
+
     /* eslint-disable no-unused-vars */
     // object for rendering
-    let length = this.props.editingVocabulary.tmpSynonym.list['ja'].length;
-    length = this.props.editingVocabulary.tmpSynonym.list['en'].length;
+    let length = editingVocabulary.tmpSynonym.list['ja'].length;
+    length = editingVocabulary.tmpSynonym.list['en'].length;
     /* eslint-enable no-unused-vars */
 
     return (
@@ -196,11 +205,7 @@ export default
                   <TextField
                     {...params}
                     variant="standard"
-                    style={
-                      this.props.disabled?
-                      {backgroundColor: 'rgba(0, 0, 0, 0.09)'}:
-                      {backgroundColor: 'rgba(0, 0, 0, 0)'}
-                    }
+                    style={{backgroundColor: backColor}}
                   />
                 )}
               />

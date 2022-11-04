@@ -102,8 +102,14 @@ export default
    */
   render() {
     const idofuri = this.props.editingVocabulary.tmpIdofUri.list;
-    const currentId =
-        this.props.editingVocabulary.currentNode.idofuri;
+    const currentId = this.props.editingVocabulary.currentNode.idofuri;
+
+    let backColor = 'rgba(0, 0, 0, 0)';
+    if(this.props.disabled){
+      backColor = 'rgba(0, 0, 0, 0.09)';
+    }else if( 0 === idofuri.length){
+      backColor = 'lavenderblush';
+    }
 
     return (
       <div onKeyDown={(e)=>{e.keyCode===13&&e.preventDefault()}}>
@@ -141,11 +147,7 @@ export default
                   <TextField
                     {...params}
                     variant="standard"
-                    style={
-                        this.props.disabled?
-                        {backgroundColor: 'rgba(0, 0, 0, 0.09)'}:
-                        {backgroundColor: 'rgba(0, 0, 0, 0)'}
-                    }
+                    style={{backgroundColor: backColor}}
                   />
                 )}
               />

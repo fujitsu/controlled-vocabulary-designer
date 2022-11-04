@@ -321,6 +321,7 @@ export default
                 classes={this.props.classes}
                 editingVocabulary={this.props.editingVocabulary}
                 disabled={disabledTextField}
+                backcolor={undefined}
                 value={metaDescription}
                 change={(value) => this.changeMetaDescription(value) }
               />
