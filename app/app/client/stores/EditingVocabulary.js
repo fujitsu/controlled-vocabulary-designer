@@ -2761,13 +2761,16 @@ class EditingVocabulary {
         this.tmpIdofUri.list.push(addedData.idofuri);
 
         // add termdescription for each language
-        if(addedData.term_description !==''){
-          if(addedData.language === 'ja' && this.tmpTermDescription.values['ja'] === ''){
-            this.tmpTermDescription.values['ja'] = addedData.term_description;
-          }else if( this.tmpTermDescription.values['en'] === ''){
-            this.tmpTermDescription.values['en'] = addedData.term_description;
+        addedSynoId.forEach((id4)=>{
+          const dataObj = this.editingVocWithId.get(id4);
+          if(this.tmpTermDescription.values[dataObj.language] === '' &&
+            dataObj.term_description !== ''){
+              this.tmpTermDescription.values[dataObj.language] = dataObj.term_description;
           }
-        }
+        }, this);
+      }else{
+        this.tmpSynonym.idList[addedData.language].push(addedData.id);
+        this.tmpSynonym.list[addedData.language].push(addedData.term);
       }
     }
 
