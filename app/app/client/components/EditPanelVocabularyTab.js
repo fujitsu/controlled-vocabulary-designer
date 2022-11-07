@@ -233,7 +233,6 @@ export default
 
     return (
       <div id="vocabulary_edit_panel" className={this.props.classes.editPanelVoc}>
-        {/* <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}> */}
         <Grid container spacing={2}>
           <Box p={1} width="400px">
             <Grid container spacing={2}>
@@ -249,7 +248,6 @@ export default
             </Grid>
 
             <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
-              {/* <Box border={1} p={1} width="430px" height='400px' style={{ overflowX: 'hidden', overflowY: 'auto'}}> */}
                 <Grid container spacing={2}>
                   <Grid item xs={2}>
                   </Grid>
@@ -276,25 +274,9 @@ export default
                           />
                         </RadioGroup>
                       </FormControl>  
-                      
-                      <Button
-                        className={this.props.classes.buttonPrimary}
-                        style={{
-                          marginTop:'5px',
-                          marginLeft:'50px',
-                        }}
-                        variant="contained"
-                        color="primary"
-                        size={'small'}
-                        onClick={()=>this.updateVocabulary()}
-                        disabled={!( nodesStateChanged['ja'] || nodesStateChanged['en'])}
-                      >
-                        反映
-                      </Button>
                     </Box>
                   </Grid> 
                 </Grid>
-              {/* </Box> */}
             </Grid>
         
 
@@ -445,6 +427,25 @@ export default
                     fileId={fileId}
                   />
                 </Box>
+              </Grid>
+            </Grid>
+            
+            <Grid container justify="center">
+              <Grid item>
+                <Button
+                  className={this.props.classes.buttonPrimary}
+                  style={{
+                    marginTop:'5px',
+                    marginLeft:'50px',
+                  }}
+                  variant="contained"
+                  color="primary"
+                  size={'small'}
+                  onClick={()=>this.updateVocabulary()}
+                  disabled={!( nodesStateChanged['ja'] || nodesStateChanged['en'])}
+                >
+                  反映
+                </Button>
               </Grid>
             </Grid>
             <DialogUpdateVocabularyError
