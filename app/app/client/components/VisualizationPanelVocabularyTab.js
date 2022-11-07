@@ -447,6 +447,8 @@ export default
 
     this.cy.on('mousedown',  (event) => {
       if( event.target === this.cy ){
+        this.props.editingVocabulary.currentNodeClear();
+        this.props.editingVocabulary.tmpDataClear();
         this.props.editingVocabulary.deselectTermList();
       }
     });
