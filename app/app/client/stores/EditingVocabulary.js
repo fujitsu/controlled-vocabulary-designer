@@ -818,33 +818,33 @@ class EditingVocabulary {
     return [...broaderTermEdges, ...synonymEdges];
   };
 
-  /**
-   * Duplicate checking of synonym edge
-   * @param  {object}  edge - edge object
-   * @param  {string}  target - vocabulary
-   * @param  {string}  source - vocabulary
-   * @return {Boolean} - true: contain duplicates, false: not contain duplicates
-   */
-  isSynonymExist(edge, target, source) {
-    if ((edge.data.target == source)&&(edge.data.source == target)) return true;
-    if ((edge.data.target == target)&&(edge.data.source == source)) return true;
-    return false;
-  };
+  // /**
+  //  * Duplicate checking of synonym edge
+  //  * @param  {object}  edge - edge object
+  //  * @param  {string}  target - vocabulary
+  //  * @param  {string}  source - vocabulary
+  //  * @return {Boolean} - true: contain duplicates, false: not contain duplicates
+  //  */
+  // isSynonymExist(edge, target, source) {
+  //   if ((edge.data.target == source)&&(edge.data.source == target)) return true;
+  //   if ((edge.data.target == target)&&(edge.data.source == source)) return true;
+  //   return false;
+  // };
 
-  /**
-   * Get the ID associated with the term
-   * @param  {array} targetList - list of vocabulary data
-   * @param  {string} term - vocabulary
-   * @return {number} - id
-   */
-  getNodeIdByTerm(targetList, term) {
-    let id = '';
-    targetList.forEach((node) => {
-      if (node.data.term == term) id = node.data.id;
-    });
-    return id;
-    // return Number(id); // is this?????
-  }
+  // /**
+  //  * Get the ID associated with the term
+  //  * @param  {array} targetList - list of vocabulary data
+  //  * @param  {string} term - vocabulary
+  //  * @return {number} - id
+  //  */
+  // getNodeIdByTerm(targetList, term) {
+  //   let id = '';
+  //   targetList.forEach((node) => {
+  //     if (node.data.term == term) id = node.data.id;
+  //   });
+  //   return id;
+  //   // return Number(id); // is this?????
+  // }
 
   /**
    * Get the vocabulary associated with currentNode registered in the editing and reference vocabulary (De-duplication, sorted)
@@ -953,6 +953,7 @@ class EditingVocabulary {
     color1: '',
     color2: '',
     confirm: 0,
+    external_voc: false,
     //
     broader_term: '',
     synonymList: [],
@@ -978,6 +979,7 @@ class EditingVocabulary {
     color1: '',
     color2: '',
     confirm: 0,
+    external_voc: false,
     //
     broader_term: '',
     synonymList: [],
@@ -1007,6 +1009,7 @@ class EditingVocabulary {
       color1: '',
       color2: '',
       confirm: 0,
+      external_voc: false,
       //
       broader_term: '',
       synonymList: [],
@@ -1036,6 +1039,7 @@ class EditingVocabulary {
       color1: '',
       color2: '',
       confirm: 0,
+      external_voc: false,
       //
       broader_term: '',
       synonymList: [],
@@ -1516,6 +1520,7 @@ class EditingVocabulary {
     outdata.color1 = indata.color1;
     outdata.color2 = indata.color2;
     outdata.confirm = indata.confirm;
+    outdata.external_voc = indata.external_voc;
     return outdata;
   }
 
@@ -1838,6 +1843,7 @@ class EditingVocabulary {
       followObj.color1 = obj.color1; // color1 as is
       followObj.color2 = obj.color2; // color2 as is
       followObj.confirm = obj.confirm; // confirm as is
+      followObj.external_voc = obj.external_voc; // external_voc as is
       delObjList.push(followObj);
       // push it to history
       followingForHistory.push(this.makeVocabularyHistoryData(obj));
@@ -1893,6 +1899,7 @@ class EditingVocabulary {
       followObj.color1 = obj.color1; // color1 as is
       followObj.color2 = obj.color2; // color2 as is
       followObj.confirm = obj.confirm; // confirm as is
+      followObj.external_voc = obj.external_voc; // external_voc as is
       // add
       followSynGroupObjList.push(followObj);
       // push it to history
@@ -1957,6 +1964,7 @@ class EditingVocabulary {
         followObj.color1 = obj.color1; // color1 as is
         followObj.color2 = obj.color2; // color2 as is
         followObj.confirm = obj.confirm; // confirm as is
+        followObj.external_voc = obj.external_voc; // external_voc as is
         // add
         followSubGroupObjList.push(followObj);
         // push it to history
