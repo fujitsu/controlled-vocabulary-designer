@@ -1430,7 +1430,7 @@ def _check_duplicated_terms(df, file_type_num=0):
     # get rows with non-blank terms
     nonempty_term_df= df[df[term_colname].str.strip() != '']
     # detect duplicated terms
-    tmpdf = nonempty_term_df[nonempty_term_df.duplicated(subset=term_colname)][[term_colname, lang_colname]]
+    tmpdf = nonempty_term_df[nonempty_term_df.duplicated(subset=[term_colname, lang_colname])][[term_colname, lang_colname]]
     if tmpdf.size != 0:
         # there are duplicated terms
         tmpdf = tmpdf.drop_duplicates()
