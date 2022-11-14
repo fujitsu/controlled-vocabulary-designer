@@ -909,6 +909,9 @@ def _download_file_make(pl_simple, pl_simple_meta):
     delIdx = get_idx_blank_term_non_condition(nm)
     nm = nm.drop(index = [*delIdx])
 
+    # adjust created_time in a sysnonym group being same. 
+    nm = _fill_created_time_to_oldest_value(nm)
+
     g.bind(nm_meta["meta_prefix"][0], nm_meta["meta_uri"][0])
 
     # replace nan with ""
@@ -1093,6 +1096,9 @@ def _download_file_ev_serialize(pl_simple, p_format):
 
     # delete artificial 'terms' 
     df_org.loc[df_org['hidden'] ==1, 'term'] = ''
+
+    # adjust created_time in a sysnonym group being same. 
+    df_org = _fill_created_time_to_oldest_value(df_org)
 
     # delete word "[","]"
     df_org['synonym_candidate'] =\
@@ -1690,4 +1696,11 @@ def _fill_modifiled_time_val(df):
     df = df.drop("tmp", axis=1)
     return df
 
-
+def _fill_created_time_to_oldest_value(df):
+    # adjust created_time in a sysnonym group being same. the value is the oldest one
+    uri_colname = 'uri'
+    created_time_colname = 'created_time'
+    for group_uri, group_df in df.groupby(uri_colname):
+        minval = group_df[created_time_colname].min()
+        df.loc[df[uri_colname] == group_uri, [created_time_colname]] = minval
+    return df
