@@ -662,6 +662,8 @@ def _make_bulk_data_reference_vocabulary(df):
 def _make_bulk_data_editing_vocabulary(data_frame):
 
     payload = []
+    ext_vocs = set()
+    ext_vocs_position = {} # position
 
     for index, item in data_frame.iterrows():
         insert_data = {}
@@ -683,6 +685,12 @@ def _make_bulk_data_editing_vocabulary(data_frame):
         if '他語彙体系の同義語のURI' in item:
             insert_data['other_voc_syn_uri'] =\
                 item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+            ext_uri = item['他語彙体系の同義語のURI']
+            if ext_uri != '':
+                if ext_uri not in ext_vocs:
+                    # get the position of this term
+                    ext_vocs_position[ext_uri] = (item['x座標値'], item['y座標値'])  
+                ext_vocs.add(ext_uri) 
         if '用語の説明' in item:
             insert_data['term_description'] =\
                 item['用語の説明'] if pd.notnull(item['用語の説明']) else None
@@ -717,7 +725,29 @@ def _make_bulk_data_editing_vocabulary(data_frame):
         else:
             insert_data['confirm'] =\
                 item['確定済み用語'] if pd.notnull(item['確定済み用語']) else 0
+        insert_data['external_voc'] = False
+        payload.append(insert_data)
 
+    for ext_uri in ext_vocs:
+        insert_data = {}
+        insert_data['term'] = ext_uri
+        insert_data['preferred_label'] = ''
+        insert_data['language'] = 'ja'
+        insert_data['uri'] = ext_uri
+        insert_data['broader_uri'] = ''
+        insert_data['other_voc_syn_uri'] = ''
+        insert_data['term_description'] = ''
+        insert_data['created_time'] = ''
+        insert_data['modified_time'] = ''
+        insert_data['synonym_candidate'] = []
+        insert_data['broader_term_candidate'] = []
+        insert_data['position_x'] = str(float(ext_vocs_position[ext_uri][0]) + 1.0)
+        insert_data['position_y'] = ext_vocs_position[ext_uri][1] 
+        insert_data['color1'] = 'black'
+        insert_data['color2'] = 'green'
+        insert_data['hidden'] = False
+        insert_data['confirm'] = 0
+        insert_data['external_voc'] = True # external
         payload.append(insert_data)
 
     return payload
@@ -904,6 +934,9 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # JSON convert to pandas.DataFrame
     nm = pd.json_normalize(pl_simple)
     nm_meta = pd.json_normalize(pl_simple_meta)
+
+    # delete other vocabulary terms
+    nm = nm[~nm['external_voc']]
 
     # delete blank terms that do not satisfy blank term condition
     delIdx = get_idx_blank_term_non_condition(nm)
@@ -1094,6 +1127,9 @@ def _download_file_ev_serialize(pl_simple, p_format):
     delIdx = get_idx_blank_term_non_condition(df_org)
     df_org = df_org.drop(index = [*delIdx])
 
+    # delete other vocabulary terms
+    df_org = df_org[~df_org['external_voc']]
+
     # delete artificial 'terms' 
     df_org.loc[df_org['hidden'] ==1, 'term'] = ''
 
@@ -1118,7 +1154,7 @@ def _download_file_ev_serialize(pl_simple, p_format):
     df_org['broader_term_candidate'] =\
         df_org['broader_term_candidate'].str.replace('\'', '')
     # delete columns id hidden
-    df_org.drop(columns=['id', 'hidden'], inplace=True)
+    df_org.drop(columns=['id', 'hidden', 'external_voc'], inplace=True)
 
     # header change
     df_org = df_org.rename(columns={'term': '用語名',
