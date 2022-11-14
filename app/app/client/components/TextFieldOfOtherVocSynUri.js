@@ -41,8 +41,7 @@
                  tag: this.props.classes.autocompleteDisabledTag,
                }}
                id="text-field-of-other-vocab-syn-uri-input"
-               options={this.props.editingVocabulary.getCandidateTermList('')}
-               getOptionLabel={(option) => option}
+               options={[]}
                renderTags={(tagValue, getTagProps) => {
                  return tagValue.map((option, index) => (
                    <EditPanelChip
@@ -51,6 +50,7 @@
                      label={option}
                      chipid={'0'}
                      currentlist={tmpOtherVocSynUri}
+                     needblankcheck={'false'}
                    />
                  ));
                }}

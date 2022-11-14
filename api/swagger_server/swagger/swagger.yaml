@@ -74,7 +74,7 @@ paths:
             "2" means it was in the preferred_label check phase error.
             "3" means it was in the lang check phase error.
             "4" means it was in the uri check phase error.
-            "5" means it was in the broader_term check phase error.
+            "5" means it was in the broader_uri check phase error.
             "6" means it was in the other_voc_syn_uri check phase error.
             "7" means it was in the term_description check phase error.
             "8" means it was in the created_time check phase error.
@@ -146,12 +146,10 @@ paths:
             ex. Invalid file uploaded.
             Set the error file name for the message.
             phase -1, reason 0: Something is wrong.
-            phase 0, reason 0: Data Format Error.
-            phase 1, reason 0: for editing vocaburaly, some of a required columns are not found. Missing colmuns are in terms parameter.
-            phase 2, reason 0: for editing vocaburaly meta, some of a required columns are not found. Missing colmuns are in terms parameter.
-            phase 3, reason 0: for reference vocaburaly1, some of a required columns are not found. Missing colmuns are in terms parameter.
-            phase 4, reason 0: for reference vocaburaly2, some of a required columns are not found. Missing colmuns are in terms parameter.
-            phase 5, reason 0: for reference vocaburaly3, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 1, reason 0: for editing vocaburaly meta, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 1, reason 2: for reference vocaburaly1, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 1, reason 3: for reference vocaburaly2, some of a required columns are not found. Missing colmuns are in terms parameter.
+            phase 1, reason 4: for reference vocaburaly3, some of a required columns are not found. Missing colmuns are in terms parameter.
           content:
             application/json:
               schema:
@@ -408,7 +406,7 @@ components:
           type: string
         uri:
           type: string
-        broader_term:
+        broader_uri:
           type: string
         synonym:
           type: array
@@ -430,6 +428,8 @@ components:
           type: array
           items:
             type: string
+        hidden:
+          type: boolean
         postion_x:
           type: string
         postion_y:
@@ -444,7 +444,7 @@ components:
         preferred_label: os
         language: ja
         uri: http://test/0/os
-        broader_term: http://myVocab/3
+        broader_uri: http://myVocab/3
         synonym: オペレーティングシステム
         other_voc_syn_uri: http://otherVocab/16
         term_description: 用語の説明です
@@ -452,10 +452,11 @@ components:
         modified_time: "2021-04-08T16:07:59Z"
         synonym_candidate: 基本ソフト
         broader_term_candidate: プログラム
+        hidden: False
         postion_x: "100"
         postion_y: "100"
         color1: black
-        color2: black
+        color2: green
     EditingVocabularyMeta:
       type: object
       properties:
@@ -502,7 +503,7 @@ components:
           type: string
         uri:
           type: string
-        broader_term:
+        broader_uri:
           type: string
         other_voc_syn_uri:
           type: string
@@ -512,6 +513,8 @@ components:
           type: string
         modified_time:
           type: string
+        hidden:
+          type: boolean
         postion_x:
           type: string
         postion_y:
@@ -522,11 +525,12 @@ components:
         preferred_label: linux
         language: en
         uri: http://test/8/linux
-        broader_term: http://myVocab/3
+        broader_uri: http://myVocab/3
         other_voc_syn_uri: http://otherVocab/16
         term_description: 用語の説明です
         created_time: "2021-04-02T12:43:02Z"
         modified_time: "2021-04-08T16:07:59Z"
+        hidden: False
         postion_x: "100"
         postion_y: "100"
     GetAllSuccessResponse:
@@ -551,7 +555,7 @@ components:
           preferred_label: os
           language: ja
           uri: http://test/0/os
-          broader_term: http://myVocab/3
+          broader_uri: http://myVocab/3
           synonym: オペレーティングシステム
           other_voc_syn_uri: http://otherVocab/16
           term_description: 用語の説明です
@@ -559,10 +563,11 @@ components:
           modified_time: "2021-04-08T16:07:59Z"
           synonym_candidate: 基本ソフト
           broader_term_candidate: プログラム
+          hidden: False
           postion_x: "100"
           postion_y: "100"
           color1: black
-          color2: black
+          color2: green
         EditingVocabularyMeta:
         - id: 1
           meta_name: 名称
@@ -579,11 +584,12 @@ components:
           preferred_label: linux
           language: en
           uri: http://test/8/linux
-          broader_term: http://myVocab/3
+          broader_uri: http://myVocab/3
           other_voc_syn_uri: http://otherVocab/16
           term_description: 用語の説明です
           created_time: "2021-04-02T12:43:02Z"
           modified_time: "2021-04-08T16:07:59Z"
+          hidden: False
           postion_x: "100"
           postion_y: "100"
     SuccessResponse:

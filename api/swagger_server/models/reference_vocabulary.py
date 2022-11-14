@@ -17,7 +17,7 @@ class ReferenceVocabulary(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, uri: str=None, broader_term: str=None):  # noqa: E501
+    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, uri: str=None, broader_uri: str=None):  # noqa: E501
         """ReferenceVocabulary - a model defined in Swagger
 
         :param id: The id of this ReferenceVocabulary.  # noqa: E501
@@ -28,15 +28,15 @@ class ReferenceVocabulary(Model):
         :type preferred_label: str
         :param uri: The uri of this ReferenceVocabulary.  # noqa: E501
         :type uri: str
-        :param broader_term: The broader_term of this ReferenceVocabulary.  # noqa: E501
-        :type broader_term: str
+        :param broader_uri: The broader_uri of this ReferenceVocabulary.  # noqa: E501
+        :type broader_uri: str
         """
         self.swagger_types = {
             'id': int,
             'term': str,
             'preferred_label': str,
             'uri': str,
-            'broader_term': str
+            'broader_uri': str
         }
 
         self.attribute_map = {
@@ -44,13 +44,13 @@ class ReferenceVocabulary(Model):
             'term': 'term',
             'preferred_label': 'preferred_label',
             'uri': 'uri',
-            'broader_term': 'broader_term'
+            'broader_uri': 'broader_uri'
         }
         self._id = id
         self._term = term
         self._preferred_label = preferred_label
         self._uri = uri
-        self._broader_term = broader_term
+        self._broader_uri = broader_uri
 
     @classmethod
     def from_dict(cls, dikt) -> 'ReferenceVocabulary':
@@ -148,22 +148,22 @@ class ReferenceVocabulary(Model):
         self._uri = uri
 
     @property
-    def broader_term(self) -> str:
-        """Gets the broader_term of this ReferenceVocabulary.
+    def broader_uri(self) -> str:
+        """Gets the broader_uri of this ReferenceVocabulary.
 
 
-        :return: The broader_term of this ReferenceVocabulary.
+        :return: The broader_uri of this ReferenceVocabulary.
         :rtype: str
         """
-        return self._broader_term
+        return self._broader_uri
 
-    @broader_term.setter
-    def broader_term(self, broader_term: str):
-        """Sets the broader_term of this ReferenceVocabulary.
+    @broader_uri.setter
+    def broader_uri(self, broader_uri: str):
+        """Sets the broader_uri of this ReferenceVocabulary.
 
 
-        :param broader_term: The broader_term of this ReferenceVocabulary.
-        :type broader_term: str
+        :param broader_uri: The broader_uri of this ReferenceVocabulary.
+        :type broader_uri: str
         """
 
-        self._broader_term = broader_term
+        self._broader_uri = broader_uri

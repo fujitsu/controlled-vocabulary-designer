@@ -117,7 +117,7 @@ def vector(txt_preprocessed_file, domain_words_file, domain_text_preprocessed_fi
 
     v_word2vec_normalized = model_normalized.wv[vocab]
 
-    tsne = TSNE(metric="euclidean", n_jobs=multiprocessing.cpu_count(), n_components=2)
+    tsne = TSNE(metric="cosine", n_jobs=multiprocessing.cpu_count(), n_components=2, perplexity=5)
     v_tsne = tsne.fit_transform(v_word2vec_normalized)
 
     # 2D vector dictionary {keys: value} = {term: [x-coordinate, y-coordinate]}

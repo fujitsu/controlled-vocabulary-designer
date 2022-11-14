@@ -197,8 +197,8 @@ def reference_ttl(rdf_file):
         preflabel_en = ""
         altlabel_ja = []
         altlabel_en = []
-        broader_term_ja = ""
-        broader_term_en = ""
+        broader_uri_ja = ""
+        broader_uri_en = ""
         broader_uri = ""
         exactMatch = ""
         description_ja = ""
@@ -224,9 +224,9 @@ def reference_ttl(rdf_file):
             for sub2, pred2, obj2 in g.triples((obj1, SKOS.prefLabel, None)):
                 lang = str(repr(obj2))[-4:-2]
                 if lang == "ja":
-                    broader_term_ja = str(obj2)
+                    broader_uri_ja = str(obj2)
                 if lang == "en":
-                    broader_term_en = str(obj2)
+                    broader_uri_en = str(obj2)
             broader_uri = str(obj1)
         
         # skos:exactMatch
@@ -248,10 +248,10 @@ def reference_ttl(rdf_file):
         term_en.append(preflabel_en)
         
         for idx in range(0, len_concept_ja_row):
-            sansyogoi_data.append([term_ja[idx], preflabel_ja, "ja", str(u), broader_term_ja, broader_uri, exactMatch, description_ja])
+            sansyogoi_data.append([term_ja[idx], preflabel_ja, "ja", str(u), broader_uri_ja, broader_uri, exactMatch, description_ja])
         
         for idx in range(0, len_concept_en_row):
-            sansyogoi_data.append([term_en[idx], preflabel_en, "en", str(u), broader_term_en, broader_uri, exactMatch, description_en])
+            sansyogoi_data.append([term_en[idx], preflabel_en, "en", str(u), broader_uri_en, broader_uri, exactMatch, description_en])
         
     return sansyogoi_data
 

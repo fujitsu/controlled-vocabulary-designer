@@ -158,6 +158,28 @@ export default class DialogFileSelector extends React.Component {
   handleErrCancel(){   
     this.setState({errOpen: false});
   }
+
+  /**
+   * read all data from DB
+   */
+  async getDatasFromDB(){
+    
+    if (undefined != this.state.files[4].file.name) {
+      await this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
+    }
+    if (undefined != this.state.files[1].file.name) {
+      await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('1');
+    }
+    if (undefined != this.state.files[2].file.name) {
+      await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('2');
+    }
+    if (undefined != this.state.files[3].file.name) {
+      await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('3');
+    }
+    if (undefined != this.state.files[0].file.name) {
+      await this.props.editingVocabulary.getEditingVocabularyDataFromDB();
+    }
+  }
   
   /**
    * File upload run
@@ -193,21 +215,7 @@ export default class DialogFileSelector extends React.Component {
           console.log('success response.');
           this.saveFileInfoToLocalstorage();
           this.uploadingEnd();
-          if (undefined != this.state.files[0].file.name) {
-            this.props.editingVocabulary.getEditingVocabularyDataFromDB();
-          }
-          if (undefined != this.state.files[1].file.name) {
-            this.props.editingVocabulary.getReferenceVocabularyDataFromDB('1');
-          }
-          if (undefined != this.state.files[2].file.name) {
-            this.props.editingVocabulary.getReferenceVocabularyDataFromDB('2');
-          }
-          if (undefined != this.state.files[3].file.name) {
-            this.props.editingVocabulary.getReferenceVocabularyDataFromDB('3');
-          }
-          if (undefined != this.state.files[4].file.name) {
-            this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
-          }
+          this.getDatasFromDB();
           this.handleClose();
         }).catch((err) => {
           console.log('error callback.');
@@ -355,22 +363,22 @@ export default class DialogFileSelector extends React.Component {
                       '」が無いためファイルが読み込めません。「'+
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」を追加して再読み込みしてください。' ;
-                  } else if ( (errResponse.data.phase == 2) &&
-                      (errResponse.data.reason == 0)) {
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 2)) {
                     errMsg = '参照用語彙1の、列「' +
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」が無いためファイルが読み込めません。「'+
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」を追加して再読み込みしてください。' ;
-                  } else if ( (errResponse.data.phase == 3) &&
-                      (errResponse.data.reason == 0)) {
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 3)) {
                     errMsg = '参照用語彙2の、列「' +
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」が無いためファイルが読み込めません。「'+
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」を追加して再読み込みしてください。' ;
-                  } else if ( (errResponse.data.phase == 4) &&
-                      (errResponse.data.reason == 0)) {
+                  } else if ( (errResponse.data.phase == 1) &&
+                      (errResponse.data.reason == 4)) {
                     errMsg = '参照用語彙3の、列「' +
                       this.getErrorTerms(errResponse.data.terms, '」,「') +
                       '」が無いためファイルが読み込めません。「'+

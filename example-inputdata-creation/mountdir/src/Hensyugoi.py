@@ -73,7 +73,7 @@ def hensyugoi(tuning, hensyugoi_file, vec, syn, hyper, filter_words, domain_word
             created = domain_words_csv["作成日"][index] if flag_created else ""
             modified = domain_words_csv["最終更新日"][index] if flag_modified else ""
             color1 = domain_words_csv["色1"][index] if flag_color1 else "black"
-            color2 = domain_words_csv["色2"][index] if flag_color2 else "black"
+            color2 = domain_words_csv["色2"][index] if flag_color2 else "green"
             confirmed = domain_words_csv["確定済み用語"][index] if flag_confirmed else 0
             word_normalized = unicodedata.normalize("NFKC", word).lower()
             if(word == ""):

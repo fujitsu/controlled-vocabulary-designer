@@ -89,22 +89,28 @@ class EditingVocabularyMeta {
     dbData.forEach( (data) => {
       
       // If the parameter is string (Set the empty string character)
-      if (!data.meta_name) data.meta_name = '';
-      if (!data.meta_enname) data.meta_enname = '';
-      if (!data.meta_version) data.meta_version = '';
-      if (!data.meta_prefix) data.meta_prefix = '';
-      if (!data.meta_uri) data.meta_uri = '';
-      if (!data.meta_description) data.meta_description = '';
-      if (!data.meta_endescription) data.meta_endescription = '';
-      if (!data.meta_author) data.meta_author = '';
+      // if (!data.meta_name) data.meta_name = '';
+      // if (!data.meta_enname) data.meta_enname = '';
+      // if (!data.meta_version) data.meta_version = '';
+      // if (!data.meta_prefix) data.meta_prefix = '';
+      // if (!data.meta_uri) data.meta_uri = '';
+      // if (!data.meta_description) data.meta_description = '';
+      // if (!data.meta_endescription) data.meta_endescription = '';
+      // if (!data.meta_author) data.meta_author = '';
+      if (undefined == data.meta_name) console.assert(false, "data.meta_name");
+      if (undefined == data.meta_enname) console.assert(false, "data.meta_enname");
+      if (undefined == data.meta_version) console.assert(false, "data.meta_version");
+      if (undefined == data.meta_prefix) console.assert(false, "data.meta_prefix");
+      if (undefined == data.meta_uri) console.assert(false, "data.meta_uri");
+      if (undefined == data.meta_description) console.assert(false, "data.meta_description");
+      if (undefined == data.meta_endescription) console.assert(false, "data.meta_endescription");
+      if (undefined == data.meta_author) console.assert(false, "data.meta_author");
 
       editingVocabularyMeta.push(data);
     });
-
     this.editingVocabularyMeta = editingVocabularyMeta[ editingVocabularyMeta.length -1];
     this.setCurrentNode( this.editingVocabularyMeta );
   }
-
 
   @observable currentNode = {
     id: null,
@@ -219,7 +225,7 @@ class EditingVocabularyMeta {
     this.updateRequest([updateCurrent], updateCurrent);
 
     // all uri over write 
-    this.updateVocabularysUriFromMeta( datas );
+    this.updateVocabulariesUriFromMeta( datas );
 
     return '';
   }
@@ -227,23 +233,34 @@ class EditingVocabularyMeta {
 
   /**
    * Updating uri values etc. to DB 
-   * @param  {object} datas - react datas (EditingVocabulary.editingVocabulary) 
+   * @param  {object} datas - react data (EditingVocabulary.editingVocabulary) 
    */
-  @action updateVocabularysUriFromMeta( datas=null ) {
+  @action updateVocabulariesUriFromMeta( datas=null ) {
     if( !datas) return;
     if( this.currentNode.meta_uri == this.editingVocabularyMeta.meta_uri) return;
     
     let updateTermList=[];
-    const metaUri = this.currentNode.meta_uri.replace(new RegExp('\/$'), '');
+    const prevMetaUri = this.editingVocabularyMeta.meta_uri; // note: properties of currentNode are changed according to input text. This behavior is different from EditingVocabulary.js
+    let nextMetaUri = this.currentNode.meta_uri;
+    if(!nextMetaUri.endsWith('/')){
+      nextMetaUri = nextMetaUri + '/'
+    }
+    // this.currentNode.meta_uri <- input uri value
+    // const metaUri = this.currentNode.meta_uri.replace(new RegExp('\/$'), '');
     datas.forEach((data) =>{
-      const uri = metaUri + '/' + data.uri.substring(data.uri.lastIndexOf('/')+1);
-      
+      const uri = data.uri.replace(prevMetaUri, nextMetaUri);
+      let broader_uri = '';
+      if(data.broader_uri !=''){
+        broader_uri = data.broader_uri.replace(prevMetaUri, nextMetaUri);
+      }
+
       const dbData = {
         term: data.term,
         preferred_label: data.preferred_label,
         language:data.language,
         uri: uri,
         broader_term: data.broader_term,
+        broader_uri: broader_uri,
         other_voc_syn_uri: data.other_voc_syn_uri,
         term_description: data.term_description,
         created_time: data.created_time,

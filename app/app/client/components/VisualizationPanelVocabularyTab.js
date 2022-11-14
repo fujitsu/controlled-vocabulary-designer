@@ -22,7 +22,6 @@ import {blue} from '@material-ui/core/colors';
 import {deepPurple} from '@material-ui/core/colors';
 import {purple} from '@material-ui/core/colors';
 
-import Slider from '@material-ui/core/Slider';
 import Grid from '@material-ui/core/Grid';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
@@ -30,8 +29,6 @@ import Popover from "@material-ui/core/Popover";
 import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import CloseIcon from '@material-ui/icons/Close';
-import AddBoxOutlinedIcon from "@material-ui/icons/AddBoxOutlined";
-import IndeterminateCheckBoxOutlinedIcon from "@material-ui/icons/IndeterminateCheckBoxOutlined";
 
 import {observer} from 'mobx-react';
 
@@ -60,20 +57,15 @@ export default
     super();
     this.zoomTimeoutId = -1;
     this.updateElesTimeoutId = -1;
-    this.isReset = true;
     this.fitCenterPan = true;
     this.situationArr = [];
     this.message = '';
     this.source = null;
     this.target = null;
-    this.sliderStep = 20,
-    this.initSlider = 0;      // Initialize zoom (0% zoom value)
-    this.sliderPercent = 0;   // 1% of zoom range
+    this.selectedIdStr = []; ///////
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
-      anchorNewEl: false,         // Edit nNew Term Panel togle
-      anchorElC: false,           // Confirm Color Setting popover togle
       anchorElColor: false,       // border color setting popover togle
       transformTogle: false,      // transform coordinate togle
       dlgTmpDelOpen: false,       // dialog for tmpData Delete confirm
@@ -85,7 +77,6 @@ export default
       dlgErrOpen: false,          // dialog for Error
       popBorderColorOpen: false,  // popover for border color setting
       reason: null,               // Reason for Error 
-      sliderValue: 0,             // zoomSlider value
     };
 
     this.ehTop = null;      // edgehandles top   object
@@ -102,7 +93,6 @@ export default
     this.setUpListeners();
     this.updateElesClass();
     this.initEdgeHandles();
-    this.setCyMinMaxZoom();
   }
 
   /**
@@ -121,52 +111,25 @@ export default
   }
 
   /**
-   * Max min scale
+   * Set initial values for zoom and pan
    */
-   setCyMinMaxZoom() {
+  async setIniPanZoom(){
     const cy = this.cy;
-    cy.minZoom(0.0025);
-    cy.maxZoom(1.2);
-    const cyw = cy.width();
-    const cyh = cy.height();
-    cy.viewport({zoom: 0.005, pan: {x: cyw/2, y: cyh/2}});
-  }
 
-  /**
-   * zoomSlider settings
-   */
-  setIniZoom(){
-    const cy = this.cy;
-    const currentZoom = cy.zoom();
-
-    // maximum magnification
-    let maxZoom = cy.maxZoom();
-    const maxMagnf = 5;
-    maxZoom = (currentZoom*maxMagnf>maxZoom?maxZoom:currentZoom*maxMagnf);
-
-    // 1% of zoom range
-    this.sliderPercent = (maxZoom - currentZoom) / 100;
-
-    // Initialize zoom (0% zoom value)
-    this.initSlider = currentZoom;
-
-    cy.minZoom(currentZoom / 2);
-    cy.maxZoom(maxZoom);
+    await cy.fit(cy.nodes ,50);
+    let currentZoom = await cy.zoom();
+    currentZoom =  await currentZoom>2.0?2.0:currentZoom;
+    await cy.zoom(currentZoom);
+    await cy.center();
+    const iniPan = await cy.pan();
 
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if(undefined == this.situationArr[ fileId]){
       this.situationArr[ fileId] = {
-        pan: undefined, 
-        zoom: undefined,
+        pan: iniPan, 
+        zoom: currentZoom,
       }
     }
-    if(undefined == this.situationArr[ fileId].sliderPercent && this.sliderPercent != 0){
-      this.situationArr[ fileId].sliderPercent = this.sliderPercent ? this.sliderPercent : 0 ;
-    }
-    if(undefined == this.situationArr[ fileId].initSlider && this.initSlider != 0){
-      this.situationArr[ fileId].initSlider = this.initSlider ? this.initSlider : 0;
-    }
-    this.setState({sliderValue:0});
   }
 
   /**
@@ -188,28 +151,9 @@ export default
       const layout = cy.layout({name: 'preset'});
       layout.run();
 
-      // Update layout
-      const currentZoom = cy.zoom();
-      const currentPan = cy.pan();
-
-      if (this.isReset) {
-        this.isReset = false;
-        // At the first display, not the entire display, narrow down to a certain magnification.
-        cy.zoom(0.005);
-      } else {
-        this.fitByPanZoom(currentPan, currentZoom);
-      }
-
       this.onPanZoom();
 
     }, 300);
-  }
-
-  /**
-   * Pan, zoom reset notification by updating editing lexical data
-   */
-  doReset() {
-    this.isReset = true;
   }
 
   /**
@@ -223,6 +167,7 @@ export default
         const confirmColor = this.props.editingVocabulary.confirmColor;
         let bgStyle;
         switch (confirmColor) {
+          case 'white': bgStyle = 'bgWhite'; break;
           case 'brown': bgStyle = 'bgBrown'; break;
           case 'red': bgStyle = 'bgRed'; break;
           case 'orange': bgStyle = 'bgOrange'; break;
@@ -233,7 +178,7 @@ export default
           case 'blue': bgStyle = 'bgBlue'; break;
           case 'deepPurple': bgStyle = 'bgDeepPurple'; break;
           case 'purple': bgStyle = 'bgPurple'; break;
-          default: bgStyle = 'bgBlack'; break;
+          default: bgStyle = 'bgGreen'; break;
         }
 
         if (bgStyle) {
@@ -241,7 +186,7 @@ export default
         }
       }
     } else {
-      eles.addClass('bgBlack');
+      eles.addClass('bgWhite');
     }
   }
 
@@ -252,18 +197,15 @@ export default
   setPanZoom() {
     const cy = this.cy;
     
+    // provisional processing
+    cy.minZoom(0.002);
+    cy.maxZoom(1.2);
+
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if( undefined == this.situationArr[ fileId]){
-      cy.fit(cy.nodes,50 );
-      this.setIniZoom();
+      this.setIniPanZoom();
     }else{
-      const initPan = {x: cy.width()/2, y: cy.height()/2};
-
-      this.sliderPercent = this.situationArr[ fileId].sliderPercent ? this.situationArr[ fileId].sliderPercent : 0 ;
-      this.initSlider    = this.situationArr[ fileId].initSlider ? this.situationArr[ fileId].initSlider : 0 ;
-
-      cy.pan( this.situationArr[ fileId].pan || initPan);
-      cy.zoom( this.situationArr[ fileId].zoom || 0.005);
+      cy.viewport({zoom: this.situationArr[ fileId].zoom, pan: this.situationArr[ fileId].pan});
     }
   }
 
@@ -327,22 +269,22 @@ export default
 
       // term point size adjustment
       nodesInView.style({
-        "width": Math.max(5.0/zoom, 5.0),
-        "height": Math.max(5.0/zoom, 5.0),
+        "width": 5.0/zoom,
+        "height": 5.0/zoom,
       });
 
       // edges line width adjustment
       const edges = cy.edges();
       edges.style({
-        "width": Math.max(3.0/zoom, 3.0),
+        "width": 5.0/zoom,
       });
       
       const nodeInViewStyle = {        
         'width': 'label',
-        'height': 'label',
-        'font-size': Math.min(4800, Math.max(16/zoom, 16)),
-        'border-width': Math.max(2.0/zoom, 2.0),
-        'padding': Math.max(10.0/zoom, 10.0),
+        'height': 20.0/zoom,
+        'font-size': 16/zoom,
+        'border-width': 2.0/zoom,
+        'padding': 10.0/zoom,
       };
       nodesInViewLimit100.forEach((node, index)=>{
         const eles = cy.$id(node.data().id);
@@ -375,49 +317,6 @@ export default
 
         // Setting of confirmation information
         this.setConfirmStyle(selectedele, selectedele.data().confirm);
-
-        // Newly added terms may not appear in the view because their coordinate values remain at their initial values.
-        // In that case, it can be forced into the view by showText.
-        if (currentNode.broader_term) {
-          const brdrTrmNode = cy.nodes().filter((n) => {
-            return n.data().term == currentNode.broader_term;
-          });
-          if (brdrTrmNode.length > 0) {
-            if (!brdrTrmNode.hasClass('showText')) {
-              brdrTrmNode.addClass('showText');
-              const eles = cy.$id(brdrTrmNode.data().id);
-              // Setting of color information
-              if (brdrTrmNode.data().vocabularyColor) {
-                eles.addClass(brdrTrmNode.data().vocabularyColor);
-              }
-
-              // Setting of confirmation information
-              this.setConfirmStyle(eles, brdrTrmNode.data().confirm);
-            }
-          }
-        }
-        if (currentNode.preferred_label) {
-          const synonymNode = cy.nodes().filter((n) => {
-            return n.data().preferred_label == currentNode.preferred_label &&
-                   n.data().term != currentNode.term;
-          });
-          if (synonymNode.length > 0) {
-            synonymNode.forEach((node) => {
-              if (!node.hasClass('showText')) {
-                node.addClass('showText');
-
-                const eles = cy.$id(node.data().id);
-                // Setting of color information
-                if (node.data().vocabularyColor) {
-                  eles.addClass(node.data().vocabularyColor);
-                }
-
-                // Setting of confirmation information
-                this.setConfirmStyle(eles, node.data().confirm);
-              }
-            });
-          }
-        }
       }
 
       // Hide inactive handles 
@@ -429,13 +328,13 @@ export default
 
     const cy = this.cy;    
     const zoom = cy.zoom();
-    const bdrWidth = Math.max((isAddTerm?4.0:2.0)/zoom, (isAddTerm?4.0:2.0));
+    const bdrWidth = (isAddTerm?4.0:2.0)/zoom;
     const nodeSelectedStyle = {        
       'width': 'label',
-      'height': 'label',
-      'font-size': Math.min(4800, Math.max(16/zoom, 16)),
+      'height': 20.0/zoom,
       'border-width': bdrWidth,
-      'padding': Math.max(10.0/zoom, 10.0),
+      'font-size': 16/zoom,
+      'padding': 10.0/zoom,
       'shape': 'rectangle',      
     };
     const eles = cy.$id(id);
@@ -481,7 +380,7 @@ export default
   /**
    * init EdgeHandles
    */
-   initEdgeHandles(){
+  initEdgeHandles(){
     if( this.props.editingVocabulary.selectedFile.id !== 0){
       return;
     }    
@@ -526,8 +425,32 @@ export default
    * Event registration
    */
   setUpListeners() {
-    this.cy.on('dragfreeon', 'node', (event) => {      
-      this.updateVocabularys( true);
+    this.cy.on('dragfreeon', 'node', (event) => {
+      const idSet = new Set();
+      if(event.target.id()){
+        idSet.add(Number(event.target.id()));
+      }
+      this.selectedIdStr.forEach((id1)=>{
+        idSet.add(Number(id1));
+      }, this);
+      this.updateVocabularies([...idSet], true);
+    });
+    
+    this.cy.on('select', 'node', (event) => {
+      // add selected list
+      this.selectedIdStr.push(event.target.id());
+    });
+    this.cy.on('unselect', 'node', (event) => {
+      // remove from selected list
+      this.selectedIdStr = this.selectedIdStr.filter((id)=>{return id !== event.target.id()});
+    });
+
+    this.cy.on('mousedown',  (event) => {
+      if( event.target === this.cy ){
+        this.props.editingVocabulary.currentNodeClear();
+        this.props.editingVocabulary.tmpDataClear();
+        this.props.editingVocabulary.deselectTermList();
+      }
     });
 
     this.cy.on('click', 'node', (event) => {
@@ -537,8 +460,9 @@ export default
         return;
       }
       const target = event.target.data();
-      const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
-      console.log('--[ event - data(cy) - data(react) ]-- '+target.term,event, target, find)
+      const findObj = this.props.editingVocabulary.editingVocWithId.get(Number(target.id));
+      console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, findObj);
+
       // other vocabulary node
       if(target.term == target.other_voc_syn_uri){ 
         return;
@@ -550,24 +474,24 @@ export default
       if( !withKey){
         if( this.props.editingVocabulary.selectedTermList.length > 1){
           this.props.editingVocabulary.deselectTermList();
-          isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id, null, true);
+          isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id), true);
         }else{
           this.props.editingVocabulary.deselectTermList();
           if(this.props.editingVocabulary.currentNode.id !=  target.id){
-            isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+            isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
           }
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }else{
-        isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+        isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
         if(isAddTerm && this.props.editingVocabulary.selectedTermList.length == 1){
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length > 0){
           const firstSelectedTerm = this.props.editingVocabulary.selectedTermList.slice(0,1)[0];
-          this.props.editingVocabulary.setCurrentNodeByTerm(firstSelectedTerm.term, firstSelectedTerm.id, null, true);
+          this.props.editingVocabulary.setCurrentNodeById(Number(firstSelectedTerm.id), true);
         }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length == 0){
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }
       this.fitCenterPan = true;
@@ -602,8 +526,6 @@ export default
       const zoom = Number( this.cy.zoom());
       this.situationArr[ fileId].zoom = zoom;
       this.onPanZoom();
-      this.setState({sliderValue : ((zoom - this.initSlider) / this.sliderPercent)});
-
       event.preventDefault();
     });
   }
@@ -629,13 +551,8 @@ export default
 
       if( this.hitHandle == 1){
         let _disableButton = this.state.handleDisableButton;
-        if( sourceNode.data().language != targetNode.data().language){
-          this.message = '「'+sourceNode.data().term +'」と「'+targetNode.data().term +'」は、言語が異なるので上位語に設定できません。\n上位語には同じ言語の用語を設定してください。';
-          _disableButton = 1;// OK only buttons
-        }else{
-          this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します。\nよろしいですか？';
-          _disableButton = 0;// OK & CANCEL buttons
-        }
+        this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します。\nよろしいですか？';
+        _disableButton = 0;// OK & CANCEL buttons
         this.setState({handleDisableButton: _disableButton,dlgBroaderOpen: true});   
       } else{        
         this.setState({dlgSynonymOpen: true});   
@@ -669,7 +586,7 @@ export default
         if(++cnt > 5) clearInterval(intervalId);
         const cy = this.cy;
         let ghostedges = cy.elements('.eh-ghost-edge');
-        const val = Math.max(5.0/cy.zoom(), 5.0);
+        const val = 5.0/cy.zoom();
         if( ghostedges.length > 0){
           
           if( this.ehTop.handleNode!== undefined && this.ehTop.handleNode.active()){
@@ -687,7 +604,7 @@ export default
             ghostedges.style({
               'width': val,
               'line-color': 'blue',
-              'line-style': 'dotted',
+              'line-style': 'solid',
               'target-arrow-shape': 'none',
               'target-arrow-color': '',
               'curve-style': 'straight',
@@ -711,7 +628,7 @@ export default
       const cy = this.cy;
       
       let handles = cy.elements('.eh-handle');
-      const val = Math.max(10.0/cy.zoom(), 10.0);
+      const val = 15.0/cy.zoom();
         
       if( handles.length > 0){
         handles.style({
@@ -760,7 +677,7 @@ export default
   /**
    * Check if edge handles display 
    */
-   dispCheckEdgeHandle(){
+  dispCheckEdgeHandle(){
 
     if( this.props.editingVocabulary.selectedFile.id === 0){  
             
@@ -791,16 +708,15 @@ export default
   setBroaderTerm(){
 
     const source = this.source;
-    
-    const nextBroaderTerm = this.target.term;
 
     this.props.editingVocabulary.deselectTermList();
-    this.props.editingVocabulary.setSelectedTermList(source.term);
-    this.props.editingVocabulary.setCurrentNodeByTerm(source.term, source.id, null, true);
+    this.props.editingVocabulary.setSelectedTermList(source.term, source.language);
+    this.props.editingVocabulary.setCurrentNodeById(Number(source.id), true);
+    const targetObj = this.props.editingVocabulary.editingVocWithId.get(Number(this.target.id));
 
-    this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
+    this.props.editingVocabulary.updateBroaderTerm( [ targetObj.term ], targetObj.language, targetObj.uri);
 
-    const ret = this.props.editingVocabulary.updateVocabulary();
+    const ret = this.props.editingVocabulary.updateVocabulary(null, 111);
     if (ret !== null) {
       this.setState({dlgErrOpen: true, reason : ret});  
     }
@@ -857,27 +773,6 @@ export default
 
 
   /**
-   * File selection event
-   * @param  {object} event - information of event
-   */
-  handleChange(event) {
-    this.props.editingVocabulary.selectFile(event.target.value);
-    if (event.target.value == 0) {
-      this.props.editingVocabulary.setSelected(0, true);
-      this.props.editingVocabulary.setSelected(1, false);
-    } else {
-      this.props.editingVocabulary.setSelected(0, true);
-      this.props.editingVocabulary.setSelected(1, true);
-    }
-
-    this.cy.one('render', (event) => {
-      setTimeout( () => {
-        this.onPanZoom();
-      }, 100);
-    });
-  };
-
-  /**
    * Sytle initialization for node
    */
   initStyleForAllNodes() {
@@ -899,7 +794,7 @@ export default
             'blue',
             'deepPurple',
             'purple',
-            'bgBlack',
+            'bgWhite',
             'bgBrown',
             'bgRed',
             'bgOrange',
@@ -944,7 +839,7 @@ export default
             'blue',
             'deepPurple',
             'purple',
-            'bgBlack',
+            'bgWhite',
             'bgBrown',
             'bgRed',
             'bgOrange',
@@ -1012,9 +907,10 @@ export default
   
     const saveRoots = await this.getSaveRoot();
 
-    if( !saveRoots || 1 > saveRoots.length)
+    if( !saveRoots || 1 > saveRoots.length){
       return;
-    
+    }
+
     // [ dagre ] layout options
     const defaults={      
       name: "dagre",
@@ -1048,6 +944,14 @@ export default
       }),
     }
 
+    // get all ids
+    const idList = [];//number
+    cy.nodes().forEach((node1)=>{
+      if(undefined !== node1.data().term){ // there may exist several unknown nodes
+        idList.push(Number(node1.id()));
+      }
+    }, this);
+
     // Extend the minimum length of edge 
     // const zoom = cy.zoom();
     // if( zoom > 0.007){
@@ -1057,24 +961,29 @@ export default
     
     await cy.elements().layout( defaults).run();
     
-    await this.updateVocabularys();
+    await this.updateVocabularies(idList);
     
     await cy.nodes().unlock();
+
+    await this.fitToVisualArea();
   }
   
   /**
    * Update coordinate transform
+   * @param {List} idList ids (list of numbers) to be update
+   * @param {bool} isDrag is this operation occur from drag of terms
    */
-  async updateVocabularys( isDrag=false) {
+  async updateVocabularies(idList,  isDrag=false) {
     
     const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
+    const saveCurrentNodeId = await this.props.editingVocabulary.currentNode.id;
     
     this.fitCenterPan = false;
-    const ret = await this.props.editingVocabulary.updateVocabularys( this.cy.nodes(), isDrag);
+    const ret = await this.props.editingVocabulary.updateVocabularies( this.cy, idList, isDrag);
     this.fitCenterPan = true;
 
     if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
-      await this.props.editingVocabulary.setCurrentNodeByTerm( saveCurrentNodeTerm);
+      await this.props.editingVocabulary.setCurrentNodeById(saveCurrentNodeId);
     }
   }
   
@@ -1091,7 +1000,8 @@ export default
       }
       // currentNode clear
       await this.props.editingVocabulary.deselectTermList();       
-      await this.props.editingVocabulary.setCurrentNodeByTerm('');
+      await this.props.editingVocabulary.currentNodeClear();
+      await this.props.editingVocabulary.tmpDataClear();
   }
   /**
    * When setting a synonym, select a Preferred term and then close the dialog 
@@ -1204,7 +1114,8 @@ export default
    */
   handleEditPopoverClose(saved=false){
 
-    if( !saved && this.props.editingVocabulary.isCurrentNodeChanged ){
+    const ret = this.props.editingVocabulary.getNodesStateChanged;
+    if( !saved && ( ret['ja'] || ret['en'] ) ){
       this.message='編集中のデータを破棄して用語選択を実行します。\n\nよろしいですか？';
       this.setState({ dlgTmpDelOpen: true});
     }else{
@@ -1231,82 +1142,6 @@ export default
 
 
   /**
-   * Confirm Color popover open
-   */
-  handleConfirmColorPopoverOpen(e){
-    // e.stopPropagation();
-    // e.preventDefault();
-    this.setState({anchorElC: this.state.anchorElC ? null : e.currentTarget});
-  }
-
-  /**
-   * Confirm Color popover Close
-   */
-   handleConfirmColorPopoverClose(e){
-    this.setState({anchorElC: null});
-  }
-
-  /**
-   * new Term add popover Open
-   */
-  handleNewEditPopoverOpen(e){
-    this.setState({anchorNewEl: this.state.anchorNewEl ? null : e.currentTarget});
-  }
-
-  /**
-   * new Term add popover close
-   */
-  handleNewEditPopoverClose(){
-    this.setState({anchorNewEl: null});
-  }
-
-  /**
-   * zoom Slider Change
-   */
-   zoomSliderChange(event, newValue){
-    const cy = this.cy;
-    cy.zoom(this.sliderPercent * Number(newValue) + this.initSlider);
-  }
-  
-  sliderPlus() {
-    let plusValue = Number(this.state.sliderValue) + Number(this.sliderStep);
-    if( 1 > plusValue){
-      plusValue = 0;
-    }else if( 100 >= plusValue){
-      // 0.5 = Simple fine-tuning for integerization
-      plusValue = Math.ceil( plusValue / Number(this.sliderStep)-0.5 )*Number(this.sliderStep)
-    }else{
-      plusValue = 100;
-    }
-    this.setState({sliderValue: plusValue});
-    const cy = this.cy;
-    cy.zoom(this.sliderPercent * Number(plusValue) + this.initSlider);
-  }
-  sliderMinus() {
-    let minusValue = Number(this.state.sliderValue) - Number(this.sliderStep);
-    if( minusValue > 100){
-      minusValue = 100;
-    }else if( minusValue >= 0){
-      // 0.5 = Simple fine-tuning for integerization
-      minusValue = Math.floor( minusValue / Number(this.sliderStep)+0.5 )*Number(this.sliderStep)
-    }else{
-      minusValue = 0;
-    }
-    this.setState({sliderValue: minusValue});
-    const cy = this.cy;
-    cy.zoom(this.sliderPercent * Number(minusValue) + this.initSlider);
-  }
-
-  /**
-   * Fixed term color reflection
-   * @param  {String} color - string of changed color
-   */
-  //  seletConfirmColor(color) {
-  //   console.log('[seletConfirmColor] change to ', color);
-  //   this.props.editingVocabulary.seletConfirmColor(color);
-  // }
-
-  /**
    * Confirm switch
    * @param  {Boolean} isConfirm - confirm acceptance
    */
@@ -1314,12 +1149,12 @@ export default
     // console.log('[toggleConfirm] change to ' + isConfirm);
     const currentNode = this.props.editingVocabulary.currentNode;
 
-    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
+    this.props.editingVocabulary.toggleConfirmById(currentNode.id, isConfirm);
     if (!isConfirm) {
       // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
       if (!currentNode.preferred_label) {
         this.props.editingVocabulary.
-            tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list].push(currentNode.term);
+            tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.value].push(currentNode.term);
       }
     }
   }
@@ -1339,19 +1174,11 @@ export default
     const anchorEl = this.state.anchorEl;
     const open = Boolean(anchorEl);
     const id = open ? "popover" : undefined;
-    const anchorNewEl = this.state.anchorNewEl;
-    const openNew = Boolean(anchorNewEl);
-    const idNew = openNew ? "popover-new" : undefined;
-    const anchorElC = this.state.anchorElC;
-    const openC = Boolean(anchorElC);
-    const idC = openC ? "popover-c" : undefined;
     const anchorElColor = this.state.anchorElColor;
     const openColor = Boolean(anchorElColor);
     const idColor = openColor ? "popover-color" : undefined;
     const editButtondisabled = editingVocabulary.currentNode.term ? true : false;
     const editButtonsDisableSwitchByFile  = editingVocabulary.selectedFile.id !== 0 ? true : false;
-
-    const sliderValue = editingVocabulary.getTargetFileData(editingVocabulary.selectedFile.id).length > 0 ? this.state.sliderValue: 0;
 
     // for Confirm Button
     let fileId = editingVocabulary.selectedFile.id;
@@ -1363,9 +1190,7 @@ export default
     }
 
     // Firm button disabled condition
-    // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
-    const isCurrentNodeChanged = editingVocabulary.isCurrentNodeChanged;
-    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
+    const disabledConfirm = disabledColor;
 
     const confirmed = editingVocabulary.currentNode.confirm;
     let isConfirm = false;
@@ -1385,21 +1210,6 @@ export default
     if (disabledTextField) {
       confirmButtonText = '確定解除';
     }
-
-    const zoomMarks = [
-      {
-        value: 20,
-      },
-      {
-        value: 40,
-      },
-      {
-        value: 60,
-      },
-      {
-        value: 80,
-      },
-    ];
 
     return (
       <div>
@@ -1505,6 +1315,9 @@ export default
               <Grid item>
                 <Button
                   className={this.props.classes.buttons}
+                  style={{
+                    marginLeft: "10px",
+                  }}
                   ml={3}
                   variant="contained"
                   color="primary"
@@ -1603,47 +1416,6 @@ export default
           reason={this.state.reason}
         />
 
-        <div className={this.props.classes.sliderDivRoot}>          
-          <Typography id="slider-slider-plus">        
-            <IconButton
-              aria-label="slider-plus"
-              onClick={()=>this.sliderPlus()}
-            >
-              <AddBoxOutlinedIcon />
-            </IconButton>
-          </Typography>
-
-          <Slider
-            classes={{
-              root: this.props.classes.sliderRoot,
-              vertical: this.props.classes.sliderRoot,
-              rail: this.props.classes.sliderRail,
-              track: this.props.classes.sliderTrackt,
-              thumb: this.props.classes.sliderThumb,
-              mark: this.props.classes.sliderMark,
-            }}
-            orientation="vertical"
-            key={`slider-${this.state.sliderValue}`}
-            defaultValue={0}
-            // value={this.state.sliderValue}
-            value={sliderValue}
-            aria-labelledby="vertical-slider"
-            marks={zoomMarks}
-            step={this.sliderStep}
-            valueLabelDisplay="off"
-            onChangeCommitted={(event, newValue) =>this.zoomSliderChange(event, newValue)}
-            
-          />       
-          <Typography id="slider-slider-minus">        
-            <IconButton
-              aria-label="slider-minus"
-              onClick={()=>this.sliderMinus()}
-            >
-              <IndeterminateCheckBoxOutlinedIcon />
-            </IconButton>
-          </Typography>
-        </div>
-
         <CytoscapeComponent
           id="relation_term_graph_container"
 
@@ -1673,7 +1445,7 @@ export default
               selector: '.showText[term]',
               style: {
                 'width': 'label',
-                'height': 'label',
+                // 'height': 'label',
                 'color': 'black',
                 'text-background-shape': 'rectangle',
                 'text-max-width': '200000px',
@@ -1695,7 +1467,7 @@ export default
             {
               selector: 'edge',
               style: {
-                'width': 3,
+                'width': 5,
                 'curve-style': 'straight',
               },
             },
@@ -1732,7 +1504,7 @@ export default
             {
               selector: '.eh-ghost-edge',
               style: {
-                width: 10,
+                width: 15,
                 'line-color': 'yellow',
                 'line-style': 'solid',
                 'target-arrow-shape': 'vee',
@@ -1813,7 +1585,7 @@ export default
               },
             },
             {
-              selector: '.bgBlack',
+              selector: '.bgWhite',
               style: {
                 'background-color': 'white',
               },

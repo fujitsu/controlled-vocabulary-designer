@@ -60,19 +60,12 @@ export default
   onChange(event, newValue) {
     const editingVocabulary = this.props.editingVocabulary;
     const inputText = event.target.value;
-    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
-    if( inputText != '' && inputText != undefined && !find){
-      const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
-                       '既存の用語を記入してください。';
-      const innerText = errorMsg.split('¥n').map((line, key) =>
-        <span key={key}>{line}<br /></span>);
-      this.openSnackbar(innerText);
-
-      return false;
-    }
-    if( find && find.language != editingVocabulary.tmpLanguage.list){
-      const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
-                       '現在選択されている言語の用語を記入してください。';
+    const displayLanguage = editingVocabulary.tmpLanguage.value;
+    // const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
+    const foundId = editingVocabulary.getIdbyTermandLang(inputText, displayLanguage);    
+    if( inputText != '' && inputText != undefined && !foundId){
+      const errorMsg =  '「' +inputText + '」 は、'+(displayLanguage =='ja'?'日本語':'英語')+'では登録されていない用語です。¥n' +
+                       '登録済みの用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
@@ -80,41 +73,50 @@ export default
       return false;
     }
     
-    const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+    const displayNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
 
     if (newValue.length > 1) {
       // When more than one preferred label is entered
-      const errorMsg = '代表語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
-      this.openSnackbar(errorMsg);
+      const errorMsg = '代表語テキストボックスには、複数の用語を記入できません。¥n' + '用語を1つだけ記入してください。';
+      const innerText = errorMsg.split('¥n').map((line, key) =>
+        <span key={key}>{line}<br /></span>);
+      this.openSnackbar(innerText);
     } else{
-      let _currentNode = currentNode;
-      if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
-        && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
+      let _displayNode = displayNode;
+      if(  _displayNode.id === null && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
         && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
-          const find = editingVocabulary.editingVocabulary.find((item)=>
-              item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
-          _currentNode = find?find:currentNode;
+        // this condition is satisfied when the currentNode is ja/en and synonym en/ja term does not exist.
+        const foundId = editingVocabulary.getIdbyTermandLang(
+          editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0],
+          editingVocabulary.currentLangDiffNode.language);
+        const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+        _displayNode = foundObj?foundObj:displayNode;
       }
       if (newValue.length == 1) {
 
         // When a selected term or a term that is not a synonym is entered in the preferred label
-        if (editingVocabulary.isInvalidPreferredLabel(_currentNode, newValue[0])) {
-          const errorMsg = '代表語テキストボックスに記入された \"' + newValue[0] + '\" は、¥n' +
-                          '\"' +_currentNode.term + '\" または同義語のいずれにも含まれていません。¥n' +
+        if (!editingVocabulary.isValidPreferredLabel(_displayNode, newValue[0], displayLanguage)) {
+          let errorMsg;
+          if(!_displayNode.hidden & _displayNode.term !== '' ){
+            errorMsg = '代表語テキストボックスに記入された用語は、¥n' +
+                          '「' +_displayNode.term + '」 または同義語のいずれにも含まれていません。¥n' +
                           '代表語テキストボックスには、¥n' +
-                          '\"' + _currentNode.term + '\" または同義語の中から選んで記入してください。';
+                          '「' + _displayNode.term + '」 または同義語の中から一つ選んで記入してください。';
+          }else{
+            errorMsg = '代表語テキストボックスに記入された用語は、¥n' +
+                          '同義語のいずれにも含まれていません。¥n' +
+                          '代表語テキストボックスには、¥n' +
+                          '同義語の中から一つ選んで記入してください。';
+          }
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
         }
-      } else if (newValue.length == 0) {
+      } else if (newValue.length === 0 && editingVocabulary.tmpPreferredLabel.list[_displayNode.language==='ja'?'en':'ja'].length === 0) {
         // Preferred label:Missing error
-        let errorMsg = '代表語テキストボックスに、同義語の中から選んで記入してください。';
-        if (_currentNode.term) {
-          // When the vocabulary is not selected, the synonym is also cleared in the subsequent process, so no error message is displayed.
-          errorMsg = '代表語テキストボックスには \"' + _currentNode.term +
-                            '\" または同義語の中から選んで記入してください。';
-        }
+        let errorMsg = '日本語と英語の代表語テキストボックスに用語が記入されていません。¥n' +
+                     '日本語もしくは英語の代表語テキストボックスに、用語を記入してください。';
+          errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);      
         this.openSnackbar(errorMsg);
       }
     }
@@ -126,24 +128,31 @@ export default
    * @return {element}
    */
   render() {
-    const preferredLabel = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list];
-    let currentPreferredLabel;
+    const editingVocabulary = this.props.editingVocabulary;
+    const preferredLabel = editingVocabulary.tmpPreferredLabel.list[editingVocabulary.tmpLanguage.value];
+
+    // preferred label when switching with the  language radio button in the selected term
+    let currentPreferredLabel = editingVocabulary.currentLangDiffNode.preferred_label;
     // preferred label on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
-      currentPreferredLabel =
-        this.props.editingVocabulary.currentNode.preferred_label;
-    } else { // preferred label when switching with the  language radio button in the selected term
-      currentPreferredLabel =
-        this.props.editingVocabulary.currentLangDiffNode.preferred_label;
+    if (editingVocabulary.currentNode.language == editingVocabulary.tmpLanguage.value) {
+      currentPreferredLabel = editingVocabulary.currentNode.preferred_label;
     }
+
+    let backColor = 'rgba(0, 0, 0, 0)';
+    if(this.props.disabled){
+      backColor = 'rgba(0, 0, 0, 0.09)';
+    }else if( currentPreferredLabel !== '' && 0 === preferredLabel.length){
+      backColor = 'lavenderblush';
+    }
+
     /* eslint-disable no-unused-vars */
     // object for rendering
-    let length = this.props.editingVocabulary.tmpPreferredLabel.list['ja'].length;
-    length = this.props.editingVocabulary.tmpPreferredLabel.list['en'].length;
+    let length = editingVocabulary.tmpPreferredLabel.list['ja'].length;
+    length = editingVocabulary.tmpPreferredLabel.list['en'].length;
     /* eslint-enable no-unused-vars */
 
     return (
-      <div>
+      <div onKeyDown={(e)=>{e.keyCode===13&&e.preventDefault()}}>
         <form noValidate autoComplete="off">
           <Grid item xs={12}>
             <Box border={1}>
@@ -162,46 +171,7 @@ export default
                   }
                 }
                 id="text-field-of-preferred_label-input"
-                options={
-                  this.props.editingVocabulary.getCandidateTermList(
-                      'preferred_label',
-                  )
-                }
-                getOptionLabel={(option) => option}
-                renderOption={(option, {selected}) => (
-                  <React.Fragment>
-                    <div style={{width: '100%'}}>
-                      
-                      <Box display="flex" flexDirection="row" alignItems="center">
-                        <Box
-                          component="span"
-                          display="inline"
-                          style={{fontSize: '16px',whiteSpace: 'nowrap'}}
-                        >
-                          {option}
-                        </Box>
-                        <Box
-                          component="span"
-                          display="inline"
-                          title={
-                            this.props.editingVocabulary.getReferenceFromData(
-                                option,
-                                '',
-                            )
-                          }
-                          style={{fontSize: '10px',whiteSpace: 'nowrap',textOverflow: 'ellipsis', overflowX: 'hidden', marginLeft: '10px'}}
-                        >
-                          {
-                            this.props.editingVocabulary.getReferenceFromData(
-                                option,
-                                '',
-                            )
-                          }
-                        </Box>
-                      </Box>
-                    </div>
-                  </React.Fragment>
-                )}
+                options={[]}
                 renderTags={(tagValue, getTagProps) => {
                   return tagValue.map((option, index) => (
                     <EditPanelChipForOneChip
@@ -209,6 +179,7 @@ export default
                       {...getTagProps({index})}
                       label={option}
                       data={currentPreferredLabel}
+                      needblankcheck={'true'}
                     />
                   ));
                 }}
@@ -216,11 +187,7 @@ export default
                   <TextField
                     {...params}
                     variant="standard"
-                    style={
-                        this.props.disabled?
-                        {backgroundColor: 'rgba(0, 0, 0, 0.09)'}:
-                        {backgroundColor: 'rgba(0, 0, 0, 0)'}
-                    }
+                    style={{backgroundColor: backColor}}
                   />
                 )}
               />

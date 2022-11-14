@@ -28,8 +28,30 @@ export default class Search extends React.Component {
       term: '', 
       values: [],
       inputValue: '',
+      maxMenuHeight: (window.innerHeight - 300),
       selectMenuIsOpen: false,
     };
+  }
+
+  componentDidMount() {
+    window.addEventListener('resize', this.updateDimensions.bind(this) );
+  }
+  
+  /**
+   * Set menu box height from browser height
+   * 
+   */
+  updateDimensions() {
+    // cytoscape area element id = "relation_term_graph_container"
+    const cyArea = document.getElementById('relation_term_graph_container');
+    let height = document.documentElement.clientHeight-300;
+    if( cyArea && cyArea.clientHeight){
+      height = cyArea.clientHeight-250;
+    }else if( window.innerHeight){
+      height = window.innerHeight-300;
+    }
+    height = 50>height?50:height;
+    this.setState({maxMenuHeight: height});
   }
 
   /**
@@ -59,19 +81,24 @@ export default class Search extends React.Component {
     if ( !value || !value.value) return;
     
     const newValue = value.value;
+    const newId = value.id;
     this.setState({values: [value]});
 
     this.errTerm='';
     const editingVocabulary = this.props.editingVocabulary;
     const convStr = this.hankana2Zenkana(newValue);
-    let result;
-    const targetFileData = editingVocabulary.getTargetFileData( editingVocabulary.selectedFile.id);
-    result = targetFileData.find((node) => // Case-insensitive comparison
-      node.term.toUpperCase() === convStr.toUpperCase());
-    if (result) {
+    
+    let result=undefined;
+    if(editingVocabulary.selectedFile.id === 0){
+      result = editingVocabulary.editingVocWithId.get(newId);
+    }else{
+      result = editingVocabulary.referenceVocWithId[editingVocabulary.selectedFile.id].get(newId);
+    }
+
+    if (result !== undefined) {
       editingVocabulary.deselectTermList();
-      editingVocabulary.setSelectedTermList( result.term,);
-      editingVocabulary.setCurrentNodeByTerm( result.term, '', null, true);
+      editingVocabulary.setSelectedTermList( result.term, result.language);
+      editingVocabulary.setCurrentNodeById( result.id, true);
     } else {
       
         this.handleClickOpen(newValue);
@@ -159,13 +186,14 @@ export default class Search extends React.Component {
     }
     let selectData = this.props.editingVocabulary.sortedNodeList.map((d) => ({
       value: d.term,
+      id: d.id,
       label: d.term,
+      hidden: d.hidden,
       fontweight: d.term==this.props.editingVocabulary.currentNode.term?'bold':'default',
       color: d.confirm?'#BBBBBB':'inherit',
       bgcolor: bgColors[d.color1],
     }));
-    const blankPrefix = this.props.editingVocabulary.getTermBlankPrefix();
-    selectData = selectData.filter((d)=>(d.value).indexOf(blankPrefix) == -1);
+    selectData = selectData.filter((d)=> !d.hidden );
 
     const customStyles = {
       menu: (provided) => ({
@@ -230,7 +258,7 @@ export default class Search extends React.Component {
               formatOptionLabel={formatOptionLabel}
               isMulti
               value={initValue}
-              maxMenuHeight={600}
+              maxMenuHeight={this.state.maxMenuHeight}
               
               height= '20px'
               
