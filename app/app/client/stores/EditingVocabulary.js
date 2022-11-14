@@ -1566,7 +1566,7 @@ class EditingVocabulary {
     }
 
     requestBody.push(dataObj);
-    const url = '/api/v1/vocabulary/editing_vocabulary/' + updateCurrent.term;
+    const url = '/api/v1/vocabulary/editing_vocabulary/' + 'term';
     axios
         .post(url,
             requestBody,
@@ -2049,7 +2049,7 @@ class EditingVocabulary {
    */
   updateRequest(updateList, current, history = null, oldNodeId = null, setCurrent=true) {
 
-    const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + current.term;
+    const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + 'term';
     let requestBody = updateList;
 
     axios
@@ -3153,7 +3153,7 @@ class EditingVocabulary {
     history.previous = this.confirmColor;
     history.following = color;
 
-    const url = '/api/v1/vocabulary/editing_vocabulary/' + confirmList[0].term;
+    const url = '/api/v1/vocabulary/editing_vocabulary/' + 'term';
     axios
         .post(url,
             confirmList,
@@ -3234,7 +3234,7 @@ class EditingVocabulary {
         isConfirm,
     );
 
-    const url = '/api/v1/vocabulary/editing_vocabulary/' + currentNode.term;
+    const url = '/api/v1/vocabulary/editing_vocabulary/' + 'term';
     axios
         .post(url,
             targetList,

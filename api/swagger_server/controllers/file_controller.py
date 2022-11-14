@@ -733,8 +733,13 @@ def _make_bulk_data_editing_vocabulary(data_frame):
         payload.append(insert_data)
 
     for ext_uri in ext_vocs:
+        # trim http/https scheme string
+        if ext_uri.startswith('http://'):
+            ext_uri_bare = ext_uri.replace("http://", '', 1)
+        if ext_uri.startswith('https://'):
+            ext_uri_bare = ext_uri.replace("https://", '', 1)
         insert_data = {}
-        insert_data['term'] = ext_uri
+        insert_data['term'] = ext_uri_bare
         insert_data['preferred_label'] = ''
         insert_data['language'] = 'ja'
         insert_data['uri'] = ext_uri
