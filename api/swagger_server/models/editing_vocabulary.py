@@ -17,7 +17,7 @@ class EditingVocabulary(Model):
 
     Do not edit the class manually.
     """
-    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, language: str=None, uri: str=None, broader_uri: str=None, synonym: List[str]=None, other_voc_syn_uri: str=None, term_description: str=None, created_time: str=None, modified_time: str=None, synonym_candidate: List[str]=None, broader_term_candidate: List[str]=None, hidden: bool=False,postion_x: str=None, postion_y: str=None, color1: str=None, color2: str=None):  # noqa: E501
+    def __init__(self, id: int=None, term: str=None, preferred_label: str=None, language: str=None, uri: str=None, broader_uri: str=None, synonym: List[str]=None, other_voc_syn_uri: str=None, term_description: str=None, created_time: str=None, modified_time: str=None, synonym_candidate: List[str]=None, broader_term_candidate: List[str]=None, hidden: bool=None, postion_x: str=None, postion_y: str=None, color1: str=None, color2: str=None, external_voc: bool=None):  # noqa: E501
         """EditingVocabulary - a model defined in Swagger
 
         :param id: The id of this EditingVocabulary.  # noqa: E501
@@ -56,6 +56,8 @@ class EditingVocabulary(Model):
         :type color1: str
         :param color2: The color2 of this EditingVocabulary.  # noqa: E501
         :type color2: str
+        :param external_voc: The external_voc of this EditingVocabulary.  # noqa: E501
+        :type external_voc: bool
         """
         self.swagger_types = {
             'id': int,
@@ -75,7 +77,8 @@ class EditingVocabulary(Model):
             'postion_x': str,
             'postion_y': str,
             'color1': str,
-            'color2': str
+            'color2': str,
+            'external_voc': bool
         }
 
         self.attribute_map = {
@@ -96,7 +99,8 @@ class EditingVocabulary(Model):
             'postion_x': 'postion_x',
             'postion_y': 'postion_y',
             'color1': 'color1',
-            'color2': 'color2'
+            'color2': 'color2',
+            'external_voc': 'external_voc'
         }
         self._id = id
         self._term = term
@@ -116,6 +120,7 @@ class EditingVocabulary(Model):
         self._postion_y = postion_y
         self._color1 = color1
         self._color2 = color2
+        self._external_voc = external_voc
 
     @classmethod
     def from_dict(cls, dikt) -> 'EditingVocabulary':
@@ -407,7 +412,7 @@ class EditingVocabulary(Model):
 
 
         :return: The hidden of this EditingVocabulary.
-        :type: bool
+        :rtype: bool
         """
         return self._hidden
 
@@ -507,3 +512,23 @@ class EditingVocabulary(Model):
 
         self._color2 = color2
         
+    @property
+    def external_voc(self) -> bool:
+        """Gets the external_voc of this EditingVocabulary.
+
+
+        :return: The external_voc of this EditingVocabulary.
+        :rtype: bool
+        """
+        return self._external_voc
+
+    @external_voc.setter
+    def external_voc(self, external_voc: bool):
+        """Sets the external_voc of this EditingVocabulary.
+
+
+        :param external_voc: The external_voc of this EditingVocabulary.
+        :type external_voc: bool
+        """
+
+        self._external_voc = external_voc

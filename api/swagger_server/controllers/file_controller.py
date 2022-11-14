@@ -17,9 +17,13 @@ import psycopg2
 from psycopg2 import extras
 
 from flask import jsonify, make_response
+import connexion
+import six
+
 from swagger_server.models.check_error_response import CheckErrorResponse  # noqa: E501
 from swagger_server.models.error_response import ErrorResponse  # noqa: E501
 from swagger_server.models.success_response import SuccessResponse  # noqa: E501
+from swagger_server import util
 
 HEADER = {
     "Content-Type": "application/json"
@@ -121,7 +125,7 @@ def download_file(file_type, out_format):  # noqa: E501
 def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None):  # noqa: E501
     """Upload the file to the server
 
-    Uploads the file selected by the client to the server. When editing_vocabulary is uploaded, its check integrity.  # noqa: E501
+    Uploads the file selected by the client to the server. When editing_vocabulary is uploaded, its check integrity. When editing_vocabulary is uploaded, please upload editing_vocabulary_meta together.  # noqa: E501
 
     :param editing_vocabulary: 
     :type editing_vocabulary: strstr

@@ -36,7 +36,7 @@ class Upload(Model):
             'editing_vocabulary_meta': str,
             'reference_vocabulary1': str,
             'reference_vocabulary2': str,
-            'reference_vocabulary3': str,
+            'reference_vocabulary3': str
         }
 
         self.attribute_map = {
@@ -44,7 +44,7 @@ class Upload(Model):
             'editing_vocabulary_meta': 'editing_vocabulary_meta',
             'reference_vocabulary1': 'reference_vocabulary1',
             'reference_vocabulary2': 'reference_vocabulary2',
-            'reference_vocabulary3': 'reference_vocabulary3',
+            'reference_vocabulary3': 'reference_vocabulary3'
         }
         self._editing_vocabulary = editing_vocabulary
         self._editing_vocabulary_meta = editing_vocabulary_meta
@@ -67,7 +67,7 @@ class Upload(Model):
     def editing_vocabulary(self) -> str:
         """Gets the editing_vocabulary of this Upload.
 
-        editing_vocabulary is xlsx file  # noqa: E501
+        editing_vocabulary is a csv file  # noqa: E501
 
         :return: The editing_vocabulary of this Upload.
         :rtype: str
@@ -78,7 +78,7 @@ class Upload(Model):
     def editing_vocabulary(self, editing_vocabulary: str):
         """Sets the editing_vocabulary of this Upload.
 
-        editing_vocabulary is xlsx file  # noqa: E501
+        editing_vocabulary is a csv file  # noqa: E501
 
         :param editing_vocabulary: The editing_vocabulary of this Upload.
         :type editing_vocabulary: str
@@ -90,7 +90,7 @@ class Upload(Model):
     def editing_vocabulary_meta(self) -> str:
         """Gets the editing_vocabulary_meta of this Upload.
 
-        editing_vocabulary_meta is xlsx file  # noqa: E501
+        editing_vocabulary_meta is a csv file  # noqa: E501
 
         :return: The editing_vocabulary_meta of this Upload.
         :rtype: str
@@ -101,7 +101,7 @@ class Upload(Model):
     def editing_vocabulary_meta(self, editing_vocabulary_meta: str):
         """Sets the editing_vocabulary_meta of this Upload.
 
-        editing_vocabulary_meta is xlsx file  # noqa: E501
+        editing_vocabulary_meta is a csv file  # noqa: E501
 
         :param editing_vocabulary_meta: The editing_vocabulary_meta of this Upload.
         :type editing_vocabulary_meta: str
@@ -113,7 +113,7 @@ class Upload(Model):
     def reference_vocabulary1(self) -> str:
         """Gets the reference_vocabulary1 of this Upload.
 
-        reference_vocabulary1 is xlsx file  # noqa: E501
+        reference_vocabulary1 is a csv file  # noqa: E501
 
         :return: The reference_vocabulary1 of this Upload.
         :rtype: str
@@ -124,7 +124,7 @@ class Upload(Model):
     def reference_vocabulary1(self, reference_vocabulary1: str):
         """Sets the reference_vocabulary1 of this Upload.
 
-        reference_vocabulary1 is xlsx file  # noqa: E501
+        reference_vocabulary1 is a csv file  # noqa: E501
 
         :param reference_vocabulary1: The reference_vocabulary1 of this Upload.
         :type reference_vocabulary1: str
@@ -136,7 +136,7 @@ class Upload(Model):
     def reference_vocabulary2(self) -> str:
         """Gets the reference_vocabulary2 of this Upload.
 
-        reference_vocabulary2 is xlsx file  # noqa: E501
+        reference_vocabulary2 is a csv file  # noqa: E501
 
         :return: The reference_vocabulary2 of this Upload.
         :rtype: str
@@ -147,7 +147,7 @@ class Upload(Model):
     def reference_vocabulary2(self, reference_vocabulary2: str):
         """Sets the reference_vocabulary2 of this Upload.
 
-        reference_vocabulary2 is xlsx file  # noqa: E501
+        reference_vocabulary2 is a csv file  # noqa: E501
 
         :param reference_vocabulary2: The reference_vocabulary2 of this Upload.
         :type reference_vocabulary2: str
@@ -159,7 +159,7 @@ class Upload(Model):
     def reference_vocabulary3(self) -> str:
         """Gets the reference_vocabulary3 of this Upload.
 
-        reference_vocabulary3 is xlsx file  # noqa: E501
+        reference_vocabulary3 is a csv file  # noqa: E501
 
         :return: The reference_vocabulary3 of this Upload.
         :rtype: str
@@ -170,11 +170,10 @@ class Upload(Model):
     def reference_vocabulary3(self, reference_vocabulary3: str):
         """Sets the reference_vocabulary3 of this Upload.
 
-        reference_vocabulary3 is xlsx file  # noqa: E501
+        reference_vocabulary3 is a csv file  # noqa: E501
 
         :param reference_vocabulary3: The reference_vocabulary3 of this Upload.
         :type reference_vocabulary3: str
         """
 
         self._reference_vocabulary3 = reference_vocabulary3
-

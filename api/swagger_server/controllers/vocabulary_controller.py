@@ -5,6 +5,8 @@ vocabulary_controller.py COPYRIGHT FUJITSU LIMITED 2021
 
 import json
 import requests
+import connexion
+import six
 
 from swagger_server.models.editing_vocabulary import EditingVocabulary  # noqa: E501
 from swagger_server.models.editing_vocabulary_meta import EditingVocabularyMeta  # noqa: E501
@@ -138,7 +140,6 @@ def post_vocabulary_term(body, file_type, term):  # noqa: E501
                 # update data.
                 update_sql = _create_update_sql(file_type, item['id'])
                 id_list.append(item['id'])
-                
                 exec_res, status_code = _exec_update_postgrest(payload, update_sql)
                 if not status_code == 200:
                     return exec_res, status_code
