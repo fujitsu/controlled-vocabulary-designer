@@ -493,11 +493,38 @@ class EditingHistory {
       data.id === history.targetId);
     const followingTarget = history.following.find((data) =>
       data.id === history.targetId);
+      
+    const currentTarget = editingVocabularyStore.editingVocWithId.get(history.targetId);
 
-    const previousLangDiffTarget = history.previous.find((data) =>
+    let previousLangDiffTarget = history.previous.find((data) =>
       data.id === history.targetLangDiffId);
-    const followingLangDiffTarget = history.following.find((data) =>
+    if( previousLangDiffTarget === undefined){
+      const findElms = history.previous.filter((data) =>
+           data.uri === previousTarget.uri
+        &&  data.uri !== previousTarget.broader_uri);
+      if( findElms !== undefined){
+        const findElm = findElms.find((elm) =>{
+          const target = editingVocabularyStore.editingVocWithId.get(elm.id);
+          return target.language!==currentTarget.language;
+        });
+        previousLangDiffTarget = findElm;
+      }
+    }
+
+    let followingLangDiffTarget = history.following.find((data) =>
       data.id === history.targetLangDiffId);
+    if( followingLangDiffTarget === undefined){
+      const findElms = history.following.filter((data) =>
+            data.uri === followingTarget.uri
+        &&  data.uri !== followingTarget.broader_uri);
+      if( findElms !== undefined){
+        const findElm = findElms.find((elm) =>{
+          const target = editingVocabularyStore.editingVocWithId.get(elm.id);
+          return target.language!==currentTarget.language;
+        });
+        followingLangDiffTarget = findElm;
+      }
+    }
 
     if (previousTarget === undefined && followingTarget !== undefined) {
       // If the change deletes the edited vocabulary
@@ -519,18 +546,18 @@ class EditingHistory {
     let message = '「' + previousTarget.term + '」の情報を変更しました。';
 
     message +=
-        this.makeSynonymMessage(type, history.previous, history.following);
+        this.makeSynonymMessage(type, history);
     message +=
         this.makePreferredLabelMessage(
             type,
             previousTarget.preferred_label,
             followingTarget.preferred_label,
         );
-    if( previousLangDiffTarget && followingLangDiffTarget){
+    if( previousLangDiffTarget || followingLangDiffTarget){
       message += this.makePreferredLabelMessage(
             type,
-            previousLangDiffTarget.preferred_label,
-            followingLangDiffTarget.preferred_label,
+            previousLangDiffTarget===undefined?'':previousLangDiffTarget.preferred_label,
+            followingLangDiffTarget===undefined?'':followingLangDiffTarget.preferred_label,
         );
     }
     message +=
@@ -541,22 +568,22 @@ class EditingHistory {
             previousTarget.broader_term,
             followingTarget.broader_term,
         );
-    if( previousLangDiffTarget && followingLangDiffTarget){
+    if( previousLangDiffTarget || followingLangDiffTarget){
       message += this.makeBroaderTermMessage(
             type,
-            previousLangDiffTarget.broader_term,
-            followingLangDiffTarget.broader_term,
+            previousLangDiffTarget===undefined?'':previousLangDiffTarget.broader_term,
+            followingLangDiffTarget===undefined?'':followingLangDiffTarget.broader_term,
         );
     }
     message += this.makeTermDescriptionMessage(
           type, 
           previousTarget.term_description, 
           followingTarget.term_description);
-    if( previousLangDiffTarget && followingLangDiffTarget){
+    if( previousLangDiffTarget || followingLangDiffTarget){
       message += this.makeTermDescriptionMessage(
             type, 
-            previousLangDiffTarget.term_description, 
-            followingLangDiffTarget.term_description);
+            previousLangDiffTarget===undefined?'':previousLangDiffTarget.term_description, 
+            followingLangDiffTarget===undefined?'':followingLangDiffTarget.term_description);
     }
 
     return message;
@@ -660,82 +687,55 @@ class EditingHistory {
   /**
    * Create synonym undo/redo message
    * @param  {string} type 'undo' or 'redo' string.
-   * @param  {array} preSynList previous - list of synonyms
-   * @param  {array} flwSynList following - list of synoyms
+   * @param  {object} history  information of history
    * @return {string}  - message
    */
-  makeSynonymMessage(type, preSynList, flwSynList) {
-    const currentPreData = preSynList[0];
-    const currentFlwData = flwSynList[0];
+  makeSynonymMessage(type, history) {
+
+    const preSynList = history.previous;
+    const flwSynList = history.following;    
+    const currentPreData = preSynList.find((i) => i.id === history.targetId);
+    const currentFlwData = flwSynList.find((i) => i.id === history.targetId);
 
     // Remove nonsynonymous terms from edited terms
-    let previous = preSynList.filter((i) => i.term !== currentPreData.term);
-    if (currentPreData.broader_term) {
+    let previous = preSynList.filter((i) => i.uri === currentPreData.uri && i.id !== currentPreData.id);
+    if (currentPreData.broader_uri) {
       previous = previous.filter((i) =>
-        i.term !== currentPreData.broader_term);
-      previous = previous.filter((i) =>
-        i.preferred_label !== currentPreData.broader_term);
-    }
-    if (currentPreData.preferred_label) {
-      previous = previous.filter((i) =>
-        i.preferred_label == currentPreData.preferred_label);
+        i.uri !== currentPreData.broader_uri);
     }
 
     // Remove nonsynonymous terms from edited terms
-    let following = flwSynList.filter((i) => i.term !== currentFlwData.term);
-    if (currentFlwData.broader_term) {
+    let following = flwSynList.filter((i) =>i.uri === currentFlwData.uri && i.id !== currentFlwData.id);
+    if (currentFlwData.broader_uri) {
       following = following.filter((i) =>
-        i.term !== currentFlwData.broader_term);
-      following = following.filter((i) =>
-        i.preferred_label !== currentFlwData.broader_term);
-    }
-    if (currentFlwData.preferred_label) {
-      following = following.filter((i) =>
-        i.preferred_label == currentFlwData.preferred_label);
+        i.uri !== currentFlwData.broader_uri);
     }
 
     const addSynList = [];
     const delSynList = [];
     if (this.STR_UNDO === type) {
       previous.forEach((pre) => {
-        const find = following.find((fllw) => fllw.term == pre.term);
-        if (find !== undefined) {
-          if (find.preferred_label != currentFlwData.preferred_label) {
-            addSynList.push(pre);
-          }
-        } else {
+        const find = following.find((fllw) => fllw.id == pre.id);
+        if (find === undefined) {
           addSynList.push(pre);
         }
       });
-
       following.forEach((fllw) => {
-        const find = previous.find((pre) => pre.term == fllw.term);
-        if (find !== undefined) {
-          if (find.preferred_label != currentPreData.preferred_label) {
-            delSynList.push(fllw);
-          }
-        } else {
+        const find = previous.find((pre) => pre.id == fllw.id);
+        if (find === undefined) {
           delSynList.push(fllw);
         }
       });
     } else { // redo
       following.forEach((fllw) => {
-        const find = previous.find((pre) => pre.term == fllw.term);
-        if (find !== undefined) {
-          if (find.preferred_label != currentPreData.preferred_label) {
-            addSynList.push(fllw);
-    }
-        } else {
+        const find = previous.find((pre) => pre.id == fllw.id);
+        if (find === undefined) {
           addSynList.push(fllw);
         }
       });
       previous.forEach((pre) => {
-        const find = following.find((fllw) => fllw.term == pre.term);
-        if (find !== undefined) {
-          if (find.preferred_label != currentFlwData.preferred_label) {
-            delSynList.push(pre);
-          }
-        } else {
+        const find = following.find((fllw) => fllw.id == pre.id);
+        if (find === undefined) {
           delSynList.push(pre);
         }
       });
