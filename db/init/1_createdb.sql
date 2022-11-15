@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS editing_vocabulary (
   "position_y" text,
   "color1" text,
   "color2" text,
-  "confirm" integer NOT NULL
+  "confirm" integer NOT NULL,
+  "external_voc" boolean
 );
 
 CREATE TABLE IF NOT EXISTS reference_vocabulary_1 (

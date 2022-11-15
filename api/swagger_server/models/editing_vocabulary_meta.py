@@ -24,8 +24,8 @@ class EditingVocabularyMeta(Model):
         :type id: int
         :param meta_name: The meta_name of this EditingVocabularyMeta.  # noqa: E501
         :type meta_name: str
-        :param meta_enname: The  meta_enname of this EditingVocabularyMeta.  # noqa: E501
-        :type  meta_enname: str
+        :param meta_enname: The meta_enname of this EditingVocabularyMeta.  # noqa: E501
+        :type meta_enname: str
         :param meta_version: The meta_version of this EditingVocabularyMeta.  # noqa: E501
         :type meta_version: str
         :param meta_prefix: The meta_prefix of this EditingVocabularyMeta.  # noqa: E501

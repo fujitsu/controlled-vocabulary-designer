@@ -464,7 +464,7 @@ export default
       console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, findObj);
 
       // other vocabulary node
-      if(target.term == target.other_voc_syn_uri){ 
+      if(target.external_voc){ 
         return;
       }
 
@@ -541,7 +541,7 @@ export default
       addedEdge.remove();
 
       // other vocabulary node
-      if(targetNode.data().term == targetNode.data().other_voc_syn_uri){ 
+      if(targetNode.data().external_voc){ 
         event.stopPropagation()
         return false;
       }
@@ -620,7 +620,7 @@ export default
 
       // other vocabulary node
       const dt = sourceNode.data();
-      if(dt.term == dt.other_voc_syn_uri){ 
+      if(dt.external_voc){ 
         this.hideHandlePostion();
         return;
       }
