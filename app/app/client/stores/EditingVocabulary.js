@@ -1792,7 +1792,7 @@ class EditingVocabulary {
     if (error !== null) {
       return error;
     }
-    let history = new History('vocabulary', this.currentNode.id, this.currentLangDiffNode.term==''?null:this.currentLangDiffNode.id);
+    let history = new History('vocabulary', this.currentNode.id, this.currentLangDiffNode.id);
     let previousForHistory = [];
     let followingForHistory = [];
 
@@ -1846,7 +1846,7 @@ class EditingVocabulary {
       followObj.external_voc = obj.external_voc; // external_voc as is
       delObjList.push(followObj);
       // push it to history
-      followingForHistory.push(this.makeVocabularyHistoryData(obj));
+      followingForHistory.push(this.makeVocabularyHistoryData(followObj));
     });
     
     // get new syngroup for all language

@@ -990,27 +990,6 @@ def _download_file_make(pl_simple, pl_simple_meta):
             nameb = [m_uri, creator, rdflib.Literal(str(name[7]))]
             namel.append(nameb)
 
-    # create type links for OtherVocabulary info
-    nameoi = nm.query('other_voc_syn_uri != ""')
-    namelx = nameoi.loc[:, ['other_voc_syn_uri']].values.tolist()
-    namelx = set(sum(namelx, []))
-    for name in namelx:
-        nameb = [rdflib.URIRef(str(name)[:(str(name).rfind('/') + 1)]), rtype, sconceptscheme]
-        namel.append(nameb)
-
-
-    # create exactMatch and inscheme for OtherVocabulary link
-    nameou = nm.query('other_voc_syn_uri != ""')
-    namelx = nameou.loc[:, ['other_voc_syn_uri', 'uri']].values.tolist()
-    namelx = list(map(list, set(map(tuple, namelx))))
-    for name in namelx:
-        nameb = [rdflib.URIRef(str(name[0])), rtype, scon]
-        namel.append(nameb)
-        nameb = [rdflib.URIRef(str(name[0])), exactMatch, rdflib.URIRef(str(name[1]))]
-        namel.append(nameb)
-        nameb = [rdflib.URIRef(str(name[0])), sinscheme, rdflib.URIRef(str(name[0])[:(str(name[0]).rfind('/') + 1)])]
-        namel.append(nameb)
-
     # JSON query Get Concept, prefLabel and narrower base
     namelpl = nm.query('term == preferred_label and uri != ""')
     # get uri and term

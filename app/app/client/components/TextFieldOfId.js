@@ -68,7 +68,11 @@ export default
       errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
-      if (!this.props.editingVocabulary.isUniqueIdofUri(this.props.editingVocabulary.currentNode, displayLanguage, newValue[0], synonymIdList)) {
+      if( newValue[0] === this.props.editingVocabulary.currentNode.idofuri){
+        // do nothing
+      } else if (!this.props.editingVocabulary.isUniqueIdofUri(this.props.editingVocabulary.currentNode, displayLanguage, newValue[0], synonymIdList)) {
+        const errorMsg = '代表語のURIテキストボックスに、¥n' +
+
         const errorMsg = '代表語のURIテキストボックスに、¥n' +
                        '同義関係でない別の代表語 「' +
                        this.props.editingVocabulary.equalUriPreferredLabel +
