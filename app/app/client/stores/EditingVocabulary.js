@@ -728,7 +728,7 @@ class EditingVocabulary {
 
     const broaderTermEdges = [];
     const synonymEdges = [];
-
+    // calculate each synonym group
     this.uri2synoid[fileId].forEach((ids, uri)=>{
       // 
       let preid_ja;
@@ -750,35 +750,69 @@ class EditingVocabulary {
       },this);
 
       // set target node id
-      let preid; // we prefer ja if it exist
-      if(undefined !== preid_ja){
-        preid = preid_ja;
-      }else if(undefined !== preid_en){
-        preid = preid_en;
+      let targetid ={}; // sink of arrow for each language
+      let broaderrootid; // root of arrow for broader
+      if(undefined !== preid_ja && undefined !== preid_en){
+        targetid['ja'] = preid_ja;
+        targetid['en'] = preid_en;
+        broaderrootid = preid_ja;
+      }else if(undefined !== preid_ja && undefined === preid_en){
+        targetid['ja'] = preid_ja;
+        targetid['en'] = preid_ja;
+        broaderrootid = preid_ja;
+      }else if(undefined === preid_ja && undefined !== preid_en){
+        targetid['ja'] = preid_en;
+        targetid['en'] = preid_en;
+        broaderrootid = preid_en;
       }
 
       // set synonym edges
       ids.forEach((id1)=>{
-        if(id1 !== preid){
-          // hidden check
-          const dataObj = termListForVocWithId.get(id1);
-          if(dataObj.hidden){
-            // the data is hidden
-            // nothing to do
-          }else{
+        const dataObj = termListForVocWithId.get(id1);
+        if(dataObj.hidden || dataObj.external_voc){
+          // the data is hidden or external_voc
+          // nothing to do
+        }else{
+          if(id1 === broaderrootid){
+            // id1-extvoc line
+            if(dataObj.other_voc_syn_uri !== '' && fileId === 0){
+              const extset = this.uri2synoid[fileId].get(dataObj.other_voc_syn_uri);
+              const extid= [...extset][0];
+              synonymEdges.push({
+                data: {
+                  type: 'synonym',
+                  target: extid,
+                  source: id1,
+                  label: ''
+                },
+                classes: ['synonym'],
+              }); 
+            }
+          }else if(id1 === targetid[dataObj.language]){
+            // id1 - broaderroot line
             synonymEdges.push({
               data: {
                 type: 'synonym',
                 target: id1,
-                source: preid,
+                source: broaderrootid,
                 label: ''
               },
               classes: ['synonym'],
-            });  
+            }); 
+          }else{
+            // id1 - target[lang] line
+            synonymEdges.push({
+              data: {
+                type: 'synonym',
+                target: id1,
+                source: targetid[dataObj.language],
+                label: ''
+              },
+              classes: ['synonym'],
+            }); 
           }
         }
       }, this);
-
       // set broader edges
       if(broader_uri !== ''){
         let preidbro_ja;
@@ -804,7 +838,7 @@ class EditingVocabulary {
         broaderTermEdges.push({
           data: {
             type: 'broader_term',
-            target: preid,
+            target: broaderrootid,
             source: preidbro,
             label: '',
             arrow: 'triangle',
@@ -817,34 +851,6 @@ class EditingVocabulary {
 
     return [...broaderTermEdges, ...synonymEdges];
   };
-
-  // /**
-  //  * Duplicate checking of synonym edge
-  //  * @param  {object}  edge - edge object
-  //  * @param  {string}  target - vocabulary
-  //  * @param  {string}  source - vocabulary
-  //  * @return {Boolean} - true: contain duplicates, false: not contain duplicates
-  //  */
-  // isSynonymExist(edge, target, source) {
-  //   if ((edge.data.target == source)&&(edge.data.source == target)) return true;
-  //   if ((edge.data.target == target)&&(edge.data.source == source)) return true;
-  //   return false;
-  // };
-
-  // /**
-  //  * Get the ID associated with the term
-  //  * @param  {array} targetList - list of vocabulary data
-  //  * @param  {string} term - vocabulary
-  //  * @return {number} - id
-  //  */
-  // getNodeIdByTerm(targetList, term) {
-  //   let id = '';
-  //   targetList.forEach((node) => {
-  //     if (node.data.term == term) id = node.data.id;
-  //   });
-  //   return id;
-  //   // return Number(id); // is this?????
-  // }
 
   /**
    * Get the vocabulary associated with currentNode registered in the editing and reference vocabulary (De-duplication, sorted)

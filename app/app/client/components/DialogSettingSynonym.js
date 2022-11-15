@@ -232,6 +232,15 @@ export default class DialogSettingSynonym extends React.Component {
       editingVocabulary.tmpTermDescription.values['en'] = selectTermDesc_En;
     }
 
+    // set the other vocs tmpOtherVocSynUri
+    editingVocabulary.tmpOtherVocSynUri.id = sourceNode.id;
+    if(sourceNode.other_voc_syn_uri !== ''){
+      editingVocabulary.tmpOtherVocSynUri.list.push(sourceNode.other_voc_syn_uri);
+    }
+    if(targetNode.other_voc_syn_uri !== ''){
+      editingVocabulary.tmpOtherVocSynUri.list.push(targetNode.other_voc_syn_uri);
+    }
+
     const ret = editingVocabulary.updateVocabulary(null, 333);
 
     this.crearDatas();
