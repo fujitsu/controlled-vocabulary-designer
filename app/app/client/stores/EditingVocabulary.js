@@ -2241,7 +2241,7 @@ class EditingVocabulary {
     // Id of URI must be unique except synonym's idofuri
     const idofuri = this.tmpIdofUri.list[0];
     const synonymIdList = this.tmpSynonym.idList;
-    if(!this.isUniqueIdofUri(this.currentNode, idofuri, synonymIdList)){
+    if(!this.isUniqueIdofUri(this.currentNode, this.tmpLanguage.value, idofuri, synonymIdList)){
       console.log('[errorCheck] nonuniqueIdofUri.');
       ret.errorKind = 'nonuniqueIdofUri';
       return ret;
@@ -2351,11 +2351,12 @@ class EditingVocabulary {
   /**
    * Determine if the Id of URI is unique except synonym's idofuri
    * @param  {Object}  currentNode - check target node
+   * @param  {String}  language - 
    * @param  {String}  idofuri - Id of URI string
    * @param  {Object}  synonymIdList - {ja: [synonym], en: [synonym]} 
    * @return {Boolean} - true: unique, false: non-unique
    */
-   isUniqueIdofUri(currentNode, idofuri, synonymIdList) {
+   isUniqueIdofUri(currentNode, language, idofuri, synonymIdList) {// id, lang
     if (!idofuri) {
       return false;
     }
@@ -2401,7 +2402,7 @@ class EditingVocabulary {
         if( idList.length > 0){
           idList.some((id)=>{
             const _item = this.editingVocWithId.get(id);
-            if( _item.hidden===false && _item.language===currentNode.language){
+            if( _item.hidden===false && _item.language=== language){
               this.equalUriPreferredLabel = _item.term;
               return true; // same role as break
             }else if( _item.hidden===false && this.equalUriPreferredLabel===''){
@@ -2695,7 +2696,6 @@ class EditingVocabulary {
       let id_disp = []; // this includes newly added term id
       let id_other = [];
       let ids_at_input = []; // ids at input for all language
-      let addedTerm;
       let addedId;
 
       // determine which term is added
@@ -2703,11 +2703,9 @@ class EditingVocabulary {
         const id1 = this.getIdbyTermandLang(term, displayLanguage);
         if(!this.tmpSynonym.idList[displayLanguage].includes(id1)){
           // this is the added term
-          addedTerm = term;
           addedId = id1;
         }
       }, this);
-      // id_disp.push(id1);
       id_disp = this.tmpSynonym.idList[displayLanguage].concat();//copy
       id_other = this.tmpSynonym.idList[otherLanguage].concat(); // copy
       // withme
@@ -2776,6 +2774,12 @@ class EditingVocabulary {
               this.tmpTermDescription.values[dataObj.language] = dataObj.term_description;
           }
         }, this);
+
+        //add other vocs
+        if(this.tmpOtherVocSynUri.list.length === 0 && addedData.other_voc_syn_uri !== '' ){
+          this.tmpOtherVocSynUri.list.push(addedData.other_voc_syn_uri);
+        }
+
       }else{
         this.tmpSynonym.idList[addedData.language].push(addedData.id);
         this.tmpSynonym.list[addedData.language].push(addedData.term);

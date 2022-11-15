@@ -59,7 +59,8 @@ export default
    */
   onChange(event, newValue) {
     const synonymIdList = this.props.editingVocabulary.tmpSynonym.idList;
-    const displayNode = this.props.editingVocabulary.tmpLanguage.value == this.props.editingVocabulary.currentNode.language ? this.props.editingVocabulary.currentNode: this.props.editingVocabulary.currentLangDiffNode;
+    // const displayNode = this.props.editingVocabulary.tmpLanguage.value == this.props.editingVocabulary.currentNode.language ? this.props.editingVocabulary.currentNode: this.props.editingVocabulary.currentLangDiffNode;
+    const displayLanguage = this.props.editingVocabulary.tmpLanguage.value;
 
     if (newValue.length > 1) {
       // When more than one id is entered
@@ -67,7 +68,7 @@ export default
       errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
-      if (!this.props.editingVocabulary.isUniqueIdofUri(displayNode, newValue[0], synonymIdList)) {
+      if (!this.props.editingVocabulary.isUniqueIdofUri(this.props.editingVocabulary.currentNode, displayLanguage, newValue[0], synonymIdList)) {
         const errorMsg = '代表語のURIテキストボックスに、¥n' +
                        '同義関係でない別の代表語 「' +
                        this.props.editingVocabulary.equalUriPreferredLabel +
