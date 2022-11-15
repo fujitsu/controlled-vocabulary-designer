@@ -248,6 +248,12 @@ class EditingVocabularyMeta {
     // this.currentNode.meta_uri <- input uri value
     // const metaUri = this.currentNode.meta_uri.replace(new RegExp('\/$'), '');
     datas.forEach((data) =>{
+
+      if(data.external_voc){
+        // other voc terms should not be affected
+        return;
+      }
+
       const uri = data.uri.replace(prevMetaUri, nextMetaUri);
       let broader_uri = '';
       if(data.broader_uri !=''){
@@ -273,6 +279,7 @@ class EditingVocabularyMeta {
         color2: data.color2,
         hidden: data.hidden,
         confirm: data.confirm,
+        external_voc: data.external_voc,
       };
       if (data.id) {
         dbData.id = Number(data.id);
