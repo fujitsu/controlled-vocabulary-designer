@@ -72,8 +72,6 @@ export default
         // do nothing
       } else if (!this.props.editingVocabulary.isUniqueIdofUri(this.props.editingVocabulary.currentNode, displayLanguage, newValue[0], synonymIdList)) {
         const errorMsg = '代表語のURIテキストボックスに、¥n' +
-
-        const errorMsg = '代表語のURIテキストボックスに、¥n' +
                        '同義関係でない別の代表語 「' +
                        this.props.editingVocabulary.equalUriPreferredLabel +
                        '」 と同じ代表語のURIが記入されています。¥n' +
