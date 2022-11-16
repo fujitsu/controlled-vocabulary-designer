@@ -423,8 +423,7 @@ export default
                 <Box>
                   <TextFieldOfOtherVocSynUri
                     classes={this.props.classes}
-                    editingVocabulary={this.props.editingVocabulary}
-                    fileId={fileId}
+                    otherVocSynUri={this.props.editingVocabulary.tmpOtherVocSynUri.list}
                   />
                 </Box>
               </Grid>

@@ -24,7 +24,7 @@
     * @return {element}
     */
    render() {
-     const tmpOtherVocSynUri = this.props.editingVocabulary.tmpOtherVocSynUri.list;
+     const tmpOtherVocSynUri = this.props.otherVocSynUri.length>0?this.props.otherVocSynUri:[];
       
      return (
        <form noValidate autoComplete="off">
@@ -69,6 +69,6 @@
  }
  
  TextFieldOfOtherVocSynUri.propTypes = {
-   editingVocabulary: PropTypes.object,
    classes: PropTypes.object,
+   otherVocSynUri: PropTypes.string,
  };
