@@ -24,6 +24,7 @@
     * @return {element}
     */
    render() {
+     const listOtherVocSynUri = this.props.currentOtherVocSynUri===''?[]:[this.props.currentOtherVocSynUri];
      const tmpOtherVocSynUri = this.props.otherVocSynUri.length>0?this.props.otherVocSynUri:[];
       
      return (
@@ -49,7 +50,7 @@
                      {...getTagProps({index})}
                      label={option}
                      chipid={'0'}
-                     currentlist={tmpOtherVocSynUri}
+                     currentlist={listOtherVocSynUri}
                      needblankcheck={'false'}
                    />
                  ));
@@ -70,5 +71,6 @@
  
  TextFieldOfOtherVocSynUri.propTypes = {
    classes: PropTypes.object,
-   otherVocSynUri: PropTypes.string,
+   currentOtherVocSynUri: PropTypes.string,
+   otherVocSynUri: PropTypes.array,
  };
