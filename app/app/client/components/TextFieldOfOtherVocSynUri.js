@@ -24,7 +24,8 @@
     * @return {element}
     */
    render() {
-     const tmpOtherVocSynUri = this.props.editingVocabulary.tmpOtherVocSynUri.list;
+     const listOtherVocSynUri = this.props.currentOtherVocSynUri===''?[]:[this.props.currentOtherVocSynUri];
+     const tmpOtherVocSynUri = this.props.otherVocSynUri.length>0?this.props.otherVocSynUri:[];
       
      return (
        <form noValidate autoComplete="off">
@@ -49,7 +50,7 @@
                      {...getTagProps({index})}
                      label={option}
                      chipid={'0'}
-                     currentlist={tmpOtherVocSynUri}
+                     currentlist={listOtherVocSynUri}
                      needblankcheck={'false'}
                    />
                  ));
@@ -69,6 +70,7 @@
  }
  
  TextFieldOfOtherVocSynUri.propTypes = {
-   editingVocabulary: PropTypes.object,
    classes: PropTypes.object,
+   currentOtherVocSynUri: PropTypes.string,
+   otherVocSynUri: PropTypes.array,
  };
