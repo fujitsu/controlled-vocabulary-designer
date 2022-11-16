@@ -57,7 +57,6 @@ export default
     super();
     this.zoomTimeoutId = -1;
     this.updateElesTimeoutId = -1;
-    this.fitCenterPan = true;
     this.situationArr = [];
     this.message = '';
     this.source = null;
@@ -355,10 +354,6 @@ export default
    */
   fitByPanZoom(pan, zoom) {
 
-    if( !this.fitCenterPan){
-      return;
-    }
-
     const cy = this.cy;
     cy.zoom(zoom);
     if (this.props.editingVocabulary.currentNode.id) {
@@ -470,7 +465,6 @@ export default
 
       let isAddTerm=false;
       const withKey = event.originalEvent.ctrlKey|| event.originalEvent.shiftKey;
-      this.fitCenterPan = false;
       if( !withKey){
         if( this.props.editingVocabulary.selectedIdList.length > 1){
           this.props.editingVocabulary.deselectTermList();
@@ -493,7 +487,6 @@ export default
           this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }
-      this.fitCenterPan = true;
       this.changeSelectedTermColor(target.id, isAddTerm);
     });
 
@@ -760,18 +753,6 @@ export default
   }
 
   /**
-   * Flag to move to the middle 
-   * @param {boolean} flg true: move / false: not move
-   * @return {boolean} Original setting value
-   */
-  centerMoveDisabled(flg){
-    const oldFlg = this.fitCenterPan;
-    this.fitCenterPan = !flg;
-    return !oldFlg;
-  }
-
-
-  /**
    * Sytle initialization for node
    */
   initStyleForAllNodes() {
@@ -973,15 +954,11 @@ export default
    * @param {bool} isDrag is this operation occur from drag of terms
    */
   async updateVocabularies(idList,  isDrag=false) {
-    
-    const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
     const saveCurrentNodeId = await this.props.editingVocabulary.currentNode.id;
     
-    this.fitCenterPan = false;
     const ret = await this.props.editingVocabulary.updateVocabularies( this.cy, idList, isDrag);
-    this.fitCenterPan = true;
 
-    if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
+    if( saveCurrentNodeId && saveCurrentNodeId !== this.props.editingVocabulary.currentNode.id){
       await this.props.editingVocabulary.setCurrentNodeById(saveCurrentNodeId);
     }
   }

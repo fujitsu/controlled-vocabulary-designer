@@ -270,7 +270,7 @@ class EditingHistory {
         }
       });
     }
-    EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.id);
+    EditingVocabulary.updateRequest(updateList, currentData);
   }
 
   /**
@@ -344,7 +344,7 @@ class EditingHistory {
       }, this);
     }
 
-    EditingVocabulary.updateRequest(updateList, currentData, null, null);
+    EditingVocabulary.updateRequest(updateList, currentData);
   }
 
   // Display message function /////////////////////////////////////////////

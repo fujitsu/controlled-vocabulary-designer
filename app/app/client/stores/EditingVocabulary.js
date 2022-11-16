@@ -1334,9 +1334,6 @@ class EditingVocabulary {
     }
 
     this.setCurrentLangDiffNode();
-
-    // Center the selected vocabulary in the visualization screen vocabulary tab and update each NodeStyle
-    this.fitToCurrent();
   }
 
   /**
@@ -1360,20 +1357,6 @@ class EditingVocabulary {
     }
   }
   
-  /**
-   * Flag to move to the middle 
-  * @param {boolean} flg true: move / false: not move
-  * @return {boolean} Original setting value
-  */
-  centerMoveDisabled(flg = true) {
-    let ret = true;
-    if (this.visualVocRef.current) {
-      ret = this.visualVocRef.current.centerMoveDisabled( flg);
-    }
-    return ret;
-  }
-
-
   /**
    * Deselect all nodes in cytoscape in the visualization screen
    */
@@ -1560,12 +1543,12 @@ class EditingVocabulary {
         });
       },this);
     }  
-    const history = new History( colorId, 0);
+    const history = new History( colorId, this.currentNode.id, this.currentLangDiffNode.id);
     history.previous = previousForHistory;
     history.following = followingForHistory;
-    history.targetId = 0;
+    history.targetId = this.currentNode.id;
 
-    this.updateRequest( updateTermList, this.currentNode, isHistory?null:history, null, true, false);
+    this.updateRequest( updateTermList, this.currentNode, isHistory?null:history);
   }
 
   /**
@@ -1912,7 +1895,7 @@ class EditingVocabulary {
 
     // need to DEBUG history
 
-    this.updateRequest(updateTermList, this.currentNode, history, setTermId);
+    this.updateRequest(updateTermList, this.currentNode, history);
     return null;
   }
 
@@ -1967,13 +1950,13 @@ class EditingVocabulary {
       });
     },this);
 
-    const history = new History('position', 0);
+    const history = new History('position', this.currentNode.id, this.currentLangDiffNode.id);
     history.previous = previousForHistory;
     history.following = followingForHistory;
-    history.targetId = 0;
+    history.targetId = this.currentNode.id;
 
     if( updateTermList.length > 0){
-      this.updateRequest(updateTermList, updateTermList[0], history, null, false);
+      this.updateRequest(updateTermList, updateTermList[0], history);
     }
     
     return '';
@@ -1984,10 +1967,8 @@ class EditingVocabulary {
    * @param  {array} updateList - updated vocabulary list
    * @param  {object} current - vocabulary data to be updated
    * @param  {object} history - history data 
-   * @param  {string} oldNodeId - vocabulary old data to be updated
-   * @param  {bool} setCurrent - do setCurrentNodeById() 
    */
-  updateRequest(updateList, current, history = null, oldNodeId = null, setCurrent=true) {
+  updateRequest(updateList, current, history = null) {
 
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + 'term';
     let requestBody = updateList;
@@ -2003,28 +1984,11 @@ class EditingVocabulary {
         )
         .then((response) => {
           this.updateEditingVocabularyData(response.data);
-
-          // Reselect to reset tmp information
-          if( setCurrent){
-            this.setCurrentNodeById(current.id, oldNodeId?false:true);
-          }
-
+          const oldNodeId = this.currentNode.id;
           if (history) {
-            if (!history.targetId) {
-              history.targetId = this.currentNode.id;
-              const find = history.following.find((data) =>
-                data.term === current.term);
-              if (find !== undefined) {
-                find.id = this.currentNode.id;
-                //DEBUG
-                console.assert(false, "something wrong at updateRequest");
-              }
-            }
             editingHistoryStore.addHistory(history);
           }
-          if( oldNodeId && (!this.currentNode.term || (this.currentNode.id && this.currentNode.id != oldNodeId))){
-            this.setCurrentNodeById( oldNodeId, true);
-          }
+          this.setCurrentNodeById( oldNodeId, true);
         }).catch((err) => {
           console.log('[Error] message : ' + err.message);
           let errMsg = '';
