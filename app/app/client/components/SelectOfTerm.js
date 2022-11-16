@@ -65,8 +65,7 @@
       this.props.editingVocabulary.setCurrentNodeById( id );
       this.props.editingVocabulary.deselectTermList();
       if( this.props.editingVocabulary.currentNode.id){
-       this.props.editingVocabulary.setSelectedTermList( this.props.editingVocabulary.currentNode.term,
-                                                         this.props.editingVocabulary.currentNode.language );
+       this.props.editingVocabulary.setSelectedIdList( this.props.editingVocabulary.currentNode );
       }
     }
 

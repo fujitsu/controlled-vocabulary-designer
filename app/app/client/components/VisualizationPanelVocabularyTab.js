@@ -301,9 +301,9 @@ export default
         // Setting of confirmation information
         this.setConfirmStyle(eles, node.data().confirm);
       });
-      const selectTermList = this.props.editingVocabulary.selectedTermList;
-      selectTermList.forEach((item, index)=>{
-        this.changeSelectedTermColor(item.id);
+      const selectTermList = this.props.editingVocabulary.selectedIdList;
+      selectTermList.forEach((id, index)=>{
+        this.changeSelectedTermColor(id);
       });
       const currentNode = this.props.editingVocabulary.currentNode;
       if (currentNode.id) {
@@ -472,25 +472,24 @@ export default
       const withKey = event.originalEvent.ctrlKey|| event.originalEvent.shiftKey;
       this.fitCenterPan = false;
       if( !withKey){
-        if( this.props.editingVocabulary.selectedTermList.length > 1){
+        if( this.props.editingVocabulary.selectedIdList.length > 1){
           this.props.editingVocabulary.deselectTermList();
-          isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
+          isAddTerm = this.props.editingVocabulary.setSelectedIdList(target);
           this.props.editingVocabulary.setCurrentNodeById(Number(target.id), true);
         }else{
           this.props.editingVocabulary.deselectTermList();
           if(this.props.editingVocabulary.currentNode.id !=  target.id){
-            isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
+            isAddTerm = this.props.editingVocabulary.setSelectedIdList(target);
           }
           this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }else{
-        isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term, target.language);
-        if(isAddTerm && this.props.editingVocabulary.selectedTermList.length == 1){
+        isAddTerm = this.props.editingVocabulary.setSelectedIdList(target);
+        if(isAddTerm && this.props.editingVocabulary.selectedIdList.length == 1){
           this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
-        }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length > 0){
-          const firstSelectedTerm = this.props.editingVocabulary.selectedTermList.slice(0,1)[0];
-          this.props.editingVocabulary.setCurrentNodeById(Number(firstSelectedTerm.id), true);
-        }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length == 0){
+        }else if(!isAddTerm && this.props.editingVocabulary.selectedIdList.length > 0){
+          this.props.editingVocabulary.setCurrentNodeById(Number(this.props.editingVocabulary.selectedIdList[0]), true);
+        }else if(!isAddTerm && this.props.editingVocabulary.selectedIdList.length == 0){
           this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }
@@ -710,7 +709,7 @@ export default
     const source = this.source;
 
     this.props.editingVocabulary.deselectTermList();
-    this.props.editingVocabulary.setSelectedTermList(source.term, source.language);
+    this.props.editingVocabulary.setSelectedIdList(source);
     this.props.editingVocabulary.setCurrentNodeById(Number(source.id), true);
     const targetObj = this.props.editingVocabulary.editingVocWithId.get(Number(this.target.id));
 
@@ -992,11 +991,11 @@ export default
    */
    async deselectionConfirm(){
 
-      const selectedTermList = this.props.editingVocabulary.selectedTermList;
+      const selectedIdList = this.props.editingVocabulary.selectedIdList;
 
-      for (let num in selectedTermList) {
-        const item = selectedTermList[num];
-        await this.changeSelectedTermColor(item.id, false);
+      for (let num in selectedIdList) {
+        const item = selectedIdList[num];
+        await this.changeSelectedTermColor(id, false);
       }
       // currentNode clear
       await this.props.editingVocabulary.deselectTermList();       
@@ -1168,7 +1167,7 @@ export default
 
     const nodeList = editingVocabulary.termListForVocabulary;
     const edgesList = editingVocabulary.edgesList;
-    const disabledDeselectConfirm = editingVocabulary.selectedTermList.length > 0 ? false : true;
+    const disabledDeselectConfirm = editingVocabulary.selectedIdList.length > 0 ? false : true;
     const disabledBorderConfirm = editingVocabulary.selectedFile.id !== 0 ? true : disabledDeselectConfirm;
     const transformTogle = this.state.transformTogle;
     const anchorEl = this.state.anchorEl;
@@ -1273,19 +1272,8 @@ export default
                 }}
               >
                 <ColorChartCheckBoxes
+                  editingVocabulary={this.props.editingVocabulary}
                   colorId="color1"
-                  classes={this.props.classes}
-                  currentId={this.props.editingVocabulary.currentNode.id}
-                  color={this.props.editingVocabulary.currentNode.color1}
-                  selectColor={(currentId, colorId, color) =>
-                    this.props.editingVocabulary.updateColor(currentId,
-                        colorId, color)
-                  }
-                  tmpColor={this.props.editingVocabulary.tmpBorderColor}
-                  selectTmpColor={(id, color) =>
-                    this.props.editingVocabulary.selectTmpBorderColor(
-                        id, color)
-                  }
                   disabled={disabledColor}
                   close={()=>this.handleBorderColorPopClose()}
                 />

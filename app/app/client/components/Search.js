@@ -97,7 +97,7 @@ export default class Search extends React.Component {
 
     if (result !== undefined) {
       editingVocabulary.deselectTermList();
-      editingVocabulary.setSelectedTermList( result.term, result.language);
+      editingVocabulary.setSelectedIdList( result);
       editingVocabulary.setCurrentNodeById( result.id, true);
     } else {
       
@@ -189,7 +189,7 @@ export default class Search extends React.Component {
       id: d.id,
       label: d.term,
       hidden: d.hidden,
-      fontweight: d.term==this.props.editingVocabulary.currentNode.term?'bold':'default',
+      fontweight: d.id==this.props.editingVocabulary.currentNode.id?'bold':'default',
       color: d.confirm?'#BBBBBB':'inherit',
       bgcolor: bgColors[d.color1],
     }));

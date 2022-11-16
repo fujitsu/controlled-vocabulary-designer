@@ -74,37 +74,24 @@ class EditingVocabulary {
 
 
   // Array for selected term on Visual vocabulary Tab
-  @observable selectedTermList = [];
+  @observable selectedIdList = [];
 
   /**
    * Set deselected term array
    */
   @action deselectTermList(){
-    this.selectedTermList = [];
+    this.selectedIdList = [];
     this.cyDeselect();
   }
   /**
-   * Set selected term array
+   * Set selected id array
    */
-  @action setSelectedTermList( term, language){
+  @action setSelectedIdList( node ){
     let ret = false;
-    let selectedTermList = this.selectedTermList;      
-    const selectedID = this.getIdbyTermandLang( term, language, this.selectedFile.id);
-
-    const tmpSelectedTermList = selectedTermList.filter((item)=>{
-      return item.id != selectedID;
-    })
-
-    if(tmpSelectedTermList.length == selectedTermList.length){
-      selectedTermList=[ ...selectedTermList, {
-        'id': selectedID, 
-        'term': term,
-      }];
+    if( !this.selectedIdList.includes( node.id)){
+      this.selectedIdList.push(node.id);
       ret = true;
-    }else{
-      selectedTermList=tmpSelectedTermList;
-    }    
-    this.selectedTermList = selectedTermList;
+    }
     return ret;
   }
 
@@ -1066,8 +1053,6 @@ class EditingVocabulary {
     this.tmpTermDescription = {id: '', values: {ja:'', en:''}};
     this.tmpCreatedTime = {id: '', list: []};
     this.tmpModifiedTime = {id: '', list: []};
-    this.tmpBorderColor =
-        {id: this.currentNode.id, color: this.currentNode.color1};
   }
 
   /**
@@ -1533,108 +1518,55 @@ class EditingVocabulary {
 
   /**
    * Changing the color of related terms and vocabulary
-   * @param  {string}  currentId - selected term id
+   * @param  {array}  tagetIds - target id array
    * @param  {string}  colorId - 'color1' or 'color2'
-   * @param  {string}  tmpColor - color to change       
-   * @param  {Boolean} [isHistory=false] - undo/redo
+   * @param  {string}  tmpColor - color to change      
+   * @param  {array}  tagetHistoryObjs - target history object array (hitorys undo only)
+   * @param  {Boolean} isHistory - caller is history
    */
-  @action updateColor(currentId, colorId, tmpColor, isHistory = false) {
+   @action updateColor( tagetIds, colorId, tmpColor = null, tagetHistoryObjs=[], isHistory = false) {
 
-    const selectedTermList = this.selectedTermList;
-    let responseData=null;
-    if(isHistory){
-      responseData = this.tmpUpdateColor(currentId, colorId, tmpColor, isHistory);
-    }else{
-      selectedTermList.forEach((item)=>{      
-        responseData = this.tmpUpdateColor(item.id, colorId, tmpColor, isHistory);
-      });
-      const ret = this.centerMoveDisabled(true);
-      this.setCurrentNodeById(currentId, true);
-      this.centerMoveDisabled( ret);
-    }  
-  }
+    const dataWithId = this.getTargetWithId(this.selectedFile.id);
 
-  tmpUpdateColor(currentId, colorId, tmpColor, isHistory = false) {
-    const requestBody = [];
-    const updateCurrent = this.editingVocWithId.get(currentId);
+    const updateTermList = [];
+    const previousForHistory = [];
+    const followingForHistory = [];
 
-    if (updateCurrent === undefined) {
-      console.log('id: ' + currentId + 'is not found.');
-      return;
-    }
-    const history = new History(colorId, currentId);
-    let dataObj;
-    if ('color1' == colorId) {
-      history.previous = updateCurrent.color1;
-      history.following = tmpColor;
-      dataObj = this.copyData(updateCurrent);
-      dataObj.color1 = tmpColor;
-    } else { // color2
-      history.previous = updateCurrent.color2;
-      history.following = tmpColor;
-      dataObj = this.copyData(updateCurrent);
-      dataObj.color2 = tmpColor;
-    }
-
-    requestBody.push(dataObj);
-    const url = '/api/v1/vocabulary/editing_vocabulary/' + 'term';
-    axios
-        .post(url,
-            requestBody,
-            {
-              headers: {
-                'Content-Type': 'application/json',
-              },
-            },
-        )
-        .then((response) => {
-          console.log('request url:' + url + ' come response.');
-          this.updateEditingVocabularyData(response.data);
-          if (!(isHistory)) {
-            editingHistoryStore.addHistory(history);
-          }
-        }).catch((err) => {
-          console.log('[Error] message : ' + err.message);
-          let errMsg = '';
-          let errCode = -1;
-          // If there is a response
-          if (err.response) {
-            errCode = err.response.status;
-            switch (errCode) {
-              case 400:
-              case 404:
-                // For errors defined in the API
-                if (err.response.data.message) {
-                  errMsg = err.response.data.message;
-                } else {
-                  errMsg = '不明なエラー発生';
-                }
-                break;
-              default:
-                errMsg = '不明なエラー発生';
-                break;
-            }
-          } else {
-            errMsg = err.message;
-          }
-          this.openApiErrorDialog('色情報変更エラー', errCode, errMsg);
+    if( isHistory === true && tmpColor === null){ // history undo
+      tagetHistoryObjs.forEach((item)=>{
+        const dataObj = dataWithId.get( Number(item.id));
+        // update data
+        const dbData = this.copyData(dataObj); // copy
+        dbData[ colorId] = item.color;
+        updateTermList.push( dbData);
+      },this);
+    }else{ // history redo and selected item
+      tagetIds.forEach((id1)=>{
+        const dataObj = dataWithId.get( Number(id1));
+        const colorName = dataObj[colorId];
+        // history
+        previousForHistory.push({
+          id: id1,
+          color: colorName,
         });
+        // update data
+        const dbData = this.copyData(dataObj); // copy
+        dbData.color1 = tmpColor;
+        updateTermList.push( dbData);
+        // history
+        followingForHistory.push({
+          id: id1,
+          color: tmpColor,
+        });
+      },this);
+    }  
+    const history = new History( colorId, 0);
+    history.previous = previousForHistory;
+    history.following = followingForHistory;
+    history.targetId = 0;
+
+    this.updateRequest( updateTermList, this.currentNode, isHistory?null:history, null, true, false);
   }
-
-  @observable tmpBorderColor = {id: '', color: ''};
-
-  /**
-   * Related terms tab color selection event
-   * @param  {string} id - target vocabulary id
-   * @param  {string} color - selected color
-   */
-  @action selectTmpBorderColor(id, color) {
-    if ( (this.tmpBorderColor.id !== '') &&
-        (this.tmpBorderColor.color != color) ) {
-      this.tmpBorderColor = {id: id, color: color};
-    }
-  }
-
 
   /**
    * Returns a sorted list of vocabulary lists by sort specification

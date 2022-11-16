@@ -70,7 +70,7 @@ export default class DialogSettingSynonym extends React.Component {
     const target = this.props.target;
 
     editingVocabulary.deselectTermList();
-    editingVocabulary.setSelectedTermList(source.term, source.language);
+    editingVocabulary.setSelectedIdList(source);
     editingVocabulary.setCurrentNodeById(Number(source.id), true);
 
     const sourceNode = editingVocabulary.editingVocWithId.get(Number(source.id));
