@@ -183,9 +183,6 @@ my:
     dct:description "サンプル用の語彙です"@ja, "The vocabulary for sample"@en;
     dct:creator "Sample Man".
 
-<http://otherVocab/>
-    rdf:type skos:ConceptScheme.
-
 my:1
     rdf:type skos:Concept;
     skos:inScheme my:;
@@ -205,11 +202,6 @@ my:2
     skos:exactMatch <http://otherVocab/16>;
     dct:created "2021-04-01T11:40:15Z";
     dct:modified "2021-04-09T09:22:11Z".
-
-<http://otherVocab/16>
-    rdf:type skos:Concept;
-    skos:inScheme <http://otherVocab/>;
-    skos:exactMatch my:2.
 ```
 
 <div align="right">
