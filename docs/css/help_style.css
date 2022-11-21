@@ -348,6 +348,32 @@ nav dd#Title {
     border-bottom: solid 1px #3B69D9;
 }
 
+#Section21 h2 {
+    font-size: 1.6rem;
+    margin-top: 1em;
+}
+#Section21 h2 + ol {margin-top: 0.5em;}
+#Section21 #process1 {
+    width: 75%;
+}
+#Section21 #process1 img {
+    width: 35%;
+    float: right;
+    margin-top: -75px;
+    margin-right: -30%;
+}
+#Section21 #process2 {margin-top: 2em;}
+#Section21 #process2 img {
+    width: 100%;
+    margin-top: 0.3em;
+}
+#Section21 #process3 {margin-top: 2em;}
+#Section21 ol a {
+    margin-right: 0.3em;
+    margin-left: 0.3em;
+    border-bottom: solid 1px #3B69D9;
+}
+
 #Section20 table {
     border-collapse: separate;
     border-spacing: 0px;
