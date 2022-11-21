@@ -1,19 +1,20 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>統制語彙作成支援ツール Controlled Vocabulary Designer</title>
-    <meta name="description" content="統制語彙作成支援ツール Controlled Vocabulary Designerの紹介ページです">
+    <title>CVD - 統制語彙作成支援ツール</title>
+    <meta name="description" content="ページの内容を表す文章120文字くらい">
     <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/help_style.css">
     <link rel="stylesheet" href="css/index_style.css">
 </head>
     
 <body>
 
-<div class="bgimg-1">
-  <figure id="Logo"><img src="images/cvd_img.png"></figure>
+<div class="bgimg-1 flex-y">
+  <figure id="Logo"><img src="images/cvd_img.svg"></figure>
 </div>
 
 <div class="content content1">
@@ -22,21 +23,118 @@
       <p><a href="https://github.com/fujitsu/controlled-vocabulary-designer" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">CVDのダウンロード</a></p>
     </div>
     <div class="Button">
-      <p><a href="help.html" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">CVDのヘルプを見る</a></p>
+      <p><a href="getting-started.html">クイックスタートガイド</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="help.html">CVDのヘルプ</a></p>
     </div>
   </div>
   <h1>統制語彙作成支援ツール CVD</h1>
   <p>組織や分野を超えてデータを連携するには、データを記述するために使用する用語や語彙の統一が必要となります。<br>
-    通常、この統一化の作業には情報処理の専門的な知識のみならず、当該分野の専門的な知識が必要となり、<br>
-    また、手間がかかります。統制語彙作成支援ツール（Controlled Vocabular Designer）では、<br>
-    分野専門家のみで用語定義作業ができるように、GUIとサポートAIによって情報処理の専門的な知識を不要とし、<br>
-    従来の方法と比べて効率的に統制語彙を作成できます。<br>
-    入出力フォーマットには統制語彙やシソーラスを記述するための標準仕様であるSKOSを採用しており、<br>
-    外部連携が容易です。また、SKOSに比べてより簡便に必要な用語リストを記述できる<br>
-    簡易フォーマット（CSV）を策定、簡易フォーマットによる入出力に対応しています。<br>
-    分野専門家のみで用語定義作業ができるため、<br>
-    新語への追従も容易になりデータ連携のハードルを継続的に低減することに貢献します。
+    通常、この統一化の作業には情報処理の専門的な知識のみならず当該分野の<br>
+    専門的な知識が必要となり、また、手間もかかります。<br>
+    統制語彙作成支援ツール CVD（Controlled Vocabular Designer）では、<br>
+    GUIとサポートAIによって情報処理の専門的な知識を必要とせず、従来の方法に比べ効率的に<br>
+    統制語彙の作成が可能です。分野専門家のみで用語定義作業ができるため、<br>
+    新語への追従も容易になり、データ連携のハードルを継続的に低減することに貢献します。<br>
+    入出力フォーマットには統制語彙やシソーラスを記述するための標準仕様である<br>
+    SKOS（Simple Knowledge Organization System）を採用しており、外部連携が容易です。<br>
+    さらにSKOSに比べて、より簡潔に必要な用語リストを記述できる新たなフォーマット<br>「SKOS-SC（SKOS Subset CSV）」を策定し、入出力にも対応しました。    
   </p>
+
+  <div id="SimpleFormat" class="accordion">
+    <input type="checkbox" id="toggle1" class="toggle">
+    <label class="title" for="toggle1">SKOS-SC（SKOS Subset CSV）フォーマットについて</label>
+    <div class="detail">
+      <h2>「SKOS-SC（SKOS Subset CSV）」は、用語間（概念間）の同義関係や上下関係を<br>簡潔に記述可能なCSV形式のファイルフォーマットです。</h2>
+      <h3>「SKOS-SC（SKOS Subset CSV）」フォーマット策定の背景</h3>
+      <p>
+        異なる企業や組織の間でデータをやり取りするには、互いに意味の分かる用語を使用する必要があります。そこで、用語間の同義関係や上下関係の記述が可能であるSKOS（Simple Knowledge Organization System）という機械可読な標準仕様が用いられます。
+      </p>
+      <p>
+        SKOSはRDF（Resource Description Framework）という形式で語彙を作成できますが、知識処理の知見が少ない利用者にとって、語彙をRDF形式で作成することは容易なことではありません。そこで国立情報学研究所と富士通株式会社では、広く一般に慣れ親しまれている表計算ソフトでも扱えるCSV形式で、用語間の同義関係や上下関係を記述できる「SKOS-SC」フォーマットを策定しました。
+      </p>
+      <h3>「SKOS-SC（SKOS Subset CSV）」フォーマットの特徴</h3>
+      <p>「SKOS-SC」は以下の特徴を持ちます。</p>
+      <ul>
+        <li>「用語名」といったラベルを主に扱う構造のため、RDFの文法や語彙の概念体系といった知識が不要</li>
+        <li>CSV形式で記述するため、より直感的に用語間（概念間）の関係性を記述することが可能</li>
+      </ul>
+      <p>CVDでは、この「SKOS-SC」を拡張し、用語の類似性などを表現した列を追加して、より直感的に用語の定義が可能です。
+      </p>
+      <div class="Button">
+        <p><a href="simple-format.html">SKOS-SCフォーマットの詳細</a></p>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="HelpContent">
+    <form>
+    <input type="checkbox" id="OverlaySW" class="toggle">
+    <label class="HelpTitle" for="OverlaySW">統制語彙編集とCVDのカンタン解説</label>
+    <div id="Overlay">
+        
+      <div id="Contents">
+        
+        <input type="reset" id="OverlaySWoff" class="toggle">
+        <label class="Label close" for="OverlaySWoff">閉じる</label>
+        
+        <input id="block-03" type="radio" class="toggle button" name="Help" >
+        <label class="Label" for="block-03">CVDとは</label>
+        
+        <input id="block-02" type="radio" class="toggle button" name="Help" >
+        <label class="Label" for="block-02">統制語彙とは</label>
+
+        <input id="block-01" type="radio" class="toggle button" name="Help" >
+        <label class="Label block01" for="block-01">統制語彙の編集とは</label>
+
+        <div id="Section01" class="section">
+          <h2>統制語彙の編集とは</h2>
+          <p>モノの名前だったり事象だったり、同一の事柄に対して、いろいろな呼び方（言葉）が存在するときがあります。これは表現が豊かになる反面、なにかと不便です。そこで、これら同じ事柄を指す言葉の関係性を、誰にでもわかりやすく整理しようというのが<em>統制語彙の編集</em>です。</p>
+          <div class="Img">
+            <figure><img src="images/illst_1.png"></figure>
+          </div>
+        </div>
+
+        <div id="Section02" class="section">
+          <h2>統制語彙とは</h2>
+          <p>それぞれの言葉は、ほかの言葉とさまざまな関係を持ちます。</p>
+          <ul class="Emp">
+            <li>同じ意味を持つ言葉<em class="red">➡同義語</em></li>
+            <li>同じ意味を持つ言葉の中で代表となる言葉<em class="red">➡代表語</em></li>
+            <li>言葉を包括している言葉<em class="red">➡上位語</em></li>
+          </ul>
+          <p id="Point"><em>このような関係性を持つ用語の集まりを<br><em>統制語彙</em>といいます</em></p>
+          <div class="Img">
+            <figure><img src="images/illst_2.png"></figure>
+          </div>
+        </div>
+
+        <div id="Section03" class="section">
+          <h2>統制語彙作成支援ツール CVDとは</h2>
+          <p>統制語彙作成では、以下のような様々な用語の情報を編集する必要があります。</p>
+          <ul class="Emp clearfix">
+            <li>同義語</li>
+            <li>代表語</li>
+            <li>代表語のURI</li>
+            <li>上位語</li>
+          </ul>
+          <p>このような多くの関係性や情報を、それぞれの言葉・用語ごとに整理するのは大変な作業です。そこで、これらの作業を支援するために開発されたのが、<em>CVD（Controlled Vocabulary Designer）</em>です。</p>
+          <div class="Img">
+            <div class="BalloonRight">
+              <p>関係性を可視化して直感的な操作が可能</p>
+              <p>AIを活用することで、作業を効率化</p>
+            </div>
+            <figure><img src="images/illst_3.png"></figure>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </form>
+  </div>
+
   <div id="flowchart">
     <h2>語彙の作成フロー</h2>
     <p>（NII武田教授の農業分野（WAGRI）での実績に基づく）</p>
@@ -74,18 +172,30 @@
     <p><a href="https://github.com/fujitsu/controlled-vocabulary-designer" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">CVDのダウンロード</a></p>
   </div>
   <div class="Button">
-    <p><a href="help.html" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">CVDのヘルプを見る</a></p>
+    <p><a href="getting-started.html">クイックスタートガイド</a></p>
+  </div>
+  <div class="Button">
+    <p><a href="help.html">CVDのヘルプ</a></p>
   </div>
 </div>
 
 <div class="bgimg-1">
-  <div id="footerArea">
-    <div id="footer">
-      <h1>CVD</h1>
-      <p>（Controlled Vocabulary Designer）</p>
-      <p>統制語彙作成支援ツール</p>
+  <footer>
+    <div id="footerArea">
+      <div id="FooterContent">
+        <figure><a href="index.html"><img src="images/cvd_img.svg"></a></figure>
+        <h1>CVD（Controlled Vocabulary Designer）</h1>
+        <p>統制語彙作成支援ツール</p>
+        <ul>
+          <li><a href="index.html">CVDの紹介 トップページ</a></li>
+          <li><a href="simple-format.html">SKOS-SCフォーマットの詳細</a></li>
+          <li><a href="getting-started.html">クイックスタートガイド</a></li>
+          <li><a href="help.html">CVDのヘルプ</a></li>
+          <li><a href="https://github.com/fujitsu/controlled-vocabulary-designer">CVDのダウンロード</a></li>
+        </ul>
+      </div>
     </div>
-  </div>
+  </footer>
 </div>
 
 </body>

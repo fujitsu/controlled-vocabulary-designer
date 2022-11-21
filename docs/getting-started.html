@@ -1,0 +1,226 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CVD - クイックスタートガイド</title>
+    <meta name="description" content="CVD - 統制語彙作成支援ツール クイックスタートガイド">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/page_style.css">
+</head>
+    
+<body>
+
+<div class="bgimg-1">
+  <figure id="Logo"><a href="index.html"><img src="images/cvd_img.svg"></a></figure>
+</div>
+
+<div class="content content1">
+  <div class="content sticky">
+    <div class="Button">
+      <p><a href="https://github.com/fujitsu/controlled-vocabulary-designer" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">CVDのダウンロード</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="getting-started.html">クイックスタートガイド</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="help.html">CVDのヘルプ</a></p>
+    </div>
+  </div>
+  <div id="GettingStart" class="clearfix">
+    <h1>クイックスタートガイド</h1>
+    <p>このページではCVDの基本的な使い方について解説しています</p>
+
+    <ul id="Nav">
+      <li><a href="#Chapter1">CVDの起動</a></li>
+      <li><a href="#Chapter2">WEBブラウザからのアクセス</a></li>
+      <li><a href="#Chapter3">WEBブラウザでの操作</a></li>
+      <li><a href="#Chapter4">ファイルの読み込み</a></li>
+      <li><a href="#Chapter5">用語の編集</a>
+        <ul>
+        <li><a href="#Chapter5-1">同義関係と上下関係の編集</a></li>
+        <ul>
+          <li><a href="#Chapter5-1-1">同義関係の編集</a></li>
+          <li><a href="#Chapter5-1-2">上下関係の編集</a></li>
+        </ul>
+        <li><a href="#Chapter5-2">詳しい情報の表示と編集</a></li>
+        </ul>
+      </li>
+      <li><a href="#Chapter6">ファイルの書き出し</a></li>
+    </ul>
+
+    <div id="Container">
+      <div id="Intro">
+        <p>Linuxマシンに以下のバージョンのdockerおよびdocker-composeがインストールされていることが前提となります。</p>
+        <ul>
+          <li>docker : バージョン19.03以上</li>
+          <li>docker-compose : バージョン1.23以上</li>
+        </ul>
+        <p>dockerおよびdocker-composeがインストールされていない場合は、<a href="https://matsuand.github.io/docs.docker.jp.onthefly/" target="_blank" rel="noopener noreferrer">Dockerの公式ページ</a>などを参照の上、インストールしてください。</p>
+      </div>
+      
+      <div id="Chapter1">
+        <h2>CVDの起動</h2>
+        <p>Linuxマシン上でCVDを起動する方法</p>
+        <h3>1</h3>
+        <p>CVDのリポジトリをローカルのLinuxマシンにクローンします。Linuxマシンのターミナル上で以下のコマンドを実行してください。</p>
+        <pre><code>$ git clone https://github.com/fujitsu/controlled-vocabulary-designer.git</code></pre>
+        <h3>2</h3>
+        <p>クローンしたCVDのリポジトリのフォルダに移動し、Linuxマシンのターミナル上で以下のコマンドを実行します。<sup>（※1）</sup></p>
+        <pre><code>$ docker-compose up -d</code></pre>
+        <p><img src="images/getting_start1.png"></p>
+        <p class="comments">（※1）proxy環境下で使用されるときは、<code>HTTP_PROXY, HTTPS_PROXY</code>を事前に環境変数に設定してください。</p>
+        <h3>3</h3>
+        <p>Linuxマシンのターミナル上で以下のように表示されれば起動成功です。</p>
+        <p><img src="images/getting_start2.png"></p>
+      </div>
+
+      <div id="Chapter2">
+        <h2>WEBブラウザからのアクセス</h2>
+        <p>起動したCVDにWEBブラウザからアクセスする方法</p>
+        <h3>1</h3>
+        <p>作業環境のWEBブラウザ<sup>（※2）</sup>で以下にアクセスします。</p>
+        <pre><code>http://(hostname):10081/</code></pre>
+        <p>あるいは</p>
+        <pre><code>http://(LinuxマシンのIPアドレス):10081/</code></pre>
+        <p class="comments">(※2) サポートしているブラウザは以下の通りです。</p>
+        <ul class="comments">
+          <li>Google Chrome</li>
+          <li>Microsoft Edge</li>
+        </ul>
+        <h3>2</h3>
+        <p>以下の図のような画面が表示されればWEBブラウザからのアクセスは成功です。</p>
+        <p><img src="images/getting_start3.png"></p>
+      </div>
+
+      <div id="Chapter3">
+        <h2>WEBブラウザでの操作</h2>
+        <p>WEBブラウザ上での操作方法について</p>
+        <p>以降では、クローンしたCVDのリポジトリのsample-fileフォルダにある以下のファイルを使用して、WEBブラウザでの操作方法を説明します。</p>
+        <ul>
+          <li>hensyugoi.csv</li>
+          <li>hensyugoi_meta.csv</li>
+          <li>sansyougoi.csv</li>
+        </ul>
+      </div>
+
+      <div id="Chapter4">
+        <h2>ファイルの読み込み</h2>
+        <p>CVDにファイルを読み込む方法</p>
+        <h3>1</h3>
+        <p>CVD画面左上の「ファイル」→「開く」をクリックすると、ファイルの読み込みダイアログが表示されます。「編集用語彙」の参照ボタンをクリックし、hensyugoi.csvを選択します。</p>
+        <p><img id="Img24" src="images/getting_start4.png"></p>
+        <h3>2</h3>
+        <p>「編集用語彙_meta」の参照ボタンをクリックし、hensyugoi_meta.csvを選択します。</p>
+        <h3>3</h3>
+        <p>「参照用語彙1」の参照ボタンをクリックし、sansyougoi.csvを選択します。その後、下の「OK」をクリックします。</p>
+        <p><img src="images/getting_start5.png"></p>
+        <h3>4</h3>
+        <p>ダイアログが消えて、以下のように用語が表示されれば、ファイルの読み込みが完了です。（画面上に表示されているのは、hensyugoi.csvの内容になります。）</p>
+        <p><img src="images/getting_start7.png"></p>
+        <h3>5</h3>
+        <p>hensyugoi_meta.csvの内容は、画面上部「語彙基本情報」をクリックすると確認、編集することができます。</p>
+        <p><img id="Img8" src="images/getting_start8.png"></p>
+        <h3>6</h3>
+        <p>sansyougoi.csvの内容は、画面上部「参照用語彙1」をクリックすることで確認できます。（sansyougoi.csvの内容は表示のみで編集はできません）</p>
+        <p><img src="images/getting_start9.png"></p>
+      </div>
+
+      <div id="Chapter5">
+        <h2>用語の編集</h2>
+        <p>CVDで用語を編集する方法</p>
+        <h3>1</h3>
+        <p>画面上部「編集用語彙」タブをクリックし、hensyugoi.csvの内容を表示します。一例として、画面上で”コンビニ”という用語を探します。画面上を目視で探すか、右上の検索ボックス上で検索することができます。検索ボックスをクリックすると、hensyugoi.csvに記載されている用語一覧が表示されます。</p>
+        <p><img src="images/getting_start10.png"></p>
+        <h3>2</h3>
+        <p>検索ボックス上で”コンビニ”を選択すると、”コンビニ”が画面中央に表示されます。</p>
+        <p><img src="images/getting_start11.png"></p>
+        <h3>3</h3>
+        <p>他の用語と重なり、少し見づらいため、”コンビニ”の表示位置を少しずらします。”コンビニ”をドラッグし、適当な場所に動かします。</p>
+        <p><img src="images/getting_start12.png"></p>
+        <h3>4</h3>
+        <p>”コンビニ”の外枠に色をつけて、場所を目立たせます。画面上部「枠線色変更」をクリックし、適当な色を選択します。ここでは、「レッド」を選択します。すると、”コンビニ”の外枠の色が赤色に変更されます。</p>
+        <p><img src="images/getting_start13.png"></p>
+        
+        <h3 id="Chapter5-1" class="Title">同義関係と上下関係を編集する</h3>
+        <p>”コンビニ”の同義関係、上下関係を編集する方法について</p>
+        <p>”コンビニ”の上にマウスポインタを合わせると、ポイントが3つ表示されます。このポイントから用語の関係性を引き出すことができます。</p>
+        <p><img id="Img14" src="images/getting_start14.png"></p>
+        <p><br></p>
+        <h3>1</h3>
+        <h4 id="Chapter5-1-1">同義関係の編集</h4>
+        <p>”コンビニ”の同義語として”コンビニエンスストア”を設定してみましょう。<br>”コンビニ”にポインタを合わせて表示された3つのポイントのうち、左右のポイントのいづれかの上でマウスボタンを押し下げたままドラッグすると、同義関係線を引き出すことができます。</p>
+        <p><img id="Img15" src="images/getting_start15.png"></p>
+        <h3>2</h3>
+        <p>同義関係線をドラッグして引っ張りながら”コンビニエンスストア”の上でマウスボタンをはなすと、次のようなダイアログが表示されます。プルダウンから代表語（同義語を代表する用語）となる用語を選択してください。</p>
+        <p><img src="images/getting_start16.png"></p>
+        <h3>3</h3>
+        <p>ここでは、代表語として”コンビニエンスストア”を選択します。すると、次のように、”コンビニ”と”コンビニエンスストア”がグレーの線で結ばれました。このグレーの線が同義関係線です。</p>
+        <p><img src="images/getting_start17.png"></p>
+        <p><br></p>
+        <h3>1</h3>
+        <h4 id="Chapter5-1-2">上下関係の編集</h4>
+        <p>”コンビニエンスストア”の上位語に”店舗”を設定してみましょう。 <br>まず、”店舗”が”http://otherVocabulary/16”に重なって見えないためマウスドラッグで適当な位置に移動します。”コンビニエンスストア” の上にマウスポインタを合わせると、ポイントが3つ表示されます。このうち、上部のポイント上でマウスボタンを押し下げ、ドラッグすると上下関係線を引き出せます。</p>
+        <p><img src="images/getting_start18.png"></p>
+        <h3>2</h3>
+        <p>上下関係線をドラッグして”店舗”の上でマウスボタンをはなすと、次のダイアログが表示されますので、確認してOKをクリックします。</p>
+        <p><img src="images/getting_start19.png"></p>
+        <h3>3</h3>
+        <p>すると、次のように、”コンビニエンスストア”から”店舗”に向かう先端が矢印の黒い線で結ばれました。この線が上下関係線です。（矢印の先端がある方が上位語になります）</p>
+        <p><img src="images/getting_start20.png"></p>
+        <h3 id="Chapter5-2" class="Title">詳しい情報を表示・編集する</h3>
+        <p>編集パネルを使用して、詳しい情報の表示と編集をする方法</p>
+        <h3>1</h3>
+        <p>”コンビニエンスストア”をクリックしたあと、画面右上の「編集」をクリックします。</p>
+        <p><img src="images/getting_start21.png"></p>
+        <h3>2</h3>
+        <p>”コンビニエンスストア”についての情報（以降、編集パネル）が表示されます。</p>
+        <p><img src="images/getting_start22.png"></p>
+        <h3>3</h3>
+        <p>同義語・代表語・上位語は、この編集パネルでも編集できます。同義語テキストボックスをクリックすると、AIによる同義語候補結果が表示されます。この中から同義語であると考えられる用語を選択するか、手入力することで同義語を設定できます。上位語についても同様です。</p>
+        <p><img id="Img23" src="images/getting_start23.png"></p>
+        <h3>4</h3>
+        <p>編集パネルでは、IDを編集することで代表語のURIを変更したり、用語の説明を編集することもできます。<br>ここでは、用語の説明を編集してみます。用語の説明テキストボックスに、”コンビニエンスストアに関する補足情報です”と入力し、キーボードのEnterを押します。すると、下図のように背景が赤い状態になります。この状態ではまだデータとして保存されていません。編集が終わったら最後に一番下の「反映」ボタンをクリックすると、編集した内容が保存され編集パネルが閉じます。</p>
+        <p><img id="Img24" src="images/getting_start24.png"></p>
+        <h3>5</h3>
+        <p>用語の説明は同義語すべてに同じ値が入ります。<br>”コンビニエンスストア”を選択したままの状態から編集パネルを開き、編集パネル上部のプルダウンから”コンビニ”を選択して”コンビニ”に切り替えます。用語の説明テキストボックスを確認すると、先ほど入力した”コンビニエンスストアに関する補足情報です”が表示されています。</p>
+        <p><img id="Img25" src="images/getting_start25.png"></p>
+      </div>
+
+      <div id="Chapter6">
+        <h2>ファイルの書き出し</h2>
+        <p>CVDで編集中のデータをファイルとして書き出す方法</p>
+        <p>書き出しできるファイルの種類は以下の3種類です。</p>
+        <ul>
+          <li>CSV（用語一覧）</li>
+          <li>CSV（語彙基本情報）</li>
+          <li>RDF</li>
+        </ul>
+        <p>いずれも同様の手順で書き出すことができます。（RDFの書き出しでは、ファイルフォーマットを選択できます。）</p>
+        <p>以下はCSV（用語一覧）を例にした書き出し方法です。<br>CVD画面左上の「ファイル」→「保存」→「編集用語彙」の順にクリックします。<br>下図のダイアログが表示され、任意のファイル名を入力して「OK」をクリックすると、ファイルがダウンロードされます。</p>
+        <p><img src="images/getting_start26.png"></p>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div id="FooterContent">
+    <figure><a href="index.html"><img src="images/cvd_img.svg"></a></figure>
+    <h1>CVD（Controlled Vocabulary Designer）</h1>
+    <p>統制語彙作成支援ツール</p>
+    <ul>
+      <li><a href="index.html">CVDの紹介 トップページ</a></li>
+      <li><a href="simple-format.html">SKOS-SCフォーマットの詳細</a></li>
+      <li><a href="getting-started.html">クイックスタートガイド</a></li>
+      <li><a href="help.html">CVDのヘルプ</a></li>
+      <li><a href="https://github.com/fujitsu/controlled-vocabulary-designer">CVDのダウンロード</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
