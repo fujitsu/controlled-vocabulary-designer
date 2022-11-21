@@ -298,7 +298,7 @@ class EditingVocabularyMeta {
     });
 
     if( updateTermList.length > 0){
-      editingVocabularyStore.updateRequest(updateTermList, updateTermList[0], null, null, false);
+      editingVocabularyStore.updateRequest(updateTermList, updateTermList[0]);
     }
   }
 

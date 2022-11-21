@@ -58,6 +58,7 @@ export default
   componentDidMount() {
     this.props.editingVocabulary.setCurrentNodeById(
       this.props.editingVocabulary.currentNode.id, true);
+    this.props.editingVocabulary.currentNode.id&&this.props.editingVocabulary.fitToCurrent();
     this.rootElm = document.getElementById('vocabulary_edit_panel');
     this.rootElm&&this.rootElm.addEventListener('keydown', this.handleKeyDown.bind(this));
   }

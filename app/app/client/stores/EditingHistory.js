@@ -201,25 +201,20 @@ class EditingHistory {
    * @param  {object} history - information of history
    */
   execChangeColor(type, history) {
-    // const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
+    let targetIds;
+    let targetObjs;
     let color;
     if (this.STR_UNDO === type) {
-      color = history.previous;
+      targetIds = [];
+      targetObjs = history.previous;
+      color = null;
     } else { // redo
-      color = history.following;
+      targetIds = history.following.map((item)=>{ return item.id});
+      targetObjs = [];
+      color = history.following[0].color;
     }
 
-    const EditingVocabulary = editingVocabularyStore;
-    switch (history.action) {
-      case 'color1':
-        EditingVocabulary.updateColor(history.targetId, 'color1', color, true);
-        break;
-      case 'color2':
-        EditingVocabulary.updateColor(history.targetId, 'color2', color, true);
-        break;
-      default:
-        break;
-    }
+    editingVocabularyStore.updateColor( targetIds, history.action, color, targetObjs, true);
   }
 
   /**
@@ -275,7 +270,7 @@ class EditingHistory {
         }
       });
     }
-    EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.id);
+    EditingVocabulary.updateRequest(updateList, currentData);
   }
 
   /**
@@ -349,7 +344,7 @@ class EditingHistory {
       }, this);
     }
 
-    EditingVocabulary.updateRequest(updateList, currentData, null, null);
+    EditingVocabulary.updateRequest(updateList, currentData);
   }
 
   // Display message function /////////////////////////////////////////////
@@ -462,21 +457,16 @@ class EditingHistory {
    * @return {string} - message
    */
   makeColorMessage(type, history) {
-    let message =
-        '「' +
-        this.getTermFromEditingVocabulary(history.targetId) +
-        '」の情報を変更しました。\n';
 
-    if (history.action === 'color1' || history.action === 'color2') {
-      message += '枠線\n　色：';
-    } else {
+    if (history.action !== 'color1' || history.action !== 'color2') {
       console.log('invalid action has came. action: ' + history.action);
     }
 
+    let message='';
     if (this.STR_UNDO === type) {
-      message += '"' + history.following + '"から"' + history.previous + '"';
+      message = '枠線色の変更を取り消しました。';
     } else { // redo
-      message += '"' + history.previous + '"から"' + history.following + '"';
+      message = '枠線色の変更をやり直しました。';
     }
 
     return message;
@@ -948,8 +938,18 @@ class EditingHistory {
   history = {
     action : "color1" or "color2",
     targetId : 000,
-    previous : "black",
-    following : "brown",
+    previous : [
+      {
+        id : 0, // number
+        color: "black",
+      }, ...
+    ],
+    following : [
+      {
+        id : 0, // number
+        color: "brown",
+      }, ...
+    ],
   };
 
   // case2 : Sample synonyms, preferred labels, URIs, and broader terms change history data for vocabulary tabs
