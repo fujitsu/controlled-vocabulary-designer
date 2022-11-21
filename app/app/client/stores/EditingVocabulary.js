@@ -1893,8 +1893,6 @@ class EditingVocabulary {
     history.action = "vocabulary";
     history.targetId = this.currentNode.id;
 
-    // need to DEBUG history
-
     this.updateRequest(updateTermList, this.currentNode, history);
     return null;
   }
