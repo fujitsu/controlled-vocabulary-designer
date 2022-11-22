@@ -1741,7 +1741,7 @@ class EditingVocabulary {
       followObj.term = obj.term; // term as is 
       followObj.preferred_label = obj.term; // set term as preferredLabel
       followObj.language = obj.language; // language as is 
-      followObj.idofuri = obj.term + '@' + obj.language// tentative treatment
+      followObj.idofuri = obj.term + '@' + obj.language + String(Date.now());// tentative treatment
       // we need to change it to UUID or something else
       followObj.uri = uri_prefix + followObj.idofuri; 
       followObj.broader_uri = obj.broader_uri;// broader_uri as is 
