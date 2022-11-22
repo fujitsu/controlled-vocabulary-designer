@@ -345,7 +345,7 @@ class App extends React.Component {
     editingVocabularyStore.getReferenceVocabularyDataFromDB('2');
     editingVocabularyStore.getReferenceVocabularyDataFromDB('3');
 
-    this.readFileChack();
+    await this.readFileChack();
   }
 
   readFileChack(){

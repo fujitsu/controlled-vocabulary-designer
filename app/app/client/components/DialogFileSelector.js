@@ -179,7 +179,6 @@ export default class DialogFileSelector extends React.Component {
     if (undefined != this.state.files[0].file.name) {
       await this.props.editingVocabulary.getEditingVocabularyDataFromDB();
     }
-
   }
   
   /**

@@ -1143,7 +1143,6 @@ export default
     const editingVocabulary = this.props.editingVocabulary;
 
     const nodeList = editingVocabulary.termListForVocabulary;
-    // const edgesList = editingVocabulary.edgesList[editingVocabulary.selectedFile.id];
     const edgesList = editingVocabulary.edgesListId;
     const disabledDeselectConfirm = editingVocabulary.selectedIdList.length > 0 ? false : true;
     const disabledBorderConfirm = editingVocabulary.selectedFile.id !== 0 ? true : disabledDeselectConfirm;
