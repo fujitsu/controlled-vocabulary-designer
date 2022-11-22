@@ -114,6 +114,7 @@ class EditingVocabulary {
             this.visualVocRef.current.situationArrReset(0);
           }
           this.initializeEditingVocabularyData(response.data.EditingVocabulary);
+          this.calcEdgesList(0);
           if (0 == this.selectedFile.id) {
             this.currentNodeClear();
             this.tmpDataClear();
@@ -486,6 +487,7 @@ class EditingVocabulary {
                     response.data.ReferenceVocabulary, param
                 );
                 this.referenceVocabulary1.forEach((data)=> this.referenceVocWithId[1].set(data.id, data));
+                this.calcEdgesList(1);
               if (1 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -499,6 +501,7 @@ class EditingVocabulary {
                     response.data.ReferenceVocabulary, param
                 );
               this.referenceVocabulary2.forEach((data)=> this.referenceVocWithId[2].set(data.id, data));
+              this.calcEdgesList(2);
               if (2 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -512,6 +515,7 @@ class EditingVocabulary {
                     response.data.ReferenceVocabulary, param
                 );
               this.referenceVocabulary3.forEach((data)=> this.referenceVocWithId[3].set(data.id, data));
+              this.calcEdgesList(3);
               if (3 == this.selectedFile.id) {
                 this.currentNodeClear();
                 this.tmpDataClear();
@@ -705,12 +709,17 @@ class EditingVocabulary {
     }
   }
 
+  @observable edgesList = [[], [], [], []];
+
+  @computed get edgesListId(){
+    return this.edgesList[this.selectedFile.id];
+  };
   /**
    * edgesList generation computed
    * @return {array} EdgesList for the visualization screen panel vocabulary tab
    */
-  @computed get edgesList() {
-    const fileId = this.selectedFile.id;
+   @action calcEdgesList(fileId = 0) {
+    // const fileId = this.selectedFile.id;
     const termListForVocWithId = this.getTargetWithId(fileId);
 
     const broaderTermEdges = [];
@@ -836,7 +845,7 @@ class EditingVocabulary {
 
     }, this);
 
-    return [...broaderTermEdges, ...synonymEdges];
+    this.edgesList[fileId] = [...broaderTermEdges, ...synonymEdges];
   };
 
   /**
@@ -1548,7 +1557,7 @@ class EditingVocabulary {
     history.following = followingForHistory;
     history.targetId = this.currentNode.id;
 
-    this.updateRequest( updateTermList, this.currentNode, isHistory?null:history);
+    this.updateRequest( updateTermList, isHistory?null:history);
   }
 
   /**
@@ -1634,48 +1643,11 @@ class EditingVocabulary {
           position: {
             x: data.position_x?this.calcPosition(data.position_x):0,
             y: data.position_y?this.calcPosition(data.position_y):0,
-          },
-          broader_term: data.broader_term,
+          }
         });
       }
     });
 
-    // // add other vocabulary data  
-    // const otherVocSynonymUri = [];
-    // targetData.forEach((data) => {
-
-    //   const findNode = otherVocSynonymUri.find((item) => { 
-    //     return item.data.term == data.other_voc_syn_uri 
-    //   })
-    //   if( findNode===undefined && data.other_voc_syn_uri
-    //     && ((data.other_voc_syn_uri.indexOf("http://") != -1) 
-    //     || (data.other_voc_syn_uri.indexOf("https://") != -1))){
-    //     // Editing vocabulary
-    //     otherVocSynonymUri.push({
-    //       data: {
-    //         id: data.id * -1,
-    //         term: data.other_voc_syn_uri,
-    //         language: data.language,
-    //         // preferred_label: data.preferred_label,
-    //         // idofuri: data.idofuri,
-    //         // uri: data.uri,
-    //         vocabularyColor: '',
-    //         other_voc_syn_uri: data.other_voc_syn_uri,
-    //         // term_description: '',
-    //         // created_time: '',
-    //         // modified_time: '',
-    //         confirm:'',
-    //       },
-    //       position: {
-    //         x: data.position_x?this.calcPosition(data.position_x):0,
-    //         y: data.position_y?this.calcPosition(data.position_y):0,
-    //       },
-    //       broader_term: '',
-    //     });
-    //   }
-    // });
-
-    // return termListForVocabulary.concat(otherVocSynonymUri);
     return termListForVocabulary;
   }
 
@@ -1893,7 +1865,8 @@ class EditingVocabulary {
     history.action = "vocabulary";
     history.targetId = this.currentNode.id;
 
-    this.updateRequest(updateTermList, this.currentNode, history);
+    const doEdgeUpdate = true;
+    this.updateRequest(updateTermList, history, doEdgeUpdate);
     return null;
   }
 
@@ -1954,7 +1927,7 @@ class EditingVocabulary {
     history.targetId = this.currentNode.id;
 
     if( updateTermList.length > 0){
-      this.updateRequest(updateTermList, updateTermList[0], history);
+      this.updateRequest(updateTermList, history);
     }
     
     return '';
@@ -1963,10 +1936,11 @@ class EditingVocabulary {
   /**
    * Execute vocabulary data update
    * @param  {array} updateList - updated vocabulary list
-   * @param  {object} current - vocabulary data to be updated
    * @param  {object} history - history data 
+   * @param  {boolean} doEdgeUpdate - doEdgeUpdate 
+   * 
    */
-  updateRequest(updateList, current, history = null) {
+  updateRequest(updateList, history = null, doEdgeUpdate = false) {
 
     const updeteUrl = '/api/v1/vocabulary/editing_vocabulary/' + 'term';
     let requestBody = updateList;
@@ -1982,6 +1956,9 @@ class EditingVocabulary {
         )
         .then((response) => {
           this.updateEditingVocabularyData(response.data);
+          if(doEdgeUpdate){
+            this.calcEdgesList();
+          }
           const oldNodeId = this.currentNode.id;
           if (history) {
             editingHistoryStore.addHistory(history);
