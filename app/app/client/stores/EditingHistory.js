@@ -271,6 +271,7 @@ class EditingHistory {
       });
     }
     EditingVocabulary.updateRequest(updateList, currentData);
+    EditingVocabulary.calcEdgesList();
   }
 
   /**

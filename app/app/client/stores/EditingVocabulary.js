@@ -709,7 +709,7 @@ class EditingVocabulary {
    * edgesList generation computed
    * @return {array} EdgesList for the visualization screen panel vocabulary tab
    */
-  @computed get edgesList() {
+  @computed get edgesList222() {
     const fileId = this.selectedFile.id;
     const termListForVocWithId = this.getTargetWithId(fileId);
 
@@ -837,6 +837,145 @@ class EditingVocabulary {
     }, this);
 
     return [...broaderTermEdges, ...synonymEdges];
+  };
+
+
+  @observable edgesList = [[], [], [], []];
+  @computed get edgesListId(){
+    return this.edgesList[this.selectFile.id];
+  }
+  /**
+   * edgesList generation computed
+   * @return {array} EdgesList for the visualization screen panel vocabulary tab
+   */
+   @action calcEdgesList(fileId = 0) {
+    // const fileId = this.selectedFile.id;
+    const termListForVocWithId = this.getTargetWithId(fileId);
+
+    const broaderTermEdges = [];
+    const synonymEdges = [];
+    // calculate each synonym group
+    this.uri2synoid[fileId].forEach((ids, uri)=>{
+      // 
+      let preid_ja;
+      let preid_en;
+      let broader_uri = '';
+      
+      ids.forEach((id1)=>{
+        const data1 = termListForVocWithId.get(id1);
+        if(data1.term === data1.preferred_label && !data1.hidden){
+          // get data who is the preferred label
+          if(data1.language === 'ja'){
+            preid_ja = id1;
+            broader_uri = data1.broader_uri;
+          }else{
+            preid_en = id1;
+            broader_uri = data1.broader_uri;
+          }
+        }
+      },this);
+
+      // set target node id
+      let targetid ={}; // sink of arrow for each language
+      let broaderrootid; // root of arrow for broader
+      if(undefined !== preid_ja && undefined !== preid_en){
+        targetid['ja'] = preid_ja;
+        targetid['en'] = preid_en;
+        broaderrootid = preid_ja;
+      }else if(undefined !== preid_ja && undefined === preid_en){
+        targetid['ja'] = preid_ja;
+        targetid['en'] = preid_ja;
+        broaderrootid = preid_ja;
+      }else if(undefined === preid_ja && undefined !== preid_en){
+        targetid['ja'] = preid_en;
+        targetid['en'] = preid_en;
+        broaderrootid = preid_en;
+      }
+
+      // set synonym edges
+      ids.forEach((id1)=>{
+        const dataObj = termListForVocWithId.get(id1);
+        if(dataObj.hidden || dataObj.external_voc){
+          // the data is hidden or external_voc
+          // nothing to do
+        }else{
+          if(id1 === broaderrootid){
+            // id1-extvoc line
+            if(dataObj.other_voc_syn_uri !== '' && fileId === 0){
+              const extset = this.uri2synoid[fileId].get(dataObj.other_voc_syn_uri);
+              const extid= [...extset][0];
+              synonymEdges.push({
+                data: {
+                  type: 'synonym',
+                  target: extid,
+                  source: id1,
+                  label: ''
+                },
+                classes: ['synonym'],
+              }); 
+            }
+          }else if(id1 === targetid[dataObj.language]){
+            // id1 - broaderroot line
+            synonymEdges.push({
+              data: {
+                type: 'synonym',
+                target: id1,
+                source: broaderrootid,
+                label: ''
+              },
+              classes: ['synonym'],
+            }); 
+          }else{
+            // id1 - target[lang] line
+            synonymEdges.push({
+              data: {
+                type: 'synonym',
+                target: id1,
+                source: targetid[dataObj.language],
+                label: ''
+              },
+              classes: ['synonym'],
+            }); 
+          }
+        }
+      }, this);
+      // set broader edges
+      if(broader_uri !== ''){
+        let preidbro_ja;
+        let preidbro_en;
+        let preidbro;
+        // for synonym group
+        this.uri2synoid[fileId].get(broader_uri).forEach((id2)=>{
+          const data2 = termListForVocWithId.get(id2);
+          if(data2.term === data2.preferred_label && !data2.hidden){
+            // get data who is the preferred label
+            if(data2.language === 'ja'){
+              preidbro_ja = id2;
+            }else{
+              preidbro_en = id2;
+            }
+          }
+        },this);
+        if(undefined !== preidbro_ja){
+          preidbro = preidbro_ja;
+        }else{
+          preidbro = preidbro_en;
+        }
+        broaderTermEdges.push({
+          data: {
+            type: 'broader_term',
+            target: broaderrootid,
+            source: preidbro,
+            label: '',
+            arrow: 'triangle',
+          },
+          classes: ['broader_term'],
+        });
+      }
+
+    }, this);
+
+    this.edgesList[fileId] = [...broaderTermEdges, ...synonymEdges];
   };
 
   /**
@@ -1640,42 +1779,6 @@ class EditingVocabulary {
       }
     });
 
-    // // add other vocabulary data  
-    // const otherVocSynonymUri = [];
-    // targetData.forEach((data) => {
-
-    //   const findNode = otherVocSynonymUri.find((item) => { 
-    //     return item.data.term == data.other_voc_syn_uri 
-    //   })
-    //   if( findNode===undefined && data.other_voc_syn_uri
-    //     && ((data.other_voc_syn_uri.indexOf("http://") != -1) 
-    //     || (data.other_voc_syn_uri.indexOf("https://") != -1))){
-    //     // Editing vocabulary
-    //     otherVocSynonymUri.push({
-    //       data: {
-    //         id: data.id * -1,
-    //         term: data.other_voc_syn_uri,
-    //         language: data.language,
-    //         // preferred_label: data.preferred_label,
-    //         // idofuri: data.idofuri,
-    //         // uri: data.uri,
-    //         vocabularyColor: '',
-    //         other_voc_syn_uri: data.other_voc_syn_uri,
-    //         // term_description: '',
-    //         // created_time: '',
-    //         // modified_time: '',
-    //         confirm:'',
-    //       },
-    //       position: {
-    //         x: data.position_x?this.calcPosition(data.position_x):0,
-    //         y: data.position_y?this.calcPosition(data.position_y):0,
-    //       },
-    //       broader_term: '',
-    //     });
-    //   }
-    // });
-
-    // return termListForVocabulary.concat(otherVocSynonymUri);
     return termListForVocabulary;
   }
 
@@ -1894,6 +1997,7 @@ class EditingVocabulary {
     history.targetId = this.currentNode.id;
 
     this.updateRequest(updateTermList, this.currentNode, history);
+    this.calcEdgesList();
     return null;
   }
 
@@ -1955,6 +2059,7 @@ class EditingVocabulary {
 
     if( updateTermList.length > 0){
       this.updateRequest(updateTermList, updateTermList[0], history);
+      this.calcEdgesList();
     }
     
     return '';

@@ -169,16 +169,21 @@ export default class DialogFileSelector extends React.Component {
     }
     if (undefined != this.state.files[1].file.name) {
       await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('1');
+      this.props.editingVocabulary.calcEdgesList(1);
     }
     if (undefined != this.state.files[2].file.name) {
       await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('2');
+      this.props.editingVocabulary.calcEdgesList(2);
     }
     if (undefined != this.state.files[3].file.name) {
       await this.props.editingVocabulary.getReferenceVocabularyDataFromDB('3');
+      this.props.editingVocabulary.calcEdgesList(3);
     }
     if (undefined != this.state.files[0].file.name) {
       await this.props.editingVocabulary.getEditingVocabularyDataFromDB();
+      this.props.editingVocabulary.calcEdgesList(0);
     }
+
   }
   
   /**
