@@ -9,7 +9,6 @@ import Cytoscape from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 
 import dagre from 'cytoscape-dagre';
-import klay from 'cytoscape-klay';
 
 import {brown} from '@material-ui/core/colors';
 import {red} from '@material-ui/core/colors';
@@ -41,7 +40,6 @@ import Search from './Search';
 
 Cytoscape.use(edgehandles);
 Cytoscape.use(dagre);
-Cytoscape.use(klay);
 
 
 /**
@@ -278,8 +276,8 @@ export default
         "width": 5.0/zoom,
       });
       
-      const nodeInViewStyle = {        
-        'width': 'label',
+      const nodeInViewStyle = {
+        'width':(node) => { return (this.bytes(node.data('term')) * 7)/zoom },   
         'height': 20.0/zoom,
         'font-size': 16/zoom,
         'border-width': 2.0/zoom,
@@ -322,14 +320,16 @@ export default
       this.hideHandlePostion();
     }, 10);
   }
-
+  bytes( str) {
+    return encodeURIComponent(str).replace(/%../g,"x").length;
+  }
   changeSelectedTermColor(id, isAddTerm=true){
 
     const cy = this.cy;    
     const zoom = cy.zoom();
     const bdrWidth = (isAddTerm?4.0:2.0)/zoom;
     const nodeSelectedStyle = {        
-      'width': 'label',
+      'width':(node) => { return (this.bytes(node.data('term')) * 7)/zoom },
       'height': 20.0/zoom,
       'border-width': bdrWidth,
       'font-size': 16/zoom,
@@ -971,7 +971,7 @@ export default
       const selectedIdList = this.props.editingVocabulary.selectedIdList;
 
       for (let num in selectedIdList) {
-        const item = selectedIdList[num];
+        const id = selectedIdList[num];
         await this.changeSelectedTermColor(id, false);
       }
       // currentNode clear
@@ -1192,7 +1192,7 @@ export default
         <Grid
           container
           spacing={2}
-          justify={'space-between'}
+          justifyContent={'space-between'}
           className={this.props.classes.visualizationVocabularyHead}
         >
           <Grid item>
@@ -1408,9 +1408,7 @@ export default
             },
             {
               selector: '.showText[term]',
-              style: {
-                'width': 'label',
-                // 'height': 'label',
+              style: {            
                 'color': 'black',
                 'text-background-shape': 'rectangle',
                 'text-max-width': '200000px',

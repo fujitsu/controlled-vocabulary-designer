@@ -431,7 +431,7 @@ export default
               </Grid>
             </Grid>
             
-            <Grid container justify="center">
+            <Grid container justifyContent="center">
               <Grid item>
                 <Button
                   className={this.props.classes.buttonPrimary}

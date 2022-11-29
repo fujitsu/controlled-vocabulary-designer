@@ -883,7 +883,9 @@ export default class DialogFileSelector extends React.Component {
           aria-labelledby="dialog-search-term-error"
           open={this.props.open}
           fullwidth="false"
-          onEntered={() => this.initFilesInfo()}
+          TransitionProps={{
+            onEntered:() =>{ this.initFilesInfo(); }
+          }}
           classes={{paper:this.props.classes.fileDialogPaper}}
         >
           <DialogTitle
@@ -903,7 +905,7 @@ export default class DialogFileSelector extends React.Component {
             { fileReadContent }
           </DialogContent>
 
-          <Grid container justify="center" spacing={1} style={{ marginBottom: '-20px'}}>
+          <Grid container justifyContent="center" spacing={1} style={{ marginBottom: '-20px'}}>
 
           <Button
               color="primary"
