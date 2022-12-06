@@ -103,10 +103,14 @@ export default
     }else{     
       this.onPanZoom();
     }
-    if( prevProps.fileId !== this.props.fileId){
-      if( prevProps.fileLoadCount !== this.props.fileLoadCount ){
-        this.situationArr[ this.props.fileId].bgImage = undefined;
-      }
+    if( prevProps.fileLoadCount !== this.props.fileLoadCount ){
+      this.situationArr.map((obj)=>{
+        if(undefined !== obj){
+          obj.bgImage = undefined;
+        }
+      })
+      this.captureZoomImage(true);
+    }else if( prevProps.fileId !== this.props.fileId){
       this.captureZoomImage();
     }
     this.dispCheckEdgeHandle();
@@ -160,7 +164,7 @@ export default
         }
   
         this.moveZoomImageFrame( this.situationArr[ fileId]);
-      }, 500, this);
+      }, 1000, this, fileId);
     }
 
   }
@@ -1443,7 +1447,6 @@ export default
           id="zoomImgWrap"
           className={this.props.classes.zoomImgWrap}
           onClick={() =>{ 
-            this.setIniPanZoom();
             this.captureZoomImage(true);
           }}
           >
