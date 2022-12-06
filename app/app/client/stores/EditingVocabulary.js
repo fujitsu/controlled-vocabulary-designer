@@ -2630,6 +2630,7 @@ class EditingVocabulary {
           if(this.uri2preflabel[0]['en'][addedData.broader_uri] !== undefined){
             this.tmpBroaderTerm.list['en'].push(this.uri2preflabel[0]['en'][addedData.broader_uri])
           }
+          this.tmpBroaderTerm.broader_uri = addedData.broader_uri;
           // the broader_uri of tmpBroaderTerm must be unique (it is not be multiple), even if the term and uri is differernt
           // it will be resoleved at updateBroaderTerm
         }
