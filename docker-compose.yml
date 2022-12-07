@@ -36,6 +36,10 @@ services:
     - https_proxy=${HTTPS_PROXY}
     - HTTP_PROXY=${HTTP_PROXY}
     - HTTPS_PROXY=${HTTPS_PROXY}
+    ulimits:
+      nofiles:
+        soft: 4096
+        hard: 4096
     volumes:
       - /usr/src/app
     tty: true
