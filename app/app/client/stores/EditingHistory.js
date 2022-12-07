@@ -271,7 +271,9 @@ class EditingHistory {
         }
       });
     }
-    EditingVocabulary.updateRequest(updateList, currentData);
+    const historyData = null;
+    const doEdgeUpdate = true;
+    EditingVocabulary.updateRequest(updateList, historyData, doEdgeUpdate);
   }
 
   /**
@@ -345,7 +347,7 @@ class EditingHistory {
       }, this);
     }
 
-    EditingVocabulary.updateRequest(updateList, currentData);
+    EditingVocabulary.updateRequest(updateList);
   }
 
   // Display message function /////////////////////////////////////////////
