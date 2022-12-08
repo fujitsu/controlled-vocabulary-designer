@@ -9,7 +9,7 @@ body, html {font-size: 14px;}
 nav {
     width: 200px;
     background-color: #fff;
-    padding: 1em 0.5em;
+    padding: 1em;
     border: 1px solid #bcbcbc;
     border-radius: 4px;
     text-align: center;
@@ -26,15 +26,19 @@ nav dl {
 }
 nav dl dt{
     font-size: 1.15rem;
-    padding: 0 0.5em;
+    padding: 0;
     margin-top: 1em;
     font-weight: 600;
 }
 nav dl dt:first-child {margin-top: 0;}
 nav dl dd{
     font-size: 1.1rem;
+    line-height: 1.2;
     margin: 0;
-    padding: 0.2em 0.5em 0;
+    margin-left: 1em;
+    margin-top: 0.5em;
+    padding: 0;
+    text-indent: -1em;
 }
 nav dl dd a {
     color: #0082FF;
