@@ -312,7 +312,30 @@ const useStyles = (theme) => ({
     padding: "3px 5px",
     whiteSpace: "nowrap",
     opacity: "0",
-  },  
+  },
+  'zoomImgWrap':{
+    border: "solid 4px #666666",
+    backgroundPosition:"center center",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "contain",
+    backgroundColor: '#E3E3E3',
+    width:"20%",    
+    height:"20%",
+    position: "absolute",
+    bottom: "15px",
+    left: "15px",
+    zIndex: "999",
+    overflow: "hidden",
+  },
+  'zoomFrame':{
+    border: "solid 6px steelblue",
+    boxSizing: "border-box",
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    top: "0px",
+    left: "0px",
+  }
 });
 
 /**

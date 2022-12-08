@@ -1,7 +1,7 @@
 /**
  * EditingHistory.js COPYRIGHT FUJITSU LIMITED 2021
  */
-import {action, observable} from 'mobx';
+import {action, makeObservable, observable} from 'mobx';
 
 import editingVocabularyStore from './EditingVocabulary';
 
@@ -15,6 +15,7 @@ class EditingHistory {
   constructor() {
     this._undoMessage = this.STR_HISTORY_NONE;
     this._redoMessage = this.STR_HISTORY_NONE;
+    makeObservable(this);
   }
 
   // Operation history stack list

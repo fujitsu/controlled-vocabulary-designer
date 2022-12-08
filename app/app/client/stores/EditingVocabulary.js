@@ -2,7 +2,7 @@
  * EditingVocabulary.js COPYRIGHT FUJITSU LIMITED 2021
  */
 import React from 'react';
-import {action, computed, observable} from 'mobx';
+import {action, computed, makeObservable, observable} from 'mobx';
 import axios from 'axios';
 
 import _ from 'lodash'
@@ -35,6 +35,10 @@ class EditingVocabulary {
   // "AA", [{id:11, language:ja}, {id:22, language:en}]
   @observable term2id = [new Map(), new Map(), new Map(), new Map()];// edit, ref1, ref2, ref3
  
+  constructor() {
+    makeObservable(this);
+  }
+
   // get object id by term and laguage
   getIdbyTermandLang(term, language, selectedFileId = 0){
     const iddatalist = this.term2id[selectedFileId].get(term);

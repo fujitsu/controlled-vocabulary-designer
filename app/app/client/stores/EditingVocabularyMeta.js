@@ -1,7 +1,7 @@
 /**
  * EditingVocabularyMeta.js COPYRIGHT FUJITSU LIMITED 2021
  */
-import {action, computed, observable} from 'mobx';
+import {action, computed, makeObservable, observable} from 'mobx';
 import axios from 'axios';
 
 import editingVocabularyStore from './EditingVocabulary';
@@ -12,6 +12,10 @@ import editingVocabularyStore from './EditingVocabulary';
 class EditingVocabularyMeta {
   // Editing vocabulary meta
   @observable editingVocabularyMeta = null;
+
+  constructor() {
+      makeObservable(this);
+  }
 
   /**
    * Get editing vocabulary meta data

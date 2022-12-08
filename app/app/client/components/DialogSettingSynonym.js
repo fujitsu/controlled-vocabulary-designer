@@ -261,7 +261,9 @@ export default class DialogSettingSynonym extends React.Component {
         <Dialog
           onClose={() => this.handleClose()}
           open={this.props.open}
-          onEntered={() => this.initPreferred()}
+          TransitionProps={{
+            onEntered:() =>{ this.initPreferred(); }
+          }}
         >
           <DialogTitle>
             {title}
