@@ -439,7 +439,7 @@ def _check_inconsistencies_vocs(df, file_type_num):
 
     # check not all preferred label in a group that have same uri are empty  
     # this returns only one error if there are many groups that having empty preferred label
-    # pahse 2, reason 1
+    # phase 2, reason 1
     exec_res, status_code = _check_pref_label_empty(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
@@ -454,7 +454,7 @@ def _check_inconsistencies_vocs(df, file_type_num):
     
     # check there does not exist different synonim group that having same uri have same preffered label 
     # this returns only one error if there are many groups that having same preferred label
-    # pahse 2, reason 2
+    # phase 2, reason 2
     exec_res, status_code = _check_diff_synogroup_have_diff_pref(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
@@ -1367,7 +1367,7 @@ def _check_pref_label_empty(df, file_type_num=0):
 
 
 
-# # 409 pahse 2, reason 2
+# # 409 phase 2, reason 2
 def _check_diff_synogroup_have_diff_pref(df, file_type_num=0):
     # check there does not exist different synonim group that having same uri have same preffered label 
     # this returns only one error if there are many groups that having same preferred label
