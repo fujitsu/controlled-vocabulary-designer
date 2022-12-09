@@ -2479,6 +2479,7 @@ class EditingVocabulary {
     // initial state A1 have no synonym, B1, B2, B3 are synonym, which have same uri_b.
     // current term A1, added synonym B1, B2, but B3 is not added as synonym of A1.
     // goalUri should be uri of A1.
+    const myuri = currentNode.uri;
     const uriList = [];
     const uriSet = new Set();
     synonymIdWithMe.forEach((id1)=>{
@@ -2488,10 +2489,14 @@ class EditingVocabulary {
     }, this);
     // delete uri_b from goal in the case of the above situation.
     uriSet.forEach((uri2)=>{
-      const numOfSameUri = uriList.filter((uri3)=> uri3 === uri2).length;
-      // find B1, B2 from the viewpoint of count
-      if(numOfSameUri === this.uri2synoid[0].get(uri2).size){
+      if(uri2 == myuri){
         goalUri.add(uri2);
+      }else{
+        const numOfSameUri = uriList.filter((uri3)=> uri3 === uri2).length;
+        // find B1, B2 from the viewpoint of count
+        if(numOfSameUri === this.uri2synoid[0].get(uri2).size){
+          goalUri.add(uri2);
+        }
       }
     }, this);
 
