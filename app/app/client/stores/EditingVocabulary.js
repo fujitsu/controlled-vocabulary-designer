@@ -2461,6 +2461,11 @@ class EditingVocabulary {
     // current term A1, added synonym B1, B2, but B3 is not added as synonym of A1.
     // goalUri should be uri of A1.
     const myuri = currentNode.uri;
+    if(myuri === broader_uri){
+      this.cycleBroaderTerm.push(currentNode.term);
+      this.cycleBroaderTerm.push(broaderTerm);
+      return true;
+    }
     const uriList = [];
     const uriSet = new Set();
     synonymIdWithMe.forEach((id1)=>{
