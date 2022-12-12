@@ -2428,8 +2428,8 @@ class EditingVocabulary {
  * @return {Boolean} - true: loop (invalid), false: not a loop
  */
   @action isCyclicBroaders(currentNode, broaderTerm, broader_uri) {
+    this.cycleBroaderTerm = [];
     if(broader_uri ===''){
-      this.cycleBroaderTerm = [];
       return false;
     }
  
