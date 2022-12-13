@@ -154,7 +154,9 @@ export default
           const contentDataURL =  canvas.toDataURL("image/png");
           const bgImg = "url('" +contentDataURL + "')";
           wrap.style.backgroundImage = bgImg;
-          this.situationArr[ fileId].bgImage = bgImg;
+          if(  undefined !== this.situationArr[ fileId]){
+            this.situationArr[ fileId].bgImage = bgImg;
+          }
         });
         if( reset && undefined !== this.situationArr[ fileId]){
           const zoom = this.cy.zoom();
@@ -386,11 +388,14 @@ export default
     eles.style(nodeSelectedStyle);
     eles.addClass('showText');
     // Setting color information
-    if (eles.data().vocabularyColor) {
-      eles.addClass(eles.data().vocabularyColor);
+    const elsData = eles.data();
+    if (undefined !== elsData) {
+      if (undefined !== elsData.vocabularyColor) {
+        eles.addClass(elsData.vocabularyColor);
+      }
+      // Setting of confirmation information
+      this.setConfirmStyle(eles, elsData.confirm);
     }
-    // Setting of confirmation information
-    this.setConfirmStyle(eles, eles.data().confirm);
   }
 
   /**
