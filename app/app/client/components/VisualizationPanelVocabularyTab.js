@@ -120,7 +120,8 @@ export default
    * Scale drawing updates
    */
   moveZoomImageFrame( situationObj){
-    if( situationObj === undefined || situationObj.iniPan === undefined){
+    const frame = document.getElementById("zoomFrame");
+    if( situationObj === undefined || situationObj.iniPan === undefined || !frame){
       return;
     }
     const cZoom = this.cy.zoom();
@@ -129,7 +130,6 @@ export default
     let left = (situationObj.iniPan.x - cPan.x*zoom) * 0.2;   // frame width 20%
     let top  = (situationObj.iniPan.y - cPan.y*zoom) * 0.2;
 
-    const frame = document.getElementById("zoomFrame");
     frame.style.width= String( zoom * 100) + "%";
     frame.style.height= String( zoom * 100) + "%";
     frame.style.left= String( left) + "px";
@@ -143,6 +143,7 @@ export default
   captureZoomImage(reset=false){
     const fileId = this.props.editingVocabulary.selectedFile.id;
     const wrap = document.getElementById("zoomImgWrap");
+    if(!wrap) return;
 
     if( !reset && undefined !== this.situationArr[ fileId] && undefined !== this.situationArr[ fileId].bgImage){
       wrap.style.backgroundImage = this.situationArr[ fileId].bgImage;
