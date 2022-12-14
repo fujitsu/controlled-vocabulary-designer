@@ -95,6 +95,8 @@ class EditingVocabulary {
     if( !this.selectedIdList.includes( node.id)){
       this.selectedIdList.push(node.id);
       ret = true;
+    }else{
+      this.selectedIdList = this.selectedIdList.filter(item => (item !== node.id));
     }
     return ret;
   }
