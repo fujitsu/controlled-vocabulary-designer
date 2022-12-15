@@ -1681,10 +1681,10 @@ def _fill_pos_val(df):
     return df
 
 def _fill_confirm_val(df):
-    # fills cells without 0 are replaced to 1
+    # fills cells without 1 are replaced to 0
     confirm_colname =  '確定済み用語'
-    tmp_bool = df[confirm_colname] != '0'
-    df.loc[tmp_bool, confirm_colname] = '1'
+    tmp_bool = df[confirm_colname] != '1'
+    df.loc[tmp_bool, confirm_colname] = '0'
     return df
 
 # convert datetime to ISO 8601 at most "second", '2021-04-02T12:43:02Z'
