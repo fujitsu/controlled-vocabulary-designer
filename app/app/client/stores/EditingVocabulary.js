@@ -997,7 +997,7 @@ class EditingVocabulary {
   /**
    * Selected node information initialization
    */
-  currentNodeClear() {
+  @action currentNodeClear() {
     this.currentNode = {
       id: null,
       idofuri: '',
@@ -1027,7 +1027,7 @@ class EditingVocabulary {
     this.currentLangDiffNodeClear();
   }
 
-  currentLangDiffNodeClear() {
+  @action currentLangDiffNodeClear() {
     this.currentLangDiffNode = {
       id: null,
       idofuri: '',
@@ -1058,7 +1058,7 @@ class EditingVocabulary {
    * Initialization of data being edited
    *   Never clear ⇒ this.tmpLanguage = {id: '', value: ''};
    */
-  tmpDataClear() {
+  @action tmpDataClear() {
     this.tmpIdofUri = {id: '', list: []};
     // this.tmpUri = {id: '', list: []};
     this.tmpBroaderTerm = {id: '', list: {ja:[], en:[]}, broader_uri: ''};
