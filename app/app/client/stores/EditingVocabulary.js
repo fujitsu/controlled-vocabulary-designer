@@ -319,6 +319,7 @@ class EditingVocabulary {
 
     this.editingVocabulary = unChangeVocabulary.concat(updatedEditingVocabulary);
     updatedEditingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
+    this.updateConfirmColor();
   }
 
   /**
@@ -3011,7 +3012,7 @@ class EditingVocabulary {
    * Get confirmed color information from editing vocabulary data
    * Use only when editing vocabulary is retrieved from DB
    */
-  initConfirmColor() {
+  @action initConfirmColor() {
     const confirmList =
       this.editingVocabulary.filter((data) => data.confirm == 1);
 
@@ -3030,6 +3031,26 @@ class EditingVocabulary {
       // If there is no confirmation information, the color information held temporarily is taken over
     }
   }
+  @action updateConfirmColor() {
+    const confirmList =
+      this.editingVocabulary.filter((data) => data.confirm == 1);
+
+    if (confirmList.length > 0) {
+      // console.log('confirm term is ' + confirmList.length);
+      const confirmColor = confirmList[0].color2;
+      // console.log('confirm color is ' + confirmColor);
+      confirmList.forEach((data) => {
+        if (data.color2 !== confirmColor) {
+          console.log('discard confirm color. term: ' +
+            data.term + ', color: ' + data.color2);
+        }
+      });
+      this.confirmColor = confirmColor;
+    } else {
+      // If there is no confirmation information, the color information held temporarily is taken over
+    }
+  }
+
 
   /**
    * Confirmed color change request
