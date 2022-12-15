@@ -1893,6 +1893,17 @@ class EditingVocabulary {
 
     // tentative treatment
     if(this.selectedFile.id !== 0){
+      idList.forEach((id1)=>{
+        const node =  cy.getElementById(String(id1));
+        const posi = node.position();
+        let position_x = null; // number
+        let position_y = null; // number
+        position_x = this.calcReversePosition( posi.x, isDrag);
+        position_y = this.calcReversePosition( posi.y, isDrag);
+        const refdata = this.referenceVocWithId[this.selectedFile.id].get(id1);
+        refdata.position_x = position_x;
+        refdata.position_y = position_y;
+      }, this);
       return;
       // this method can not treat reference voc
     }
