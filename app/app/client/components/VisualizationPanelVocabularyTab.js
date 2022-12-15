@@ -358,7 +358,7 @@ export default
       selectedele.addClass('selected');
       selectedele.addClass('showText');
       // Setting of color information
-      if (selectedele.data().vocabularyColor) {
+      if (selectedele !== undefined && selectedele.data().vocabularyColor) {
         selectedele.addClass(selectedele.data().vocabularyColor);
       }
 
