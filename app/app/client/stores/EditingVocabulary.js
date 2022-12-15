@@ -79,6 +79,12 @@ class EditingVocabulary {
 
   // Array for selected term on Visual vocabulary Tab
   @observable selectedIdList = [];
+  // Array for selected term on Visual vocabulary Tab with gui mouse cursor d&d selection
+  @observable selectedIdListGUIStr = [];
+  
+  @action clearSelectedIdListGUIStr(){
+    this.selectedIdListGUIStr = [];
+  }
 
   /**
    * Set deselected term array
@@ -234,6 +240,7 @@ class EditingVocabulary {
     this.editingVocabulary = editingVocabulary;
     editingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
     this.initConfirmColor();
+    this.clearSelectedIdListGUIStr();
   }
 
   /**

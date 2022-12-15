@@ -58,7 +58,6 @@ export default
     this.message = '';
     this.source = null;
     this.target = null;
-    this.selectedIdStr = []; ///////
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
@@ -479,7 +478,7 @@ export default
       if(event.target.id()){
         idSet.add(Number(event.target.id()));
       }
-      this.selectedIdStr.forEach((id1)=>{
+      this.props.editingVocabulary.selectedIdListGUIStr.forEach((id1)=>{
         idSet.add(Number(id1));
       }, this);
       this.updateVocabularies([...idSet], true);
@@ -487,11 +486,11 @@ export default
     
     this.cy.on('select', 'node', (event) => {
       // add selected list
-      this.selectedIdStr.push(event.target.id());
+      this.props.editingVocabulary.selectedIdListGUIStr.push(event.target.id());
     });
     this.cy.on('unselect', 'node', (event) => {
       // remove from selected list
-      this.selectedIdStr = this.selectedIdStr.filter((id)=>{return id !== event.target.id()});
+      this.props.editingVocabulary.selectedIdListGUIStr = this.props.editingVocabulary.selectedIdListGUIStr.filter((id)=>{return id !== event.target.id()});
     });
 
     this.cy.on('tap',  (event) => {
