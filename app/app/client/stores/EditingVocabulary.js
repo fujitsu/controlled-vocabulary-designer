@@ -312,7 +312,6 @@ class EditingVocabulary {
 
     this.editingVocabulary = unChangeVocabulary.concat(updatedEditingVocabulary);
     updatedEditingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
-    this.initConfirmColor();
   }
 
   /**
@@ -3015,7 +3014,7 @@ class EditingVocabulary {
       // console.log('confirm color is ' + confirmColor);
       confirmList.forEach((data) => {
         if (data.color2 !== confirmColor) {
-          console.log('discord confirm color. term: ' +
+          console.log('discard confirm color. term: ' +
             data.term + ', color: ' + data.color2);
         }
       });
