@@ -363,7 +363,9 @@ export default
       }
 
       // Setting of confirmation information
-      this.setConfirmStyle(selectedele, selectedele.data().confirm);
+      if (selectedele.data() !== undefined && selectedele.data().confirm) {    
+        this.setConfirmStyle(selectedele, selectedele.data().confirm);
+      }
     }
 
     // Hide inactive handles 
