@@ -79,6 +79,12 @@ class EditingVocabulary {
 
   // Array for selected term on Visual vocabulary Tab
   @observable selectedIdList = [];
+  // Array for selected term on Visual vocabulary Tab with gui mouse cursor d&d selection
+  @observable selectedIdListGUIStr = [];
+  
+  @action clearSelectedIdListGUIStr(){
+    this.selectedIdListGUIStr = [];
+  }
 
   /**
    * Set deselected term array
@@ -234,6 +240,7 @@ class EditingVocabulary {
     this.editingVocabulary = editingVocabulary;
     editingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
     this.initConfirmColor();
+    this.clearSelectedIdListGUIStr();
   }
 
   /**
@@ -312,7 +319,7 @@ class EditingVocabulary {
 
     this.editingVocabulary = unChangeVocabulary.concat(updatedEditingVocabulary);
     updatedEditingVocabulary.forEach((data)=> this.editingVocWithId.set(data.id, data));
-    this.initConfirmColor();
+    this.updateConfirmColor();
   }
 
   /**
@@ -1886,6 +1893,17 @@ class EditingVocabulary {
 
     // tentative treatment
     if(this.selectedFile.id !== 0){
+      idList.forEach((id1)=>{
+        const node =  cy.getElementById(String(id1));
+        const posi = node.position();
+        let position_x = null; // number
+        let position_y = null; // number
+        position_x = this.calcReversePosition( posi.x, isDrag);
+        position_y = this.calcReversePosition( posi.y, isDrag);
+        const refdata = this.referenceVocWithId[this.selectedFile.id].get(id1);
+        refdata.position_x = position_x;
+        refdata.position_y = position_y;
+      }, this);
       return;
       // this method can not treat reference voc
     }
@@ -3005,7 +3023,7 @@ class EditingVocabulary {
    * Get confirmed color information from editing vocabulary data
    * Use only when editing vocabulary is retrieved from DB
    */
-  initConfirmColor() {
+  @action initConfirmColor() {
     const confirmList =
       this.editingVocabulary.filter((data) => data.confirm == 1);
 
@@ -3015,7 +3033,7 @@ class EditingVocabulary {
       // console.log('confirm color is ' + confirmColor);
       confirmList.forEach((data) => {
         if (data.color2 !== confirmColor) {
-          console.log('discord confirm color. term: ' +
+          console.log('discard confirm color. term: ' +
             data.term + ', color: ' + data.color2);
         }
       });
@@ -3024,6 +3042,26 @@ class EditingVocabulary {
       // If there is no confirmation information, the color information held temporarily is taken over
     }
   }
+  @action updateConfirmColor() {
+    const confirmList =
+      this.editingVocabulary.filter((data) => data.confirm == 1);
+
+    if (confirmList.length > 0) {
+      // console.log('confirm term is ' + confirmList.length);
+      const confirmColor = confirmList[0].color2;
+      // console.log('confirm color is ' + confirmColor);
+      confirmList.forEach((data) => {
+        if (data.color2 !== confirmColor) {
+          console.log('discard confirm color. term: ' +
+            data.term + ', color: ' + data.color2);
+        }
+      });
+      this.confirmColor = confirmColor;
+    } else {
+      // If there is no confirmation information, the color information held temporarily is taken over
+    }
+  }
+
 
   /**
    * Confirmed color change request

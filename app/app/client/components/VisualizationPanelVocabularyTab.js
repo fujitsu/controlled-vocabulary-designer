@@ -58,7 +58,6 @@ export default
     this.message = '';
     this.source = null;
     this.target = null;
-    this.selectedIdStr = []; ///////
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
@@ -138,7 +137,7 @@ export default
 
   /**
    * Scale drawing initialize
-   * @param {Boolean} reset - true: must reset inisialize viewport
+   * @param {Boolean} reset - true: must reset initialize viewport
    */
   captureZoomImage(reset=false){
     const fileId = this.props.editingVocabulary.selectedFile.id;
@@ -358,12 +357,14 @@ export default
       selectedele.addClass('selected');
       selectedele.addClass('showText');
       // Setting of color information
-      if (selectedele !== undefined && selectedele.data().vocabularyColor) {
+      if (selectedele.data() !== undefined && selectedele.data().vocabularyColor) {
         selectedele.addClass(selectedele.data().vocabularyColor);
       }
 
       // Setting of confirmation information
-      this.setConfirmStyle(selectedele, selectedele.data().confirm);
+      if (selectedele.data() !== undefined && selectedele.data().confirm) {    
+        this.setConfirmStyle(selectedele, selectedele.data().confirm);
+      }
     }
 
     // Hide inactive handles 
@@ -477,7 +478,7 @@ export default
       if(event.target.id()){
         idSet.add(Number(event.target.id()));
       }
-      this.selectedIdStr.forEach((id1)=>{
+      this.props.editingVocabulary.selectedIdListGUIStr.forEach((id1)=>{
         idSet.add(Number(id1));
       }, this);
       this.updateVocabularies([...idSet], true);
@@ -485,11 +486,11 @@ export default
     
     this.cy.on('select', 'node', (event) => {
       // add selected list
-      this.selectedIdStr.push(event.target.id());
+      this.props.editingVocabulary.selectedIdListGUIStr.push(event.target.id());
     });
     this.cy.on('unselect', 'node', (event) => {
       // remove from selected list
-      this.selectedIdStr = this.selectedIdStr.filter((id)=>{return id !== event.target.id()});
+      this.props.editingVocabulary.selectedIdListGUIStr = this.props.editingVocabulary.selectedIdListGUIStr.filter((id)=>{return id !== event.target.id()});
     });
 
     this.cy.on('tap',  (event) => {
@@ -583,7 +584,8 @@ export default
       this.captureZoomImage();      // zoom scale background image capture
     }); 
     this.cy.on('resize', (event) => {
-      this.captureZoomImage( true); // zoom scale background image capture
+      //this.captureZoomImage( true); // zoom scale background image capture
+      this.captureZoomImage( ); // zoom scale background image capture
     }); 
     this.cy.on('viewport', (event) => { 
       this.moveZoomImageFrame( this.situationArr[ this.props.editingVocabulary.selectedFile.id]);
@@ -1452,9 +1454,9 @@ export default
         <Box        
           id="zoomImgWrap"
           className={this.props.classes.zoomImgWrap}
-          onClick={() =>{ 
-            this.captureZoomImage(true);
-          }}
+          // onClick={() =>{ 
+          //   this.captureZoomImage(true);
+          // }}
           >
           <div 
             id="zoomFrame"
