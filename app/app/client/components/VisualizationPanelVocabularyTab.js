@@ -1454,9 +1454,9 @@ export default
         <Box        
           id="zoomImgWrap"
           className={this.props.classes.zoomImgWrap}
-          // onClick={() =>{ 
-          //   this.captureZoomImage(true);
-          // }}
+          onClick={() =>{
+            this.captureZoomImage(true);
+          }}
           >
           <div 
             id="zoomFrame"
