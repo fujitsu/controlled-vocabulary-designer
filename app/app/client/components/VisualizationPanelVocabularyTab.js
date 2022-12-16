@@ -137,7 +137,7 @@ export default
 
   /**
    * Scale drawing initialize
-   * @param {Boolean} reset - true: must reset inisialize viewport
+   * @param {Boolean} reset - true: must reset initialize viewport
    */
   captureZoomImage(reset=false){
     const fileId = this.props.editingVocabulary.selectedFile.id;
@@ -584,7 +584,8 @@ export default
       this.captureZoomImage();      // zoom scale background image capture
     }); 
     this.cy.on('resize', (event) => {
-      this.captureZoomImage( true); // zoom scale background image capture
+      //this.captureZoomImage( true); // zoom scale background image capture
+      this.captureZoomImage( ); // zoom scale background image capture
     }); 
     this.cy.on('viewport', (event) => { 
       this.moveZoomImageFrame( this.situationArr[ this.props.editingVocabulary.selectedFile.id]);
@@ -1453,9 +1454,9 @@ export default
         <Box        
           id="zoomImgWrap"
           className={this.props.classes.zoomImgWrap}
-          onClick={() =>{ 
-            this.captureZoomImage(true);
-          }}
+          // onClick={() =>{ 
+          //   this.captureZoomImage(true);
+          // }}
           >
           <div 
             id="zoomFrame"
