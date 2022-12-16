@@ -1270,7 +1270,7 @@ class EditingVocabulary {
     if (!isForce) {
       // if (target.term === this.currentNode.term) {
       if (target.id === this.currentNode.id) {
-          this.currentNodeClear();
+        this.currentNodeClear();
         this.tmpDataClear();
         // Updating NodeStyle in visualization screen vocabulary tab
         this.fitToCurrent();

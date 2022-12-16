@@ -62,6 +62,10 @@
     }
 
     if( id !== undefined){
+      if(id === this.props.editingVocabulary.currentNode.id ){
+        // in order to avoid deselection in the function
+        this.props.editingVocabulary.currentNodeClear();
+      }
       this.props.editingVocabulary.setCurrentNodeById( id );
       this.props.editingVocabulary.deselectTermList();
       if( this.props.editingVocabulary.currentNode.id){
