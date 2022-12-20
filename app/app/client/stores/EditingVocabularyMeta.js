@@ -86,7 +86,7 @@ class EditingVocabularyMeta {
    * Editing vocabulary meta data initialization
    * @param {array} dbData - list of editing vocabulary meta
    */
-  setEditingVocabularyMetaData(dbData) {
+  @action setEditingVocabularyMetaData(dbData) {
     
     const editingVocabularyMeta = [];
 
@@ -131,7 +131,7 @@ class EditingVocabularyMeta {
   /**
    * Editing vocabulary meta data currentNode set
    */
-  setCurrentNode( data=null ){ 
+  @action setCurrentNode( data=null ){ 
     // If reading the data
     if( data){
       this.currentNode = {
