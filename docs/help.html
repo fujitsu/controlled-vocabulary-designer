@@ -26,7 +26,7 @@
       <dd><a href="#Section08">編集パネル</a></dd>
       <dd><a href="#Section06">関係線を使う</a></dd>
       <dd><a href="#Section11">用語の追加と削除</a></dd>
-      <dd><a href="#Section21">他語彙体系の同義語の追加と削除</a></dd>
+      <dd><a href="#Section21">他語彙体系の同義語のURIの編集</a></dd>
       <dt>いろいろな機能</dt>
       <dd><a href="#Section09">枠線色の変更</a></dd>
       <dd><a href="#Section10">確定について</a></dd>
@@ -39,8 +39,8 @@
     <h1>ファイルの読み込み</h1>
     <p>入力可能なデータは以下の3種類です。</p>
     <ul class="Emp Descr">
-      <li>編集用語彙_meta<br><span class="descr">（csv形式 UTF-8 BOM付き）<br>語彙のメタファイル。</span></li>
       <li>編集用語彙<br><span class="descr">（csv形式 UTF-8 BOM付き）<br>用語の同義関係や上下関係を編集中のデータ。</span></li>
+      <li>編集用語彙_meta<br><span class="descr">（csv形式 UTF-8 BOM付き）<br>語彙のメタファイル。</span></li>
       <li>参照用語彙<br><span class="descr">（csv形式 UTF-8 BOM付き）<br>既存の語彙情報を表形式にまとめたデータ。編集することはできません。<br>参照専用のデータです。3つまでファイルを読み込むことが可能です。</span></li>
     </ul>
     <p id="illst4-1"><span class="Emp">画面の左上のメニュー「ファイル」→「開く」をクリックすると、ファイルの読み込みダイアログが表示されます。</span><img src="images/help_illst4-1.png"></p>
@@ -60,7 +60,7 @@
       <li>CSV（語彙基本情報）<span class="descr">（csv形式 UTF-8 BOM付き）</span></li>
       <li>RDF<span class="descr">（n3, nquads, nt, trix, turtle, xml, jsonld形式）：公開する統制語彙。</span></li>
     </ul>
-    <p>左上の「ファイル」→「保存」→「編集用語彙」「編集用語彙_meta」または「統制語彙」をクリックします。ファイル出力ダイアログが表示されるので、任意のファイル名を入力し、「OK」をクリックすると、ファイルがローカル環境にダウンロードされます。</p>
+    <p>左上の「ファイル」→「保存」→「CSV（用語一覧）」「CSV（語彙基本情報）」または「RDF」をクリックします。ファイル出力ダイアログが表示されるので、任意のファイル名を入力し、「OK」をクリックすると、ファイルがローカル環境にダウンロード・保存されます。</p>
     <div class="Img margin0">
       <figure><img src="images/help_illst5.png"></figure>
     </div>
@@ -68,12 +68,14 @@
 
   <div id="Section07" class="section">
     <h1>用語の選択方法</h1>
-    <p>登録されている用語の選択方法は次の２つです。</p>
+    <p>登録されている用語の選択方法は次のとおりです。</p>
     <ol class="Emp Descr">
       <li>可視化画面で用語をクリックする<br><span class="descr">可視化画面で用語が選択されると枠線が太くなって、強調表示されます。</span></li>
+      <li>検索ボックスをクリックすると表示される一覧から選択する</li>
       <li>検索ボックスで検索する<br><span class="descr">検索ボックスに用語名を入力して検索します。目的の用語が見つかると画面の中央に表示されます。</span></li>
+      <li>編集パネル内のプルダウンから目的の用語を選択する<br><span class="descr">無作為に用語をクリック（選択）して、画面右上の「編集」ボタンを押すと編集パネルが表示されます。開かれた編集パネル内の用語名のプルダウンから目的の用語を選択します。</span></li>
     </ol>
-    <p class="Emp">用語を選択して画面右上の編集ボタンをクリックすると編集パネルが開きます。<br><span class="red">選択中の用語をクリックするか、選択全解除ボタンもしくは可視化画面の背景をクリックすると選択が解除されます。</span></p>
+    <p class="Emp"><span class="red">選択中の用語をクリックするか、選択全解除ボタンを押す、もしくは可視化画面の背景部分をクリックすると選択が解除されます。</span></p>
     <div class="Img margin0">
       <figure><img src="images/help_illst7.png"></figure>
     </div>
@@ -83,50 +85,76 @@
     <h1>編集パネル</h1>
     <p>用語を選択し「編集」ボタンを押すと、編集パネルが開きます。編集パネルでは、同義語・代表語・上位語の編集や、IDを編集して代表語のURIを変更したり、用語の説明を編集することもできます。</p>
     <div id="HensyuPanel" >
+      <div class="Img">
+        <p style="top: 0.5%; left: 82.5%;">1</p>
+        <p style="top: 9.2%; left: 1%;">2</p>
+        <p style="top: 15%; left: 17%;">3</p>
+        <p style="top: 20.5%; left: -1.5%;">4</p>
+        <p style="top: 20.5%; left: 43%;">5</p>
+        <p style="top: 29%; left: -1.5%;">6</p>
+        <p style="top: 37.3%; left: -1.5%;">7</p>
+        <p style="top: 47%; left: -1.5%;">8</p>
+        <p style="top: 54.5%; left: -1.5%;">9</p>
+        <p style="top: 62.5%; left: -1.5%;">10</p>
+        <p style="top: 71.5%; left: -1.5%;">11</p>
+        <p style="top: 82%; left: -1.5%;">12</p>
+        <p style="top: 93%; left: 40%;">13</p>
+        <figure><img src="images/help_illst8.png"></figure>
+      </div>
+
       <dl class="Descr">
         <dt>①クローズボタン</dt>
         <dd class="descr">クリックすると編集パネルを閉じます。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>②選択中の用語表示</dt>
         <dd class="descr">編集中の用語名が表示されます。プルダウンから別の用語を選択すると選択中の用語が変更されます。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>③言語の切り替え</dt>
         <dd class="descr">用語の言語。日本語か英語を設定します（それ以外の言語には未対応）。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>④同義語</dt>
         <dd class="descr">語形や音が異なる、意味が同じ語。複数個の設定が可能です。同義語テキストボックスをクリックすると、AIによる同義語候補が表示されます。この中から用語を選択するか、手入力して同義語を設定できます。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>⑤編集した項目の背景はピンク、既存の項目の背景はブルーで表示されます。</dt>
         <dd class="descr red">手入力では、入力後にEnterキーで入力が決定されます。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>⑥代表語</dt>
         <dd class="descr">選択中の用語と同義語の中から、代表となる用語を、ひとつ設定します。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>⑦ID</dt>
         <dd class="descr">代表語に割り当てられた一意のIDを設定します。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>⑧代表語のURI</dt>
         <dd class="descr">代表語に割り当てられた一意のURIです。IDを編集することで変更されますす。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>⑨上位語</dt>
         <dd class="descr">選択中の用語の意味範囲を包括する語です。ひとつだけ設定が可能です。テキストボックスをクリックすると、AIによる上位語の候補が表示されます。この中から用語を選択するか、手入力して上位語を設定できます。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>⑩下位語</dt>
-        <dd class="descr">選択中の用語の意味範囲を特殊化した語です。この画面では、下位語は編集できません。下位語に相当する用語から上位語を設定することで上位語・下位語関係が変更できます。</dd>
+        <dd class="descr">選択中の用語の意味範囲を特殊化した語です。編集パネルでは下位語は編集できません。下位語に相当する用語から上位語を設定することで上位語・下位語関係が変更できます。</dd>
+      </dl>
+      <dl class="Descr">
         <dt>⑪用語の説明</dt>
         <dd class="descr">用語についての説明です。</dd>
-        <dt>⑫他語彙体系の同義語のURI</dt>
-        <dd class="descr">現在編集中の分野の語彙とは、別の語彙で同義関係である用語のURI。変更できません。</dd>
-        <dt>⑬反映ボタン</dt>
-        <dd class="descr">編集が終わったら最後に反映ボタンをクリックすることで、編集した内容が保存されます。</dd>
       </dl>
-      <div class="Img">
-        <p style="top: 1%; left: 85%;">1</p>
-        <p style="top: 9.5%; left: 1.5%;">2</p>
-        <p style="top: 15%; left: 23%;">3</p>
-        <p style="top: 20%; left: -1%;">4</p>
-        <p style="top: 21.5%; left: 41%;">5</p>
-        <p style="top: 29%; left: -1%;">6</p>
-        <p style="top: 37.5%; left: -1%;">7</p>
-        <p style="top: 48%; left: -1%;">8</p>
-        <p style="top: 55.5%; left: -1%;">9</p>
-        <p style="top: 64.5%; left: -1%;">10</p>
-        <p style="top: 72.5%; left: -1%;">11</p>
-        <p style="top: 82%; left: -1%;">12</p>
-        <p style="top: 93%; left: 36%;">13</p>
-        <figure><img src="images/help_illst8.png"></figure>
-      </div>
+      <dl class="Descr">
+        <dt>⑫他語彙体系の同義語のURI</dt>
+        <dd class="descr">現在編集中の分野の語彙とは別の語彙で、同義関係である用語のURI。編集パネルでは変更できません。（<a href="#Section21">編集方法はこちら</a>）</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑬反映ボタン</dt>
+        <dd class="descr">編集が終わった後に反映ボタンをクリックすることで、編集した内容が反映・保存されます。</dd>
+      </dl>
+      
     </div>
   </div>
 
@@ -152,26 +180,25 @@
 
   <div id="Section11" class="section">
     <h1>用語の追加と削除</h1>
-    <p class="Emp">CVDを使用して、新規に用語を追加したり登録済みの用語を削除することはできません。</p>
-    <p>用語を追加または削除する場合は、編集中の語彙をCSVファイルに書き出して、CSVファイルを編集してください。</p>
+    <p class="Emp">CVDで新規に用語を追加したり、登録済みの用語を削除することはできません。</p>
+    <p>用語を追加または削除する場合は、編集中の語彙をCSVファイルに書き出して編集した後、CVDに読み込みます。</p>
     <h2>用語の追加・削除の手順</h2>
     <ol class="Emp Descr">
-      <li id="process1">編集中の語彙を編集用語彙ファイル（CSVファイル）に書き出します。<br><span class="descr">編集用語彙ファイルを書き出す手順は、このヘルプの<a href="#Section05">ファイルの書き出し</a>を参照してください。</span><img src="images/help_illst9-1.png"></li>
-      <li id="process2">書き出された編集用語彙ファイルを編集します。<br><span class="descr">書き出されたCSVファイルで、用語を追加する場合は<em>行を追加</em>します。<br>（削除する場合は削除したい<em>用語の行を削除</em>します）<br>用語を最小限の入力で追加するには、「用語名」列・「代表語」列・「代表語のURI」列を設定すれば追加することができます。（「用語名」列以外はCVDで変更が可能です）</span><img src="images/help_illst9-2.png"></li>
-      <li id="process3">編集した編集用語彙ファイルをCVDに読み込みます。<br><span class="descr">ファイルの読み込み手順は、このヘルプの<a href="#Section04">ファイルの読み込み</a>を参照してください。</span></li>
+      <li id="process1">編集中の語彙をファイルメニューの保存からCSV（用語一覧）で書き出します。<br><span class="descr">書き出す手順は、このヘルプの<a href="#Section05">ファイルの書き出し</a>を参照してください。</span><img src="images/help_illst9-1.png"></li>
+      <li id="process2">書き出されたCSVファイルを編集します。<br><span class="descr">書き出されたCSVファイルで、用語を追加する場合は<em>新たに行を追加</em>します。（削除する場合は削除したい<em>用語の行を削除</em>します）<br>用語を最小限の入力で追加するには、「用語名」列・「代表語」列・「代表語のURI」列を設定すれば追加することができます。（「用語名」列以外はCVDで編集が可能です）</span><img src="images/help_illst9-2.png"></li>
+      <li id="process3">編集したCSVファイルを編集用語彙としてCVDに読み込みます。<br><span class="descr">ファイルの読み込み手順は、このヘルプの<a href="#Section04">ファイルの読み込み</a>を参照してください。</span></li>
     </ol>
   </div>
 
   <div id="Section21" class="section">
-    <h1>他語彙体系の同義語の追加と削除</h1>
-    <p class="Emp">CVDを使用して、新規に他語彙体系の同義語のURIを用語に追加したり削除したりすることはできません。</p>
-    <p>他語彙体系の同義語を用語に追加または削除する場合は、編集中の語彙をCSVファイルに書き出して、CSVファイルを編集してください。</p>
-    <h2>他語彙体系の同義語のURIの追加・削除の手順</h2>
+    <h1>他語彙体系の同義語のURIの編集・追加・削除</h1>
+    <p class="Emp">CVDを使用して、他語彙体系の同義語のURIを編集・追加・削除することはできません。</p>
+    <p>他語彙体系の同義語のURIを編集・追加・削除するには、編集中の語彙をCSVファイルに書き出して編集し、CVDに読み込みます。</p>
+    <h2>他語彙体系の同義語のURIの編集・追加・削除の手順</h2>
     <ol class="Emp Descr">
-      <li id="process1">編集中の語彙を編集用語彙ファイル（CSVファイル）に書き出します。<br><span class="descr">編集用語彙ファイルを書き出す手順は、このヘルプの<a href="#Section05">ファイルの書き出し</a>を参照してください。</span><img src="images/help_illst9-1-2.png"></li>
-      <li id="process2">書き出された編集用語彙ファイルを編集します。<br>
-        <span class="descr">書き出されたCSVファイルで、用語に他語彙体系の同義語を追加する場合は「他語彙体系の同義語のURI」列に、その同義語のURIを入力します。</span><img src="images/help_illst9-2-2.png"></li>
-      <li id="process3">編集した編集用語彙ファイルをCVDに読み込みます。<br><span class="descr">ファイルの読み込み手順は、このヘルプの<a href="#Section04">ファイルの読み込み</a>を参照してください。</span></li>
+      <li id="process1">編集中の語彙をファイルメニューの保存からCSV（用語一覧）で書き出します。<br><span class="descr">書き出す手順は、このヘルプの<a href="#Section05">ファイルの書き出し</a>を参照してください。</span><img src="images/help_illst9-1-2.png"></li>
+      <li id="process2">書き出されたCSVファイルを編集します。<br><span class="descr">書き出されたCSVファイルで、他語彙体系の同義語のURIを追加する場合は「他語彙体系の同義語のURI」列に、その同義語のURIを入力します。</span><img src="images/help_illst9-2-2.png"></li>
+      <li id="process3">編集したCSVファイルを編集用語彙としてCVDに読み込みます。<br><span class="descr">ファイルの読み込み手順は、このヘルプの<a href="#Section04">ファイルの読み込み</a>を参照してください。</span></li>
     </ol>
   </div>
 

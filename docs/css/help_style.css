@@ -187,7 +187,7 @@ nav dd#Title {
     margin-top: 0;
     margin-bottom: 0;
     float: left;
-    width: 40%;
+    width: 44%;
     min-width: 350px;
 }
 #Section04 p#illst4-1 + p {
@@ -237,7 +237,7 @@ nav dd#Title {
     text-indent: -1.3em;
     width: 45%;
     float: left;
-    margin: 0;
+    margin: 0 4% 0 0;
 }
 #Section08 #HensyuPanel dd.descr {
     font-size: 0.95em;
@@ -252,7 +252,7 @@ nav dd#Title {
     vertical-align: middle;
 }
 #Section08 #HensyuPanel .Img{
-    margin: 3em 0;
+    margin: 0 0 2em;
     width: 48%;
     float: right;
 }
@@ -269,6 +269,11 @@ nav dd#Title {
     border: 2px solid #FF0000;
     border-radius: 50%;
     background-color: rgba(255, 255, 255, 0.5);
+}
+#Section08 dl a {
+    margin-right: 0.3em;
+    margin-left: 0.3em;
+    border-bottom: solid 1px #3B69D9;
 }
 
 #Section06 .Img p#Text01 {
@@ -323,7 +328,7 @@ nav dd#Title {
 #Section06 .Img #Text03 {right: 0%;}
 
 #Section09 ol {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
 }
 
 #Section11 h2 {
@@ -363,7 +368,7 @@ nav dd#Title {
 #Section21 #process1 img {
     width: 35%;
     float: right;
-    margin-top: -75px;
+    margin-top: -90px;
     margin-right: -30%;
 }
 #Section21 #process2 {margin-top: 2em;}
