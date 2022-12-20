@@ -1,0 +1,332 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CVD - SKOS-SCフォーマットの詳細</title>
+    <meta name="description" content="CVD - 統制語彙作成支援ツール SKOS-SCフォーマットの詳細">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/page_style.css">
+</head>
+    
+<body>
+
+<div class="bgimg-1">
+   <figure id="Logo"><a href="index.html"><img src="images/cvd_img.svg"></a></figure>
+</div>
+
+<div class="content content1">
+  <div class="content sticky">
+    <div class="Button">
+      <p><a href="https://github.com/fujitsu/controlled-vocabulary-designer" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">CVDのダウンロード</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="getting-started.html">クイックスタートガイド</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="help.html">CVDのヘルプ</a></p>
+    </div>
+  </div>
+
+  <div id="SimpleFormat" class="clearfix">
+    <h1>SKOS-SC（SKOS Subset CSV）フォーマットの詳細</h1>
+
+    <ul id="Nav">
+      <li><a href="#Title1">用語解説</a></li>
+      <li><a href="#Title2">CVDと語彙リポジトリとSKOS-SCフォーマット</a></li>
+      <li><a href="#Title3">「SKOS-SC 用語一覧」について</a></li>
+      <li><a href="#Title4">「語彙基本情報」について</a></li>
+    </ul>
+
+    <div id="Container">
+
+      <h2 id="Title1">用語解説</h2>
+      <div id="Intro">
+        <h3>SKOS-SC（SKOS Subset CSV）フォーマット</h3>
+        <p>RDFなどの知識処理に精通していないユーザーでも、理解が容易にできるよう設計されている語彙のCSVフォーマット。</p>
+        <p>語彙リポジトリ(下記)に格納するCSVファイルフォーマットでもある。</p>
+        <p>SKOS-SC（SKOS Subset CSV）フォーマットは以下の2種類。</p>
+        <ul>
+            <li>統制語彙の各用語間の関係性について記述したデータ。（以降、「SKOS-SC 用語一覧」とする）</li>
+            <li>統制語彙の名称や作成者について記述したメタデータ。（以降、「語彙基本情報」とする）</li>
+        </ul>
+
+        <h3>統制語彙作成支援ツール（CVD: Controlled Vocabulary Designer）</h3>
+        <p>分野の統制語彙の作成を支援するWEBアプリケーション。</p>
+        <dl>
+          <dt>より詳しい説明</dt>
+          <dd><a href="https://sip-cyber-x.jp/overview/o002">SIP分野間データ連携基盤のWEBページ「統制語彙作成支援ツール」</a>（https://sip-cyber-x.jp/overview/o002）</dd>
+          <dt>ソースコード</dt>
+          <dd><a href="https://github.com/fujitsu/controlled-vocabulary-designer">https://github.com/fujitsu/controlled-vocabulary-designer</a>（OSSとして公開済み）</dd>
+        </dl>
+
+        <h3>語彙リポジトリ</h3>
+        <p>語彙を収集するリポジトリ（データやファイルなどを一元的に管理する格納場所）で、語彙を自由に登録、検索、参照することが可能。</p>
+        <dl>
+          <dt>より詳しい説明</dt>
+          <dd><a href="https://sip-cyber-x.jp/overview/o003">SIP分野間データ連携基盤のWEBページ「語彙リポジトリ」</a>（https://sip-cyber-x.jp/overview/o003）</dd>
+        </dl>
+      </div>
+
+      <div id="Chapter_1">
+        <h2 id="Title2">CVDと語彙リポジトリとSKOS-SCフォーマット</h2>
+        <figure><figcaption>▼CVDと語彙リポジトリの間でのSKOS-SCフォーマット連携イメージ</figcaption><img src="images/simple_format1.png"></figure>
+        <p>統制語彙の作成・編集は、CVDを使用せずにExcelでSKOS-SCフォーマットのファイルを編集する事も可能。以降の説明は Excelを使用してSKOS-SCフォーマットのファイルを編集する場合の補足。</p>
+      </div>
+
+      <div>
+        <h2 id="Title3">「SKOS-SC 用語一覧」について</h2>
+
+        <ul id="Anchor" class="clearfix">
+          <li><a href="#Chapter_3">用語名</a></li>
+          <li><a href="#Chapter_4">代表語</a></li>
+          <li><a href="#Chapter_5">言語</a></li>
+          <li><a href="#Chapter_6">代表語のURI</a></li>
+          <li><a href="#Chapter_7">上位語のURI</a></li>
+          <li><a href="#Chapter_8">他語彙体系の同義語のURI</a></li>
+          <li><a href="#Chapter_9">用語の説明</a></li>
+          <li><img src="images/simple_format2-2.png"></li>
+        </ul>
+
+        <div id="Chapter_2">
+          <figure>
+            <img src="images/simple_format2.png">
+            <figcaption>▲「SKOS-SC 用語一覧」記述例</figcaption>
+          </figure>
+        </div>
+        
+        <div id="space"></div>
+
+        <h3>各列についての解説</h3>
+        
+        <div id="Chapter_3" class="clearfix">
+          <h4>「用語名」列</h4>
+          <ul>
+            <li>当該分野の用語一覧</li>
+            <li>各行に1つずつ、重複なしで記述する</li>
+          </ul>
+          <figure>
+            <figcaption>
+              <p>1行ずつ重複なしで記述</p>
+            </figcaption>
+            <img src="images/simple_format3.png">
+          </figure>
+        </div>
+
+        <div id="Chapter_4">
+          <h4>「代表語」列</h4>
+          <ul>
+            <li>当該分野の用語間に同義語があった際に、表記上それらを代表する用語</li>
+            <li>簡易ファイルフォーマット記述例では、「コンビニ」と「コンビニエンスストア」の代表語がいずれも「コンビニエンスストア」となっている。これは、「コンビニ」と「コンビニエンスストア」が同義語であり、代表語が「コンビニエンスストア」であることを表現している。</li>
+          </ul>
+          <figure>
+            <img src="images/simple_format4.png">
+            <figcaption><p>同義関係の用語がある場合はこのように重複して同じ代表語を記述する</p></figcaption>
+          </figure>
+          <ul>
+            <li>代表語は、同義関係の用語の中から1つ選んで記述する。この例では、代表語が「コンビニ」と「コンビニエンスストア」のいずれかを記述し、それ以外の用語は記述してはいけない。</li>
+            <li>同義語が無い用語は、その用語自身を代表語とするため、代表語列に用語名を記述する。</li>
+          </ul>
+        </div>
+
+        <div id="Chapter_5">
+          <h4>「言語」列</h4>
+          <ul>
+            <li>当該分野の用語の言語情報</li>
+            <li>用語が日本語の場合は“ja”、英語の場合は“en”を記述する（それ以外の言語は未対応）。</li>
+            <li>同義関係の用語は、言語ごとに代表語を統一する</li>
+          </ul>
+          <figure>
+            <img src="images/simple_format5.png">
+            <figcaption>
+              <p>言語が“ja”の代表語は“コンビニエンスストア”</p>
+              <p>言語が“en”の代表語は“convenience store”</p>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div id="Chapter_6">
+          <h4>「代表語のURI」列</h4>
+          <ul>
+            <li>当該分野の用語の代表語が持つユニークな値</li>
+            <li>語彙自体のURI+代表語のIDで表現される（IDは数字以外でもOK）</li>
+            <li class="NoList">※語彙自体のURIは、「語彙基本情報」の語彙のURIと同一</li>
+          </ul>
+          <figure>
+            <img src="images/simple_format6.png">
+          </figure>
+          <ul>
+            <li>語彙自体のURI、代表語のIDの表現方法に特に制限はない（語彙自体のURIと代表語のIDの境界はバックスラッシュで記述すること）</li>
+            <li>代表語のURIは、記述必須</li>
+            <li>代表語のURIは、同義関係の用語については全て同じ値を記述する</li>
+          </ul>
+          <figure class="img2">
+            <img id="img7" src="images/simple_format7.png">
+            <figcaption>
+              <dl>
+                <dt>以下は同義語である</dt>
+                <dd>コンビニ</dd>
+                <dd>コンビニエンスストア</dd>
+                <dd>convenience store</dd>
+                <dd>drug store</dd>
+                <dd>the corner shop</dd>
+              </dl>
+              <dl>
+                <dt>以下は同義語である</dt>
+                <dd>店舗</dd>
+                <dd>店</dd>
+                <dd>store</dd>
+                <dd>shop</dd>
+              </dl>
+            </figcaption>
+          </figure>
+          <dl class="Comment">
+            <dt>【補足】URIとは</dt>
+            <dd>URIは「Uniform Resource Identifier」の略で、一定の書式に従って記述される文字列で、あらゆるリソースを認識するための識別子です。</dd>
+          </dl>
+        </div>
+
+        <div id="Chapter_7">
+          <h4>「上位語のURI」列</h4>
+          <ul>
+            <li>当該分野の用語の上位語の代表語のURI</li>
+            <li>同義関係の用語については同じ「上位語のURI」を記述する</li>
+            <li>上位語が存在する場合のみ記述する（省略可能）</li>
+          </ul>
+          <figure class="clearfix">
+            <figcaption>
+              <p>代表語のURIがhttp://myVocabulary/1である用語たち（「コンビニ」など）の上位語は、代表語のURIがhttp://myVocabulary/2である用語たち（「店舗」など）である</p>
+              <p>代表語のURIがhttp://myVocabulary/2である用語たち（「店舗」など）の上位語は特に無いので、記述が無い</p>
+            </figcaption>
+            <img src="images/simple_format8.png">
+          </figure>
+        </div>
+
+        <div id="Chapter_8">
+          <h4>「他語彙体系の同義語のURI」列</h4>
+          <ul>
+            <li>当該分野の語彙とは別の語彙で同義関係である用語のURI</li>
+            <li>同義関係の用語については同じ「他語彙体系の同義語のURI」を記述する</li>
+            <li>別の語彙で同義関係の用語が存在する場合のみ記述する（省略可能）</li>
+          </ul>
+          <figure class="clearfix">
+            <figcaption>
+              <p>代表語のURIがhttp://myVocabulary/2である用語たち（「店舗」など）の「他語彙体系の同義語のURI」はhttp://otherVocabulary/16である（わかるのはURIだけであって、それ以外の情報はない）</p>
+              <p>代表語のURIがhttp://myVocabulary/2である用語たち（「コンビニ」など）の他語彙体系の同義語は無いので記述が無い</p>
+            </figcaption>
+            <img src="images/simple_format9.png">
+          </figure>
+        </div>
+
+        <div id="Chapter_9">
+          <h4>「用語の説明」列</h4>
+          <ul>
+            <li>当該分野の用語についての説明</li>
+            <li>同義関係の用語については、言語ごとに同じ用語の説明を記述する</li>
+            <li>省略可能</li>
+          </ul>
+          <figure>
+            <img src="images/simple_format10.png">
+            <figcaption>
+              <p>同義語「コンビニ」「コンビニエンスストア」の用語の説明</p>
+              <p>同義語「store」「shop」の用語の説明はなし</p>
+              <p>同義語「店舗」「店」の用語の説明はなし</p>
+              <p>同義語「convenience store」「drug store」「the corner shop」の用語の説明</p>
+            </figcaption>
+          </figure>
+        </div>
+        
+      </div>
+
+      <div id="Chapter_10">
+        <h2 id="Title4">「語彙基本情報」について</h2>
+        <figure>
+          <figcaption>▼「語彙基本情報」記述例</figcaption>
+          <img src="images/simple_format11.png">
+        </figure>
+      </div>
+
+      <h3>各列についての解説</h3>
+      
+      <div id="Chapter_11">
+        <div>
+          <h4>「語彙の名称」列</h4>
+          <ul>
+            <li>統制語彙の日本語名称</li>
+            <li>任意の名前を記述する</li>
+          </ul>
+        </div>
+        <div>
+          <h4>「語彙の英語名称」列</h4>
+          <ul>
+            <li>統制語彙の英語名称</li>
+            <li>任意の名前を記述する</li>
+          </ul>
+        </div>
+        <div>
+          <h4>「バージョン」列</h4>
+          <ul>
+            <li>統制語彙のバージョン</li>
+          </ul>
+        </div>
+        <div>
+          <h4>「接頭語」列</h4>
+          <ul>
+            <li>統制語彙のURIを簡略化した表現方法</li>
+            <li>統制語彙をRDFとして記述する際に接頭語を使って記述できるため、長いURIの文字列を何度も使わずに簡略化できる</li>
+          </ul>
+        </div>
+        <div>
+          <h4>「語彙のURI」列</h4>
+          <ul>
+            <li>統制語彙のURI</li>
+            <li>表現方法は自由</li>
+            <li>記述必須</li>
+          </ul>
+        </div>
+        <div>
+          <h4>「語彙の説明」列</h4>
+          <ul>
+            <li>統制語彙の日本語説明</li>
+            <li>統制語彙に関する説明を記述する</li>
+          </ul>
+        </div>
+        <div>
+          <h4>「語彙の英語説明」列</h4>
+          <ul>
+            <li>統制語彙の英語説明</li>
+            <li>統制語彙に関する説明を英語で記述する</li>
+          </ul>
+        </div>
+        <div>
+          <h4>「語彙の作成者」列</h4>
+          <ul>
+            <li>統制語彙の作成者</li>
+            <li>記述方法は自由</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer>
+    <div id="FooterContent">
+      <figure><a href="index.html"><img src="images/cvd_img.svg"></a></figure>
+      <h1>CVD（Controlled Vocabulary Designer）</h1>
+      <p>統制語彙作成支援ツール</p>
+      <ul>
+        <li><a href="index.html">CVDの紹介 トップページ</a></li>
+        <li><a href="simple-format.html">SKOS-SCフォーマットの詳細</a></li>
+        <li><a href="getting-started.html">クイックスタートガイド</a></li>
+        <li><a href="help.html">CVDのヘルプ</a></li>
+        <li><a href="https://github.com/fujitsu/controlled-vocabulary-designer">CVDのダウンロード</a></li>
+      </ul>
+  </div>
+</footer>
+
+</body>
+</html>
