@@ -40,6 +40,7 @@ export default
    */
   constructor(props) {
     super(props);
+    this.rootElm = undefined;
     this.state = {
       open: false,
       snackOpen: false, 
@@ -60,7 +61,7 @@ export default
   /**
    * Key event registration
    */
-  componentDidMount() { 
+  componentDidMount() {
     this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
     if( undefined != this.props.editingVocabularyMeta.editingVocabularyMeta ){          
         this.setState({
@@ -74,6 +75,32 @@ export default
           metaDescriptionEn: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_endescription,
         });
     } 
+    // window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    // window.removeEventListener('keydown', this);
+    this.rootElm = document.getElementById('vocabulary_meta_panel');
+    if( this.rootElm){
+      this.rootElm.addEventListener('keydown', this.handleKeyDown.bind(this));
+    }
+    this.rootElm&&this.rootElm.addEventListener('keydown', this.handleKeyDown.bind(this));
+  }
+  // componentWillUnmount(){
+  //   if( this.rootElm){
+  //     this.rootElm.removeEventListener('keydown', this.handleKeyDown);
+  //   }
+  // }
+
+  /**
+  * Key event
+  * @param  {object} event - information of key event
+  */
+  handleKeyDown(event) {
+    if (event.keyCode === 13) {
+      //return false;
+      console.log("meta keydown hogehoge");
+    }
+    // event.stopPropagation();
+    event.preventDefault();
+
   }
 
   /**
@@ -202,7 +229,7 @@ export default
     const metaAuthor = this.state.metaAuthor ? this.state.metaAuthor : '';
 
     return (
-      <div>
+      <div id='vocabulary_meta_panel'>
         <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
           <Box p={1} width="430px" height='100%' padding='20px' style={{ overflowX: 'hidden', overflowY: 'auto'}}>
             <Grid container spacing={2}>
