@@ -75,32 +75,6 @@ export default
           metaDescriptionEn: this.props.editingVocabularyMeta.editingVocabularyMeta.meta_endescription,
         });
     } 
-    // window.addEventListener('keydown', this.handleKeyDown.bind(this));
-    // window.removeEventListener('keydown', this);
-    this.rootElm = document.getElementById('vocabulary_meta_panel');
-    if( this.rootElm){
-      this.rootElm.addEventListener('keydown', this.handleKeyDown.bind(this));
-    }
-    this.rootElm&&this.rootElm.addEventListener('keydown', this.handleKeyDown.bind(this));
-  }
-  // componentWillUnmount(){
-  //   if( this.rootElm){
-  //     this.rootElm.removeEventListener('keydown', this.handleKeyDown);
-  //   }
-  // }
-
-  /**
-  * Key event
-  * @param  {object} event - information of key event
-  */
-  handleKeyDown(event) {
-    if (event.keyCode === 13) {
-      //return false;
-      console.log("meta keydown hogehoge");
-    }
-    // event.stopPropagation();
-    event.preventDefault();
-
   }
 
   /**
