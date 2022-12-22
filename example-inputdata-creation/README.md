@@ -1,13 +1,19 @@
 # 読み込み用ファイル作成例
 編集用語彙、参照用語彙の作成例です。<br>
-domain_words.csv、domain_text.txt、reference.csv、reference.ttlのサンプルはそれぞれこのREADMEの下部に提示しています。
+domain_words.csv、domain_text.txt、reference.csv、reference.ttlのサンプルは「samples」ディレクトリーにあり、それぞれの説明はこのREADMEの下部に提示しています。
 
+編集語彙_meta.csvは別途作成する必要があります。
+トップフォルダの[README](../README.md)の「編集用語彙_metaのサンプル」についての項を参照ください。
 
 ## 編集用語彙を作成する方法
 domain_words.csvとdomain_text.txtをmountdir/data/に置き、Linuxマシンのターミナル上で以下のコマンドを実行します。
 1. ```$ cd example-inputdata-creation```
 2. ```$ docker-compose build --build-arg HOST_USER_ID=$(id -u)```
+
+以下のコマンドで、コンテナの中に入ります。
 3. ```$ docker-compose run python /bin/bash```
+
+以下のスクリプトを動かすことで、編集用語彙を作成します。
 4. ```$ ./Hensyugoi.sh```
 
 mountdir/data/に、Hensyugoi.csvというファイル名で編集用語彙が出力されます。
@@ -51,15 +57,13 @@ mountdir/data/に、Hensyugoi.csvというファイル名で編集用語彙が�
 
 ## 参照用語彙を作成する方法
 domain_words.csvをmountdir/data/に置きます。さらに、参照したい既存の語彙がある場合は、ファイル名をreference.csvあるいはreference.ttlとしてmountdir/data/に置きます。<br>
-Linuxマシンのターミナル上で以下のコマンドを実行します。
-1. ```$ cd example-inputdata-creation```
-2. ```$ docker-compose build --build-arg HOST_USER_ID=$(id -u)```
-3. ```$ docker-compose run python /bin/bash```
-4. ```$ ./Sansyougoi.sh```. 
+コンテナに入るまでは「編集用語彙を作成する方法」と同じ手順です。
+コンテナの中で以下のスクリプトを動かすことで、参照用語彙を作成します。
+4. ```$ ./Sansyougoi.sh```
 
 mountdir/data/に、SansyougoiAll.csv、SansyougoiTarget.csvというファイル名で2種類の参照用語彙が出力されます。<br>
 ・SansyougoiAll.csv：既存の語彙の情報全てを抽出したファイル<br>
-・SansyougoiTarget.csv：既存の語彙の情報のうち、domain_words.csvに記載されている用語についての情報のみを抽出したファイル
+・SansyougoiTarget.csv：既存の語彙の情報のうち、domain_words.csvに記載されている用語のみを抽出したファイル
 
 -  上記1～4のコマンドは既存の語彙をCVDの読み込みできる形式に変換するための処理であり、domain_words.csvやreference.csvやreference.ttlの内容に不整合が存在するかどうかは検出しません。不整合が存在する場合は別途手動で修正が必要です（domain_words.csvやreference.csvの記述ルールは、トップフォルダの[README](../README.md)の「編集用語彙のサンプル」についての項を参照ください。reference.ttlの記述ルールは、このREADMEのreference.ttlのサンプルを参照ください）。
 -  reference.csvあるいはreference.ttlを使用するかどうかは任意ですが、使用する場合はmountdir/src/config.jsonの以下の箇所に、"reference.csv"あるいは"reference.ttl"を記入してください。
