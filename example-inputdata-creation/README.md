@@ -10,10 +10,10 @@ domain_words.csvとdomain_text.txtをmountdir/data/に置き、Linuxマシンの
 1. ```$ cd example-inputdata-creation```
 2. ```$ docker-compose build --build-arg HOST_USER_ID=$(id -u)```
 
-以下のコマンドで、コンテナの中に入ります。
+以下のコマンドで、コンテナの中に入ります。<br>
 3. ```$ docker-compose run python /bin/bash```
 
-以下のスクリプトを動かすことで、編集用語彙を作成します。
+以下のスクリプトを動かすことで、編集用語彙を作成します。<br>
 4. ```$ ./Hensyugoi.sh```
 
 mountdir/data/に、Hensyugoi.csvというファイル名で編集用語彙が出力されます。
@@ -57,8 +57,8 @@ mountdir/data/に、Hensyugoi.csvというファイル名で編集用語彙が�
 
 ## 参照用語彙を作成する方法
 domain_words.csvをmountdir/data/に置きます。さらに、参照したい既存の語彙がある場合は、ファイル名をreference.csvあるいはreference.ttlとしてmountdir/data/に置きます。<br>
-コンテナに入るまでは「編集用語彙を作成する方法」と同じ手順です。
-コンテナの中で以下のスクリプトを動かすことで、参照用語彙を作成します。
+コンテナに入るまでは「編集用語彙を作成する方法」と同じ手順です。<br>
+コンテナの中で以下のスクリプトを動かすことで、参照用語彙を作成します。<br>
 4. ```$ ./Sansyougoi.sh```
 
 mountdir/data/に、SansyougoiAll.csv、SansyougoiTarget.csvというファイル名で2種類の参照用語彙が出力されます。<br>
