@@ -11,9 +11,11 @@ domain_words.csvとdomain_text.txtをmountdir/data/に置き、Linuxマシンの
 2. ```$ docker-compose build --build-arg HOST_USER_ID=$(id -u)```
 
 以下のコマンドで、コンテナの中に入ります。<br>
+
 3. ```$ docker-compose run python /bin/bash```
 
 以下のスクリプトを動かすことで、編集用語彙を作成します。<br>
+
 4. ```$ ./Hensyugoi.sh```
 
 mountdir/data/に、Hensyugoi.csvというファイル名で編集用語彙が出力されます。
