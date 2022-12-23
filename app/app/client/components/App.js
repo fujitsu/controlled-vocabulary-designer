@@ -362,6 +362,8 @@ class App extends React.Component {
    * Get db data
    */
   async componentDidMount() {
+    window.addEventListener('pageshow', this.handlePageShow.bind(this));
+    
     await editingVocabularyMetaStore.getEditingVocabularyMetaDataFromDB();
     await editingVocabularyStore.getEditingVocabularyDataFromDB();
     editingVocabularyStore.getReferenceVocabularyDataFromDB('1');
@@ -370,6 +372,16 @@ class App extends React.Component {
 
     await this.readFileChack();
   }
+    /**
+   * @param  {object} event - information of pageshow
+   */
+    handlePageShow(event) {
+      // catch browser back button event and reload the page
+      // https://developer.mozilla.org/ja/docs/Web/API/Performance/getEntriesByType
+      if(window.performance.getEntriesByType("navigation").map((nav) => nav.type).includes('back_forward')){
+        location.reload();
+      }
+    }
 
   readFileChack(){
     setTimeout(()=> {
