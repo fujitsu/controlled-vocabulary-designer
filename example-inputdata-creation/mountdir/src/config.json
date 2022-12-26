@@ -29,7 +29,7 @@
         "URI": "http://sampleWordnet/"
     },
     "WordEmbedding2": {
-        "poincare.epochs": 20
+        "poincare.epochs": 200
     }
   }
 }
