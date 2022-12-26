@@ -32,7 +32,12 @@
     */
    render() {
  
-     const bgcolor = this.props.disabled?'rgba(0, 0, 0, 0.09)':'rgba(0, 0, 0, 0)';
+     let bgcolor = 'rgba(0, 0, 0, 0)';
+     if( this.props.backcolor !== undefined){
+      bgcolor = this.props.backcolor;
+     }else if( this.props.disabled){
+      bgcolor = 'rgba(0, 0, 0, 0.09)';
+     }
      const tmpMetaDescription = this.props.value;
 
      return (
@@ -49,6 +54,7 @@
                     multiline
                     onChange={(e)=>this.onChange(e)}
                     className={this.props.classes.inputText}
+                    disabled={this.props.disabled}
                     style={{backgroundColor: bgcolor, minHeight: '4.7em'}}
                     value={tmpMetaDescription}
                  />
@@ -63,9 +69,9 @@
  
  TextFieldMultiLine.propTypes = {
    editingVocabulary: PropTypes.object,
-   editingVocabularyMeta: PropTypes.object,
    classes: PropTypes.object,
    value: PropTypes.string,
    change: PropTypes.func,
    disabled: PropTypes.bool,
+   backcolor: PropTypes.string,
  };

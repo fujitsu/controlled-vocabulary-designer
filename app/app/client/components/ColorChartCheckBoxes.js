@@ -26,8 +26,6 @@ export default class ColorChartCheckBoxes extends React.Component {
    */
   constructor(props) {
     super(props);
-    this.props.tmpColor.id = '';
-    this.props.tmpColor.color = '';
   }
 
   /**
@@ -35,8 +33,7 @@ export default class ColorChartCheckBoxes extends React.Component {
    * @param  {object} event - information of color event for update
    */
   selectColor(event) {
-    this.props.selectTmpColor(this.props.currentId, event.target.name);
-    this.props.selectColor(this.props.currentId, this.props.colorId, event.target.name);
+    this.props.editingVocabulary.updateColor(this.props.editingVocabulary.selectedIdList, this.props.colorId, event.target.name);
 
     this.props.close();
   }
@@ -54,21 +51,8 @@ export default class ColorChartCheckBoxes extends React.Component {
       blue: false,
       purple: false,
     };
-
-    if (this.props.currentId == this.props.tmpColor.id) {
-      if (this.props.tmpColor.color) {
-        colorSet[this.props.tmpColor.color] = true;
-      } else {
-        // Rerender separately from the color change without changing the color.
-        if (this.props.color) {
-          colorSet[this.props.color] = true;
-        }
-      }
-    } else {
-      this.props.tmpColor.id = this.props.currentId;
-      if (this.props.color) {
-        colorSet[this.props.color] = true;
-      }
+    if ( this.props.editingVocabulary.currentNode.color1) {
+      colorSet[this.props.editingVocabulary.currentNode.color1] = true;
     }
 
     return (
@@ -150,13 +134,8 @@ export default class ColorChartCheckBoxes extends React.Component {
 }
 
 ColorChartCheckBoxes.propTypes = {
-  tmpColor: PropTypes.object,
-  selectColor: PropTypes.func,
+  editingVocabulary: PropTypes.object,
   colorId: PropTypes.string,
-  selectTmpColor: PropTypes.func,
-  currentId: PropTypes.number,
-  color: PropTypes.string,
-  classes: PropTypes.object,
   disabled: PropTypes.bool,
   close: PropTypes.func,
 };

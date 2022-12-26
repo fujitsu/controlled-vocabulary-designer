@@ -29,11 +29,11 @@ export default
       // Chips added by completion
       chipColor = '#ffcdd2';
     }
-    const disp = editingVocabularyStore.isBlankTerm(this.props.label);
+    const disp = !editingVocabularyStore.isBlankTerm(this.props.label);
 
     return (
       <>
-      { !disp && 
+      { disp && 
         <Chip
           style={{backgroundColor: chipColor}}
           {...this.props}

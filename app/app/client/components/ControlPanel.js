@@ -90,7 +90,7 @@ export default class ControlPanel extends React.Component {
    * Key event registration
    */
   componentDidMount() {
-    // window.addEventListener('keydown', this.handleKeyDown.bind(this));
+    window.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   /**
@@ -217,11 +217,6 @@ export default class ControlPanel extends React.Component {
       disabledColor = false;
     }
 
-    // Firm button disabled condition
-    // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
-    const isCurrentNodeChanged = editingVocabulary.isCurrentNodeChanged;
-    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
-    
     const anchorElC = this.state.anchorElC;
     const openC = Boolean(anchorElC);
     const idC = openC ? "popover-c" : undefined;
@@ -231,7 +226,7 @@ export default class ControlPanel extends React.Component {
     const leftPostion = (window.innerWidth - 480) / 2;
 
     return (
-      <div onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
+      <div>
         <Box>
           <Button
             aria-controls="customized-menu"
@@ -291,17 +286,17 @@ export default class ControlPanel extends React.Component {
             <MenuItem onClick={(fileType) =>
               this.downloadDialogOpen('editing_vocabulary')}
             >
-              編集用語彙
+              CSV（用語一覧）
             </MenuItem>
             <MenuItem onClick={(fileType) =>
               this.downloadDialogOpen('editing_vocabulary_meta')}
             >
-              編集用語彙_meta
+              CSV（語彙基本情報）
             </MenuItem>
             <MenuItem onClick={(fileType) =>
               this.downloadDialogOpen('controlled_vocabulary')}
             >
-              統制語彙
+              RDF
             </MenuItem>
           </Menu>
           <Button 

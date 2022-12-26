@@ -36,7 +36,7 @@ export default
     const tmpMetaAuthor = this.props.value;
 
     return (
-      <div>
+      <div onKeyDown={(e)=>{e.keyCode===13&&e.preventDefault()}}>
         <form noValidate autoComplete="off">
           <Grid item xs={12}>
             {/* [ inputTextWrap ] - declared a global class to take advantage of WebKit's CSS extensions */}

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS editing_vocabulary (
   "preferred_label" text,
   "language" text,
   "uri" text,
-  "broader_term" text,
+  "broader_uri" text,
   "other_voc_syn_uri" text,
   "term_description" text,
   "created_time" text,
@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS editing_vocabulary (
   "position_y" text,
   "color1" text,
   "color2" text,
-  "confirm" integer NOT NULL
+  "confirm" integer NOT NULL,
+  "external_voc" boolean
 );
 
 CREATE TABLE IF NOT EXISTS reference_vocabulary_1 (
@@ -26,7 +27,7 @@ CREATE TABLE IF NOT EXISTS reference_vocabulary_1 (
   "preferred_label" text,
   "language" text,
   "uri" text,
-  "broader_term" text,
+  "broader_uri" text,
   "other_voc_syn_uri" text,
   "term_description" text,
   "created_time" text,
@@ -41,7 +42,7 @@ CREATE TABLE IF NOT EXISTS reference_vocabulary_2 (
   "preferred_label" text,
   "language" text,
   "uri" text,
-  "broader_term" text,
+  "broader_uri" text,
   "other_voc_syn_uri" text,
   "term_description" text,
   "created_time" text,
@@ -56,7 +57,7 @@ CREATE TABLE IF NOT EXISTS reference_vocabulary_3 (
   "preferred_label" text,
   "language" text,
   "uri" text,
-  "broader_term" text,
+  "broader_uri" text,
   "other_voc_syn_uri" text,
   "term_description" text,
   "created_time" text,

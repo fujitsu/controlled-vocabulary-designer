@@ -55,24 +55,16 @@ export default
   /**
    * Broader term update event
    * @param  {object} event - information of event
-   * @param  {array} newValue - broader term list
+   * @param  {array} newValues - broader term list
    */
-  onChange(event, newValue) {
+  onChange(event, newValues) {
     const editingVocabulary = this.props.editingVocabulary;
     const inputText = event.target.value;
-    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
-    if( inputText != '' && inputText != undefined && !find){
-      const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
-                       '既存の用語を記入してください。';
-      const innerText = errorMsg.split('¥n').map((line, key) =>
-        <span key={key}>{line}<br /></span>);
-      this.openSnackbar(innerText);
-
-      return false;
-    }
-    if( find && find.language != editingVocabulary.tmpLanguage.list){
-      const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
-                      '現在選択されている言語の用語を記入してください。';
+    const displayLanguage = editingVocabulary.tmpLanguage.value;
+    const foundId = editingVocabulary.getIdbyTermandLang(inputText, displayLanguage);
+    if( inputText != '' && inputText != undefined && !foundId){
+      const errorMsg =  '「' +inputText + '」 は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
+                       '登録済みの用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
@@ -80,65 +72,79 @@ export default
       return false;
     }
 
-    if (newValue.length > 1) {
-      // More than one broader term selected
-      const errorMsg = '上位語テキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
-      this.openSnackbar(errorMsg);
-    } else if (newValue.length == 1) {
-      const nextBroaderTerm = newValue[0];
-
-      // Check the validity of a broader term /////////////////////////////////////////
-      const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
-      let _currentNode = currentNode;
-      if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
-        && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
-        && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
-          const find = editingVocabulary.editingVocabulary.find((item)=>
-              item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
-          _currentNode = find?find:currentNode;
+    // const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+    let newValueUri = '';
+    if(newValues.length !==0){
+      const foundId2 = editingVocabulary.getIdbyTermandLang(newValues[0], displayLanguage);
+      const foundObj2 = editingVocabulary.editingVocWithId.get(foundId2);
+      if(undefined !== foundObj2){
+        newValueUri = foundObj2.uri;
       }
-      if (editingVocabulary.isInvalidBrdrTrm(_currentNode, nextBroaderTerm)) {
+    }
+
+    if (newValues.length > 1) {
+      // More than one broader term selected
+      let errorMsg = '上位語テキストボックスには、複数の用語を記入できません。¥n用語を1つだけ記入してください。';
+      errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);
+      this.openSnackbar(errorMsg);
+    }else if (newValues.length == 1) {
+      const nextBroaderTerm = newValues[0];
+      
+      // Check the validity of a broader term /////////////////////////////////////////
+      const displayNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+      let _displayNode = displayNode;
+      if(  _displayNode.term == '' && displayLanguage !== editingVocabulary.currentNode.language
+        && editingVocabulary.currentLangDiffNode.term === '' // && editingVocabulary.currentLangDiffNode.language !== ''
+        && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
+          // this condition is satisfied when the currentNode is ja/en and synonym en/ja term does not exist.
+          const foundId = editingVocabulary.getIdbyTermandLang(
+             editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0],
+             editingVocabulary.currentLangDiffNode.language);
+          const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+          _displayNode = foundObj?foundObj:displayNode;
+      }
+      if (editingVocabulary.isBroaderInSynonym(_displayNode.term, displayLanguage, nextBroaderTerm)) { 
         const errorMsg = '上位語テキストボックスに、¥n' +
-                       '\"' + _currentNode.term + '\" の代表語あるいは同義語が記入されています。¥n' +
+                       '「' + _displayNode.term + '」 の代表語あるいは同義語が記入されています。¥n' +
                        '上位語テキストボックスには、¥n' +
-                       '\"' + _currentNode.term + '\" の代表語と同義語以外の値を記入してください。';
+                       '「' + _displayNode.term + '」 の代表語と同義語以外の用語を記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
-      } else if (editingVocabulary.isCycleBrdrTrm(_currentNode, nextBroaderTerm)) {
+      } else if (editingVocabulary.isCyclicBroaders(editingVocabulary.currentNode, String(nextBroaderTerm), newValueUri)){
         // Broader term loop check /////////////////////////////////////////
           const cycleBroaderTerm =
             editingVocabulary.cycleBroaderTerm;
 
-          let errorMsg = '上位語テキストボックスに \"'+
-                         nextBroaderTerm +'\" を記入することで、¥n';
+          let errorMsg = '上位語テキストボックスに 「'+
+                         nextBroaderTerm +'」 を記入することで、¥n';
           errorMsg += '代表語 ';
           cycleBroaderTerm.forEach((term) => {
-            errorMsg += '\"';
+            errorMsg += '「';
             errorMsg += term;
-            errorMsg += '\", ';
+            errorMsg += '」, ';
           });
           errorMsg = errorMsg.slice( 0, -2 );
           errorMsg += ' は、¥n上下関係が循環してしまいます。¥n';
           errorMsg += '上位語テキストボックスには、¥n';
           cycleBroaderTerm.forEach((term) => {
-            errorMsg += '\"';
+            errorMsg += '「';
             errorMsg += term;
-            errorMsg += '\", ';
+            errorMsg += '」, ';
           });
           errorMsg = errorMsg.slice( 0, -2 );
           errorMsg += ' 以外の代表語を持つ用語を記入してください。';
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
           this.openSnackbar(innerText);
-      } else if (editingVocabulary.isInvalidSynonymBrdrTrm(_currentNode, nextBroaderTerm)) {
+      } else if (!editingVocabulary.isValidSynonymBrdrTrm(_displayNode, nextBroaderTerm)) {
         let errorMsg = '上位語テキストボックスに、日本語と英語で同義関係ではない用語が記入されています。¥n日本語と英語で同義関係の用語を記入してください。'
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
       }
     }
-    editingVocabulary.updataBroaderTerm(newValue);
+    editingVocabulary.updateBroaderTerm(newValues, displayLanguage, newValueUri);
   }
 
   /**
@@ -146,19 +152,25 @@ export default
    * @return {element}
    */
   render() {
-    const broaderTerm = this.props.editingVocabulary.tmpBroaderTerm.list[this.props.editingVocabulary.tmpLanguage.list];
-    let currentBroaderTerm;
+    const editingVocabulary = this.props.editingVocabulary;
+    const broaderTerm = editingVocabulary.tmpBroaderTerm.list[editingVocabulary.tmpLanguage.value];
+    
+    // broader term when switching with the  language radio button in the selected term
+    let currentBroaderTerm = editingVocabulary.currentLangDiffNode.broader_term;
     // broader term on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
-      currentBroaderTerm =
-        this.props.editingVocabulary.currentNode.broader_term;
-    } else { // broader term when switching with the  language radio button in the selected term
-      currentBroaderTerm =
-        this.props.editingVocabulary.currentLangDiffNode.broader_term;
+    if (editingVocabulary.currentNode.language == editingVocabulary.tmpLanguage.value) {
+      currentBroaderTerm = editingVocabulary.currentNode.broader_term;
+    }
+    
+    let backColor = 'rgba(0, 0, 0, 0)';
+    if(this.props.disabled){
+      backColor = 'rgba(0, 0, 0, 0.09)';
+    }else if( currentBroaderTerm !== '' && 0 === broaderTerm.length){
+      backColor = 'lavenderblush';
     }
     
     return (
-      <div>
+      <div onKeyDown={(e)=>{e.keyCode===13&&e.preventDefault()}}>
         <form noValidate autoComplete="off">
           <Grid item xs={12}>
             <Box border={1}>
@@ -224,6 +236,7 @@ export default
                       {...getTagProps({index})}
                       label={option}
                       data={currentBroaderTerm}
+                      needblankcheck={'true'}
                     />
                   ));
                 }}
@@ -231,11 +244,7 @@ export default
                   <TextField
                     {...params}
                     variant="standard"
-                    style={
-                        this.props.disabled?
-                        {backgroundColor: 'rgba(0, 0, 0, 0.09)'}:
-                        {backgroundColor: 'rgba(0, 0, 0, 0)'}
-                    }
+                    style={{backgroundColor: backColor}}
                   />
                 )}
               />

@@ -1,0 +1,792 @@
+﻿@charset "utf-8";
+/* CSS Document */
+
+
+/************ コンテンツのフォントサイズを変更するには以下を調整 ************/
+body, html {font-size: 14px;}
+/************************************************************************/
+
+.bgimg-1, .bgimg-2, .bgimg-3 {
+    position: relative;
+    background-attachment: fixed;
+    background-position: center -15em;
+    background-repeat: no-repeat;
+    background-size: cover;
+}
+@media only screen and (max-device-width: 1024px) {
+    .bgimg-1, .bgimg-2, .bgimg-3 {background-attachment: scroll;}
+}
+.bgimg-1 {
+    background-image: url("../images/index_bg.png");
+    min-height: 180px;
+    background-color: #EBEBEB;
+}
+
+/************ headerロゴの設定 ************/
+#Logo {
+    position: absolute;
+    top: 15%;
+    width: 100%;
+    text-align: center;
+}
+#Logo img {
+    height: 150px;
+    opacity: 0.75;
+}
+
+.content{
+    background-color:#fff;
+    padding:10vh 0px 10vh;
+    text-align:center;
+}
+.content h1 {
+    font-size: 2.4rem;
+    line-height: 1.1;
+    font-weight: 500;
+    color: #222;
+    margin: 2em auto 2.5em;
+    letter-spacing: 0;
+    text-align: center;
+    padding: 0.3em 0 0.2em;
+    border-top: 2px solid #484b4e;
+    border-bottom: 2px solid #484b4e;
+}
+.content p {
+    font-size: 1.55vw;
+    line-height: 2.0;
+    margin-bottom: 2em;
+}
+.content figure {
+    position: relative;
+    margin: 0 auto 0;
+    max-width: 1000px;
+}
+.content figure img {
+    width: 90%;
+    max-width: 1000px;
+}
+
+.content1 {padding-top: 0;}
+.content1 figure {margin-top: -1vw;}
+.content2 {background-color: #ebebeb;}
+.content3 {margin: 4.5vh auto;}
+
+.Button {
+    display: inline-block;
+    margin: 0.5em;
+    padding: 0.6em;
+}
+.Button p {
+    line-height: 1;
+    margin: 0;
+}
+.Button a {
+    color: #fff;
+    font-size: 1.1rem;
+    padding: 0.8em 2em 0.7em;
+    background-color: #0082FF;
+    border-radius: 4px;
+    display: block;
+    width: 15em;
+}
+.Button a img {
+    width: 1em;
+    margin-right: 0.5em;
+}
+.sticky {
+    background-color: #ebebeb;
+    margin: 0vh auto;
+    padding: 0;
+    position: sticky;
+    top: -1px;
+    z-index: 50;
+    border-bottom: solid 1px #ccc;
+}
+
+
+/************ 簡易フォーマット説明ページの設定 ************/
+#SimpleFormat {
+    margin: 0 auto;
+    width: 70%;
+    text-align: left;
+}
+
+#SimpleFormat #Nav {
+    max-width: 210px;
+    float: left;
+    list-style: none;
+    margin: 0;
+    padding: 0 1em 1em 0.5em;
+    border: 1px solid #bcbcbc;
+    border-radius: 4px;
+    position: sticky;
+    top: 90px;
+    z-index: 99;
+}
+#SimpleFormat #Nav li {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    text-indent:-1em;
+    margin-top: 0.6em;
+    padding-left:1em;
+}
+#SimpleFormat #Nav li a {
+    font-weight: 600;
+    color: #0082FF;
+}
+#SimpleFormat #Nav li a:before {
+    content: "";
+    margin: -0.2em 0.3em 0.2em;
+    width: 0.4em;
+    height: 0.4em;
+    display: inline-block;
+    border-top: 2px solid #0082FF;
+    border-right: 2px solid #0082FF;
+    transform: rotate(45deg);
+}
+#SimpleFormat #Container {
+    width: calc(100% - 250px);
+    float: right;
+}
+#SimpleFormat #Container h2#Title1 {margin-top: 0;}
+#SimpleFormat #Container h2[id] {scroll-margin-top: 90px;}
+
+#SimpleFormat h2 {
+    margin: 4em 0 1.5em;
+    font-size: 2.6rem;
+    line-height: 1.2;
+    border-bottom: 1px solid #bcbcbc;
+}
+#SimpleFormat h1 + h2 {margin-top: 0;}
+#SimpleFormat h3 {
+    margin: 3em 0 0;
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1.2;
+    border-top: 1px solid #bcbcbc;
+    border-bottom: 1px solid #bcbcbc;
+    padding: 0.18em 0.1em 0.15em;
+}
+#SimpleFormat h4 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 3em;
+}
+#SimpleFormat p {
+    line-height: 1.6;
+}
+#SimpleFormat figure {
+    margin: 1.5em auto 1em;
+    width: 90%;
+}
+#SimpleFormat figcaption {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #666;
+}
+#SimpleFormat div figcaption p {
+    font-size: 1.1rem;
+    line-height: 1.4;
+    font-weight: 600;
+    color: #ff5500;
+    margin: 0;
+    padding: 0;
+}
+#SimpleFormat figure img {
+    width: 100%;
+    margin-top: 1em;
+}
+
+#SimpleFormat dt {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+#SimpleFormat li ,
+#SimpleFormat dd {
+    font-size: 1.15rem;
+    line-height: 1.4;
+    margin-top: 0.1em;
+}
+#SimpleFormat div dd {
+    display: list-item;
+    list-style-type: disc;
+}
+#SimpleFormat .NoList{list-style: none;}
+
+#SimpleFormat #Intro h3 {
+    font-size: 1.6rem;
+    font-weight: 600;
+    margin-bottom: 0.1em;
+    clear: both;
+}
+#SimpleFormat #Intro p {margin-bottom: 0.2em;}
+#SimpleFormat #Intro dl {overflow: hidden;}
+#SimpleFormat #Intro dt {
+    font-weight: 500;
+    display: inline;
+    float: left;
+    clear: both;
+    border: 1px solid #bcbcbc;
+    border-radius: 4px;
+    padding: 0 0.4em;
+}
+#SimpleFormat #Intro dd {
+    display: inline;
+    float: left;
+    list-style: none;
+    margin: 1px 0.3em 0.5em;
+}
+
+#SimpleFormat .Comment {
+    border: 1px solid #bcbcbc;
+    border-radius: 4px;
+    padding: 0.7em;
+    width: 90%;
+    margin: 0 auto;
+}
+#SimpleFormat .Comment dt {
+    margin-top: -0.3em;
+    font-size: 1.15rem;
+}
+#SimpleFormat #Chapter_1 figure {width: 100%;}
+
+#SimpleFormat #Anchor {
+    background-color: #fff;
+    list-style: none;
+    margin: 0;
+    padding: 25px 0 0;
+    position: sticky;
+    top: 65px;
+    z-index: 15;
+}
+#SimpleFormat #Anchor li {
+    font-size: 0.95rem;
+    line-height: 1;
+    float: left;
+    margin: 0;
+    text-align: center;
+    position: relative;
+    z-index: 9;
+}
+#SimpleFormat #Anchor li:nth-child(1) {margin-left: 1.5%;}
+#SimpleFormat #Anchor li:nth-child(2) {margin-left: 6.5%;}
+#SimpleFormat #Anchor li:nth-child(3) {margin-left: 6.5%;}
+#SimpleFormat #Anchor li:nth-child(4) {margin-left: 1.6%;}
+#SimpleFormat #Anchor li:nth-child(5) {margin-left: 3.6%;}
+#SimpleFormat #Anchor li:nth-child(6) {margin-left: 2%;}
+#SimpleFormat #Anchor li:nth-child(7) {margin-left: 1.5%;}
+#SimpleFormat #Anchor li a {
+    font-weight: 500;
+    color: #fff;
+    background-color: #0082FF;
+    vertical-align: middle;
+    padding: 0.5em 0.7em 0.4em 0.4em;
+    border-radius: 4px;
+    display: block;
+    z-index: 9;
+}
+#SimpleFormat #Anchor li a::before {
+    content: "";
+    position: absolute;
+    top: 115%;
+    left: 30%;
+    display: inline-block;
+    transform: rotate(90deg);
+    border: 5px solid transparent;
+    border-left: 25px solid #0082FF;
+    z-index: 6;
+}
+/**#SimpleFormat #Anchor li a::after {
+    content: "";
+    width: 0.5em;
+    height: 0.5em;
+    border-top: 1px solid #fff;
+    border-right: 1px solid #fff;
+    transform: rotate(135deg);
+    margin: 0 auto 0.3em;
+    position: relative;
+    display: block;
+    z-index: 9;
+}**/
+#SimpleFormat #Anchor li:nth-child(3) a::before {
+    transform: rotate(80deg);
+}
+#SimpleFormat #Anchor li:nth-child(7) a::before {
+    left: 0;
+    transform: rotate(120deg);
+}
+#SimpleFormat #Anchor li:nth-child(8) {
+    margin: 0.2em 0 0;
+    clear: both;
+    z-index: 5;
+}
+#SimpleFormat #Anchor li:nth-child(8) img {width: 100%;}
+#SimpleFormat div > div[id] {scroll-margin-top: 215px;}
+
+#SimpleFormat #Chapter_2 {margin-top: 0;}
+#SimpleFormat #Chapter_2 figure {
+    width: 100%;
+    margin: 0;
+}
+#SimpleFormat #Chapter_2 figure img {margin-top: -43px;}
+#SimpleFormat #space {
+    height: 25px;
+    z-index: 9;
+    background-color: #fff;
+    position: sticky;
+    top: 155px;
+    margin-bottom: -20px;
+}
+@media screen and (max-width: 1199px) {
+    #SimpleFormat #Anchor li:nth-child(1) {margin-left: 1%;}
+    #SimpleFormat #Anchor li:nth-child(2) {margin-left: 5%;}
+    #SimpleFormat #Anchor li:nth-child(3) {margin-left: 5.2%;}
+    #SimpleFormat #Anchor li:nth-child(4) {margin-left: 0.3%;}
+    #SimpleFormat #Anchor li:nth-child(5) {margin-left: 0.3%;}
+    #SimpleFormat #Anchor li:nth-child(6) {margin-left: 0.3%;}
+    #SimpleFormat #Anchor li:nth-child(6) a::before {left: 25%;}
+    #SimpleFormat #Anchor li:nth-child(7) {margin-left: 0.3%;}
+    #SimpleFormat #Chapter_2 figure img {margin-top: -36px;}
+}
+
+#SimpleFormat #Chapter_3 h4 {margin-top: 2em;}
+#SimpleFormat #Chapter_3 figure {
+    display: flex;
+    align-items: flex-start;
+    float: left;
+    margin: -3em 0 0 2em;
+    width: 55%;
+    height: 100%;
+}
+#SimpleFormat #Chapter_3 figcaption {
+    margin-top: 12.5%;
+    margin-right: 15px;
+    border: 3px solid #ff5500;
+    border-radius: 4px;
+    padding: 1em 0.4em;
+}
+#SimpleFormat #Chapter_3 figure img{
+    width: 50%;
+    margin-top: 0;
+}
+#SimpleFormat #Chapter_3 ul {
+    max-width: 42%;
+    float: left;
+}
+
+#SimpleFormat #Chapter_4 figure {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+#SimpleFormat #Chapter_4 figcaption {
+    margin-top: 6%;
+    margin-left: 15px;
+    border: 3px solid #ff5500;
+    border-radius: 4px;
+    padding: 0.3em 0.4em;
+}
+#SimpleFormat #Chapter_4 figure img{width: 40%;}
+#SimpleFormat #Chapter_5 figure {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+#SimpleFormat #Chapter_5 figcaption {
+    margin-top: 8%;
+    margin-left: 0;
+}
+#SimpleFormat #Chapter_5 figcaption p {
+    border: 3px solid #ff5500;
+    border-radius: 4px;
+    padding: 0.3em 0.4em;
+}
+#SimpleFormat #Chapter_5 figcaption p + p {
+    margin-top: 5%;
+    border: 3px solid #0077ff;
+    color: #0077ff;
+}
+#SimpleFormat #Chapter_5 figure img{width: 48%;}
+#SimpleFormat #Chapter_6 figure img{width: 70%;}
+#SimpleFormat #Chapter_6 figure.img2 img{
+    width: 72%;
+    margin-top: 3em;
+}
+#SimpleFormat #Chapter_6 figure.img2 {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+#SimpleFormat #Chapter_6 figure.img2 dl {
+    border: 3px solid #ff5500;
+    border-radius: 4px;
+    padding: 0.3em;
+    color: #ff5500;
+}
+#SimpleFormat #Chapter_6 figure.img2 dl + dl {
+    border: 3px solid #0077ff;
+    color: #0077ff;
+}
+
+#SimpleFormat #Chapter_7 figure {
+    margin-bottom: 20px;
+    position: relative;
+}
+#SimpleFormat #Chapter_7 figure img{
+    width: 90%;
+    position: absolute;
+    top: 19%;
+}
+#SimpleFormat #Chapter_7 figcaption p {
+    border: 3px solid #ff5500;
+    border-radius: 4px;
+    padding: 0.3em 0.4em;
+    float: right;
+    position: relative;
+    z-index: 2;
+    width: 70%;
+}
+#SimpleFormat #Chapter_7 figcaption p + p {
+    margin-top: 33.5%;
+    border: 3px solid #0077ff;
+    color: #0077ff;
+}
+#SimpleFormat #Chapter_8 figure {
+    margin-bottom: 20px;
+    position: relative;
+}
+#SimpleFormat #Chapter_8 figure img{
+    position: absolute;
+    top: 19.5%;
+}
+#SimpleFormat #Chapter_8 figcaption p {
+    border: 3px solid #0077ff;
+    color: #0077ff;
+    border-radius: 4px;
+    padding: 0.3em 0.4em;
+    float: right;
+    width: 70%;
+}
+#SimpleFormat #Chapter_8 figcaption p + p {
+    margin-top: 30%;
+    border: 3px solid #ff5500;
+    color: #ff5500;
+}
+#SimpleFormat #Chapter_9 figure {
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+}
+#SimpleFormat #Chapter_9 figure img{}
+#SimpleFormat #Chapter_9 figcaption p {
+    border: 3px solid #ff5500;
+    color: #ff5500;
+    border-radius: 4px;
+    padding: 0.3em 0.4em;
+    width: 22%;
+    float: right;
+    margin-right: 10px;
+}
+#SimpleFormat #Chapter_9 figcaption p:nth-child(2) {
+    border: 3px solid #9933cc;
+    color: #9933cc;
+}
+#SimpleFormat #Chapter_9 figcaption p:nth-child(3) {
+    border: 3px solid #0077ff;
+    color: #0077ff;
+}
+#SimpleFormat #Chapter_9 figcaption p:nth-child(4) {
+    border: 3px solid #009933;
+    color: #009933;
+}
+#SimpleFormat #Chapter_10 {margin-top: 15em;}
+#SimpleFormat #Chapter_10 figure {width: 100%;}
+
+#SimpleFormat #Chapter_11 {
+    display: flex;
+    flex-wrap: wrap;
+}
+#SimpleFormat #Chapter_11 div{
+width: 28%;
+margin: 0.7em 2.5%;
+}
+#SimpleFormat #Chapter_11 div ul {
+    margin-top: 0.5em;
+    padding-left: 1.7em;
+}
+#SimpleFormat #Chapter_11 h4 {margin-top: 0.3em;}
+#SimpleFormat #Chapter_11 > dl {
+    width: 100%;
+    margin: 0 2.5%;
+}
+@media screen and (max-width: 1199px) {
+    #SimpleFormat h2 {font-size: 2.5rem;}
+    #SimpleFormat #Chapter_6 figure.img2 img{
+        width: 68%;
+        margin-top: 4em;
+    }
+    #SimpleFormat #Chapter_7 figure img{top: 21%;}
+    #SimpleFormat #Chapter_8 figure img{top: 26%;}
+}
+
+/***************** Getting Startedページの設定 *****************/
+#GettingStart {
+    margin: 0 auto;
+    width: 70%;
+    text-align: left;
+}
+#GettingStart #Nav {
+    max-width: 240px;
+    float: left;
+    list-style: none;
+    margin: 0;
+    padding: 0 1em 1em 0.5em;
+    border: 1px solid #bcbcbc;
+    border-radius: 4px;
+    position: sticky;
+    top: 90px;
+    z-index: 15;
+}
+#GettingStart #Nav li {margin-top: 1em;}
+#GettingStart #Nav li a {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #0082FF;
+    line-height: 1.1;
+}
+#GettingStart #Nav li a:before {
+    content: "";
+    margin: -0.2em 0.3em 0.2em;
+    width: 0.4em;
+    height: 0.4em;
+    display: inline-block;
+    border-top: 2px solid #0082FF;
+    border-right: 2px solid #0082FF;
+    transform: rotate(45deg);
+}
+#GettingStart #Nav ul {
+    list-style: none;
+    font-size: 1rem;
+    padding-left: 0.7em;
+}
+#GettingStart #Nav ul ul {padding-left: 1.4em;}
+#GettingStart #Nav ul li {margin-top: 0.6em;}
+#GettingStart #Nav ul li a {font-weight: 500;}
+#GettingStart #Nav ul li a:before {
+    width: 0.35em;
+    height: 0.35em;
+    border-top: 1px solid #0082FF;
+    border-right: 1px solid #0082FF;
+}
+
+#GettingStart #Container {
+    width: calc(100% - 270px);
+    float: right;
+}
+#GettingStart #Chapter1,
+#GettingStart #Chapter2,
+#GettingStart #Chapter3,
+#GettingStart #Chapter4,
+#GettingStart #Chapter5,
+#GettingStart #Chapter6 {
+    padding-top: 90px;
+}
+#GettingStart h1 {margin-bottom: 0.1em;}
+#GettingStart h1 + p {
+    font-size: 1.3rem;
+    font-weight: 600;
+    line-height: 1.2;
+    margin-top: 0.2em;
+    margin-bottom: 4em;
+    text-align: center;
+}
+#GettingStart #Container h2 {
+    margin: 0 0 0.1em;
+    font-size: 2.4rem;
+    line-height: 1.2;
+    border-bottom: 1px solid #bcbcbc;
+}
+#GettingStart #Container h2 + p{
+    font-weight: 600;
+    margin-bottom: 1.5em;
+    margin-left: 0;
+}
+#GettingStart #Container h3 {
+    font-size: 1.1rem;
+    font-weight: 400;
+    float: left;
+    width: 2rem;
+    height: 2rem;
+    text-align: center;
+    line-height: 2.1rem;
+    border: 1px solid #888888;
+    border-radius: 50%;
+    margin-left: -0.2em;
+    padding-right: 0.1rem;
+}
+#GettingStart #Container h3.Title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 3em;
+    margin-bottom: 0.3em;
+    margin-left: 0;
+    padding: 0.35em 0.1em 0.2em;
+    float: none;
+    line-height: 1.2;
+    width: 100%;
+    height: 100%;
+    text-align: left;
+    border-left: none;
+    border-right: none;
+    border-radius: 0;
+}
+/***** アンカーリンクの位置を調整 *****/
+#GettingStart #Container h3.Title[id] ,
+#GettingStart #Container #Chapter5 h4[id] {scroll-margin-top: 90px;}
+
+#GettingStart #Container h3.Title + p {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin-left: 0;
+    margin-bottom: 1em;
+}
+#GettingStart #Container ul,
+#GettingStart #Container figure,
+#GettingStart #Container pre,
+#GettingStart #Container p {
+    margin-left: 2.6rem;
+}
+#GettingStart #Container h4 {
+    font-size: 1.3rem;
+    line-height: 1.65;
+    margin-bottom: 0.5em;
+    margin-top: -2em;
+}
+#GettingStart #Container p {
+    line-height: 1.65;
+    margin-bottom: 0.5em;
+}
+#GettingStart #Container #Intro p {margin-left: 0;}
+
+#GettingStart #Container li {font-size: 1.2rem;}
+#GettingStart #Container p a {
+    color: #0082FF;
+    margin-right: 0.3em;
+    margin-left: 0.3em;
+}
+#GettingStart #Container pre {
+    font-family: Consolas, Menlo, Monaco, -apple-system, BlinkMacSystemFont, "Segoe UI", Meiryo, monospace;
+    font-size: 1.1rem;
+    padding: 1em;
+    color: #fff;
+    white-space: pre-wrap;
+    background: #444951;
+    border-radius: 4px;
+}
+#GettingStart #Container sup {
+    white-space: nowrap;
+    font-weight: normal;
+    font-style: normal;
+    line-height: 1;
+}
+#GettingStart #Container .comments {
+    font-size: 1.1rem;
+    line-height: 1.3;
+    margin-bottom: 1.5em;
+}
+#GettingStart #Container .comments + ul.comments {margin-top: -1em;}
+#GettingStart #Container ul.comments li {
+    font-size: 1.1rem;
+    margin-bottom: 0.3em;
+}
+#GettingStart #Container p code {
+    display: inline-block;
+    padding: 0 0.5em;
+    margin-right:0.2em;
+    margin-left: 00.2em;
+    background-color: #e8eef3;
+    border-radius: 4px;
+}
+#GettingStart #Container img {
+    width: 100%;
+    margin-bottom: 1em;
+    border: 1px solid #ddd;
+}
+#GettingStart #Container img#Img4 {width: 75%;}
+#GettingStart #Container img#Img8 {width: 75%;}
+#GettingStart #Container img#Img14 {width: 55%;}
+#GettingStart #Container img#Img15 {width: 80%;}
+#GettingStart #Container img#Img23 {width: 60%;}
+#GettingStart #Container img#Img24 {width: 60%;}
+#GettingStart #Container img#Img25 {width: 60%;}
+
+/******************** footerブロックの設定 ********************/
+footer {
+    background-color: #dfdfdf;
+    padding: 20px 0;
+    clear: both;
+}
+#FooterContent {
+    width: 70%;
+    margin: 0 auto;
+    text-align: center
+}
+footer h1 {
+    font-size: 1rem;
+    line-height: 1.1;
+    font-weight: 500;
+    color: #222;
+    margin-top: 0.2em;
+    margin-bottom: 0;
+}
+footer p {
+    font-size: 1rem;
+    line-height: 1.1;
+    margin: 0.2em 0 1em;
+}
+footer img {
+    width: 35%;
+    max-width: 250px;
+}
+footer ul {
+    list-style: none;
+    margin: 5em auto 0;
+    padding: 0;
+    display: inline;
+}
+footer ul li {
+    display: inline;
+    margin: 0 0.5em;
+    white-space: nowrap;
+}
+footer ul li a {color: #0082FF;}
+footer ul li a:before {
+    content: "";
+    margin: -0.2em 0.3em 0.2em;
+    width: 0.4em;
+    height: 0.4em;
+    display: inline-block;
+    border-top: 2px solid #0082FF;
+    border-right: 2px solid #0082FF;
+    transform: rotate(45deg);
+}
+
+/****************** レスポンシブ対応のための設定 ******************/
+
+/*********** 暫定的にワイドサイズを指定 **********/
+#GettingStart,
+#SimpleFormat {
+    width: 960px;
+}
+
+@media screen and (min-width: 1200px) {
+    #GettingStart {width: 1000px;}
+    #SimpleFormat {width: 1100px;}
+    .content h1 {font-size: 2.6rem;}
+    .content p {font-size: 1.2rem;}
+}
+@media screen and (max-width: 800px) {
+    footer h1 {}
+}

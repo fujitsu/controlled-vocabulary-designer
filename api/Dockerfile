@@ -1,4 +1,4 @@
-FROM python:3.6-stretch
+FROM python:3.11.0
 
 ARG PROXY
 ARG SPROXY
