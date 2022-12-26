@@ -125,7 +125,7 @@ mountdir/src/config.jsonで設定を変更することができます。
 |Hensyugoi|HypernymExtraction|Algorithm|String|hypernym|上位語推定アルゴリズム（デフォルトではwordnetを使用）|
 |SanSyogoi|ExternalVocabulary|Algorithm|String|wordnet|既存語彙（wordnetあるいはreference.csvあるいはreference.ttlを選択）|
 |SanSyogoi|WordnetURI|URI|String|http\://sampleWordnet/|既存語彙としてwordnetを選択した際の参照用語彙に記載する語彙のURI|
-|SanSyogoi|WordEmbedding2|poincare.epochs|Number|2000|モデル学習のイテレーション数（エポック数）|
+|SanSyogoi|WordEmbedding2|poincare.epochs|Number|200|モデル学習のイテレーション数（エポック数）|
 
 
 ## domain_words.csvのサンプル
