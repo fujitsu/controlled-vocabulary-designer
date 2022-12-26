@@ -43,8 +43,9 @@ Vagrantをインストール後、DOSからCUIでインストールします。
 # vi: set ft=ruby :
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "bento/fedora-36" 
-  config.vm.box_version = "202206.03.0"
+  config.vm.box = "bento/ubuntu-22.04"
+  config.vm.box_version = "202206.13.0"
+  config.vm.boot_timeout = 900
   #config.proxy.http     = "http://userid:PWD@your.proxy.com:8080"
   #config.proxy.https    = "https://userid:PWD@your.proxy.com:8080"
   #config.proxy.no_proxy = "localhost,127.0.0.1"
@@ -53,13 +54,13 @@ Vagrant.configure("2") do |config|
     #v.gui = true
     v.gui = false
   end
-  config.vm.define "fedora36-1" do |mymachine|
-    mymachine.vm.hostname = "myfedora36-1"
+  config.vm.define "ubuntu22-04-1" do |mymachine|
+    mymachine.vm.hostname = "ubuntu22-04-1"
     mymachine.vm.network "forwarded_port", guest: 10081, host: 10081 
     mymachine.vm.provision "docker"  
-    mymachine.vm.provision "shell", inline: "dnf -y install docker-compose git --allowerasing"
+    mymachine.vm.provision "shell", inline: "apt-get -y install docker-compose git"
     mymachine.vm.provision "shell", inline: "git clone https://github.com/fujitsu/controlled-vocabulary-designer.git"
-    mymachine.vm.provision "shell", inline: "docker-compose -f controlled-vocabulary-designer/docker-compose.yml up -d"
+    mymachine.vm.provision "shell", inline: "COMPOSE_HTTP_TIMEOUT=240 docker-compose -f controlled-vocabulary-designer/docker-compose.yml up -d"
   end
 end
 ```
