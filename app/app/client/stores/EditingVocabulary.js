@@ -1594,7 +1594,7 @@ class EditingVocabulary {
   // //////////////////////////////////////////////////////
 
   // node display MAX number
-  DISP_NODE_MAX = 100;
+  DISP_NODE_MAX = 300;
 
   /**
    * Adjust coordinate values to display related terms
