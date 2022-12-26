@@ -1345,6 +1345,7 @@ export default
                 <Search
                   classes={this.props.classes}
                   editingVocabulary={this.props.editingVocabulary}
+                  key={'search_root_'+this.props.fileLoadCount}
                 />
               </Grid>
               <Grid item>
