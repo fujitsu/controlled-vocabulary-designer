@@ -38,6 +38,7 @@ export default
    */
   constructor(props) {
     super(props);
+    this.rootElm = undefined;
     this.state = {
       disabledFlg: true,
       open: false,
@@ -55,7 +56,11 @@ export default
    * Key event registration
    */
   componentDidMount() {
-    this.props.editingVocabulary.setCurrentNodeByTerm(this.props.editingVocabulary.currentNode.term, null, null, true);
+    this.props.editingVocabulary.setCurrentNodeById(
+      this.props.editingVocabulary.currentNode.id, true);
+    this.props.editingVocabulary.currentNode.id&&this.props.editingVocabulary.fitToCurrent();
+    this.rootElm = document.getElementById('vocabulary_edit_panel');
+    this.rootElm&&this.rootElm.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
 
   /**
@@ -76,12 +81,6 @@ export default
       if (this.state.broadertermact) {
         this.props.editingVocabulary.popBroaderTerm();
       }
-      if (this.state.termdescriptionact) { 
-        this.props.editingVocabulary.popTermDescription(); 
-      }
-    }
-    if (event.keyCode === 13) {
-      event.preventDefault();
     }
   }
 
@@ -106,9 +105,8 @@ export default
         break;
       case 'TermDescription': 
         this.setState({termdescriptionact: value}); 
-          break;
         break;
-        defalut:
+      default:
         break;
     }
   }
@@ -146,29 +144,12 @@ export default
    * Update edits
    */
   updateVocabulary() {
-    const baseTerm= this.props.editingVocabulary.currentNode.term;
-    const ret = this.props.editingVocabulary.updateVocabulary( baseTerm);
+    const baseTermId= this.props.editingVocabulary.currentNode.id;   
+    const ret = this.props.editingVocabulary.updateVocabulary( baseTermId, 222);
     if (ret !== null) {
       this.errorDialogOpen(ret);
     }else{
       this.props.close( true);  // true=from EditPanelVocabularyTab.updateVocabulary() 
-    }
-  }
-
-  /**
-   * Confirm switch
-   * @param  {Boolean} isConfirm - confirm acceptance
-   */
-  toggleConfirm(isConfirm) {
-    // console.log('[toggleConfirm] change to ' + isConfirm);
-    const currentNode = this.props.editingVocabulary.currentNode;
-
-    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
-    if (!isConfirm) {
-      // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
-      if (!currentNode.preferred_label) {
-        this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list].push(currentNode.term);
-      }
     }
   }
 
@@ -189,9 +170,9 @@ export default
    handleRadioChange(e){
     this.setState({defalutValue: e.target.value});
     if (e.target.value != this.props.editingVocabulary.currentNode.language) {
-      this.props.editingVocabulary.tmpLanguage.list = this.props.editingVocabulary.currentNode.language == 'ja'?'en':'ja';
+      this.props.editingVocabulary.tmpLanguage.value = this.props.editingVocabulary.currentNode.language == 'ja'?'en':'ja';
     }else {
-      this.props.editingVocabulary.tmpLanguage.list = this.props.editingVocabulary.currentNode.language;
+      this.props.editingVocabulary.tmpLanguage.value = this.props.editingVocabulary.currentNode.language;
     }
   }
 
@@ -219,9 +200,7 @@ export default
 
     // Firm button disabled condition
     // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
-    const isCurrentNodeChanged =
-      this.props.editingVocabulary.isCurrentNodeChanged;
-    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
+    const nodesStateChanged = this.props.editingVocabulary.getNodesStateChanged;
 
     const confirmed = this.props.editingVocabulary.currentNode.confirm;
     let isConfirm = false;
@@ -237,8 +216,7 @@ export default
        ( !this.props.editingVocabulary.currentNode.id) ? false : true;
 
     return (
-      <div className={this.props.classes.editPanelVoc} onKeyDown={(e)=>this.handleKeyDown.bind(e)}>
-        {/* <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}> */}
+      <div id="vocabulary_edit_panel" className={this.props.classes.editPanelVoc}>
         <Grid container spacing={2}>
           <Box p={1} width="400px">
             <Grid container spacing={2}>
@@ -254,33 +232,35 @@ export default
             </Grid>
 
             <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
-              {/* <Box border={1} p={1} width="430px" height='400px' style={{ overflowX: 'hidden', overflowY: 'auto'}}> */}
                 <Grid container spacing={2}>
-                  <Grid item xs={3}>
+                  <Grid item xs={2}>
                   </Grid>
-                  <Grid item xs={9}>
-                    <FormControl component="fieldset">
-                      <RadioGroup row 
-                        onChange={(e)=>this.handleRadioChange(e)}
-                        aria-label="language" 
-                        name="language" 
-                        value={this.state.defalutValue}
-                      >
-                        <FormControlLabel
-                          value="ja" 
-                          control={<Radio color="primary" />} 
-                          label="日本語" 
-                        />
-                        <FormControlLabel
-                          value="en" 
-                          control={<Radio color="primary" />} 
-                          label="英語" 
-                        />
-                      </RadioGroup>
-                    </FormControl>  
+                  <Grid item xs={10}>
+                    <Box py={1} pl={2}>
+                      <FormControl component="fieldset">
+                        <RadioGroup row 
+                          onChange={(e)=>this.handleRadioChange(e)}
+                          aria-label="language" 
+                          name="language" 
+                          value={this.state.defalutValue}
+                        >
+                          <FormControlLabel
+                            value="ja" 
+                            control={<Radio color="primary" />} 
+                            style={{color: nodesStateChanged['ja']?'red':'inherit'}}
+                            label="日本語" 
+                          />
+                          <FormControlLabel
+                            value="en" 
+                            control={<Radio color="primary" />} 
+                            style={{color: nodesStateChanged['en']?'red':'inherit'}}
+                            label="英語" 
+                          />
+                        </RadioGroup>
+                      </FormControl>  
+                    </Box>
                   </Grid> 
                 </Grid>
-              {/* </Box> */}
             </Grid>
         
 
@@ -427,35 +407,39 @@ export default
                 <Box>
                   <TextFieldOfOtherVocSynUri
                     classes={this.props.classes}
-                    editingVocabulary={this.props.editingVocabulary}
-                    fileId={fileId}
+                    currentOtherVocSynUri={this.props.editingVocabulary.currentNode.other_voc_syn_uri}
+                    otherVocSynUri={this.props.editingVocabulary.tmpOtherVocSynUri.list}
                   />
                 </Box>
               </Grid>
             </Grid>
-
-            <Grid container justify="center">
+            
+            <Grid container justifyContent="center">
               <Grid item>
                 <Button
                   className={this.props.classes.buttonPrimary}
+                  style={{
+                    marginTop:'5px',
+                    marginLeft:'50px',
+                  }}
                   variant="contained"
                   color="primary"
                   size={'small'}
                   onClick={()=>this.updateVocabulary()}
-                  disabled={!isCurrentNodeChanged}
+                  disabled={!( nodesStateChanged['ja'] || nodesStateChanged['en'])}
                 >
                   反映
                 </Button>
-                <DialogUpdateVocabularyError
-                  onClose={() => this.errorDialogClose()}
-                  open={this.state.open}
-                  classes={this.props.classes}
-                  editingVocabulary={this.props.editingVocabulary}
-                  isFromEditPanel={true}
-                  reason={this.state.reason}
-                />
               </Grid>
             </Grid>
+            <DialogUpdateVocabularyError
+              onClose={() => this.errorDialogClose()}
+              open={this.state.open}
+              classes={this.props.classes}
+              editingVocabulary={this.props.editingVocabulary}
+              isFromEditPanel={true}
+              reason={this.state.reason}
+            />
           </Box>
         </Grid>
       </div>

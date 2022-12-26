@@ -17,9 +17,13 @@ import psycopg2
 from psycopg2 import extras
 
 from flask import jsonify, make_response
+import connexion
+import six
+
 from swagger_server.models.check_error_response import CheckErrorResponse  # noqa: E501
 from swagger_server.models.error_response import ErrorResponse  # noqa: E501
 from swagger_server.models.success_response import SuccessResponse  # noqa: E501
+from swagger_server import util
 
 HEADER = {
     "Content-Type": "application/json"
@@ -121,7 +125,7 @@ def download_file(file_type, out_format):  # noqa: E501
 def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference_vocabulary1=None, reference_vocabulary2=None, reference_vocabulary3=None):  # noqa: E501
     """Upload the file to the server
 
-    Uploads the file selected by the client to the server. When editing_vocabulary is uploaded, its check integrity.  # noqa: E501
+    Uploads the file selected by the client to the server. When editing_vocabulary is uploaded, its check integrity. When editing_vocabulary is uploaded, please upload editing_vocabulary_meta together.  # noqa: E501
 
     :param editing_vocabulary: 
     :type editing_vocabulary: strstr
@@ -201,16 +205,16 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                     '[Error] failed _check_uri_startswith_prefix',
                     location())
             return exec_res, status_code
-        # the empty cell or cells with white spaces are detected the above
-        # broader_term must start with prefix
+        # the empty cell or cells with white spaces are detected at the above
+        # broader_uri must start with prefix
         # phase 5, reason 0
-        exec_res, status_code = _check_broader_term_startswith_prefix(df, uri_prefix, file_type_num)
+        exec_res, status_code = _check_broader_uri_startswith_prefix(df, uri_prefix, file_type_num)
         if not status_code == 200:
             print(datetime.datetime.now(),
-                    '[Error] failed __check_broader_term_startswith_prefix',
+                    '[Error] failed __check_broader_uri_startswith_prefix',
                     location())
             return exec_res, status_code
-        # the empty cell or cells with white spaces are detected the above
+        # the empty cell or cells with white spaces are detected at the above
 
         # check inconsistencies
         exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
@@ -222,7 +226,6 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
 
         # Payload-make to upload to database by REST API
         payload = _make_bulk_data_editing_vocabulary(df)
-
         exec_res, status_code =\
             _exec_insert_postgrest(payload, 'editing_vocabulary')
         if not status_code == 200:
@@ -249,6 +252,26 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
+
+        # uri must starts with http  
+        # phase 4, reasn 0
+        exec_res, status_code = _check_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed _check_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+        # broader_uri must start with http
+        # phase 5, reason 0
+        exec_res, status_code = _check_broader_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed __check_broader_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+
         # check inconsistencies
         exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
@@ -288,6 +311,26 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
+
+        # uri must starts with http  
+        # phase 4, reasn 0
+        exec_res, status_code = _check_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed _check_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+        # broader_uri must start with http
+        # phase 5, reason 0
+        exec_res, status_code = _check_broader_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed __check_broader_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+
         # check inconsistencies
         exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
@@ -326,6 +369,26 @@ def upload_file(editing_vocabulary=None, editing_vocabulary_meta=None, reference
                   '[Error] failed _check_columns_ref',
                   location())
             return exec_res, status_code
+
+        # uri must starts with http  
+        # phase 4, reasn 0
+        exec_res, status_code = _check_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed _check_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+        # broader_uri must start with http
+        # phase 5, reason 0
+        exec_res, status_code = _check_broader_uri_startswith_prefix(df, 'http', file_type_num)
+        if not status_code == 200:
+            print(datetime.datetime.now(),
+                    '[Error] failed __check_broader_uri_startswith_prefix',
+                    location())
+            return exec_res, status_code
+        # the empty cell or cells with white spaces are detected at the above
+
         # check inconsistencies
         exec_res, status_code, df = _check_inconsistencies_vocs(df, file_type_num)
         if not status_code == 200:
@@ -376,7 +439,7 @@ def _check_inconsistencies_vocs(df, file_type_num):
 
     # check not all preferred label in a group that have same uri are empty  
     # this returns only one error if there are many groups that having empty preferred label
-    # pahse 2, reason 1
+    # phase 2, reason 1
     exec_res, status_code = _check_pref_label_empty(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
@@ -391,7 +454,7 @@ def _check_inconsistencies_vocs(df, file_type_num):
     
     # check there does not exist different synonim group that having same uri have same preffered label 
     # this returns only one error if there are many groups that having same preferred label
-    # pahse 2, reason 2
+    # phase 2, reason 2
     exec_res, status_code = _check_diff_synogroup_have_diff_pref(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
@@ -402,12 +465,12 @@ def _check_inconsistencies_vocs(df, file_type_num):
    
     # At here, sysnominus relations must be valid.
 
-    # check blanck term existence condition
+    # check blank term existence condition
     # 409 phase 1, reason 0 
-    exec_res, status_code = _check_blanck_term_condition(df, file_type_num)
+    exec_res, status_code = _check_blank_term_condition(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
-                '[Error] failed _check_blanck_term_condition',
+                '[Error] failed _check_blank_term_condition',
                 location())
         return exec_res, status_code, df
 
@@ -426,10 +489,10 @@ def _check_inconsistencies_vocs(df, file_type_num):
 
     # check broader terms are same in a synonum group
     # phase 5, reason 1
-    exec_res, status_code = _check_broader_terms_same(df, file_type_num)
+    exec_res, status_code = _check_broader_uris_same(df, file_type_num)
     if not status_code == 200:
         print(datetime.datetime.now(),
-                '[Error] failed _check_broader_terms_same',
+                '[Error] failed _check_broader_uris_same',
                 location())
         return exec_res, status_code, df
 
@@ -505,10 +568,15 @@ def _check_inconsistencies_vocs(df, file_type_num):
         # fills cells without 0 are replaced to 1
         df = _fill_confirm_val(df)
 
+        # parse created_time modified_time
+        # if create time is blank or unparsable string, it will be filled by now time
+        df = _fill_create_time_val(df)
+        # if modified time is blank or unparsable string, it will be filled by now time
+        df = _fill_modifiled_time_val(df)
+
     # fill values for position_x_colname and position_y_colname
     df = _fill_pos_val(df)
 
-    # parse created_time modified_time
 
     return SuccessResponse('request is success.'), 200, df
 
@@ -570,7 +638,7 @@ def _make_bulk_data_reference_vocabulary(df):
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
         if '上位語のURI' in item:
-            insert_data['broader_term'] =\
+            insert_data['broader_uri'] =\
                 item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
         if '他語彙体系の同義語のURI' in item:
             insert_data['other_voc_syn_uri'] =\
@@ -598,12 +666,14 @@ def _make_bulk_data_reference_vocabulary(df):
 def _make_bulk_data_editing_vocabulary(data_frame):
 
     payload = []
+    ext_vocs = set()
+    ext_vocs_position = {} # position
 
     for index, item in data_frame.iterrows():
         insert_data = {}
         if '用語名' in item:
             insert_data['term'] = \
-            item['用語名'] if item['用語名'] != '' else TERM_BLANK_MARK + str(index)
+                item['用語名'] if item['用語名'] != '' else TERM_BLANK_MARK + str(index)
         if '代表語' in item:
             insert_data['preferred_label'] =\
                 item['代表語'] if pd.notnull(item['代表語']) else None
@@ -614,11 +684,17 @@ def _make_bulk_data_editing_vocabulary(data_frame):
             insert_data['uri'] =\
                 item['代表語のURI'] if pd.notnull(item['代表語のURI']) else None
         if '上位語のURI' in item:
-            insert_data['broader_term'] =\
+            insert_data['broader_uri'] =\
                 item['上位語のURI'] if pd.notnull(item['上位語のURI']) else None
         if '他語彙体系の同義語のURI' in item:
             insert_data['other_voc_syn_uri'] =\
                 item['他語彙体系の同義語のURI'] if pd.notnull(item['他語彙体系の同義語のURI']) else None
+            ext_uri = item['他語彙体系の同義語のURI']
+            if ext_uri != '':
+                if ext_uri not in ext_vocs:
+                    # get the position of this term
+                    ext_vocs_position[ext_uri] = (item['x座標値'], item['y座標値'])  
+                ext_vocs.add(ext_uri) 
         if '用語の説明' in item:
             insert_data['term_description'] =\
                 item['用語の説明'] if pd.notnull(item['用語の説明']) else None
@@ -646,13 +722,41 @@ def _make_bulk_data_editing_vocabulary(data_frame):
             item['色1'] if pd.notnull(item['色1']) else None
         insert_data['color2'] =\
             item['色2'] if pd.notnull(item['色2']) else None
-        insert_data['hidden'] = False
+        insert_data['hidden'] =\
+            False if item['用語名'] != '' else True
         if '確定済み用語' not in item:
             insert_data['confirm'] = 0
         else:
             insert_data['confirm'] =\
                 item['確定済み用語'] if pd.notnull(item['確定済み用語']) else 0
+        insert_data['external_voc'] = False
+        payload.append(insert_data)
 
+    for ext_uri in ext_vocs:
+        # trim http/https scheme string
+        if ext_uri.startswith('http://'):
+            ext_uri_bare = ext_uri.replace("http://", '', 1)
+        if ext_uri.startswith('https://'):
+            ext_uri_bare = ext_uri.replace("https://", '', 1)
+        insert_data = {}
+        insert_data['term'] = ext_uri_bare
+        insert_data['preferred_label'] = ''
+        insert_data['language'] = 'ja'
+        insert_data['uri'] = ext_uri
+        insert_data['broader_uri'] = ''
+        insert_data['other_voc_syn_uri'] = ''
+        insert_data['term_description'] = ''
+        insert_data['created_time'] = ''
+        insert_data['modified_time'] = ''
+        insert_data['synonym_candidate'] = []
+        insert_data['broader_term_candidate'] = []
+        insert_data['position_x'] = str(float(ext_vocs_position[ext_uri][0]) + 1.0)
+        insert_data['position_y'] = ext_vocs_position[ext_uri][1] 
+        insert_data['color1'] = 'black'
+        insert_data['color2'] = 'green'
+        insert_data['hidden'] = False
+        insert_data['confirm'] = 0
+        insert_data['external_voc'] = True # external
         payload.append(insert_data)
 
     return payload
@@ -840,6 +944,16 @@ def _download_file_make(pl_simple, pl_simple_meta):
     nm = pd.json_normalize(pl_simple)
     nm_meta = pd.json_normalize(pl_simple_meta)
 
+    # delete other vocabulary terms
+    nm = nm[~nm['external_voc']]
+
+    # delete blank terms that do not satisfy blank term condition
+    delIdx = get_idx_blank_term_non_condition(nm)
+    nm = nm.drop(index = [*delIdx])
+
+    # adjust created_time in a sysnonym group being same. 
+    nm = _fill_created_time_to_oldest_value(nm)
+
     g.bind(nm_meta["meta_prefix"][0], nm_meta["meta_uri"][0])
 
     # replace nan with ""
@@ -849,18 +963,6 @@ def _download_file_make(pl_simple, pl_simple_meta):
     for index, row in nm.iterrows():
         if row['preferred_label'] != "":
             dic_preflabel_uri[row['preferred_label']] = row['uri']
-
-    # replace label with URI
-    col_broader_uri = []
-    for broader_term in nm['broader_term']:
-        if broader_term in dic_preflabel_uri.keys():
-            col_broader_uri.append(dic_preflabel_uri[broader_term])
-        elif broader_term != "":
-            col_broader_uri.append(broader_term)
-        else:
-            col_broader_uri.append("")
-
-    nm.loc[:, "broader_term"] = col_broader_uri
 
     # create meta
     namelx = nm_meta.loc[:, ['meta_name', 'meta_enname', 'meta_version', 'meta_prefix', 'meta_uri',  'meta_description', 'meta_endescription', 'meta_author']].values
@@ -888,33 +990,12 @@ def _download_file_make(pl_simple, pl_simple_meta):
             nameb = [m_uri, creator, rdflib.Literal(str(name[7]))]
             namel.append(nameb)
 
-    # create type links for OtherVocabulary info
-    nameoi = nm.query('other_voc_syn_uri != ""')
-    namelx = nameoi.loc[:, ['other_voc_syn_uri']].values.tolist()
-    namelx = set(sum(namelx, []))
-    for name in namelx:
-        nameb = [rdflib.URIRef(str(name)[:(str(name).rfind('/') + 1)]), rtype, sconceptscheme]
-        namel.append(nameb)
-
-
-    # create exactMatch and inscheme for OtherVocabulary link
-    nameou = nm.query('other_voc_syn_uri != ""')
-    namelx = nameou.loc[:, ['other_voc_syn_uri', 'uri']].values.tolist()
-    namelx = list(map(list, set(map(tuple, namelx))))
-    for name in namelx:
-        nameb = [rdflib.URIRef(str(name[0])), rtype, scon]
-        namel.append(nameb)
-        nameb = [rdflib.URIRef(str(name[0])), exactMatch, rdflib.URIRef(str(name[1]))]
-        namel.append(nameb)
-        nameb = [rdflib.URIRef(str(name[0])), sinscheme, rdflib.URIRef(str(name[0])[:(str(name[0]).rfind('/') + 1)])]
-        namel.append(nameb)
-
     # JSON query Get Concept, prefLabel and narrower base
     namelpl = nm.query('term == preferred_label and uri != ""')
     # get uri and term
-    namelx = namelpl.loc[:, ['term', 'uri', 'language']].values
+    namelx = namelpl.loc[:, ['term', 'uri', 'language', 'hidden']].values
     for name in namelx:
-        if TERM_BLANK_MARK in str(name[0]):
+        if name[3] == 1: # hidden is true
             continue
         # print('prefLabel:'+str(name[0])+' '+str(name[1]))
         nameb = [
@@ -929,9 +1010,9 @@ def _download_file_make(pl_simple, pl_simple_meta):
     # query altLabel
     namelal = nm.query('term != preferred_label and uri != ""')
     # get uri and term
-    namelx = namelal.loc[:, ['term', 'uri', 'language']].values
+    namelx = namelal.loc[:, ['term', 'uri', 'language', 'hidden']].values
     for name in namelx:
-        if TERM_BLANK_MARK in str(name[0]):
+        if name[3] == 1: # hidden is true
             continue
         # print('altLabel:' + str(name[0])+' '+str(name[1]))
         nameb = [
@@ -942,12 +1023,12 @@ def _download_file_make(pl_simple, pl_simple_meta):
         namel.append(nameb)
 
     # create broader links
-    # query broader_term
-    namelbt = nm.query('broader_term != "" and uri != ""')
-    # get uri and broader_term
-    namelx = namelbt.loc[:, ['broader_term', 'term', 'uri']].values
+    # query broader_uri
+    namelbt = nm.query('broader_uri != "" and uri != ""')
+    # get uri and broader_uri
+    namelx = namelbt.loc[:, ['broader_uri', 'term', 'uri', 'hidden']].values
     for name in namelx:
-        if TERM_BLANK_MARK in str(name[1]):
+        if name[3] == 1: # hidden is true
             continue
         _add_check_term(name_bt, name[0], name[1], name[2])
 
@@ -1008,7 +1089,7 @@ def _download_file_serialize(g, p_format):
     # n3, nt, turtle, xml, trix, nquads
     if p_format in REFERENCE_FORMAT:
         response = make_response()
-        response.data = g.serialize(format=p_format).decode("utf-8")
+        response.data = g.serialize(format=p_format)
         response.headers['Content-Type'] = 'application/octet-stream'
         response.headers['Content-Disposition'] =\
             'attachment; filename=test_sample.' + p_format
@@ -1016,7 +1097,7 @@ def _download_file_serialize(g, p_format):
     elif p_format in REFERENCE_FORMAT_JSON:
         df_json = []
         wk_format = "json-ld"
-        df_json = g.serialize(format=wk_format, indent=4).decode("utf-8")
+        df_json = g.serialize(format=wk_format, indent=4)
         response = make_response(jsonify(df_json))
         response.headers['Content-Type'] = 'application/ld+json'
         response.headers['Content-Disposition'] =\
@@ -1030,9 +1111,20 @@ def _download_file_ev_serialize(pl_simple, p_format):
     df_json = pd.json_normalize(pl_simple)
     # print("--- printing "+p_format+" ---")
     df_org = df_json.copy()
+    # delete blank terms that do not satisfy blank term condition
+    delIdx = get_idx_blank_term_non_condition(df_org)
+    df_org = df_org.drop(index = [*delIdx])
+
+    # delete other vocabulary terms
+    df_org = df_org[~df_org['external_voc']]
+
+    # delete artificial 'terms' 
+    df_org.loc[df_org['hidden'] ==1, 'term'] = ''
+
+    # adjust created_time in a sysnonym group being same. 
+    df_org = _fill_created_time_to_oldest_value(df_org)
+
     # delete word "[","]"
-    df_org['term'] =\
-            df_org['term'].str.replace(TERM_BLANK_MARK+'\d+', '',regex=True) 
     df_org['synonym_candidate'] =\
         df_org['synonym_candidate'].astype("string")
     df_org['broader_term_candidate'] =\
@@ -1050,7 +1142,7 @@ def _download_file_ev_serialize(pl_simple, p_format):
     df_org['broader_term_candidate'] =\
         df_org['broader_term_candidate'].str.replace('\'', '')
     # delete columns id hidden
-    df_org.drop(columns=['id', 'hidden'], inplace=True)
+    df_org.drop(columns=['id', 'hidden', 'external_voc'], inplace=True)
 
     # make dictionary {preferred_label: uri}
     dic_preflabel_uri = dict(zip(df_org['preferred_label'], df_org['uri']))
@@ -1073,7 +1165,7 @@ def _download_file_ev_serialize(pl_simple, p_format):
                                     'preferred_label': '代表語',
                                     'language': '言語',
                                     'uri': '代表語のURI',
-                                    'broader_term': '上位語のURI',
+                                    'broader_uri': '上位語のURI',
                                     'other_voc_syn_uri': '他語彙体系の同義語のURI',
                                     'term_description': '用語の説明',
                                     'created_time': '作成日',
@@ -1133,6 +1225,54 @@ def _download_meta_file_ev_serialize(pl_simple, p_format):
         pass
 
 
+# get index of rows whose term is blank and the blank term condition is not satisfied
+# retrun set of index
+def get_idx_blank_term_non_condition(df):
+    term_colname = 'term'  
+    preferred_label_colname = 'preferred_label' 
+    lang_colname = 'language' 
+    uri_colname = 'uri' 
+    term_description_colname = 'term_description' 
+    # to avoid unhashable columns
+    df = df[[term_colname, preferred_label_colname, lang_colname, uri_colname, term_description_colname, 'hidden']].copy()
+    #
+    df.loc[(df['hidden'] == 1),  term_colname] = ''    
+    # get rows with blank terms
+    empty_term_df= df[df['hidden'] == 1]
+    #
+    delIdx = set()
+    # check preferred label are empty, term description are not empty
+    for idx, row in empty_term_df.iterrows():
+        if row[preferred_label_colname].strip() != '':
+            # term is blank but preferred label is not empty
+            delIdx.add(idx)
+        if row[term_description_colname].strip() == '':
+            # term description is empty
+            delIdx.add(idx)
+    #
+    # check duplicate rows with blank terms
+    count_df = empty_term_df.groupby([lang_colname, uri_colname]).count() # this is a DataFrame　
+    # this count blank string
+    count_df2 = count_df[count_df[term_colname] != 1]
+    if count_df2.size != 0:
+        # if there are blank terms
+        for tmplang, tmpuri in count_df2.index: # get the uri and lang
+            tmp = empty_term_df[(empty_term_df[uri_colname] == tmpuri) & (empty_term_df[lang_colname] == tmplang)]
+            delIdx.update([*tmp.index[1:]]) # remove blank term except the first one
+    #
+    # check blank and non blank term existence in a synonym group
+    for idx, row in empty_term_df.iterrows():
+        lang = row[lang_colname]
+        uri = row[uri_colname]
+        tmpdf = df[(df[uri_colname] == uri) & (df[lang_colname] == lang)]
+        count_series = tmpdf.nunique()
+        if count_series[term_colname] != 1:
+            # blank and non blank term are existed
+            delIdx.update([*empty_term_df[(empty_term_df[uri_colname] == uri)&(empty_term_df[lang_colname] == lang)].index])
+    
+    return delIdx
+
+
 
 #########################################################################################################
 #########################################################################################################
@@ -1144,8 +1284,8 @@ def _check_uri_startswith_prefix(df, uri_prefix, file_type_num=0):
     # the empty cell or cells with white spaces are also detected and returns errorresponse
     term_colname ='用語名'
     lang_colname = '言語'
-    pre_uri_colname = '代表語のURI'
-    tmpdf = df[~df[pre_uri_colname].str.startswith(uri_prefix, na=False)][[term_colname, lang_colname]]
+    uri_colname = '代表語のURI'
+    tmpdf = df[~df[uri_colname].str.startswith(uri_prefix, na=False)][[term_colname, lang_colname]]
     term_list = tmpdf[term_colname].to_list()
     lang_list = tmpdf[lang_colname].to_list()
     if len(term_list) != 0:
@@ -1154,16 +1294,16 @@ def _check_uri_startswith_prefix(df, uri_prefix, file_type_num=0):
 
 
 # 409 phase 5, reason 0
-def _check_broader_term_startswith_prefix(df, uri_prefix, file_type_num=0):
-    # broader_term must start with prefix
+def _check_broader_uri_startswith_prefix(df, uri_prefix, file_type_num=0):
+    # broader_uri must start with prefix
     # the empty cell or cells with white spaces are also detected and returns errorresponse
     term_colname ='用語名'
     lang_colname = '言語'
-    broader_term_colname =  '上位語のURI'
+    broader_uri_colname =  '上位語のURI'
     # non empty
-    tmpdf1 = df[broader_term_colname] != '' 
+    tmpdf1 = df[broader_uri_colname] != '' 
     # starts with prefix
-    tmpdf2 = df[broader_term_colname].str.startswith(uri_prefix)
+    tmpdf2 = df[broader_uri_colname].str.startswith(uri_prefix)
     tmpdf = df[tmpdf1 & ~tmpdf2][[term_colname, lang_colname]]
     term_list = tmpdf[term_colname].to_list()
     lang_list = tmpdf[lang_colname].to_list()
@@ -1209,7 +1349,7 @@ def _check_pref_label_val(df, file_type_num=0):
     df = df[[term_colname,uri_colname, lang_colname, preferred_label_colname]]
     # count distinct pref_label in eeach group 
     count_df = df.groupby([lang_colname, uri_colname]).nunique(dropna= False) # this is a DataFrame　
-    # this count blanck string
+    # this count blank string
     count_df2 = count_df[count_df[preferred_label_colname] != 1]
     if count_df2.size != 0:
         # if there are distinct pref_labels
@@ -1243,7 +1383,7 @@ def _check_pref_label_empty(df, file_type_num=0):
 
 
 
-# # 409 pahse 2, reason 2
+# # 409 phase 2, reason 2
 def _check_diff_synogroup_have_diff_pref(df, file_type_num=0):
     # check there does not exist different synonim group that having same uri have same preffered label 
     # this returns only one error if there are many groups that having same preferred label
@@ -1251,7 +1391,8 @@ def _check_diff_synogroup_have_diff_pref(df, file_type_num=0):
     preferred_label_colname = '代表語' 
     lang_colname = '言語' 
     uri_colname = '代表語のURI' 
-    count_df = df.groupby([preferred_label_colname, lang_colname]).nunique(dropna= False) # this is a DataFrame　
+    # eliminate blank preferred labels
+    count_df = df[df[preferred_label_colname] != ''].groupby([preferred_label_colname, lang_colname]).nunique(dropna= False) # this is a DataFrame　
     count_df2 = count_df[count_df[uri_colname] != 1]
     if count_df2.size != 0:
         # there are different synonim group that have same preffered label
@@ -1265,10 +1406,10 @@ def _check_diff_synogroup_have_diff_pref(df, file_type_num=0):
 
 
 # 409 phase 1, reason 0, 1, 2
-def _check_blanck_term_condition(df, file_type_num=0):
-    # check blanck term existence condition
-    # preferred label must be blanck for the row
-    # term description must not be blanck for the row
+def _check_blank_term_condition(df, file_type_num=0):
+    # check blank term existence condition
+    # preferred label must be blank for the row
+    # term description must not be blank for the row
     # 
     # empty terms that have same uri and lang are not allowed
     # empty term and no empty term that have same uri and lang are not allowed
@@ -1283,12 +1424,12 @@ def _check_blanck_term_condition(df, file_type_num=0):
     lang_colname = '言語' 
     uri_colname = '代表語のURI' 
     term_description_colname = '用語の説明' 
-    # get rows with blanck terms
+    # get rows with blank terms
     empty_term_df= df[df[term_colname].str.strip() == '']
     # check preferred label are empty, term description are not empty
     for idx, row in empty_term_df.iterrows():
         if row[preferred_label_colname].strip() != '':
-            # term is blanck but preferred label is not empty
+            # term is blank but preferred label is not empty
             term_list = [row[uri_colname]]
             lang_list = [row[lang_colname]]
             return CheckErrorResponse(1, term_list, lang_list, 0, file_type_num), 409
@@ -1298,12 +1439,12 @@ def _check_blanck_term_condition(df, file_type_num=0):
             lang_list = [row[lang_colname]]
             return CheckErrorResponse(1, term_list, lang_list, 0, file_type_num), 409
     ### 1-1
-    # check duplicate rows with blanck terms
+    # check duplicate rows with blank terms
     count_df = empty_term_df.groupby([lang_colname, uri_colname]).count() # this is a DataFrame　
-    # this count blanck string
+    # this count blank string
     count_df2 = count_df[count_df[term_colname] != 1]
     if count_df2.size != 0:
-        # if there are blanck terms
+        # if there are blank terms
         tmplang, tmpuri = count_df2.index[0] # get the first uri and lang
         term_list = [tmpuri]
         lang_list = [tmplang]
@@ -1315,7 +1456,7 @@ def _check_blanck_term_condition(df, file_type_num=0):
         tmpdf = df[(df[uri_colname] == uri) & (df[lang_colname] == lang)]
         count_series = tmpdf.nunique()
         if count_series[term_colname] != 1:
-            # blanck and non blanck term are existed
+            # blank and non blank term are existed
             term_list = [uri]
             lang_list = [lang]
             return CheckErrorResponse(1, term_list, lang_list, 2, file_type_num), 409
@@ -1326,8 +1467,10 @@ def _check_duplicated_terms(df, file_type_num=0):
     # check duplicated terms
     term_colname = '用語名'  
     lang_colname = '言語'
-    # detedt duplicated terms
-    tmpdf = df[df.duplicated(subset=term_colname)][[term_colname, lang_colname]]
+    # get rows with non-blank terms
+    nonempty_term_df= df[df[term_colname].str.strip() != '']
+    # detect duplicated terms
+    tmpdf = nonempty_term_df[nonempty_term_df.duplicated(subset=[term_colname, lang_colname])][[term_colname, lang_colname]]
     if tmpdf.size != 0:
         # there are duplicated terms
         tmpdf = tmpdf.drop_duplicates()
@@ -1338,16 +1481,16 @@ def _check_duplicated_terms(df, file_type_num=0):
 
 
 # 409 phase 5, reason 1
-def _check_broader_terms_same(df, file_type_num=0):
+def _check_broader_uris_same(df, file_type_num=0):
     # check broader terms are same in a synonum group
     # this returns only one error if there are many
     term_colname = '用語名'  
     lang_colname = '言語' 
     uri_colname = '代表語のURI' 
-    broader_term_colname = '上位語のURI' 
-    # df = df[[term_colname, lang_colname, uri_colname, broader_term_colname]] # just for debug
+    broader_uri_colname = '上位語のURI' 
+    # df = df[[term_colname, lang_colname, uri_colname, broader_uri_colname]] # just for debug
     count_df = df.groupby(uri_colname).nunique(dropna= False)
-    count_df2 = count_df[count_df[broader_term_colname] != 1]
+    count_df2 = count_df[count_df[broader_uri_colname] != 1]
     if count_df2.size != 0:
         # there is non unique broader
         tmpuri = count_df2.index[0] # get the first uri
@@ -1364,15 +1507,15 @@ def _check_broader_exist_in_uri(df, file_type_num=0):
     term_colname = '用語名'  
     lang_colname = '言語' 
     uri_colname = '代表語のURI' 
-    broader_term_colname = '上位語のURI' 
+    broader_uri_colname = '上位語のURI' 
     # get broader uri
-    uri_series = df[broader_term_colname].drop_duplicates()
+    uri_series = df[broader_uri_colname].drop_duplicates()
     uri_list = uri_series[uri_series != ''].to_list()
     for tmpuri in uri_list:
         tmp_bool_series = ~(df[uri_colname] == tmpuri)
         if tmp_bool_series.all():
             # there does not exist the broader uri in uri
-            tmpdf = df[df[broader_term_colname] == tmpuri][[term_colname, lang_colname]]
+            tmpdf = df[df[broader_uri_colname] == tmpuri][[term_colname, lang_colname]]
             term_list = tmpdf[term_colname].to_list()
             lang_list = tmpdf[lang_colname].to_list()
             return CheckErrorResponse(5, term_list, lang_list, 2, file_type_num), 409
@@ -1399,13 +1542,13 @@ def dfs(v, neighbor, invisited, infinished, pushdown):
 # phase 5, reason 3 (This returns only one error even if there are many)
 def _check_broader_loop_relation(df, file_type_num=0):
     # checks loop relation between terms
-    # prerequest all values in broader_term must exist in uri
+    # prerequest all values in broader_uri must exist in uri
     # this use graph theoreticd depth first search
     term_colname = '用語名'
     lang_colname = '言語'
     uri_colname = '代表語のURI' 
-    broader_term_colname = '上位語のURI' 
-    df2 = df[[uri_colname, broader_term_colname]] 
+    broader_uri_colname = '上位語のURI' 
+    df2 = df[[uri_colname, broader_uri_colname]] 
     df2 = df2.drop_duplicates()
     # make graph adjacent list
     df2[uri_colname]
@@ -1414,8 +1557,8 @@ def _check_broader_loop_relation(df, file_type_num=0):
     finished ={ x: False for x in uri_set}
     neighbor ={ x: [] for x in uri_set}
     for idx, row in df2.iterrows():
-        if row[broader_term_colname] != '':
-            neighbor[row[uri_colname]].append(row[broader_term_colname])
+        if row[broader_uri_colname] != '':
+            neighbor[row[uri_colname]].append(row[broader_uri_colname])
     pushdown = []
     for uri_item in uri_set:
         visited, finished, pushdown, status, tmp_uri = dfs(uri_item, neighbor, visited, finished, pushdown)
@@ -1554,8 +1697,50 @@ def _fill_pos_val(df):
     return df
 
 def _fill_confirm_val(df):
-    # fills cells without 0 are replaced to 1
+    # fills cells without 1 are replaced to 0
     confirm_colname =  '確定済み用語'
-    tmp_bool = df[confirm_colname] != '0'
-    df.loc[tmp_bool, confirm_colname] = '1'
+    tmp_bool = df[confirm_colname] != '1'
+    df.loc[tmp_bool, confirm_colname] = '0'
+    return df
+
+# convert datetime to ISO 8601 at most "second", '2021-04-02T12:43:02Z'
+def _convert_datetime2cvdtimestr(indatetime):
+    return indatetime.isoformat(timespec='seconds').replace('+00:00', 'Z')
+
+# input {string} timeStr ISO 8601 '2021-04-02T12:43:02Z'
+# input {string} vnowStr value with which fill blank or unparcable data ISO 8601 '2021-04-02T12:43:02Z'
+# return datetime
+def _convert_isostr2datetime(timeStr, nowStr):
+    try:
+        return datetime.datetime.fromisoformat(timeStr)
+    except:
+        return datetime.datetime.fromisoformat(nowStr)
+
+def _fill_create_time_val(df):
+    # if create time is blank or unparsable string, it will be filled by now time
+    created_time_colname = '作成日'
+    nowTime =  datetime.datetime.now(datetime.timezone.utc) 
+    nowStr = nowTime.isoformat()
+    df["tmp"] = df[created_time_colname].apply(_convert_isostr2datetime, args=(nowStr, ) )
+    df[created_time_colname] = df["tmp"].apply(_convert_datetime2cvdtimestr)
+    df = df.drop("tmp", axis=1)
+    return df
+
+def _fill_modifiled_time_val(df):
+    # if create time is blank or unparsable string, it will be filled by now time
+    modified_time_colname = '最終更新日'
+    nowTime =  datetime.datetime.now(datetime.timezone.utc) 
+    nowStr = nowTime.isoformat()
+    df["tmp"] = df[modified_time_colname].apply(_convert_isostr2datetime, args=(nowStr, ) )
+    df[modified_time_colname] = df["tmp"].apply(_convert_datetime2cvdtimestr)
+    df = df.drop("tmp", axis=1)
+    return df
+
+def _fill_created_time_to_oldest_value(df):
+    # adjust created_time in a sysnonym group being same. the value is the oldest one
+    uri_colname = 'uri'
+    created_time_colname = 'created_time'
+    for group_uri, group_df in df.groupby(uri_colname):
+        minval = group_df[created_time_colname].min()
+        df.loc[df[uri_colname] == group_uri, [created_time_colname]] = minval
     return df

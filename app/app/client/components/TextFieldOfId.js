@@ -58,19 +58,23 @@ export default
    * @param  {array} newValue - list of preferred label
    */
   onChange(event, newValue) {
-    const prfrrdLbl = this.props.editingVocabulary.tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list][0];
-    const currentNode = this.props.editingVocabulary.tmpLanguage.list == this.props.editingVocabulary.currentNode.language ? this.props.editingVocabulary.currentNode: this.props.editingVocabulary.currentLangDiffNode;
+    const synonymIdList = this.props.editingVocabulary.tmpSynonym.idList;
+    // const displayNode = this.props.editingVocabulary.tmpLanguage.value == this.props.editingVocabulary.currentNode.language ? this.props.editingVocabulary.currentNode: this.props.editingVocabulary.currentLangDiffNode;
+    const displayLanguage = this.props.editingVocabulary.tmpLanguage.value;
 
     if (newValue.length > 1) {
       // When more than one id is entered
-      const errorMsg = 'IDテキストボックスには、複数の値を記入できません。値を1つだけ記入してください。';
+      let errorMsg = 'IDテキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+      errorMsg = errorMsg.split('¥n').map((line, key) => <span key={key}>{line}<br /></span>);
       this.openSnackbar(errorMsg);
     } else if (newValue.length == 1) {
-      if (this.props.editingVocabulary.isInvalidIdofUri(currentNode, newValue[0], prfrrdLbl)) {
+      if( newValue[0] === this.props.editingVocabulary.currentNode.idofuri){
+        // do nothing
+      } else if (!this.props.editingVocabulary.isUniqueIdofUri(this.props.editingVocabulary.currentNode, displayLanguage, newValue[0], synonymIdList)) {
         const errorMsg = '代表語のURIテキストボックスに、¥n' +
-                       '同義関係でない別の代表語 \"' +
+                       '同義関係でない別の代表語 「' +
                        this.props.editingVocabulary.equalUriPreferredLabel +
-                       '\" と同じ代表語のURIが記入されています。¥n' +
+                       '」 と同じ代表語のURIが記入されています。¥n' +
                        '代表語のURIテキストボックスには、¥n' +
                        '既に登録されている他の代表語のURIとは異なる値が入るように、¥n' +
                        'IDテキストボックスの値を変更してください。';
@@ -83,8 +87,8 @@ export default
       if (this.props.editingVocabulary.tmpIdofUri.list.length > 0) {
         const currentIdofUri = this.props.editingVocabulary.currentNode.idofuri;
         if (currentIdofUri) {
-          const errorMsg = 'IDテキストボックスには \"' + currentIdofUri +
-                           '\" または既に登録されている他の代表語のURIとは異なる値が入るように、¥n' +
+          const errorMsg = 'IDテキストボックスには 「' + currentIdofUri +
+                           '」 または既に登録されている他の代表語のURIとは異なる値が入るように、¥n' +
                            'IDテキストボックスの値を変更してください。';
           const innerText = errorMsg.split('¥n').map((line, key) =>
             <span key={key}>{line}<br /></span>);
@@ -100,12 +104,18 @@ export default
    * @return {element}
    */
   render() {
-    const id = this.props.editingVocabulary.tmpIdofUri.list; 
-    const currentId =
-        this.props.editingVocabulary.currentNode.idofuri;
+    const idofuri = this.props.editingVocabulary.tmpIdofUri.list;
+    const currentId = this.props.editingVocabulary.currentNode.idofuri;
+
+    let backColor = 'rgba(0, 0, 0, 0)';
+    if(this.props.disabled){
+      backColor = 'rgba(0, 0, 0, 0.09)';
+    }else if( 0 === idofuri.length){
+      backColor = 'lavenderblush';
+    }
 
     return (
-      <div>
+      <div onKeyDown={(e)=>{e.keyCode===13&&e.preventDefault()}}>
         <form noValidate autoComplete="off">
           <Grid item xs={12}>
             <Box border={1}>
@@ -113,7 +123,7 @@ export default
                 multiple
                 freeSolo
                 disabled={this.props.disabled}
-                value={id}
+                value={idofuri}
                 onFocus={(e)=>this.props.change('Id', true)}
                 onBlur={(e)=>this.props.change('Id', false)}
                 onChange={(event, newValue) => this.onChange(event, newValue)}
@@ -124,9 +134,7 @@ export default
                   }
                 }
                 id="text-field-of-id-input"
-                options={
-                  this.props.editingVocabulary.getCandidateTermList('')}
-                getOptionLabel={(option) => option}
+                options={[]}
                 renderTags={(tagValue, getTagProps) => {
                   return tagValue.map((option, index) => (
                     <EditPanelChipForOneChip 
@@ -134,6 +142,7 @@ export default
                       {...getTagProps({index})}
                       label={option}
                       data={currentId}
+                      needblankcheck={'false'}
                     />
                   ));
                 }}
@@ -141,11 +150,7 @@ export default
                   <TextField
                     {...params}
                     variant="standard"
-                    style={
-                        this.props.disabled?
-                        {backgroundColor: 'rgba(0, 0, 0, 0.09)'}:
-                        {backgroundColor: 'rgba(0, 0, 0, 0)'}
-                    }
+                    style={{backgroundColor: backColor}}
                   />
                 )}
               />

@@ -247,7 +247,9 @@ export default class DialogFileDownload extends React.Component {
           onClose={() => this.handleClose()}
           open={this.props.open}
           fullwidth="false"
-          onEntered={() => this.initFilesInfo()}
+          TransitionProps={{
+            onEntered:() =>{ this.initFilesInfo(); }
+          }}
         >
           <DialogTitle>
             ファイル出力

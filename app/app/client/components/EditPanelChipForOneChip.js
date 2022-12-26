@@ -29,12 +29,13 @@ export default
       // Chips added by completion
       chipColor = '#ffcdd2';
     }
-    const disp = editingVocabularyStore.isBlankTerm(label);
+
+    const disp = this.props.needblankcheck=='true'?(!editingVocabularyStore.isBlankTerm( label)):true;
 
 
     return (
       <>
-      { !disp && 
+      { disp && 
         <Chip
           style={{backgroundColor: chipColor}}
           {...this.props}
@@ -48,4 +49,5 @@ export default
 EditPanelChipForOneChip.propTypes = {
   data: PropTypes.string,
   label: PropTypes.string,
+  needblankcheck: PropTypes.string,
 };

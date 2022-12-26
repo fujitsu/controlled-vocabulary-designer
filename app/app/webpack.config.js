@@ -19,6 +19,10 @@ module.exports = (env, argv) => {
     output: {
         path: path.resolve(__dirname, './public/app/js/'),
         filename: 'app.js'
+    },    
+    watchOptions: {
+      poll: 500, 
+      aggregateTimeout: 100,
     },
     module: {
         rules: [
@@ -31,7 +35,7 @@ module.exports = (env, argv) => {
                   plugins: [
                     'react-html-attrs',
                     [require('@babel/plugin-proposal-decorators'), {legacy: true}],
-                    [require('@babel/plugin-proposal-class-properties'), {loose: true }]
+                    [require('@babel/plugin-proposal-class-properties'), {loose: false }]
                   ],
                   presets: ['@babel/preset-react', '@babel/preset-env']
                 }
@@ -39,7 +43,7 @@ module.exports = (env, argv) => {
         },
         {
             test: /\.css$/i,
-            loaders: ['style-loader', 'css-loader']
+            use: ['style-loader', 'css-loader']
         },
         {
             test: /\.(jpe?g|png|gif)$/i,
@@ -54,7 +58,7 @@ module.exports = (env, argv) => {
         }
       ]
     },
-    devtool: IS_DEVELOPMENT ? 'inline-source-map' : 'none',
+    devtool: IS_DEVELOPMENT ? 'inline-source-map' : 'eval',
     optimization: {
       minimizer: IS_DEVELOPMENT
         ? []

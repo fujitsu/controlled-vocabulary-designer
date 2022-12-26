@@ -297,13 +297,12 @@ const useStyles = (theme) => ({
     left: 0,
     width: "100%",
     padding: "2px 4px",
-    minWidth: "15vw",
-    backgroundColor: 'red',
+    minWidth: "325px",
+    boxSizing: "unset",
   },
   'inputTextItem': {
     position: "relative",
     display: "inline-block",
-    backgroundCplor: "red"
   },
   'inputTextDummy': {
     position: "relative",
@@ -313,7 +312,30 @@ const useStyles = (theme) => ({
     padding: "3px 5px",
     whiteSpace: "nowrap",
     opacity: "0",
-  },  
+  },
+  'zoomImgWrap':{
+    border: "solid 4px #666666",
+    backgroundPosition:"center center",
+    backgroundRepeat: "no-repeat",
+    backgroundSize: "contain",
+    backgroundColor: '#E3E3E3',
+    width:"20%",    
+    height:"20%",
+    position: "absolute",
+    bottom: "15px",
+    left: "15px",
+    zIndex: "999",
+    overflow: "hidden",
+  },
+  'zoomFrame':{
+    border: "solid 6px steelblue",
+    boxSizing: "border-box",
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    top: "0px",
+    left: "0px",
+  }
 });
 
 /**
@@ -340,14 +362,26 @@ class App extends React.Component {
    * Get db data
    */
   async componentDidMount() {
-
-    editingVocabularyStore.getEditingVocabularyDataFromDB();
-    await editingVocabularyStore.getReferenceVocabularyDataFromDB('1');
-    await editingVocabularyStore.getReferenceVocabularyDataFromDB('2');
-    await editingVocabularyStore.getReferenceVocabularyDataFromDB('3');
+    window.addEventListener('pageshow', this.handlePageShow.bind(this));
+    
     await editingVocabularyMetaStore.getEditingVocabularyMetaDataFromDB();
+    await editingVocabularyStore.getEditingVocabularyDataFromDB();
+    editingVocabularyStore.getReferenceVocabularyDataFromDB('1');
+    editingVocabularyStore.getReferenceVocabularyDataFromDB('2');
+    editingVocabularyStore.getReferenceVocabularyDataFromDB('3');
+
     await this.readFileChack();
   }
+    /**
+   * @param  {object} event - information of pageshow
+   */
+    handlePageShow(event) {
+      // catch browser back button event and reload the page
+      // https://developer.mozilla.org/ja/docs/Web/API/Performance/getEntriesByType
+      if(window.performance.getEntriesByType("navigation").map((nav) => nav.type).includes('back_forward')){
+        location.reload();
+      }
+    }
 
   readFileChack(){
     setTimeout(()=> {

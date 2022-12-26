@@ -55,24 +55,17 @@ export default
   /**
    * Synonym update event
    * @param  {object} event - information of event
-   * @param  {array} newValue - list of broader terms
+   * @param  {array} newValue - list of synonym terms
    */
   onChange(event, newValue) {
     const editingVocabulary =this.props.editingVocabulary;
     const inputText = event.target.value;
-    const find = editingVocabulary.editingVocabulary.find((d)=>{ return d.term == inputText });    
-    if( inputText != '' && inputText != undefined && !find){
-      const errorMsg =  '\"' +inputText + '\" は、登録されていない用語です。¥n' +
-                       '既存の用語を記入してください。';
-      const innerText = errorMsg.split('¥n').map((line, key) =>
-        <span key={key}>{line}<br /></span>);
-      this.openSnackbar(innerText);
-
-      return false;
-    }
-    if( find && find.language != editingVocabulary.tmpLanguage.list){
-      const errorMsg =  '\"' +inputText + '\" は、'+(find.language=='ja'?'日本語':'英語')+'の用語です。¥n' +
-                       '現在選択されている言語の用語を記入してください。';
+    const displayLanguage = editingVocabulary.tmpLanguage.value;
+    // const find = editingVocabulary.editingVocabulary.find((d)=>{ return (d.term === inputText && displayLanguage ===d.language)});  
+    const foundId = editingVocabulary.getIdbyTermandLang(inputText, displayLanguage);  
+    if( inputText != '' && inputText != undefined && !foundId){
+      const errorMsg =  '「' +inputText + '」 は、' +(displayLanguage=='ja'?'日本語':'英語')+ 'では登録されていない用語です。¥n' +
+                       '登録済みの用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
@@ -80,32 +73,32 @@ export default
       return false;
     }
 
-    const currentNode = editingVocabulary.tmpLanguage.list == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
-    let _currentNode = currentNode;
-    if(  _currentNode.term == '' && editingVocabulary.tmpLanguage.list !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
+    const displayNode = displayLanguage == editingVocabulary.currentNode.language ? editingVocabulary.currentNode: editingVocabulary.currentLangDiffNode;
+    let _displayNode = displayNode;
+    if(  _displayNode.term == '' && editingVocabulary.tmpLanguage.value !== editingVocabulary.currentNode.language // dare editingVocabulary.currentNode
       && editingVocabulary.currentLangDiffNode.term === '' && editingVocabulary.currentLangDiffNode.language !== ''
       && editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language].length > 0){
-        const find = editingVocabulary.editingVocabulary.find((item)=>
-            item.term == editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0])
-        _currentNode = find?find:currentNode;
+        // this condition is satisfied when the currentNode is ja/en and synonym en/ja term does not exist.
+        const foundId = editingVocabulary.getIdbyTermandLang(
+          editingVocabulary.tmpSynonym.list[editingVocabulary.currentLangDiffNode.language][0],
+          editingVocabulary.currentLangDiffNode.language);
+        const foundObj = editingVocabulary.editingVocWithId.get(foundId);
+        _displayNode = foundObj?foundObj:displayNode;
     }
-    if (editingVocabulary.isRelationSynonym(_currentNode, newValue)) {
-      const errorMsg = '下位語テキストボックスに、 \"' + _currentNode.term +
-                       '\" あるいは \"' + _currentNode.term + '\" の代表語' +
-                       'あるいは \"' + _currentNode.term + '\" の同義語が記入されています。¥n' +
-                       '同義語テキストボックスには、 \"' + _currentNode.term +
-                       '\" と上下関係を持たないように、¥n' +
-                       'かつ記入する複数の用語間にも上下関係を持たないように、用語を記入してください。';
+    if (editingVocabulary.isNarrowerTerm(_displayNode.term, displayLanguage, newValue)) {
+      const errorMsg = '同義語テキストボックスに上位語（下位語）が記入されています。¥n' +
+                       '同義語テキストボックスには、上位語・下位語以外の用語を記入してください。';
       const innerText = errorMsg.split('¥n').map((line, key) =>
         <span key={key}>{line}<br /></span>);
       this.openSnackbar(innerText);
     }
-    editingVocabulary.updataSynonym(newValue);
+    editingVocabulary.updateSynonym(newValue);
+    // if the added term have diffrent preferred label the label is added to the Text Field of PrefLabel
     if (this.state.open == false) {
       const preferredLabelLength =
-        editingVocabulary.tmpPreferredLabel.list[_currentNode.language].length;
+        editingVocabulary.tmpPreferredLabel.list[_displayNode.language].length;
       if (preferredLabelLength > 1) {
-        const errorMsg = '代表語テキストボックスには、複数の値を記入できません。¥n値を1つだけ記入してください。';
+        const errorMsg = '代表語テキストボックスに、複数の用語が記入されています。¥n用語を1つだけ記入してください。';
         const innerText = errorMsg.split('¥n').map((line, key) =>
           <span key={key}>{line}<br /></span>);
         this.openSnackbar(innerText);
@@ -118,22 +111,31 @@ export default
    * @return {element}
    */
   render() {
-    const synonym = this.props.editingVocabulary.tmpSynonym.list[this.props.editingVocabulary.tmpLanguage.list];
-    let currentSynonym;
+    const editingVocabulary = this.props.editingVocabulary;
+    const synonym = editingVocabulary.tmpSynonym.list[editingVocabulary.tmpLanguage.value];
+
+    // synonym when switching with the  language radio button in the selected term
+    let currentSynonym = editingVocabulary.currentLangDiffNode.synonymList; 
     // synonym on the selected term
-    if (this.props.editingVocabulary.currentNode.language == this.props.editingVocabulary.tmpLanguage.list) {
-      currentSynonym = this.props.editingVocabulary.currentNode.synonymList;
-    } else { // synonym when switching with the  language radio button in the selected term
-      currentSynonym = this.props.editingVocabulary.currentLangDiffNode.synonymList; 
+    if (editingVocabulary.currentNode.language == editingVocabulary.tmpLanguage.value) {
+      currentSynonym = editingVocabulary.currentNode.synonymList;
     }
+    
+    let backColor = 'rgba(0, 0, 0, 0)';
+    if(this.props.disabled){
+      backColor = 'rgba(0, 0, 0, 0.09)';
+    }else if( currentSynonym.length > 0 && 0 === synonym.length){
+      backColor = 'lavenderblush';
+    }
+
     /* eslint-disable no-unused-vars */
     // object for rendering
-    let length = this.props.editingVocabulary.tmpSynonym.list['ja'].length;
-    length = this.props.editingVocabulary.tmpSynonym.list['en'].length;
+    let length = editingVocabulary.tmpSynonym.list['ja'].length;
+    length = editingVocabulary.tmpSynonym.list['en'].length;
     /* eslint-enable no-unused-vars */
 
     return (
-      <div>
+      <div onKeyDown={(e)=>{e.keyCode===13&&e.preventDefault()}}>
         <form noValidate autoComplete="off">
           <Grid item xs={12}>
             <Box border={1}>
@@ -203,11 +205,7 @@ export default
                   <TextField
                     {...params}
                     variant="standard"
-                    style={
-                      this.props.disabled?
-                      {backgroundColor: 'rgba(0, 0, 0, 0.09)'}:
-                      {backgroundColor: 'rgba(0, 0, 0, 0)'}
-                    }
+                    style={{backgroundColor: backColor}}
                   />
                 )}
               />

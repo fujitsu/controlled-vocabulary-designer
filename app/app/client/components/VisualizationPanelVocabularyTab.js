@@ -9,7 +9,6 @@ import Cytoscape from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
 
 import dagre from 'cytoscape-dagre';
-import klay from 'cytoscape-klay';
 
 import {brown} from '@material-ui/core/colors';
 import {red} from '@material-ui/core/colors';
@@ -38,10 +37,10 @@ import DialogSettingSynonym from './DialogSettingSynonym';
 import DialogOkCancel from './DialogOkCancel';
 import DialogUpdateVocabularyError from './DialogUpdateVocabularyError';
 import Search from './Search';
+import html2canvas from "html2canvas";
 
 Cytoscape.use(edgehandles);
 Cytoscape.use(dagre);
-Cytoscape.use(klay);
 
 
 /**
@@ -55,10 +54,6 @@ export default
    */
   constructor() {
     super();
-    this.zoomTimeoutId = -1;
-    this.updateElesTimeoutId = -1;
-    this.isReset = true;
-    this.fitCenterPan = true;
     this.situationArr = [];
     this.message = '';
     this.source = null;
@@ -66,7 +61,6 @@ export default
 
     this.state = { 
       anchorEl: false,            // Edit Panel togle
-      anchorElC: false,           // Confirm Color Setting popover togle
       anchorElColor: false,       // border color setting popover togle
       transformTogle: false,      // transform coordinate togle
       dlgTmpDelOpen: false,       // dialog for tmpData Delete confirm
@@ -94,7 +88,6 @@ export default
     this.setUpListeners();
     this.updateElesClass();
     this.initEdgeHandles();
-    this.setCyMinMaxZoom();
   }
 
   /**
@@ -109,36 +102,95 @@ export default
     }else{     
       this.onPanZoom();
     }
+    if( prevProps.fileLoadCount !== this.props.fileLoadCount ){
+      this.situationArr.map((obj)=>{
+        if(undefined !== obj){
+          obj.bgImage = undefined;
+        }
+      })
+      this.captureZoomImage(true);
+    }else if( prevProps.fileId !== this.props.fileId){
+      this.captureZoomImage();
+    }
     this.dispCheckEdgeHandle();
   }
 
   /**
-   * Max min scale
+   * Scale drawing updates
    */
-   setCyMinMaxZoom() {
-    const cy = this.cy;
-    // cy.minZoom(0.0025);
-    // cy.maxZoom(1.2);
-    const cyw = cy.width();
-    const cyh = cy.height();
-    cy.viewport({zoom: 0.005, pan: {x: cyw/2, y: cyh/2}});
+  moveZoomImageFrame( situationObj){
+    const frame = document.getElementById("zoomFrame");
+    if( situationObj === undefined || situationObj.iniPan === undefined || !frame){
+      return;
+    }
+    const cZoom = this.cy.zoom();
+    const cPan = this.cy.pan();
+    const zoom = situationObj.iniZoom / cZoom;
+    let left = (situationObj.iniPan.x - cPan.x*zoom) * 0.2;   // frame width 20%
+    let top  = (situationObj.iniPan.y - cPan.y*zoom) * 0.2;
+
+    frame.style.width= String( zoom * 100) + "%";
+    frame.style.height= String( zoom * 100) + "%";
+    frame.style.left= String( left) + "px";
+    frame.style.top= String( top) + "px";
+  }  
+
+  /**
+   * Scale drawing initialize
+   * @param {Boolean} reset - true: must reset initialize viewport
+   */
+  captureZoomImage(reset=false){
+    const fileId = this.props.editingVocabulary.selectedFile.id;
+    const wrap = document.getElementById("zoomImgWrap");
+    if(!wrap) return;
+
+    if( !reset && undefined !== this.situationArr[ fileId] && undefined !== this.situationArr[ fileId].bgImage){
+      wrap.style.backgroundImage = this.situationArr[ fileId].bgImage;
+      this.moveZoomImageFrame( this.situationArr[ fileId]);
+    }else{
+
+      setTimeout( () => {
+        html2canvas(document.getElementById("relation_term_graph_container")).then((canvas) => {
+          const contentDataURL =  canvas.toDataURL("image/png");
+          const bgImg = "url('" +contentDataURL + "')";
+          wrap.style.backgroundImage = bgImg;
+          if(  undefined !== this.situationArr[ fileId]){
+            this.situationArr[ fileId].bgImage = bgImg;
+          }
+        });
+        if( reset && undefined !== this.situationArr[ fileId]){
+          const zoom = this.cy.zoom();
+          const pan = this.cy.pan();
+          this.situationArr[ fileId].iniPan={x: pan.x, y: pan.y};
+          this.situationArr[ fileId].iniZoom = zoom;
+        }
+  
+        this.moveZoomImageFrame( this.situationArr[ fileId]);
+      }, 1000, this, fileId);
+    }
+
   }
 
   /**
-   * zoomSlider settings
+   * Set initial values for zoom and pan
    */
-  setIniZoom(){
+  async setIniPanZoom(){
     const cy = this.cy;
-    let currentZoom = cy.zoom();
-    currentZoom = currentZoom>2.0?2.0:currentZoom;
-    cy.zoom(currentZoom);
+
+    await cy.fit(cy.nodes ,50);
+    let currentZoom = await cy.zoom();
+    currentZoom =  await currentZoom>2.0?2.0:currentZoom;
+    await cy.zoom(currentZoom);
+    await cy.center();
+    const iniPan = await cy.pan();
 
     const fileId = this.props.editingVocabulary.selectedFile.id;
-    if(undefined == this.situationArr[ fileId]){
-      this.situationArr[ fileId] = {
-        pan: undefined, 
-        zoom: undefined,
-      }
+    this.situationArr[ fileId] = {
+      pan: {x: iniPan.x, y: iniPan.y}, 
+      zoom: currentZoom,
+      iniPan: {x: iniPan.x, y: iniPan.y},
+      iniZoom: currentZoom,
+      bgImage: undefined,
     }
   }
 
@@ -146,43 +198,14 @@ export default
    * Update graph data
    */
   updateElesClass() {
-    if (this.updateElesTimeoutId > 0) {
-      clearTimeout(this.updateElesTimeoutId);
-      this.updateElesTimeoutId = -1;
-    }
 
     // Suppress redundant update processing by consecutive occurrence of events.
-    this.updateElesTimeoutId = setTimeout( () => {
+    // node Initialization
+    this.initStyleForAllNodes();
+    const layout = this.cy.layout({name: 'preset'});
+    layout.run();
 
-      const cy = this.cy;
-
-      // node Initialization
-      this.initStyleForAllNodes();
-      const layout = cy.layout({name: 'preset'});
-      layout.run();
-
-      // Update layout
-      const currentZoom = cy.zoom();
-      const currentPan = cy.pan();
-
-      if (this.isReset) {
-        this.isReset = false;
-        // At the first display, not the entire display, narrow down to a certain magnification.
-        cy.zoom(0.005);
-      } else {
-        this.fitByPanZoom(currentPan, currentZoom);
-      }
-
-      this.onPanZoom();
-
-    }, 300);
-  }
-
-  /**
-   * Pan, zoom reset notification by updating editing lexical data
-   */
-  doReset() {
-    this.isReset = true;
+    this.onPanZoom();
   }
 
   /**
@@ -226,14 +249,15 @@ export default
   setPanZoom() {
     const cy = this.cy;
     
+    // provisional processing
+    cy.minZoom(0.002);
+    cy.maxZoom(1.2);
+
     const fileId = this.props.editingVocabulary.selectedFile.id;
     if( undefined == this.situationArr[ fileId]){
-      this.setIniZoom();
-      cy.fit(cy.nodes ,50);
+      this.setIniPanZoom();
     }else{
-      const initPan = {x: cy.width()/2, y: cy.height()/2};
-      cy.pan( this.situationArr[ fileId].pan || initPan);
-      cy.zoom( this.situationArr[ fileId].zoom || 0.005);
+      cy.viewport({zoom: this.situationArr[ fileId].zoom, pan: this.situationArr[ fileId].pan});
     }
   }
 
@@ -241,167 +265,121 @@ export default
    * [onPanZoom description]
    */
   onPanZoom() {
-    if (this.zoomTimeoutId > 0) {
-      clearTimeout(this.zoomTimeoutId);
-      this.zoomTimeoutId = -1;
+    const cy = this.cy;
+
+    // List of nodes in view
+    const ext = cy.extent();
+
+    let nodesInView = cy.nodes().filter((n) => {
+      const bb = n.boundingBox();
+      // Show nodes if any are in the viewport range
+      return bb.x1 > (ext.x1 - bb.w) &&
+              bb.x2 < (ext.x2 + bb.w) &&
+              bb.y1 > (ext.y1 - bb.h) &&
+              bb.y2 < (ext.y2 + bb.h);
+    });
+    if (nodesInView.length == 0) {
+      nodesInView = cy.nodes();
     }
 
-    this.zoomTimeoutId = setTimeout( () => {
-      const cy = this.cy;
+    // get element near center
+    const zoom = cy.zoom();
+    const cpX = ( ext.x1 + ext.w / 2 ) / zoom;
+    const cpY = ( ext.y1 + ext.h / 2 ) / zoom;
+    let sortArr=[];
+    nodesInView.map((n, index)=>{
 
-      // List of nodes in view
-      const ext = cy.extent();
-
-      let nodesInView = cy.nodes().filter((n) => {
-        const bb = n.boundingBox();
-        // Show nodes if any are in the viewport range
-        return bb.x1 > (ext.x1 - bb.w) &&
-               bb.x2 < (ext.x2 + bb.w) &&
-               bb.y1 > (ext.y1 - bb.h) &&
-               bb.y2 < (ext.y2 + bb.h);
-      });
-      if (nodesInView.length == 0) {
-        nodesInView = cy.nodes();
+      // excluding edgehandle 
+      if( n.hasClass('eh-handle')){ 
+        return;
       }
+      const bb = n.boundingBox();
+      sortArr = [...sortArr, {
+        'index': index,
+        'distance': Math.abs( bb.x1 / zoom - cpX ) + Math.abs( bb.y1 / zoom - cpY )
+      }]
+    })
 
-      // get element near center
-      const zoom = cy.zoom();
-      const cpX = ( ext.x1 + ext.w / 2 ) / zoom;
-      const cpY = ( ext.y1 + ext.h / 2 ) / zoom;
-      let sortArr=[];
-      nodesInView.map((n, index)=>{
+    const dispNodeMax = this.props.editingVocabulary.DISP_NODE_MAX;
+    sortArr.sort((a, b)=> { return a.distance - b.distance; });
+    if( sortArr.length > dispNodeMax ) sortArr.splice( dispNodeMax);
 
-        // excluding edgehandle 
-        if( n.hasClass('eh-handle')){ 
-          return;
-        }
-        const bb = n.boundingBox();
-        sortArr = [...sortArr, {
-          'index': index,
-          'distance': Math.abs( bb.x1 / zoom - cpX ) + Math.abs( bb.y1 / zoom - cpY )
-        }]
-      })
+    // 300 visibleNodesInView
+    let nodesInViewLimit300 = [];
+    sortArr.forEach((data)=>{
+      nodesInViewLimit300 =
+        [...nodesInViewLimit300, nodesInView[data.index]];
+    })
 
-      const dispNodeMax = this.props.editingVocabulary.DISP_NODE_MAX;
-      sortArr.sort((a, b)=> { return a.distance - b.distance; });
-      if( sortArr.length > dispNodeMax ) sortArr.splice( dispNodeMax);
+    this.initStyleByPanZoom();
 
-      // 100 visibleNodesInView
-      let nodesInViewLimit100 = [];
-      sortArr.forEach((data)=>{
-        nodesInViewLimit100 =
-          [...nodesInViewLimit100, nodesInView[data.index]];
-      })
+    // term point size adjustment
+    nodesInView.style({
+      "width": 5.0/zoom,
+      "height": 5.0/zoom,
+    });
 
-      this.initStyleByPanZoom();
-
-      // term point size adjustment
-      nodesInView.style({
-        "width": 5.0/zoom,
-        "height": 5.0/zoom,
-      });
-
-      // edges line width adjustment
-      const edges = cy.edges();
-      edges.style({
-        "width": 3.0/zoom,
-      });
+    // edges line width adjustment
+    const edges = cy.edges();
+    edges.style({
+      "width": 5.0/zoom,
+    });
+    
+    const nodeInViewStyle = {
+      'width':(node) => { return (this.bytes(node.data('term')) * 7)/zoom },   
+      'height': 20.0/zoom,
+      'font-size': 16/zoom,
+      'border-width': 2.0/zoom,
+      'padding': 10.0/zoom,
+    };
+    nodesInViewLimit300.forEach((node, index)=>{
+      const eles = cy.$id(node.data().id);
       
-      const nodeInViewStyle = {        
-        'width': 'label',
-        'height': 20.0/zoom,
-        'font-size': 16/zoom,
-        'border-width': 2.0/zoom,
-        'padding': 10.0/zoom,
-      };
-      nodesInViewLimit100.forEach((node, index)=>{
-        const eles = cy.$id(node.data().id);
-        
-        // Adjust term size ↓ but Causes of color settings not working 
-        node.style(nodeInViewStyle);
+      // Adjust term size ↓ but Causes of color settings not working 
+      node.style(nodeInViewStyle);
 
-        node.addClass('showText');
-        // Setting color information
-        if (node.data().vocabularyColor) {
-          eles.addClass(node.data().vocabularyColor);
-        }
-
-        // Setting of confirmation information
-        this.setConfirmStyle(eles, node.data().confirm);
-      });
-      const selectTermList = this.props.editingVocabulary.selectedTermList;
-      selectTermList.forEach((item, index)=>{
-        this.changeSelectedTermColor(item.id);
-      });
-      const currentNode = this.props.editingVocabulary.currentNode;
-      if (currentNode.id) {
-        const selectedele = cy.$id(currentNode.id);
-        selectedele.addClass('selected');
-        selectedele.addClass('showText');
-        // Setting of color information
-        if (selectedele.data().vocabularyColor) {
-          selectedele.addClass(selectedele.data().vocabularyColor);
-        }
-
-        // Setting of confirmation information
-        this.setConfirmStyle(selectedele, selectedele.data().confirm);
-
-        // Newly added terms may not appear in the view because their coordinate values remain at their initial values.
-        // In that case, it can be forced into the view by showText.
-        if (currentNode.broader_term) {
-          const brdrTrmNode = cy.nodes().filter((n) => {
-            return n.data().term == currentNode.broader_term;
-          });
-          if (brdrTrmNode.length > 0) {
-            if (!brdrTrmNode.hasClass('showText')) {
-              brdrTrmNode.addClass('showText');
-              const eles = cy.$id(brdrTrmNode.data().id);
-              // Setting of color information
-              if (brdrTrmNode.data().vocabularyColor) {
-                eles.addClass(brdrTrmNode.data().vocabularyColor);
-              }
-
-              // Setting of confirmation information
-              this.setConfirmStyle(eles, brdrTrmNode.data().confirm);
-            }
-          }
-        }
-        if (currentNode.preferred_label) {
-          const synonymNode = cy.nodes().filter((n) => {
-            return n.data().preferred_label == currentNode.preferred_label &&
-                   n.data().term != currentNode.term;
-          });
-          if (synonymNode.length > 0) {
-            synonymNode.forEach((node) => {
-              if (!node.hasClass('showText')) {
-                node.addClass('showText');
-
-                const eles = cy.$id(node.data().id);
-                // Setting of color information
-                if (node.data().vocabularyColor) {
-                  eles.addClass(node.data().vocabularyColor);
-                }
-
-                // Setting of confirmation information
-                this.setConfirmStyle(eles, node.data().confirm);
-              }
-            });
-          }
-        }
+      node.addClass('showText');
+      // Setting color information
+      if (node.data().vocabularyColor) {
+        eles.addClass(node.data().vocabularyColor);
       }
 
-      // Hide inactive handles 
-      this.hideHandlePostion();
-    }, 10);
-  }
+      // Setting of confirmation information
+      this.setConfirmStyle(eles, node.data().confirm);
+    });
+    const selectTermList = this.props.editingVocabulary.selectedIdList;
+    selectTermList.forEach((id, index)=>{
+      this.changeSelectedTermColor(id);
+    });
+    const currentNode = this.props.editingVocabulary.currentNode;
+    if (currentNode.id) {
+      const selectedele = cy.$id(currentNode.id);
+      selectedele.addClass('selected');
+      selectedele.addClass('showText');
+      // Setting of color information
+      if (selectedele.data() !== undefined && selectedele.data().vocabularyColor) {
+        selectedele.addClass(selectedele.data().vocabularyColor);
+      }
 
+      // Setting of confirmation information
+      if (selectedele.data() !== undefined && selectedele.data().confirm) {    
+        this.setConfirmStyle(selectedele, selectedele.data().confirm);
+      }
+    }
+
+    // Hide inactive handles 
+    this.hideHandlePostion();
+  }
+  bytes( str) {
+    return encodeURIComponent(str).replace(/%../g,"x").length;
+  }
   changeSelectedTermColor(id, isAddTerm=true){
 
     const cy = this.cy;    
     const zoom = cy.zoom();
     const bdrWidth = (isAddTerm?4.0:2.0)/zoom;
     const nodeSelectedStyle = {        
-      'width': 'label',
+      'width':(node) => { return (this.bytes(node.data('term')) * 7)/zoom },
       'height': 20.0/zoom,
       'border-width': bdrWidth,
       'font-size': 16/zoom,
@@ -412,11 +390,14 @@ export default
     eles.style(nodeSelectedStyle);
     eles.addClass('showText');
     // Setting color information
-    if (eles.data().vocabularyColor) {
-      eles.addClass(eles.data().vocabularyColor);
+    const elsData = eles.data();
+    if (undefined !== elsData) {
+      if (undefined !== elsData.vocabularyColor) {
+        eles.addClass(elsData.vocabularyColor);
+      }
+      // Setting of confirmation information
+      this.setConfirmStyle(eles, elsData.confirm);
     }
-    // Setting of confirmation information
-    this.setConfirmStyle(eles, eles.data().confirm);
   }
 
   /**
@@ -425,10 +406,6 @@ export default
    * @param  {Object} zoom get cy.zoom()
    */
   fitByPanZoom(pan, zoom) {
-
-    if( !this.fitCenterPan){
-      return;
-    }
 
     const cy = this.cy;
     cy.zoom(zoom);
@@ -451,7 +428,7 @@ export default
   /**
    * init EdgeHandles
    */
-   initEdgeHandles(){
+  initEdgeHandles(){
     if( this.props.editingVocabulary.selectedFile.id !== 0){
       return;
     }    
@@ -496,8 +473,32 @@ export default
    * Event registration
    */
   setUpListeners() {
-    this.cy.on('dragfreeon', 'node', (event) => {      
-      this.updateVocabularys( true);
+    this.cy.on('dragfreeon', 'node', (event) => {
+      const idSet = new Set();
+      if(event.target.id()){
+        idSet.add(Number(event.target.id()));
+      }
+      this.props.editingVocabulary.selectedIdListGUIStr.forEach((id1)=>{
+        idSet.add(Number(id1));
+      }, this);
+      this.updateVocabularies([...idSet], true);
+    });
+    
+    this.cy.on('select', 'node', (event) => {
+      // add selected list
+      this.props.editingVocabulary.selectedIdListGUIStr.push(event.target.id());
+    });
+    this.cy.on('unselect', 'node', (event) => {
+      // remove from selected list
+      this.props.editingVocabulary.selectedIdListGUIStr = this.props.editingVocabulary.selectedIdListGUIStr.filter((id)=>{return id !== event.target.id()});
+    });
+
+    this.cy.on('tap',  (event) => {
+      if( event.target === this.cy ){
+        this.props.editingVocabulary.currentNodeClear();
+        this.props.editingVocabulary.tmpDataClear();
+        this.props.editingVocabulary.deselectTermList();
+      }
     });
 
     this.cy.on('click', 'node', (event) => {
@@ -507,50 +508,50 @@ export default
         return;
       }
       const target = event.target.data();
-      const find = this.props.editingVocabulary.editingVocabulary.find((node)=>node.term == target.term)
-      console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, find)
+      const findObj = this.props.editingVocabulary.editingVocWithId.get(Number(target.id));
+      console.log('--[ event - data(cy) - data(react) ]-- term:'+target.term+' zoom:'+this.cy.zoom(),event, target, findObj);
 
       // other vocabulary node
-      if(target.term == target.other_voc_syn_uri){ 
+      if(target.external_voc){ 
         return;
       }
 
       let isAddTerm=false;
       const withKey = event.originalEvent.ctrlKey|| event.originalEvent.shiftKey;
-      this.fitCenterPan = false;
       if( !withKey){
-        if( this.props.editingVocabulary.selectedTermList.length > 1){
+        if( this.props.editingVocabulary.selectedIdList.length > 1){
           this.props.editingVocabulary.deselectTermList();
-          isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id, null, true);
+          isAddTerm = this.props.editingVocabulary.setSelectedIdList(target);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id), true);
         }else{
           this.props.editingVocabulary.deselectTermList();
           if(this.props.editingVocabulary.currentNode.id !=  target.id){
-            isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
+            isAddTerm = this.props.editingVocabulary.setSelectedIdList(target);
           }
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }else{
-        isAddTerm = this.props.editingVocabulary.setSelectedTermList(target.term);
-        if(isAddTerm && this.props.editingVocabulary.selectedTermList.length == 1){
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
-        }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length > 0){
-          const firstSelectedTerm = this.props.editingVocabulary.selectedTermList.slice(0,1)[0];
-          this.props.editingVocabulary.setCurrentNodeByTerm(firstSelectedTerm.term, firstSelectedTerm.id, null, true);
-        }else if(!isAddTerm && this.props.editingVocabulary.selectedTermList.length == 0){
-          this.props.editingVocabulary.setCurrentNodeByTerm(target.term, target.id);
+        isAddTerm = this.props.editingVocabulary.setSelectedIdList(target);
+        if(isAddTerm && this.props.editingVocabulary.selectedIdList.length == 1){
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
+        }else if(!isAddTerm && this.props.editingVocabulary.selectedIdList.length > 0){
+          this.props.editingVocabulary.setCurrentNodeById(Number(this.props.editingVocabulary.selectedIdList[0]), true);
+        }else if(!isAddTerm && this.props.editingVocabulary.selectedIdList.length == 0){
+          this.props.editingVocabulary.setCurrentNodeById(Number(target.id));
         }
       }
-      this.fitCenterPan = true;
       this.changeSelectedTermColor(target.id, isAddTerm);
     });
 
     this.cy.on('pan', (event) => {
       const fileId = this.props.editingVocabulary.selectedFile.id;
-      if(undefined == this.situationArr[ fileId]){
+      if(undefined === this.situationArr[ fileId]){
         this.situationArr[ fileId] = {
           pan: undefined,
           zoom: undefined,
+          iniPan: undefined,
+          iniZoom: undefined,
+          bgImage: undefined,
         }
       }
       const pan = this.cy.pan();
@@ -564,16 +565,30 @@ export default
 
     this.cy.on('zoom', (event) => {
       const fileId = this.props.editingVocabulary.selectedFile.id;
-      if(undefined == this.situationArr[ fileId]){
+      if(undefined === this.situationArr[ fileId]){
         this.situationArr[ fileId] = {
           pan:undefined, 
-          zoom:undefined
+          zoom:undefined,
+          iniPan: undefined,
+          iniZoom: undefined,
+          bgImage: undefined,
         }
       }
       const zoom = Number( this.cy.zoom());
       this.situationArr[ fileId].zoom = zoom;
       this.onPanZoom();
       event.preventDefault();
+    });
+
+    this.cy.on('layoutstop', (event) => {
+      this.captureZoomImage();      // zoom scale background image capture
+    }); 
+    this.cy.on('resize', (event) => {
+      //this.captureZoomImage( true); // zoom scale background image capture
+      this.captureZoomImage( ); // zoom scale background image capture
+    }); 
+    this.cy.on('viewport', (event) => { 
+      this.moveZoomImageFrame( this.situationArr[ this.props.editingVocabulary.selectedFile.id]);
     });
   }
 
@@ -588,7 +603,7 @@ export default
       addedEdge.remove();
 
       // other vocabulary node
-      if(targetNode.data().term == targetNode.data().other_voc_syn_uri){ 
+      if(targetNode.data().external_voc){ 
         event.stopPropagation()
         return false;
       }
@@ -598,13 +613,8 @@ export default
 
       if( this.hitHandle == 1){
         let _disableButton = this.state.handleDisableButton;
-        if( sourceNode.data().language != targetNode.data().language){
-          this.message = '「'+sourceNode.data().term +'」と「'+targetNode.data().term +'」は、言語が異なるので上位語に設定できません。\n上位語には同じ言語の用語を設定してください。';
-          _disableButton = 1;// OK only buttons
-        }else{
-          this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します。\nよろしいですか？';
-          _disableButton = 0;// OK & CANCEL buttons
-        }
+        this.message = '「'+sourceNode.data().term +'」　の上位語に 「'+targetNode.data().term +'」 を設定します。\nよろしいですか？';
+        _disableButton = 0;// OK & CANCEL buttons
         this.setState({handleDisableButton: _disableButton,dlgBroaderOpen: true});   
       } else{        
         this.setState({dlgSynonymOpen: true});   
@@ -656,7 +666,7 @@ export default
             ghostedges.style({
               'width': val,
               'line-color': 'blue',
-              'line-style': 'dotted',
+              'line-style': 'solid',
               'target-arrow-shape': 'none',
               'target-arrow-color': '',
               'curve-style': 'straight',
@@ -672,7 +682,7 @@ export default
 
       // other vocabulary node
       const dt = sourceNode.data();
-      if(dt.term == dt.other_voc_syn_uri){ 
+      if(dt.external_voc){ 
         this.hideHandlePostion();
         return;
       }
@@ -680,7 +690,7 @@ export default
       const cy = this.cy;
       
       let handles = cy.elements('.eh-handle');
-      const val = 10.0/cy.zoom();
+      const val = 15.0/cy.zoom();
         
       if( handles.length > 0){
         handles.style({
@@ -729,7 +739,7 @@ export default
   /**
    * Check if edge handles display 
    */
-   dispCheckEdgeHandle(){
+  dispCheckEdgeHandle(){
 
     if( this.props.editingVocabulary.selectedFile.id === 0){  
             
@@ -760,16 +770,15 @@ export default
   setBroaderTerm(){
 
     const source = this.source;
-    
-    const nextBroaderTerm = this.target.term;
 
     this.props.editingVocabulary.deselectTermList();
-    this.props.editingVocabulary.setSelectedTermList(source.term);
-    this.props.editingVocabulary.setCurrentNodeByTerm(source.term, source.id, null, true);
+    this.props.editingVocabulary.setSelectedIdList(source);
+    this.props.editingVocabulary.setCurrentNodeById(Number(source.id), true);
+    const targetObj = this.props.editingVocabulary.editingVocWithId.get(Number(this.target.id));
 
-    this.props.editingVocabulary.updataBroaderTerm( [ nextBroaderTerm ] );
+    this.props.editingVocabulary.updateBroaderTerm( [ targetObj.term ], targetObj.language, targetObj.uri);
 
-    const ret = this.props.editingVocabulary.updateVocabulary();
+    const ret = this.props.editingVocabulary.updateVocabulary(null, 111);
     if (ret !== null) {
       this.setState({dlgErrOpen: true, reason : ret});  
     }
@@ -812,39 +821,6 @@ export default
     const cy = this.cy;
     cy.fit(cy.nodes,50 );
   }
-
-  /**
-   * Flag to move to the middle 
-   * @param {boolean} flg true: move / false: not move
-   * @return {boolean} Original setting value
-   */
-  centerMoveDisabled(flg){
-    const oldFlg = this.fitCenterPan;
-    this.fitCenterPan = !flg;
-    return !oldFlg;
-  }
-
-
-  /**
-   * File selection event
-   * @param  {object} event - information of event
-   */
-  handleChange(event) {
-    this.props.editingVocabulary.selectFile(event.target.value);
-    if (event.target.value == 0) {
-      this.props.editingVocabulary.setSelected(0, true);
-      this.props.editingVocabulary.setSelected(1, false);
-    } else {
-      this.props.editingVocabulary.setSelected(0, true);
-      this.props.editingVocabulary.setSelected(1, true);
-    }
-
-    this.cy.one('render', (event) => {
-      setTimeout( () => {
-        this.onPanZoom();
-      }, 100);
-    });
-  };
 
   /**
    * Sytle initialization for node
@@ -981,9 +957,10 @@ export default
   
     const saveRoots = await this.getSaveRoot();
 
-    if( !saveRoots || 1 > saveRoots.length)
+    if( !saveRoots || 1 > saveRoots.length){
       return;
-    
+    }
+
     // [ dagre ] layout options
     const defaults={      
       name: "dagre",
@@ -1017,6 +994,14 @@ export default
       }),
     }
 
+    // get all ids
+    const idList = [];//number
+    cy.nodes().forEach((node1)=>{
+      if(undefined !== node1.data().term){ // there may exist several unknown nodes
+        idList.push(Number(node1.id()));
+      }
+    }, this);
+
     // Extend the minimum length of edge 
     // const zoom = cy.zoom();
     // if( zoom > 0.007){
@@ -1026,24 +1011,25 @@ export default
     
     await cy.elements().layout( defaults).run();
     
-    await this.updateVocabularys();
+    await this.updateVocabularies(idList);
     
     await cy.nodes().unlock();
+
+    await this.fitToVisualArea();
   }
   
   /**
    * Update coordinate transform
+   * @param {List} idList ids (list of numbers) to be update
+   * @param {bool} isDrag is this operation occur from drag of terms
    */
-  async updateVocabularys( isDrag=false) {
+  async updateVocabularies(idList,  isDrag=false) {
+    const saveCurrentNodeId = await this.props.editingVocabulary.currentNode.id;
     
-    const saveCurrentNodeTerm = await this.props.editingVocabulary.currentNode.term;
-    
-    this.fitCenterPan = false;
-    const ret = await this.props.editingVocabulary.updateVocabularys( this.cy.nodes(), isDrag);
-    this.fitCenterPan = true;
+    const ret = await this.props.editingVocabulary.updateVocabularies( this.cy, idList, isDrag);
 
-    if( saveCurrentNodeTerm && saveCurrentNodeTerm !== this.props.editingVocabulary.currentNode.term){
-      await this.props.editingVocabulary.setCurrentNodeByTerm( saveCurrentNodeTerm);
+    if( saveCurrentNodeId && saveCurrentNodeId !== this.props.editingVocabulary.currentNode.id){
+      await this.props.editingVocabulary.setCurrentNodeById(saveCurrentNodeId);
     }
   }
   
@@ -1052,15 +1038,16 @@ export default
    */
    async deselectionConfirm(){
 
-      const selectedTermList = this.props.editingVocabulary.selectedTermList;
+      const selectedIdList = this.props.editingVocabulary.selectedIdList;
 
-      for (let num in selectedTermList) {
-        const item = selectedTermList[num];
-        await this.changeSelectedTermColor(item.id, false);
+      for (let num in selectedIdList) {
+        const id = selectedIdList[num];
+        await this.changeSelectedTermColor(id, false);
       }
       // currentNode clear
       await this.props.editingVocabulary.deselectTermList();       
-      await this.props.editingVocabulary.setCurrentNodeByTerm('');
+      await this.props.editingVocabulary.currentNodeClear();
+      await this.props.editingVocabulary.tmpDataClear();
   }
   /**
    * When setting a synonym, select a Preferred term and then close the dialog 
@@ -1173,7 +1160,8 @@ export default
    */
   handleEditPopoverClose(saved=false){
 
-    if( !saved && this.props.editingVocabulary.isCurrentNodeChanged ){
+    const ret = this.props.editingVocabulary.getNodesStateChanged;
+    if( !saved && ( ret['ja'] || ret['en'] ) ){
       this.message='編集中のデータを破棄して用語選択を実行します。\n\nよろしいですか？';
       this.setState({ dlgTmpDelOpen: true});
     }else{
@@ -1200,22 +1188,6 @@ export default
 
 
   /**
-   * Confirm Color popover open
-   */
-  handleConfirmColorPopoverOpen(e){
-    // e.stopPropagation();
-    // e.preventDefault();
-    this.setState({anchorElC: this.state.anchorElC ? null : e.currentTarget});
-  }
-
-  /**
-   * Confirm Color popover Close
-   */
-   handleConfirmColorPopoverClose(e){
-    this.setState({anchorElC: null});
-  }
-
-  /**
    * Confirm switch
    * @param  {Boolean} isConfirm - confirm acceptance
    */
@@ -1223,12 +1195,12 @@ export default
     // console.log('[toggleConfirm] change to ' + isConfirm);
     const currentNode = this.props.editingVocabulary.currentNode;
 
-    this.props.editingVocabulary.toggleConfirm(currentNode.term, isConfirm);
+    this.props.editingVocabulary.toggleConfirmById(currentNode.id, isConfirm);
     if (!isConfirm) {
       // In the case of a term without a preferred label, supplement the preferred label column when the term is unfixed.
       if (!currentNode.preferred_label) {
         this.props.editingVocabulary.
-            tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.list].push(currentNode.term);
+            tmpPreferredLabel.list[this.props.editingVocabulary.tmpLanguage.value].push(currentNode.term);
       }
     }
   }
@@ -1241,16 +1213,13 @@ export default
     const editingVocabulary = this.props.editingVocabulary;
 
     const nodeList = editingVocabulary.termListForVocabulary;
-    const edgesList = editingVocabulary.edgesList;
-    const disabledDeselectConfirm = editingVocabulary.selectedTermList.length > 0 ? false : true;
+    const edgesList = editingVocabulary.edgesListId;
+    const disabledDeselectConfirm = editingVocabulary.selectedIdList.length > 0 ? false : true;
     const disabledBorderConfirm = editingVocabulary.selectedFile.id !== 0 ? true : disabledDeselectConfirm;
     const transformTogle = this.state.transformTogle;
     const anchorEl = this.state.anchorEl;
     const open = Boolean(anchorEl);
     const id = open ? "popover" : undefined;
-    const anchorElC = this.state.anchorElC;
-    const openC = Boolean(anchorElC);
-    const idC = openC ? "popover-c" : undefined;
     const anchorElColor = this.state.anchorElColor;
     const openColor = Boolean(anchorElColor);
     const idColor = openColor ? "popover-color" : undefined;
@@ -1267,9 +1236,7 @@ export default
     }
 
     // Firm button disabled condition
-    // You can control the confirm button when the term in the edited vocabulary is selected and there is no change in the synonym, preferred label, URI or broader term.
-    const isCurrentNodeChanged = editingVocabulary.isCurrentNodeChanged;
-    const disabledConfirm = disabledColor || isCurrentNodeChanged ? true:false;
+    const disabledConfirm = disabledColor;
 
     const confirmed = editingVocabulary.currentNode.confirm;
     let isConfirm = false;
@@ -1295,7 +1262,7 @@ export default
         <Grid
           container
           spacing={2}
-          justify={'space-between'}
+          justifyContent={'space-between'}
           className={this.props.classes.visualizationVocabularyHead}
         >
           <Grid item>
@@ -1352,19 +1319,8 @@ export default
                 }}
               >
                 <ColorChartCheckBoxes
+                  editingVocabulary={this.props.editingVocabulary}
                   colorId="color1"
-                  classes={this.props.classes}
-                  currentId={this.props.editingVocabulary.currentNode.id}
-                  color={this.props.editingVocabulary.currentNode.color1}
-                  selectColor={(currentId, colorId, color) =>
-                    this.props.editingVocabulary.updateColor(currentId,
-                        colorId, color)
-                  }
-                  tmpColor={this.props.editingVocabulary.tmpBorderColor}
-                  selectTmpColor={(id, color) =>
-                    this.props.editingVocabulary.selectTmpBorderColor(
-                        id, color)
-                  }
                   disabled={disabledColor}
                   close={()=>this.handleBorderColorPopClose()}
                 />
@@ -1495,6 +1451,19 @@ export default
           isFromEditPanel={false}
           reason={this.state.reason}
         />
+        {/* Scale drawing */}
+        <Box        
+          id="zoomImgWrap"
+          className={this.props.classes.zoomImgWrap}
+          onClick={() =>{
+            this.captureZoomImage(true);
+          }}
+          >
+          <div 
+            id="zoomFrame"
+            className={this.props.classes.zoomFrame}
+          ></div>
+        </Box>
 
         <CytoscapeComponent
           id="relation_term_graph_container"
@@ -1523,9 +1492,7 @@ export default
             },
             {
               selector: '.showText[term]',
-              style: {
-                'width': 'label',
-                // 'height': 'label',
+              style: {            
                 'color': 'black',
                 'text-background-shape': 'rectangle',
                 'text-max-width': '200000px',
@@ -1547,7 +1514,7 @@ export default
             {
               selector: 'edge',
               style: {
-                'width': 3,
+                'width': 5,
                 'curve-style': 'straight',
               },
             },
@@ -1584,7 +1551,7 @@ export default
             {
               selector: '.eh-ghost-edge',
               style: {
-                width: 10,
+                width: 15,
                 'line-color': 'yellow',
                 'line-style': 'solid',
                 'target-arrow-shape': 'vee',

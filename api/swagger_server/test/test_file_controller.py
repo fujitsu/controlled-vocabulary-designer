@@ -36,6 +36,7 @@ class TestFileController(BaseTestCase):
         Upload the file to the server
         """
         data = dict(editing_vocabulary='editing_vocabulary_example',
+                    editing_vocabulary_meta='editing_vocabulary_meta_example',
                     reference_vocabulary1='reference_vocabulary1_example',
                     reference_vocabulary2='reference_vocabulary2_example',
                     reference_vocabulary3='reference_vocabulary3_example')

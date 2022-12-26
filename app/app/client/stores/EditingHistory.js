@@ -1,7 +1,7 @@
 /**
  * EditingHistory.js COPYRIGHT FUJITSU LIMITED 2021
  */
-import {action, observable} from 'mobx';
+import {action, makeObservable, observable} from 'mobx';
 
 import editingVocabularyStore from './EditingVocabulary';
 
@@ -15,6 +15,7 @@ class EditingHistory {
   constructor() {
     this._undoMessage = this.STR_HISTORY_NONE;
     this._redoMessage = this.STR_HISTORY_NONE;
+    makeObservable(this);
   }
 
   // Operation history stack list
@@ -97,12 +98,10 @@ class EditingHistory {
    * @return {string} - vocabulary
    */
   getTermFromEditingVocabulary(id) {
-    const editingVocabulary = editingVocabularyStore.editingVocabulary;
-
     let term = '';
-    const target = editingVocabulary.find( (data) => data.id === id);
-    if (target) {
-      term = target.term;
+    let foundObj = editingVocabularyStore.editingVocWithId.get(id);
+    if(undefined != foundObj){
+      term = foundObj.term;
     }
     return term;
   }
@@ -203,26 +202,20 @@ class EditingHistory {
    * @param  {object} history - information of history
    */
   execChangeColor(type, history) {
-    const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
+    let targetIds;
+    let targetObjs;
     let color;
     if (this.STR_UNDO === type) {
-      color = history.previous;
+      targetIds = [];
+      targetObjs = history.previous;
+      color = null;
     } else { // redo
-      color = history.following;
+      targetIds = history.following.map((item)=>{ return item.id});
+      targetObjs = [];
+      color = history.following[0].color;
     }
 
-    const EditingVocabulary = editingVocabularyStore;
-    // EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
-    switch (history.action) {
-      case 'color1':
-        EditingVocabulary.updateColor(history.targetId, 'color1', color, true);
-        break;
-      case 'color2':
-        EditingVocabulary.updateColor(history.targetId, 'color2', color, true);
-        break;
-      default:
-        break;
-    }
+    editingVocabularyStore.updateColor( targetIds, history.action, color, targetObjs, true);
   }
 
   /**
@@ -245,31 +238,42 @@ class EditingHistory {
         this.getIndexById(history.following, 'id', i.id) != -1);
       upSynList.forEach((data) => {
         const target =
-            EditingVocabulary.editingVocabulary.find((i) => i.id == data.id);
+            EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
-          target.preferred_label = data.preferred_label;
-          target.uri = data.uri;
-          target.broader_term = data.broader_term;
-          target.term_description = data.term_description;
-          updateList.push(target);
+          const dataObj = EditingVocabulary.copyData(target);
+          dataObj.preferred_label = data.preferred_label;
+          dataObj.idofuri = data.idofuri;
+          dataObj.uri = data.uri;
+          dataObj.broader_uri = data.broader_uri;
+          dataObj.broader_term = data.broader_term;
+          dataObj.other_voc_syn_uri = data.other_voc_syn_uri;
+          dataObj.term_description = data.term_description;
+          dataObj.modified_time = data.modified_time;
+          updateList.push(dataObj);
         }
       });
     } else { // redo
       const upSynList = history.following.filter((i) =>
         this.getIndexById(history.previous, 'id', i.id) != -1);
       upSynList.forEach((data) => {
-        const target = EditingVocabulary.editingVocabulary.find((i) =>
-          i.id == data.id);
+        const target = EditingVocabulary.editingVocWithId.get(data.id);
         if (target) {
-          target.preferred_label = data.preferred_label;
-          target.uri = data.uri;
-          target.broader_term = data.broader_term;
-          target.term_description = data.term_description;
-          updateList.push(target);
+          const dataObj = EditingVocabulary.copyData(target);
+          dataObj.preferred_label = data.preferred_label;
+          dataObj.idofuri = data.idofuri;
+          dataObj.uri = data.uri;
+          dataObj.broader_uri = data.broader_uri;
+          dataObj.broader_term = data.broader_term;
+          dataObj.other_voc_syn_uri = data.other_voc_syn_uri;
+          dataObj.term_description = data.term_description;
+          dataObj.modified_time = data.modified_time;
+          updateList.push(dataObj);
         }
       });
     }
-    EditingVocabulary.updateRequest(updateList, currentData, null, oldNode.term);
+    const historyData = null;
+    const doEdgeUpdate = true;
+    EditingVocabulary.updateRequest(updateList, historyData, doEdgeUpdate);
   }
 
   /**
@@ -278,7 +282,7 @@ class EditingHistory {
    * @param  {object} history - information of history
    */
   execConfirmChanged(type, history) {
-    const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
+    // const currentTerm = this.getTermFromEditingVocabulary(history.targetId);
 
     let confirm;
     if (this.STR_UNDO === type) {
@@ -293,9 +297,9 @@ class EditingHistory {
     }
 
     const EditingVocabulary = editingVocabularyStore;
-    EditingVocabulary.setCurrentNodeByTerm(currentTerm, history.targetId);
-
-    EditingVocabulary.toggleConfirm(currentTerm, isConfirm, true);
+    EditingVocabulary.setCurrentNodeById(history.targetId);
+    
+    EditingVocabulary.toggleConfirmById(history.targetId, isConfirm, true);
   }
 
   /**
@@ -316,25 +320,34 @@ class EditingHistory {
   }
 
   execPosition(type, history) {
-    
     const EditingVocabulary = editingVocabularyStore;
-    const target = EditingVocabulary.getTargetFileData(EditingVocabulary.selectedFile.id).find((obj) => {
-      return (obj.id == history.targetId);
-    });
+    const dataWithId = EditingVocabulary.getTargetWithId(EditingVocabulary.selectedFile.id);
+    let currentData = dataWithId.get(history.previous[0].id);
+    if(undefined === currentData){
+      currentData = dataWithId.get(history.following[0].id);
+    }
     
-    if (!target) {
-      console.log('target is not found. id: ' + history.targetId);
-      return;
+    const updateList = [];
+    if (this.STR_UNDO === type) {
+      // undo
+      history.previous.forEach((histData)=>{
+        const targetObj = dataWithId.get(Number(histData.id));
+        const dbData = EditingVocabulary.copyData(targetObj);
+        dbData.position_x = histData.position_x;
+        dbData.position_y = histData.position_y;
+        updateList.push(dbData);
+      }, this);
+    } else { // redo
+      history.following.forEach((histData)=>{
+        const targetObj = dataWithId.get(Number(histData.id));
+        const dbData = EditingVocabulary.copyData(targetObj);
+        dbData.position_x = histData.position_x;
+        dbData.position_y = histData.position_y;
+        updateList.push(dbData);
+      }, this);
     }
 
-    let position;
-    if (this.STR_UNDO === type) {
-      position = history.previous;
-    } else { // redo
-      position = history.following;
-    }
-    target.position_x = position.position_x;
-    target.position_y = position.position_y;
+    EditingVocabulary.updateRequest(updateList);
   }
 
   // Display message function /////////////////////////////////////////////
@@ -447,21 +460,16 @@ class EditingHistory {
    * @return {string} - message
    */
   makeColorMessage(type, history) {
-    let message =
-        '「' +
-        this.getTermFromEditingVocabulary(history.targetId) +
-        '」の情報を変更しました。\n';
 
-    if (history.action === 'color1' || history.action === 'color2') {
-      message += '枠線\n　色：';
-    } else {
+    if (history.action !== 'color1' || history.action !== 'color2') {
       console.log('invalid action has came. action: ' + history.action);
     }
 
+    let message='';
     if (this.STR_UNDO === type) {
-      message += '"' + history.following + '"から"' + history.previous + '"';
+      message = '枠線色の変更を取り消しました。';
     } else { // redo
-      message += '"' + history.previous + '"から"' + history.following + '"';
+      message = '枠線色の変更をやり直しました。';
     }
 
     return message;
@@ -478,13 +486,40 @@ class EditingHistory {
       data.id === history.targetId);
     const followingTarget = history.following.find((data) =>
       data.id === history.targetId);
+      
+    const currentTarget = editingVocabularyStore.editingVocWithId.get(history.targetId);
 
-    const previousLangDiffTarget = history.previous.find((data) =>
+    let previousLangDiffTarget = history.previous.find((data) =>
       data.id === history.targetLangDiffId);
-    const followingLangDiffTarget = history.following.find((data) =>
-      data.id === history.targetLangDiffId);
+    if( previousLangDiffTarget === undefined){
+      const findElms = history.previous.filter((data) =>
+           data.uri === previousTarget.uri
+        &&  data.uri !== previousTarget.broader_uri);
+      if( findElms !== undefined){
+        const findElm = findElms.find((elm) =>{
+          const target = editingVocabularyStore.editingVocWithId.get(elm.id);
+          return target.language!==currentTarget.language;
+        });
+        previousLangDiffTarget = findElm;
+      }
+    }
 
-    if (!previousTarget && followingTarget) {
+    let followingLangDiffTarget = history.following.find((data) =>
+      data.id === history.targetLangDiffId);
+    if( followingLangDiffTarget === undefined){
+      const findElms = history.following.filter((data) =>
+            data.uri === followingTarget.uri
+        &&  data.uri !== followingTarget.broader_uri);
+      if( findElms !== undefined){
+        const findElm = findElms.find((elm) =>{
+          const target = editingVocabularyStore.editingVocWithId.get(elm.id);
+          return target.language!==currentTarget.language;
+        });
+        followingLangDiffTarget = findElm;
+      }
+    }
+
+    if (previousTarget === undefined && followingTarget !== undefined) {
       // If the change deletes the edited vocabulary
       if (this.STR_UNDO === type) {
         return '用語 : ' + followingTarget.term + 'が削除されました。';
@@ -504,18 +539,18 @@ class EditingHistory {
     let message = '「' + previousTarget.term + '」の情報を変更しました。';
 
     message +=
-        this.makeSynonymMessage(type, history.previous, history.following);
+        this.makeSynonymMessage(type, history);
     message +=
         this.makePreferredLabelMessage(
             type,
             previousTarget.preferred_label,
             followingTarget.preferred_label,
         );
-    if( previousLangDiffTarget && followingLangDiffTarget){
+    if( previousLangDiffTarget || followingLangDiffTarget){
       message += this.makePreferredLabelMessage(
             type,
-            previousLangDiffTarget.preferred_label,
-            followingLangDiffTarget.preferred_label,
+            previousLangDiffTarget===undefined?'':previousLangDiffTarget.preferred_label,
+            followingLangDiffTarget===undefined?'':followingLangDiffTarget.preferred_label,
         );
     }
     message +=
@@ -526,22 +561,22 @@ class EditingHistory {
             previousTarget.broader_term,
             followingTarget.broader_term,
         );
-    if( previousLangDiffTarget && followingLangDiffTarget){
+    if( previousLangDiffTarget || followingLangDiffTarget){
       message += this.makeBroaderTermMessage(
             type,
-            previousLangDiffTarget.broader_term,
-            followingLangDiffTarget.broader_term,
+            previousLangDiffTarget===undefined?'':previousLangDiffTarget.broader_term,
+            followingLangDiffTarget===undefined?'':followingLangDiffTarget.broader_term,
         );
     }
     message += this.makeTermDescriptionMessage(
           type, 
           previousTarget.term_description, 
           followingTarget.term_description);
-    if( previousLangDiffTarget && followingLangDiffTarget){
+    if( previousLangDiffTarget || followingLangDiffTarget){
       message += this.makeTermDescriptionMessage(
             type, 
-            previousLangDiffTarget.term_description, 
-            followingLangDiffTarget.term_description);
+            previousLangDiffTarget===undefined?'':previousLangDiffTarget.term_description, 
+            followingLangDiffTarget===undefined?'':followingLangDiffTarget.term_description);
     }
 
     return message;
@@ -554,9 +589,8 @@ class EditingHistory {
    * @return {string} - message
    */
   makeConfirmChangedMessage(type, history) {
-    const editingVocabulary = editingVocabularyStore.editingVocabulary;
-    const target =
-      editingVocabulary.find( (data) => data.id === history.targetId);
+    const target = editingVocabularyStore.editingVocWithId.get(history.targetId);
+      
     if (!target) {
       console.log('target is not found. id: ' + history.targetId);
       return;
@@ -646,93 +680,59 @@ class EditingHistory {
   /**
    * Create synonym undo/redo message
    * @param  {string} type 'undo' or 'redo' string.
-   * @param  {array} preSynList previous - list of synonyms
-   * @param  {array} flwSynList following - list of synoyms
+   * @param  {object} history  information of history
    * @return {string}  - message
    */
-  makeSynonymMessage(type, preSynList, flwSynList) {
-    const currentPreData = preSynList[0];
-    const currentFlwData = flwSynList[0];
+  makeSynonymMessage(type, history) {
+
+    const preSynList = history.previous;
+    const flwSynList = history.following;    
+    const currentPreData = preSynList.find((i) => i.id === history.targetId);
+    const currentFlwData = flwSynList.find((i) => i.id === history.targetId);
 
     // Remove nonsynonymous terms from edited terms
-    let previous = preSynList.filter((i) => i.term !== currentPreData.term);
-    if (currentPreData.broader_term) {
+    let previous = preSynList.filter((i) => i.uri === currentPreData.uri && i.id !== currentPreData.id);
+    if (currentPreData.broader_uri) {
       previous = previous.filter((i) =>
-        i.term !== currentPreData.broader_term);
-      previous = previous.filter((i) =>
-        i.preferred_label !== currentPreData.broader_term);
-    }
-    if (currentPreData.preferred_label) {
-      previous = previous.filter((i) =>
-        i.preferred_label == currentPreData.preferred_label);
+        i.uri !== currentPreData.broader_uri);
     }
 
     // Remove nonsynonymous terms from edited terms
-    let following = flwSynList.filter((i) => i.term !== currentFlwData.term);
-    if (currentFlwData.broader_term) {
+    let following = flwSynList.filter((i) =>i.uri === currentFlwData.uri && i.id !== currentFlwData.id);
+    if (currentFlwData.broader_uri) {
       following = following.filter((i) =>
-        i.term !== currentFlwData.broader_term);
-      following = following.filter((i) =>
-        i.preferred_label !== currentFlwData.broader_term);
-    }
-    if (currentFlwData.preferred_label) {
-      following = following.filter((i) =>
-        i.preferred_label == currentFlwData.preferred_label);
+        i.uri !== currentFlwData.broader_uri);
     }
 
     const addSynList = [];
     const delSynList = [];
     if (this.STR_UNDO === type) {
       previous.forEach((pre) => {
-        const find = following.find((fllw) => fllw.term == pre.term);
-        if (find) {
-          if (find.preferred_label != currentFlwData.preferred_label) {
-            addSynList.push(pre);
-          }
-        } else {
+        const find = following.find((fllw) => fllw.id == pre.id);
+        if (find === undefined) {
           addSynList.push(pre);
         }
       });
-
       following.forEach((fllw) => {
-        const find = previous.find((pre) => pre.term == fllw.term);
-        if (find) {
-          if (find.preferred_label != currentPreData.preferred_label) {
-            delSynList.push(fllw);
-          }
-        } else {
+        const find = previous.find((pre) => pre.id == fllw.id);
+        if (find === undefined) {
           delSynList.push(fllw);
         }
       });
     } else { // redo
       following.forEach((fllw) => {
-        const find = previous.find((pre) => pre.term == fllw.term);
-        if (find) {
-          if (find.preferred_label != currentPreData.preferred_label) {
-            addSynList.push(fllw);
-    }
-        } else {
+        const find = previous.find((pre) => pre.id == fllw.id);
+        if (find === undefined) {
           addSynList.push(fllw);
         }
       });
       previous.forEach((pre) => {
-        const find = following.find((fllw) => fllw.term == pre.term);
-        if (find) {
-          if (find.preferred_label != currentFlwData.preferred_label) {
-            delSynList.push(pre);
-          }
-        } else {
+        const find = following.find((fllw) => fllw.id == pre.id);
+        if (find === undefined) {
           delSynList.push(pre);
         }
       });
     }
-
-    // console.log(
-    //     '[makeSynonymMessage] addSynList :' + JSON.stringify(addSynList),
-    // );
-    // console.log(
-    //     '[makeSynonymMessage] delSynList :' + JSON.stringify(delSynList),
-    // );
 
 
     let message = '';
@@ -941,8 +941,18 @@ class EditingHistory {
   history = {
     action : "color1" or "color2",
     targetId : 000,
-    previous : "black",
-    following : "brown",
+    previous : [
+      {
+        id : 0, // number
+        color: "black",
+      }, ...
+    ],
+    following : [
+      {
+        id : 0, // number
+        color: "brown",
+      }, ...
+    ],
   };
 
   // case2 : Sample synonyms, preferred labels, URIs, and broader terms change history data for vocabulary tabs
@@ -951,11 +961,16 @@ class EditingHistory {
     targetId : 0,
     previous : [
       {
-        id : 0,
+        id : 0, // number
         term : "",
         preferred_label : "",
+        idofuri: '',
         uri : "",
+        broader_uri : "",
         broader_term : "",
+        other_voc_syn_uri : '';
+        term_description : '';
+        modified_time : '';
       },
     ],
     following : [
@@ -963,8 +978,13 @@ class EditingHistory {
         id : 0,
         term : "",
         preferred_label : "",
+        idofuri: '',
         uri : "",
+        broader_uri : "",
         broader_term : "",
+        other_voc_syn_uri : '';
+        term_description : '';
+        modified_time : '';
       },
     ],
   };
@@ -991,6 +1011,24 @@ class EditingHistory {
     targetId : 000,
     previous : { position_x:0.001, position_y: 0.001 },
     following :{ position_x:0.001, position_y: 0.001 },
+  };
+  history = {
+    action : "position",
+    targetId : 000,
+    previous : [
+      {
+        id : 0, // number
+        position_x:0.001,
+        position_y: 0.111
+      }, ...
+    ],
+    following : [
+      {
+        id : 0, // number
+        position_x:0.002,
+        position_y: 0.222
+      }, ...
+    ],
   };
   ///////////////////////////////////////////////////////////////////////
  */

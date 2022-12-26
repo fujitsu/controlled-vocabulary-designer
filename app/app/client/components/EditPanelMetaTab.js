@@ -40,6 +40,7 @@ export default
    */
   constructor(props) {
     super(props);
+    this.rootElm = undefined;
     this.state = {
       open: false,
       snackOpen: false, 
@@ -60,7 +61,7 @@ export default
   /**
    * Key event registration
    */
-  componentDidMount() { 
+  componentDidMount() {
     this.props.editingVocabularyMeta.getEditingVocabularyMetaDataFromDB();
     if( undefined != this.props.editingVocabularyMeta.editingVocabularyMeta ){          
         this.setState({
@@ -202,7 +203,7 @@ export default
     const metaAuthor = this.state.metaAuthor ? this.state.metaAuthor : '';
 
     return (
-      <div>
+      <div id='vocabulary_meta_panel'>
         <Grid container style={{margin: '0.25rem', marginTop: '0.25rem'}}>
           <Box p={1} width="430px" height='100%' padding='20px' style={{ overflowX: 'hidden', overflowY: 'auto'}}>
             <Grid container spacing={2}>
@@ -320,8 +321,8 @@ export default
               <TextFieldMultiLine
                 classes={this.props.classes}
                 editingVocabulary={this.props.editingVocabulary}
-                editingVocabularyMeta={this.props.editingVocabularyMeta} 
                 disabled={disabledTextField}
+                backcolor={undefined}
                 value={metaDescription}
                 change={(value) => this.changeMetaDescription(value) }
               />
