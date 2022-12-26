@@ -304,11 +304,11 @@ export default
     sortArr.sort((a, b)=> { return a.distance - b.distance; });
     if( sortArr.length > dispNodeMax ) sortArr.splice( dispNodeMax);
 
-    // 100 visibleNodesInView
-    let nodesInViewLimit100 = [];
+    // 300 visibleNodesInView
+    let nodesInViewLimit300 = [];
     sortArr.forEach((data)=>{
-      nodesInViewLimit100 =
-        [...nodesInViewLimit100, nodesInView[data.index]];
+      nodesInViewLimit300 =
+        [...nodesInViewLimit300, nodesInView[data.index]];
     })
 
     this.initStyleByPanZoom();
@@ -332,7 +332,7 @@ export default
       'border-width': 2.0/zoom,
       'padding': 10.0/zoom,
     };
-    nodesInViewLimit100.forEach((node, index)=>{
+    nodesInViewLimit300.forEach((node, index)=>{
       const eles = cy.$id(node.data().id);
       
       // Adjust term size ↓ but Causes of color settings not working 
