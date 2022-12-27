@@ -5,6 +5,8 @@ CVDは、統制語彙の作成を視覚的なインターフェースでサポ�
 作成された統制語彙は、RDFファイルとして出力・保存できます。<br>
 CVDのヘルプページは[こちら](https://fujitsu.github.io/controlled-vocabulary-designer/)。
 
+![screenshot](docs/imagess/screenshot.png)
+
 # システム要件
 - docker : バージョン19.03以上
 - docker-compose : バージョン1.23以上
