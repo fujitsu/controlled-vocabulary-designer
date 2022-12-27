@@ -169,13 +169,13 @@ def reference_csv(csv_file):
     output_all = []
     for index, row in reference_df.iterrows():
         if row["言語"] == "ja" and row["上位語のURI"] != "":
-            output_all.append([row["用語名"], row["代表語"], row["言語"], row["代表語のURI"], dic_uri_preflabel_ja[row["上位語のURI"]], row["上位語のURI"], row["他語彙体系の同義語のURI"], row["用語の説明"]])
+            output_all.append([row["用語名"], row["代表語"], row["言語"], row["代表語のURI"], dic_uri_preflabel_ja[row["上位語のURI"]], row["上位語のURI"], row["他語彙体系の同義語のURI"], row["用語の説明"], row["作成日"], row["最終更新日"]])
         elif row["言語"] == "ja" and row["上位語のURI"] == "":
-            output_all.append([row["用語名"], row["代表語"], row["言語"], row["代表語のURI"], "", row["上位語のURI"], row["他語彙体系の同義語のURI"], row["用語の説明"]])
+            output_all.append([row["用語名"], row["代表語"], row["言語"], row["代表語のURI"], "", row["上位語のURI"], row["他語彙体系の同義語のURI"], row["用語の説明"], row["作成日"], row["最終更新日"]])
         elif row["言語"] == "en" and row["上位語のURI"] != "":
-            output_all.append([row["用語名"], row["代表語"], row["言語"], row["代表語のURI"], dic_uri_preflabel_en[row["上位語のURI"]], row["上位語のURI"], row["他語彙体系の同義語のURI"], row["用語の説明"]])
+            output_all.append([row["用語名"], row["代表語"], row["言語"], row["代表語のURI"], dic_uri_preflabel_en[row["上位語のURI"]], row["上位語のURI"], row["他語彙体系の同義語のURI"], row["用語の説明"], row["作成日"], row["最終更新日"]])
         elif row["言語"] == "en" and row["上位語のURI"] == "":
-            output_all.append([row["用語名"], row["代表語"], row["言語"], row["代表語のURI"], "", row["上位語のURI"], row["他語彙体系の同義語のURI"], row["用語の説明"]])
+            output_all.append([row["用語名"], row["代表語"], row["言語"], row["代表語のURI"], "", row["上位語のURI"], row["他語彙体系の同義語のURI"], row["用語の説明"], row["作成日"], row["最終更新日"]])
 
     return output_all
 
