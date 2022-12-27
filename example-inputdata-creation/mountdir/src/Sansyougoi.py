@@ -39,7 +39,7 @@ def sansyougoi(relations_file, vec_file, input_file):
 
     # ######### File output (all wordnet terms) ##########
     # csv
-    header = ["用語名", "代表語", "言語", "代表語のURI", "上位語", "上位語のURI", "他語彙体系の同義語のURI", "用語の説明", "x座標値", "y座標値"]
+    header = ["用語名", "代表語", "言語", "代表語のURI", "上位語", "上位語のURI", "他語彙体系の同義語のURI", "用語の説明", "作成日", "最終更新日", "x座標値", "y座標値"]
     df1 = pd.DataFrame(output_all, columns=header)
     df1.drop(columns=['上位語'], inplace=True)
 
@@ -75,6 +75,22 @@ def sansyougoi(relations_file, vec_file, input_file):
            output_all[idx_output][1] in domain_words or\
            output_all[idx_output][4] in domain_words:
             output_target.append(output_all[idx_output])
+
+    # Extract only lines that the preferred label is included in the term name
+    delete_idx = []
+    for idx, term in enumerate([term[1] for term in output_target]):
+        if term in (set([term[0] for term in output_target]) ^ set([term[1] for term in output_target])):
+            delete_idx.append(idx)
+
+    delete_idx = list(set(delete_idx))
+    for idx in sorted(delete_idx, reverse=True):
+        output_target.pop(idx)
+
+    # If the broader term is not "" and is not included in the term name, replace it with ""
+    for idx, term in enumerate([term[4] for term in output_target]):
+        if term in (set([term[0] for term in output_target]) ^ set([term[4] for term in output_target])) and term != "":
+            output_target[idx][4] = ""
+            output_target[idx][5] = ""
 
     # csv
     df2 = pd.DataFrame(output_target, columns=header)
