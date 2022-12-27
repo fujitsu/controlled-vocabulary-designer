@@ -11,6 +11,8 @@ import json
 import datetime
 import inspect
 import pandas as pd
+import unicodedata
+import string
 
 from nltk.corpus import wordnet as wn
 from rdflib import Graph
@@ -74,12 +76,39 @@ def wordnet(voc_uri):
             if syn_hyper_pref[key] == "":
                 output_all.append([syn_word_no_dup[key][idx_syn_word_no_dup],
                                   syn_word_no_dup[key][0], lang, voc_uri + syn_word_no_dup[key][0],
-                                  syn_hyper_pref[key], "", "", ""])
+                                  syn_hyper_pref[key], "", "", "", "", ""])
             elif syn_hyper_pref[key] != "":
                 output_all.append([syn_word_no_dup[key][idx_syn_word_no_dup],
                                   syn_word_no_dup[key][0], lang, voc_uri + syn_word_no_dup[key][0],
-                                  syn_hyper_pref[key], voc_uri + syn_hyper_pref[key], "", ""])
+                                  syn_hyper_pref[key], voc_uri + syn_hyper_pref[key], "", "", "", ""])
     print(datetime.datetime.now(), "---syn_word_no_dup loop End", location())
+
+    # delete lines that start with a number or symbol
+    delete_idx = []
+    for col_idx in [0, 1]:
+        for idx, term in enumerate([term[col_idx] for term in output_all]):
+            if unicodedata.normalize("NFKC", term[0]) in string.punctuation or unicodedata.normalize("NFKC", term[0]) in '1234567890':
+                delete_idx.append(idx)
+
+    delete_idx = list(set(delete_idx))
+    for idx in sorted(delete_idx, reverse=True):
+        output_all.pop(idx)
+
+    # extract only lines that the preferred label is included in the term name
+    delete_idx = []
+    for idx, term in enumerate([term[1] for term in output_all]):
+        if term in (set([term[0] for term in output_all]) ^ set([term[1] for term in output_all])):
+            delete_idx.append(idx)
+
+    delete_idx = list(set(delete_idx))
+    for idx in sorted(delete_idx, reverse=True):
+        output_all.pop(idx)
+
+    # if the broader term is not "" and is not included in the term name, replace it with ""
+    for idx, term in enumerate([term[4] for term in output_all]):
+        if term in (set([term[0] for term in output_all]) ^ set([term[4] for term in output_all])) and term != "":
+            output_all[idx][4] = ""
+            output_all[idx][5] = ""
 
     return output_all
 
@@ -111,6 +140,12 @@ def reference_csv(csv_file):
 
     if("用語の説明" not in reference_df.columns):
         check_list.append("「用語の説明」列")
+
+    if("作成日" not in reference_df.columns):
+        check_list.append("「作成日」列")
+
+    if("最終更新日" not in reference_df.columns):
+        check_list.append("「最終更新日」列")
 
     if check_list != []:
         print("reference.csvに", end="")
@@ -240,6 +275,14 @@ def reference_ttl(rdf_file):
                 description_ja = str(obj)
             if lang == "en":
                 description_en = str(obj)
+
+        # dct:created
+        for sub, pred, obj in g.triples((u, DCTERMS.created, None)):
+            created = str(obj)
+        
+        # dct:modified
+        for sub, pred, obj in g.triples((u, DCTERMS.modified, None)):
+            modified = str(obj)
         
         # skos:prefLabel + skos:altLabel
         term_ja = altlabel_ja
@@ -248,10 +291,10 @@ def reference_ttl(rdf_file):
         term_en.append(preflabel_en)
         
         for idx in range(0, len_concept_ja_row):
-            sansyogoi_data.append([term_ja[idx], preflabel_ja, "ja", str(u), broader_uri_ja, broader_uri, exactMatch, description_ja])
+            sansyogoi_data.append([term_ja[idx], preflabel_ja, "ja", str(u), broader_uri_ja, broader_uri, exactMatch, description_ja, created, modified])
         
         for idx in range(0, len_concept_en_row):
-            sansyogoi_data.append([term_en[idx], preflabel_en, "en", str(u), broader_uri_en, broader_uri, exactMatch, description_en])
+            sansyogoi_data.append([term_en[idx], preflabel_en, "en", str(u), broader_uri_en, broader_uri, exactMatch, description_en, created, modified])
         
     return sansyogoi_data
 
