@@ -1144,21 +1144,6 @@ def _download_file_ev_serialize(pl_simple, p_format):
     # delete columns id hidden
     df_org.drop(columns=['id', 'hidden', 'external_voc'], inplace=True)
 
-    # make dictionary {preferred_label: uri}
-    dic_preflabel_uri = dict(zip(df_org['preferred_label'], df_org['uri']))
-    if '' in dic_preflabel_uri:
-        dic_preflabel_uri[''] = ''
-
-    # if broader_term is label, convert label into uri
-    col_broader_uri = []
-    for broader_term in list(df_org['broader_term']):
-        if broader_term in list(df_org['uri']):
-            col_broader_uri.append(broader_term)
-        elif broader_term in list(df_org['preferred_label']):
-            col_broader_uri.append(dic_preflabel_uri[broader_term])
-        else:
-            col_broader_uri.append(np.nan)
-    df_org.loc[:, 'broader_term'] = col_broader_uri
     
     # header change
     df_org = df_org.rename(columns={'term': '用語名',
