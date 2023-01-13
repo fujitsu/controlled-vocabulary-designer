@@ -50,7 +50,6 @@ def wordnet(voc_uri):
     # create dict {key: value} = {synset: headword(no duplicates)}
     # Because the same headword exists in more than one synset, remove the headword from the synset if the previous headword is included in the synset to eliminate duplicates
     # The reason for dedupe is that in CVD, if the same term exists in more than one synonym group, it will result in an error when reading the reference vocabulary file.
-    import itertools
     dup_check = {}
     word_list = []
     word_list = list(set(itertools.chain.from_iterable(syn_word.values())))
