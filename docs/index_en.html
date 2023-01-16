@@ -32,7 +32,7 @@
       <p><a href="index.html">日本語</a></p>
     </div>
   </div>
-  <h1>Controlled Vocabulary Creation Support Tool CVD</h1>
+  <h1 id ="h1en">Controlled Vocabulary Creation Support Tool CVD</h1>
   <div id="TopMessage">In order to integrate data across different organizations or fields, terms and vocabularies must be used consistently to describe the data.
     Such data unification normally requires not only special knowledge in data processing, but also expertise in the target field as well as time and effort.
     Our Controlled Vocabulary Designer (CVD) is a controlled vocabulary creation support tool
@@ -90,53 +90,62 @@
       <div id="Contents">
         
         <input type="reset" id="OverlaySWoff" class="toggle">
-        <label class="Label close" for="OverlaySWoff">閉じる</label>
+        <label class="Label close" for="OverlaySWoff">Close</label>
         
         <input id="block-03" type="radio" class="toggle button" name="Help" >
-        <label class="Label" for="block-03">CVDとは</label>
+        <label class="Label" for="block-03">About CVD</label>
         
         <input id="block-02" type="radio" class="toggle button" name="Help" >
-        <label class="Label" for="block-02">統制語彙とは</label>
+        <label class="Label" for="block-02">Controlled vocabulary</label>
 
         <input id="block-01" type="radio" class="toggle button" name="Help" >
-        <label class="Label block01" for="block-01">統制語彙の編集とは</label>
+        <label class="Label block01" for="block-01">Problem</label>
 
         <div id="Section01" class="section">
-          <h2>統制語彙の編集とは</h2>
-          <p>モノの名前だったり事象だったり、同一の事柄に対して、いろいろな呼び方（言葉）が存在するときがあります。これは表現が豊かになる反面、なにかと不便です。そこで、これら同じ事柄を指す言葉の関係性を、誰にでもわかりやすく整理しようというのが<em>統制語彙の編集</em>です。</p>
+          <h2>Problems with multiple terms</h2>
+          <p>There are times when there are various names (terms) for the same thing,
+             such as the name of an object or an event. 
+            While this is rich in expression, it is somewhat inconvenient. 
+            Therefore, creating <em>controlled vocabulary</em> is an attempt to organize the relationships between these terms
+             that refer to the same thing in an easy-to-understand manner for everyone.
+          </p>
           <div class="Img">
             <figure><img src="images/illst_1.png"></figure>
           </div>
         </div>
 
         <div id="Section02" class="section">
-          <h2>統制語彙とは</h2>
-          <p>それぞれの言葉は、ほかの言葉とさまざまな関係を持ちます。</p>
+          <h2>Controlled vocabulary</h2>
+          <p>Each term has different relationships with other terms.</p>
           <ul class="Emp">
-            <li>同じ意味を持つ言葉<em class="red">➡同義語</em></li>
-            <li>同じ意味を持つ言葉の中で代表となる言葉<em class="red">➡代表語</em></li>
-            <li>言葉を包括している言葉<em class="red">➡上位語</em></li>
+            <li>Terms with the same meaning<br>
+              <em class="red">→ Synonym</em></li>
+            <li>A representative word among terms with the same meaning<br>
+              <em class="red">→ Representative word</em></li>
+            <li>Term whose meaning contains other terms' meaning<br>
+              <em class="red">→ Hypernym</em></li>
           </ul>
-          <p id="Point"><em>このような関係性を持つ用語の集まりを<br><em>統制語彙</em>といいます</em></p>
+          <p id="Point"><em>A collection of terms with such relationships is called a <em>controlled vocabulary</em>.</em></p>
           <div class="Img">
             <figure><img src="images/illst_2.png"></figure>
           </div>
         </div>
 
         <div id="Section03" class="section">
-          <h2>統制語彙作成支援ツール CVDとは</h2>
-          <p>統制語彙作成では、以下のような様々な用語の情報を編集する必要があります。</p>
+          <h2>About Controlled Vocabulary Designer</h2>
+          <p>In creating a controlled vocabulary, it is necessary to edit the information of various terms such as:</p>
           <ul class="Emp clearfix">
-            <li>同義語</li>
-            <li>代表語</li>
-            <li>代表語のURI</li>
-            <li>上位語</li>
+            <li>Synonym</li>
+            <li>Representative word</li>
+            <li>URI of Representative word</li>
+            <li>Hypernym</li>
           </ul>
-          <p>このような多くの関係性や情報を、それぞれの言葉・用語ごとに整理するのは大変な作業です。そこで、これらの作業を支援するために開発されたのが、<em>CVD（Controlled Vocabulary Designer）</em>です。</p>
+          <p>It is a daunting task to organize such a large number of relationships and information by each word and term.
+            <em>CVD (Controlled Vocabulary Designer)</em> was developed to support these tasks.</p>
           <div class="Img">
             <div class="BalloonRight">
-              <p>関係性を可視化して直感的な操作が可能</p>
-              <p>AIを活用することで、作業を効率化</p>
+              <p>Intuitive operation is possible by visualizing relationships</p>
+              <p>Efficient work by utilizing AI</p>
             </div>
             <figure><img src="images/illst_3.png"></figure>
           </div>
@@ -151,16 +160,16 @@
     <h2>Vocabulary Creation Flow</h2>
     <p>(Based on achievements in the agricultural sector (WAGRI) by Professor Takeda, NII)</p>
     <dl id="flow1">
-      <dt>Document collection & extraction of candidate terms</dt>
+      <dt>Document collection <br>& extraction of <br>candidate terms</dt>
       <dd>approx. 1.5 months</dd>
     </dl>
     <dl id="flow2">
-      <dt>Definition of synonymous relationships and is-a relationships</dt>
+      <dt>Definition of  <br>synonymous/is-a  <br>relationships</dt>
       <dd>approx. 1.5 months</dd>
-      <dd id="flowArrow">Creation of a controlled vocabulary</dd>
+      <dd id="flowArrow_en"> Creation of <br>a controlled vocabulary</dd>
     </dl>
     <dl id="flow3">
-      <dt>Structuration (e.g. part-of, attribute-of, predicate logic)</dt>
+      <dt>Structuration <br>(e.g. part-of, attribute-of, <br>predicate logic)</dt>
       <dd>approx. 3 months</dd>
     </dl>
   </div>
