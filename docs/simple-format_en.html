@@ -78,27 +78,25 @@
 
       <div>
         <h2 id="Title3">About “SKOS-SC Term List”</h2>
-
-        <ul id="Anchor" class="clearfix">
-          <li><a href="#Chapter_3">Terms (用語名)</a></li>
-          <li><a href="#Chapter_4">Representative word (代表語)</a></li>
-          <li><a href="#Chapter_5">Language (言語)</a></li>
-          <li><a href="#Chapter_6">URI of representative word (代表語のURI)</a></li>
-          <li><a href="#Chapter_7">URI of hypernym (上位語のURI)</a></li>
-          <li><a href="#Chapter_8">URI of synonym in other vocabulary systems (他語彙体系の同義語のURI)</a></li>
-          <li><a href="#Chapter_9">Term description (用語の説明)</a></li>
-          <li><img src="images/simple_format2-2.png"></li>
+        SKOS-SC Term List have the following columns: 
+        <ul>
+          <li><a href="#Chapter_3">Terms (用語名) Column</a></li>
+          <li><a href="#Chapter_4">Representative word (代表語) Column</a></li>
+          <li><a href="#Chapter_5">Language (言語) Column</a></li>
+          <li><a href="#Chapter_6">URI of representative word (代表語のURI) Column</a></li>
+          <li><a href="#Chapter_7">URI of hypernym (上位語のURI) Column</a></li>
+          <li><a href="#Chapter_8">URI of synonym in other vocabulary systems (他語彙体系の同義語のURI) Column</a></li>
+          <li><a href="#Chapter_9">Term description (用語の説明) Column</a></li>
         </ul>
+      
 
-        <div id="Chapter_2">
+        <div id="Chapter_2_en">
           <figure>
             <img src="images/simple_format2.png">
             <figcaption>▲Example of entries in the SKOS-SC Term List</figcaption>
           </figure>
         </div>
         
-        <div id="space"></div>
-
         <h3>Explanation of each column</h3>
         
         <div id="Chapter_3" class="clearfix">
@@ -107,12 +105,12 @@
             <li>List of terms in the target field</li>
             <li>One term is entered in each row with no duplicates</li>
           </ul>
-          <figure>
-            <figcaption>
+          <figure_en>
+            <figcaption_en>
               <p>Enter a term in each row with no duplicate</p>
-            </figcaption>
+            </figcaption_en>
             <img src="images/simple_format3.png">
-          </figure>
+          </figure_en>
         </div>
 
         <div id="Chapter_4">
@@ -126,7 +124,9 @@
           </ul>
           <figure>
             <img src="images/simple_format4.png">
-            <figcaption><p>If there are terms in a synonymous relationship, the same representative word is entered repeatedly as in this case</p></figcaption>
+            <figcaption_en>
+              <p>If there are terms in a synonymous relationship, the same representative word is entered repeatedly as in this case</p>
+            </figcaption_en>
           </figure>
           <ul>
             <li>One representative word is selected from the terms in each synonymous relationship and entered.
@@ -145,10 +145,10 @@
           </ul>
           <figure>
             <img src="images/simple_format5.png">
-            <figcaption>
+            <figcaption_en>
               <p>“convenience store (コンビニエンスストア)” is the representative word in “ja”</p>
               <p>“convenience store” is the representative word in “en”</p>
-            </figcaption>
+            </figcaption_en>
           </figure>
         </div>
 
@@ -203,11 +203,11 @@
             <li>It is entered only if a hypernym exists (and can be omitted)</li>
           </ul>
           <figure class="clearfix">
-            <figcaption>
+            <figcaption_en>
               <p>Terms such as “store (店舗)” with http://myVocabulary/2 as the URI of their representative word
                  are hypernyms of terms such as “conbini (コンビニ)” with http://myVocabulary/1 as the URI of their representative word</p>
               <p>There is no entry, because terms such as “store (店舗)” with http://myVocabulary/2 as the URI of their representative word have no particular hypernym</p>
-            </figcaption>
+            </figcaption_en>
             <img src="images/simple_format8.png">
           </figure>
         </div>
@@ -220,13 +220,13 @@
             <li>It is entered only if there is any term in a synonymous relationship in another vocabulary (and can be omitted)</li>
           </ul>
           <figure class="clearfix">
-            <figcaption>
+            <figcaption_en>
               <p>The “URI of synonym in other vocabulary systems (他語彙体系の同義語のURI)” of terms such as
                  “store (店舗)” with http://myVocabulary/2 as the URI of their representative word is
                   http://otherVocabulary/16 (and there is no available information other than this URI)</p>
               <p>There is no entry, because terms such as “conbini (コンビニ)” with http://myVocabulary/2 as
                  the URI of their representative word have no synonym in other vocabulary systems</p>
-            </figcaption>
+            </figcaption_en>
             <img src="images/simple_format9.png">
           </figure>
         </div>
