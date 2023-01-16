@@ -1,0 +1,283 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CVD - HELP</title>
+    <meta name="description" content="CVD - Help">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/help_style.css">
+</head>
+    
+<body>
+
+<div id="Content" class="clerfix">
+
+  <nav>
+    <dl id="menu">
+      <dt id="CVD-logo"><a href="index_en.html"><img src="images/cvd_img.svg"></a></dt>
+      <dd id="Title">HELP</dd>
+      <dt>Using files</dt>
+      <dd><a href="#Section04">Importing files</a></dd>
+      <dd><a href="#Section05">Exporting files</a></dd>
+      <dt>Editing terms</dt>
+      <dd><a href="#Section07">How to select terms</a></dd>
+      <dd><a href="#Section08">Edit panel (編集パネル)</a></dd>
+      <dd><a href="#Section06">Using relationship lines</a></dd>
+      <dd><a href="#Section11">Adding and deleting terms</a></dd>
+      <dd><a href="#Section21">Adding and deleting synonyms in other vocabulary systems</a></dd>
+      <dt>Other features</dt>
+      <dd><a href="#Section09">Changing the color of the border line of a term</a></dd>
+      <dd><a href="#Section10">About confirmation</a></dd>
+      <dd><a href="#Section20">CVD-supported browsers</a></dd>
+    </dl>
+    
+  </nav>
+
+  <div id="Section04" class="section">
+    <h1>Importing files</h1>
+    <p>The following three types of data can be input.</p>
+    <ul class="Emp Descr">
+      <li>Editing Vocabulary (編集用語彙)<br><span class="descr">(CSV format with UTF-8 BOM)<br>Data that is currently being edited regarding synonymous relationships and hierarchical relationships between terms.</span></li>
+      <li>Editing Vocabulary_meta (編集用語彙_meta)<br><span class="descr">(CSV format with UTF-8 BOM)<br>Vocabulary metafile.</span></li>
+      <li>Reference Vocabulary (参照用語彙)<br><span class="descr">(CSV format with UTF-8 BOM)<br>Data that organizes existing vocabulary information in tabular form.
+        It cannot be edited.<br>
+        This data is for reference only. Up to three files can be imported.</span></li>
+    </ul>
+    <p id="illst4-1"><span class="Emp">Click Files (ファイル) > Open (開く) in the top left corner of the menu to display the file import dialog box.</span><img src="images/help_illst4-1.png"></p>
+
+    <figure id="illst4-2"><figcaption>File import dialog box</figcaption><img src="images/help_illst4-2.png"></figure>
+    <ul class="Attention">
+      <li>* If any Reference Vocabulary (参照用語彙) file was imported in the past, the name and size of the imported file are displayed in the file import dialog box.</li>
+      <li>* To import a new Reference Vocabulary (参照用語彙) file that has the same file name as a past imported file, it is necessary to click CLEAR first, and then reference the new file.</li>
+    </ul>
+  </div>
+
+  <div id="Section05" class="section">
+    <h1>Exporting files</h1>
+    <p>The following three types of data can be output.</p>
+    <ul class="Emp Descr">
+      <li>CSV (term list)<span class="descr">(CSV format with UTF-8 BOM): Data that is currently being edited regarding synonymous relationships and hierarchical relationships.</span></li>
+      <li>CSV (basic vocabulary information) <span class="descr">(CSV format with UTF-8 BOM)</span></li>
+      <li>RDF<span class="descr">(n3, nquads, nt, trix, turtle, xml and jsonld formats): Controlled vocabulary to be released.</span></li>
+    </ul>
+    <p>Click Files (ファイル) > Save (保存) > Editing Vocabulary (編集用語彙), Editing Vocabulary_meta (編集用語彙_meta) or Controlled Vocabulary (統制語彙) in the top left corner. When the File Output (ファイル出力) dialog box appears, enter any file name and click OK to download the file to your local environment.</p>
+    <div class="Img margin0">
+      <figure><img src="images/help_illst5.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section07" class="section">
+    <h1>How to select terms</h1>
+    <p>The following two methods are used to select registered terms.</p>
+    <ol class="Emp Descr">
+      <li>Click a term on the Visualization (可視化) screen.<br><span class="descr">Selecting a term on the Visualization (可視化) screen highlights it by making its border line thicker.</span></li>
+      <li>Search in the search box.<br><span class="descr">Enter the term name in the search box to search. When the desired term is found, it will be displayed in the center of the screen.</span></li>
+      <li>Select a term from the pulldown in the Edit panel.<br><span class="descr">
+        Select a term at random and press the Edit (編集) button on the upper right of the screen to display the edit panel. Select the desired term from the pull-down in the edit panel.</span></li>
+    </ol>
+    <p class="Emp"><span class="red">To cancel the selection, click the selected term, click the Cancel All Selections (選択全解除) button or the background of the Visualization (可視化) screen.</span></p>
+    <div class="Img margin0">
+      <figure><img src="images/help_illst7.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section08" class="section">
+    <h1>Edit panel (編集パネル)</h1>
+    <p>Select a term and click the Edit (編集) button to open the Edit panel (編集パネル) . The Edit panel (編集パネル) allows you to edit synonyms, the representative word and hypernym of the selected term, change the URI of the representative word by editing its ID and edit the description of the term.</p>
+    <div id="HensyuPanel" >
+      <div class="Img">
+        <p style="top: 0.5%; left: 82.5%;">1</p>
+        <p style="top: 9.2%; left: 1%;">2</p>
+        <p style="top: 15%; left: 17%;">3</p>
+        <p style="top: 20.5%; left: -1.5%;">4</p>
+        <p style="top: 20.5%; left: 43%;">5</p>
+        <p style="top: 29%; left: -1.5%;">6</p>
+        <p style="top: 37.3%; left: -1.5%;">7</p>
+        <p style="top: 47%; left: -1.5%;">8</p>
+        <p style="top: 54.5%; left: -1.5%;">9</p>
+        <p style="top: 62.5%; left: -1.5%;">10</p>
+        <p style="top: 71.5%; left: -1.5%;">11</p>
+        <p style="top: 82%; left: -1.5%;">12</p>
+        <p style="top: 93%; left: 40%;">13</p>
+        <figure><img src="images/help_illst8.png"></figure>
+      </div>
+
+      <dl class="Descr">
+        <dt>①Close (クローズ) button</dt>
+        <dd class="descr">Clicking it closes the Edit panel (編集パネル).</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>②Display of the selected term</dt>
+        <dd class="descr">This field displays the name of the term that is currently being edited. Select another term from the pull-down menu to change the selected term.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>③Language selection</dt>
+        <dd class="descr">This indicates which language is used for the term. Set Japanese or English (other languages are not supported).</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>④Synonyms (同義語)</dt>
+        <dd class="descr">Terms in different word forms that have the same meaning. Multiple terms can be set. Clicking a synonym text box displays candidate synonyms chosen by AI. Select a desired term from them or enter one manually to set each synonym.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑤The background of edited items is in pink, whereas the background of existing items is in blue.</dt>
+        <dd class="descr red">For the manual input, press the Enter key after entering a term to confirm the entry.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑥Representative word (代表語)</dt>
+        <dd class="descr">Set one term among the selected term and its synonyms to represent them.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑦ID</dt>
+        <dd class="descr">Assign a unique ID to the representative word.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑧URI of representative word (代表語のURI)</dt>
+        <dd class="descr">It is the unique URI assigned to each representative word. It can be changed by editing the ID.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑨Hypernym (上位語)</dt>
+        <dd class="descr">This word covers the meaning of the selected term. Only one hypernym can be set. Clicking the text box displays candidate hypernyms chosen by AI. Select a desired term from them or enter one manually to set the hypernym.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑩Hyponym (下位語)</dt>
+        <dd class="descr">This word has a more specific meaning than the selected term. Hyponyms cannot be edited on this screen. A hypernym-hyponym relationship can be changed by selecting a hypernym from the terms that are equivalent to hyponyms.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑪Term description (用語の説明)</dt>
+        <dd class="descr">This is a description of the term.</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑫URI of synonym in other vocabulary systems (他語彙体系の同義語のURI)</dt>
+        <dd class="descr">The URI of a term that has a synonymous relationship with the selected term in a vocabulary that is different from the vocabulary that is currently being edited in the target field. It cannot be changed at the Edit panel.
+          (Please see <a href="#Section21">Adding and deleting synonyms in other vocabulary systems</a>)</dd>
+      </dl>
+      <dl class="Descr">
+        <dt>⑬Apply (反映) button</dt>
+        <dd class="descr">After finishing the editing, click the Apply (反映) button to save the edited data.</dd>
+      </dl>
+      
+    </div>
+  </div>
+
+  <div id="Section06" class="section">
+    <h1>Editing enabled by using relationship lines</h1>
+    <p>Placing the mouse pointer over a registered term displays three points. These points can be used to draw relationship lines.</p>
+    <p>Hold down the mouse button over one of the displayed points and drag it to make a relationship line appear. Then, connect the line to another term. A dialog box will appear to allow you to set synonyms and hypernyms.</p>
+    <div class="Img">
+      <p id="Text01">If you use relationship lines, you can set synonyms and broader terms without using the edit panel.</p>
+      <figure><img src="images/illst_6-1.png"></figure>
+      <div id="Text02">
+        <p>Start point of a relationship line with a synonym</p>
+        <figure><img src="images/illst_6-2.png"></figure>
+        <p>Connecting a synonymous relationship line from the selected term to another term can establish a synonymous relationship between them.</p>
+      </div>
+      <div id="Text03">
+        <p>Start point of a relationship line with a hypernym</p>
+        <figure><img src="images/illst_6-3.png"></figure>
+        <p>Connecting a hierarchical relationship line from the selected term to another term can establish a hierarchical relationship between them.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="Section11" class="section">
+    <h1>Adding and deleting terms</h1>
+    <p class="Emp">CVD cannot be used to add new terms or delete registered terms.</p>
+    <p>To add or delete terms, export the vocabulary that is currently being edited into a CSV file, and then edit the CSV file.</p>
+    <h2>Procedure for adding and deleting terms</h2>
+    <ol class="Emp Descr">
+      <li id="process1">Export the vocabulary that is currently being edited into an Editing Vocabulary (編集用語彙) file (CSV （用語一覧）file).<br>
+        <span class="descr">For the procedure for exporting an Editing Vocabulary (編集用語彙) file, refer to <a href="#Section05">Exporting files</a> on this help page. </span><img src="images/help_illst9-1.png"></li>
+      <li id="process2">Edit the exported Editing Vocabulary (編集用語彙) file.<br>
+        <span class="descr">To add a term, <em>add a row</em> to the exported CSV file.
+          (To delete a term, <em>delete the row</em> of the term that should be deleted.)
+          When adding terms, setting the Terms (用語名) Column, the Representative word (代表語) Column and the URI of
+           representative word (代表語のURI) Column can minimize data entry.
+            (Those other than the Terms (用語名) Column can be changed on CVD.)
+        </span><img src="images/help_illst9-2.png"></li>
+      <li id="process3">Import the edited Editing Vocabulary (編集用語彙) file into CVD.<br>
+        <span class="descr">For the procedure for importing the file, refer to <a href="#Section04">Importing files</a> on this help page.</span></li>
+    </ol>
+  </div>
+
+  <div id="Section21" class="section">
+    <h1>Adding and deleting synonyms in other vocabulary systems</h1>
+    <p class="Emp">CVD cannot be used to add or delete the URI of a new synonym in another vocabulary system to or from any term.</p>
+    <p>To add or delete synonyms in other vocabulary systems, export the vocabulary that is currently being edited into a CSV file, and then edit the CSV file.</p>
+    <h2>Procedure for adding and deleting the URIs of synonyms in other vocabulary systems (他語彙体系の同義語のURI)</h2>
+    <ol class="Emp Descr">
+      <li id="process1">Export the vocabulary that is currently being edited into an Editing Vocabulary (編集用語彙) file (CSV（用語一覧） file).<br>
+        <span class="descr">For the procedure for exporting an Editing Vocabulary (編集用語彙) file, refer to <a href="#Section05">Exporting files</a> on this help page. </span><img src="images/help_illst9-1-2.png"></li>
+      <li id="process2">Edit the exported Editing Vocabulary (編集用語彙) file.<br>
+        <span class="descr">To add a synonym in another vocabulary system to a term in the exported CSV file, enter the URI of the synonym in the “URI of synonym in other vocabulary systems (他語彙体系の同義語のURI)” Column.</span><img src="images/help_illst9-2-2.png"></li>
+      <li id="process3"> Import the edited Editing Vocabulary (編集用語彙) file into CVD.<br>
+        <span class="descr">For the procedure for importing the file, refer to <a href="#Section04">Importing files</a> on this help page.</span></li>
+    </ol>
+  </div>
+
+  <div id="Section09" class="section">
+    <h1>Changing the color of the border line of a term</h1>
+    <p class="Emp">The color of the border line of each term displayed on the Visualization (可視化) screen can be changed individually.</p>
+    <p>Use this function to divide terms into different groups or distinguish different statuses such as editing in progress on the display.</p>
+    <ol>
+      <li>Select a term to activate the Change Border Color (枠線色変更) button.</li>
+      <li>Press the button, and then select a border color to change the border color of the selected term on the Visualization (可視化) screen.</li>
+    </ol>
+    <div class="Img margin0">
+      <figure><img src="images/help_illst10.png"></figure>
+    </div>
+    <div class="Point">
+      <p class="Emp red margin0"><em>Multiple items can be changed at once</em></p>
+      <p>Multiple terms can be selected by clicking them, while holding down the Shift key on the Visualization (可視化) screen.<br>
+        Select multiple terms, click the Change Border Color (枠線色変更) button and select a border line color to apply the change to all of the selected terms.</p>
+    </div>
+  </div>
+
+  <div id="Section10" class="section">
+    <h1>About confirmation</h1>
+    <p class="Emp">The editing status of each term can be locked to prevent operation errors.</p>
+    <p>Select a term and click the Confirm (確定) button to lock the selected term so that it cannot be edited. The Confirm (確定) button will change to the Cancel Confirmation (確定解除) button.</p>
+    <p>Select a confirmed term and click the Cancel Confirmation (確定解除) button to return to the editable state.</p>
+    <p>Selecting a confirmation color on the menu allows you to change the background color of the confirmed term to the specified color.</p>
+    <div class="Img margin0">
+      <figure><img src="images/help_illst11.png"></figure>
+    </div>
+  </div>
+
+  <div id="Section20" class="section">
+    <h1>CVD-supported browsers</h1>
+    <p>The following WEB browsers are supported.</p>
+    <table>
+      <tr>
+        <th>Browser</th>
+        <th>Support status</th>
+      </tr>
+      <tr>
+        <td>Google Chrome</td>
+        <td>Supported</td>
+      </tr>
+      <tr>
+        <td>Microsoft Edge</td>
+        <td>Supported</td>
+      </tr>
+      <tr>
+        <td>Internet Explorer</td>
+        <td>Not supported</td>
+      </tr>
+      <tr>
+        <td>Firefox</td>
+        <td>Not supported</td>
+      </tr>
+      <tr>
+        <td>Other browsers</td>
+        <td>Not supported</td>
+      </tr>
+    </table>
+      
+  </div>
+
+</div>
+
+</body>
+</html>

@@ -164,6 +164,27 @@ body, html {font-size: 14px;}
     #Docker p {font-size: 1.2rem;}
 }
 
+#TopMessage {
+    display: inline-block;
+    text-align: left;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 1%;
+}
+#TopMessage h1 {
+    font-size: 3.5vw;
+    letter-spacing: 0em;
+    margin-bottom: 0.1em;
+}
+#TopMessage p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: 0;
+}
+@media screen and (min-width: 1200px) {
+    #TopMessage h1 {font-size: 3rem;}
+    #TopMessage p {font-size: 1.2rem;}
+}
 .content3 {margin: 1vh auto;}
 .Button {
     display: inline-block;

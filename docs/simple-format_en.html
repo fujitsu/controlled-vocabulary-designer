@@ -1,0 +1,346 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CVD - SKOS-SC Format</title>
+    <meta name="description" content="CVD - SKOS-SC Format">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/page_style.css">
+</head>
+    
+<body>
+
+<div class="bgimg-1">
+   <figure id="Logo"><a href="index_en.html"><img src="images/cvd_img.svg"></a></figure>
+</div>
+
+<div class="content content1">
+  <div class="content sticky">
+    <div class="Button">
+      <p><a href="https://github.com/fujitsu/controlled-vocabulary-designer" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">Download CVD</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="getting-started_en.html">Quick Start Guide</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="help_en.html">CVD Help</a></p>
+    </div>
+  </div>
+
+  <div id="SimpleFormat" class="clearfix">
+    <h1>Details of the SKOS Subset CSV (SKOS-SC) format</h1>
+
+    <ul id="Nav">
+      <li><a href="#Title1">Term Descriptions</a></li>
+      <li><a href="#Title2">CVD, Vocabulary Repository and SKOS-SC Format</a></li>
+      <li><a href="#Title3">About “SKOS-SC Term List”</a></li>
+      <li><a href="#Title4">About “Basic Vocabulary Information”</a></li>
+    </ul>
+
+    <div id="Container">
+
+      <h2 id="Title1">Term Descriptions</h2>
+      <div id="Intro">
+        <h3>SKOS Subset CSV (SKOS-SC) format</h3>
+        <p>This vocabulary CSV format is designed for easy understanding of users who are not familiar with knowledge processing such as RDF.</p>
+        <p>It is also a CSV file format stored in a vocabulary repository (see below).</p>
+        <p>The following two types of the SKOS Subset CSV (SKOS-SC) format are available:</p>
+        <ul>
+            <li>Data that describes relationships between terms in a controlled vocabulary (hereinafter “SKOS-SC term list”)</li>
+            <li>Metadata that describes the names and creators of controlled vocabularies (hereinafter “basic vocabulary information”)</li>
+        </ul>
+
+        <h3>Controlled vocabulary creation support tool: Controlled Vocabulary Designer (CVD)</h3>
+        <p>This WEB application supports creation of controlled vocabularies in each field.</p>
+        <dl>
+          <dt>Detailed description</dt>
+          <dd><a href="https://sip-cyber-x.jp/overview/o002">Website for SIP cross-domain data exchange platform “Controlled Vocabulary Creation Support Tool” </a>（https://sip-cyber-x.jp/overview/o002）</dd>
+          <dt>Source code</dt>
+          <dd><a href="https://github.com/fujitsu/controlled-vocabulary-designer">https://github.com/fujitsu/controlled-vocabulary-designer</a>(released as OSS)</dd>
+        </dl>
+
+        <h3>Vocabulary repository</h3>
+        <p>This repository (a storage place where data, files and other items are managed centrally) is used to build vocabularies and allows the user to register, search and view vocabularies freely.</p>
+        <dl>
+          <dt>Detailed description</dt>
+          <dd><a href="https://sip-cyber-x.jp/overview/o003">Website for SIP cross-domain data exchange platform “Vocabulary Repository”</a>（https://sip-cyber-x.jp/overview/o003）</dd>
+        </dl>
+      </div>
+
+      <div id="Chapter_1">
+        <h2 id="Title2">CVD, Vocabulary Repository and SKOS-SC Format</h2>
+        <figure><figcaption>▼Conceptual image of SKOS-SC format integration between CVD and vocabulary repository</figcaption><img src="images/simple_format1.png"></figure>
+        <p>Controlled vocabularies can also be created and edited without using CVD, by editing files in the SKOS-SC format on Excel.
+           The following explanation is supplementary information about how to edit files in the SKOS-SC format by using Excel.</p>
+      </div>
+
+      <div>
+        <h2 id="Title3">About “SKOS-SC Term List”</h2>
+
+        <ul id="Anchor" class="clearfix">
+          <li><a href="#Chapter_3">Terms (用語名)</a></li>
+          <li><a href="#Chapter_4">Representative word (代表語)</a></li>
+          <li><a href="#Chapter_5">Language (言語)</a></li>
+          <li><a href="#Chapter_6">URI of representative word (代表語のURI)</a></li>
+          <li><a href="#Chapter_7">URI of hypernym (上位語のURI)</a></li>
+          <li><a href="#Chapter_8">URI of synonym in other vocabulary systems (他語彙体系の同義語のURI)</a></li>
+          <li><a href="#Chapter_9">Term description (用語の説明)</a></li>
+          <li><img src="images/simple_format2-2.png"></li>
+        </ul>
+
+        <div id="Chapter_2">
+          <figure>
+            <img src="images/simple_format2.png">
+            <figcaption>▲Example of entries in the SKOS-SC Term List</figcaption>
+          </figure>
+        </div>
+        
+        <div id="space"></div>
+
+        <h3>Explanation of each column</h3>
+        
+        <div id="Chapter_3" class="clearfix">
+          <h4>Terms (用語名) Column</h4>
+          <ul>
+            <li>List of terms in the target field</li>
+            <li>One term is entered in each row with no duplicates</li>
+          </ul>
+          <figure>
+            <figcaption>
+              <p>Enter a term in each row with no duplicate</p>
+            </figcaption>
+            <img src="images/simple_format3.png">
+          </figure>
+        </div>
+
+        <div id="Chapter_4">
+          <h4>Representative word (代表語) Column</h4>
+          <ul>
+            <li>Term that represents its synonyms in the target field, if any, for display purposes</li>
+            <li>In an example of entries in the simplified file format, “convenience store (コンビニエンスストア)” is the representative word of
+               both “conbini (コンビニ)” and “convenience store (コンビニエンスストア).”
+               This expresses that “conbini (コンビニ)” and “convenience store (コンビニエンスストア)” are synonyms
+                and their representative word is “convenience store (コンビニエンスストア).”</li>
+          </ul>
+          <figure>
+            <img src="images/simple_format4.png">
+            <figcaption><p>If there are terms in a synonymous relationship, the same representative word is entered repeatedly as in this case</p></figcaption>
+          </figure>
+          <ul>
+            <li>One representative word is selected from the terms in each synonymous relationship and entered.
+              In this example, either “conbini (コンビニ)” or “convenience store (コンビニエンスストア)” should be entered
+               as their representative word and no other term should be entered.</li>
+            <li>If a term has no synonym, the term itself is selected as the representative word and entered in the Representative word (代表語) Column.</li>
+          </ul>
+        </div>
+
+        <div id="Chapter_5">
+          <h4>Language (言語) Column</h4>
+          <ul>
+            <li>Information about the language used in the target field</li>
+            <li>When the terms are in Japanese, “ja” is entered. When they are in English, “en” is entered (other languages are not supported).</li>
+            <li>Terms in each synonymous relationship should have a uniform representative word by language</li>
+          </ul>
+          <figure>
+            <img src="images/simple_format5.png">
+            <figcaption>
+              <p>“convenience store (コンビニエンスストア)” is the representative word in “ja”</p>
+              <p>“convenience store” is the representative word in “en”</p>
+            </figcaption>
+          </figure>
+        </div>
+
+        <div id="Chapter_6">
+          <h4>URI of representative word (代表語のURI) Column</h4>
+          <ul>
+            <li>Unique value held by each representative word of terms in the target field</li>
+            <li>It is expressed in the combination of the URI of that vocabulary and the ID of the representative word (the ID does not have to be a number)</li>
+            <li class="NoList">* The URI of each vocabulary is the same as the URI of the vocabulary in the “basic vocabulary information.”</li>
+          </ul>
+          <figure>
+            <img src="images/simple_format6.png">
+          </figure>
+          <ul>
+            <li>There is no particular restriction on how to express the URI of each vocabulary
+               and the ID of each representative word (however, a slash should be entered between the URI of the vocabulary and the ID of the representative word)</li>
+            <li>URI must be entered for each representative word</li>
+            <li>The same URI is entered for all of the representative words in each synonymous relationship</li>
+          </ul>
+          <figure class="img2">
+            <img id="img7" src="images/simple_format7.png">
+            <figcaption>
+              <dl>
+                <dt>The following terms are synonyms:</dt>
+                <dd>conbini (コンビニ)</dd>
+                <dd>convenience store (コンビニエンスストア)</dd>
+                <dd>convenience store</dd>
+                <dd>drug store</dd>
+                <dd>the corner shop</dd>
+              </dl>
+              <dl>
+                <dt>The following terms are synonyms:</dt>
+                <dd>store (店舗)</dd>
+                <dd>shop (店)</dd>
+                <dd>store</dd>
+                <dd>shop</dd>
+              </dl>
+            </figcaption>
+          </figure>
+          <dl class="Comment">
+            <dt>[Supplementary information] About URI</dt>
+            <dd>URI is an abbreviation for “Uniform Resource Identifier,” which is a character string described according
+               to a certain format and an identifier used to recognize any kind of resource.</dd>
+          </dl>
+        </div>
+
+        <div id="Chapter_7">
+          <h4>URI of hypernym (上位語のURI) Column</h4>
+          <ul>
+            <li>URI of the representative word for each hypernym of terms in the target field</li>
+            <li>The same “URI of hypernym (上位語のURI)” is entered for the terms in each synonymous relationship</li>
+            <li>It is entered only if a hypernym exists (and can be omitted)</li>
+          </ul>
+          <figure class="clearfix">
+            <figcaption>
+              <p>Terms such as “store (店舗)” with http://myVocabulary/2 as the URI of their representative word
+                 are hypernyms of terms such as “conbini (コンビニ)” with http://myVocabulary/1 as the URI of their representative word</p>
+              <p>There is no entry, because terms such as “store (店舗)” with http://myVocabulary/2 as the URI of their representative word have no particular hypernym</p>
+            </figcaption>
+            <img src="images/simple_format8.png">
+          </figure>
+        </div>
+
+        <div id="Chapter_8">
+          <h4>URI of synonym in other vocabulary systems (他語彙体系の同義語のURI) Column</h4>
+          <ul>
+            <li>URI of a term that has a synonymous relationship with each term in a vocabulary that is different from the vocabulary in the target field</li>
+            <li>The same “URI of synonym in other vocabulary systems (他語彙体系の同義語のURI)” is entered for all of the terms in each synonymous relationship</li>
+            <li>It is entered only if there is any term in a synonymous relationship in another vocabulary (and can be omitted)</li>
+          </ul>
+          <figure class="clearfix">
+            <figcaption>
+              <p>The “URI of synonym in other vocabulary systems (他語彙体系の同義語のURI)” of terms such as
+                 “store (店舗)” with http://myVocabulary/2 as the URI of their representative word is
+                  http://otherVocabulary/16 (and there is no available information other than this URI)</p>
+              <p>There is no entry, because terms such as “conbini (コンビニ)” with http://myVocabulary/2 as
+                 the URI of their representative word have no synonym in other vocabulary systems</p>
+            </figcaption>
+            <img src="images/simple_format9.png">
+          </figure>
+        </div>
+
+        <div id="Chapter_9">
+          <h4>Term description (用語の説明) Column</h4>
+          <ul>
+            <li>Description of each term in the target field</li>
+            <li>The same term description is entered for the terms in each synonymous relationship by language</li>
+            <li>It can be omitted</li>
+          </ul>
+          <figure>
+            <img src="images/simple_format10.png">
+            <figcaption>
+              <p>Description of synonyms such as 
+                “convenience store,” “drug
+                store” and “the corner shop”</p>
+              <p>There is no description of synonyms such as “store (店舗)” and “shop (店)”</p>
+              <p>There is no description of synonyms such as “store” and “shop”</p>
+              <p>Description of synonyms such as “conbini (コンビニ)” and “convenience store (コンビニエンスストア)”</p>
+            </figcaption>
+          </figure>
+        </div>
+        
+      </div>
+
+      <div id="Chapter_10">
+        <h2 id="Title4">About “Basic Vocabulary Information”</h2>
+        <figure>
+          <figcaption>▼Example of entries in “basic vocabulary information”</figcaption>
+          <img src="images/simple_format11.png">
+        </figure>
+      </div>
+
+      <h3>Explanation of each column</h3>
+      
+      <div id="Chapter_11">
+        <div>
+          <h4>Vocabulary name (語彙の名称) Column</h4>
+          <ul>
+            <li>Japanese name of each controlled vocabulary</li>
+            <li>Any name is entered</li>
+          </ul>
+        </div>
+        <div>
+          <h4>English name of vocabulary (語彙の英語名称) Column</h4>
+          <ul>
+            <li>English name of the controlled vocabulary</li>
+            <li>Any name is entered</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Version (バージョン) Column</h4>
+          <ul>
+            <li>Version of the controlled vocabulary</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Prefix (接頭語) Column</h4>
+          <ul>
+            <li>Expression by simplifying the URI of the controlled vocabulary</li>
+            <li>As a prefix may be used to describe the controlled vocabulary in RDF, it can be simplified without using a long URI character string repeatedly</li>
+          </ul>
+        </div>
+        <div>
+          <h4>URI of vocabulary (語彙のURI) Column</h4>
+          <ul>
+            <li>URI of the controlled vocabulary</li>
+            <li>It can be expressed freely</li>
+            <li>It must be entered</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Vocabulary description (語彙の説明) Column</h4>
+          <ul>
+            <li>Description of the controlled vocabulary in Japanese</li>
+            <li>The controlled vocabulary is described here</li>
+          </ul>
+        </div>
+        <div>
+          <h4>English description of vocabulary (語彙の英語説明) Column</h4>
+          <ul>
+            <li>Description of the controlled vocabulary in English</li>
+            <li>The controlled vocabulary is described in English</li>
+          </ul>
+        </div>
+        <div>
+          <h4>Creator of vocabulary (語彙の作成者) Column</h4>
+          <ul>
+            <li>Person who created the controlled vocabulary</li>
+            <li>It can be entered freely</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer>
+    <div id="FooterContent">
+      <figure><a href="index_en.html"><img src="images/cvd_img.svg"></a></figure>
+      <h1>CVD (Controlled Vocabulary Designer)</h1>
+      <p>Controlled Vocabulary Creation Support Tool</p>
+      <ul>
+        <li><a href="index_en.html">CVD Introduction Top Page</a></li>
+        <li><a href="simple-format_en.html">Details of SKOS-SC Format</a></li>
+        <li><a href="getting-started_en.html">Quick Start Guide</a></li>
+        <li><a href="help_en.html">CVD Help</a></li>
+        <li><a href="https://github.com/fujitsu/controlled-vocabulary-designer">Download CVD</a></li>
+      </ul>
+  </div>
+</footer>
+
+</body>
+</html>

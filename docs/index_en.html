@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CVD - Controlled Vocabulary Designer</title>
+    <meta name="description" content="Controlled Vocabulary Creation Support Tool Controlled Vocabulary Designer CVD">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/help_style.css">
+    <link rel="stylesheet" href="css/index_style.css">
+</head>
+    
+<body>
+
+<div class="bgimg-1 flex-y">
+  <figure id="Logo"><img src="images/cvd_img.svg"></figure>
+</div>
+
+<div class="content content1">
+  <div class="content sticky">
+    <div class="Button">
+      <p><a href="https://github.com/fujitsu/controlled-vocabulary-designer" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">Download CVD</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="getting-started_en.html">Quick Start Guide</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="help_en.html">CVD Help</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="index.html">日本語</a></p>
+    </div>
+  </div>
+  <h1>Controlled Vocabulary Creation Support Tool CVD</h1>
+  <div id="TopMessage">In order to integrate data across different organizations or fields, terms and vocabularies must be used consistently to describe the data.
+    Such data unification normally requires not only special knowledge in data processing, but also expertise in the target field as well as time and effort.
+    Our Controlled Vocabulary Designer (CVD) is a controlled vocabulary creation support tool
+     that uses a GUI and support AI so that you can create controlled vocabularies more efficiently than
+      conventional methods without the need for special knowledge of data processing.
+    As CVD allows a field expert to define terms exclusively, CVD makes it easier to follow new terms and helps reduce obstacles to data integration.<br>
+    As its input and output format, CVD has adopted the Simple Knowledge Organization System (SKOS),
+     a standard specification used to describe controlled vocabularies and thesauruses,
+      which facilitates external data integration.
+    We have also developed a new format “SKOS Subset CSV (SKOS-SC),”
+     which can describe required term lists more concisely than SKOS and meet your input and output needs.
+  </div>
+
+  <div id="SimpleFormat" class="accordion">
+    <input type="checkbox" id="toggle1" class="toggle">
+    <label class="title" for="toggle1">About SKOS Subset CSV (SKOS-SC) format</label>
+    <div class="detail">
+      <h2>SKOS Subset CSV (SKOS-SC) is a CSV-based file format that can describe synonymous relationships and hierarchical relationships between terms (or concepts) concisely.</h2>
+      <h3>Why SKOS Subset CSV (SKOS-SC) format was developed</h3>
+      <p>
+        When data is exchanged between different companies or organizations, they need to use terms with meanings that can be understood by both parties.
+         Machine-readable standard specification “Simple Knowledge Organization System (SKOS)” can be used to describe
+          synonymous relationships and hierarchical relationships between terms.
+      </p>
+      <p>
+        While SKOS can create vocabularies in the format called “Resource Description Framework (RDF),” it is not easy for users
+         who have very little experience in knowledge processing to create vocabularies in the RDF format.
+        To solve this issue, the National Institute of Informatics and Fujitsu Limited worked together to develop the SKOS-SC format,
+         which allows you to describe synonymous relationships and hierarchical relationships between terms in the CSV format,
+          which is widely used by the general public and is also compatible with spreadsheet software.
+      </p>
+      <h3>Feature of SKOS Subset CSV (SKOS-SC)</h3>
+      <p>「SKOS-SC has the following features:</p>
+      <ul>
+        <li>As its structure mainly uses the label called “term name (用語名),” the user does not need to have knowledge
+           in the RDF grammar or the conceptual system of vocabularies </li>
+        <li>As it describes data in the CSV format, the user can describe relationships between terms (or concepts) more intuitively</li>
+      </ul>
+      <p>Since CVD expands SKOS-SC to add data strings that express similarities between terms and other characteristics,
+         the user can define terms more intuitively.
+      </p>
+      <div class="Button">
+        <p><a href="simple-format_en.html">Details of the SKOS-SC format</a></p>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="HelpContent">
+    <form>
+    <input type="checkbox" id="OverlaySW" class="toggle">
+    <label class="HelpTitle" for="OverlaySW">Easy explanation of controlled vocabulary editing and CVD</label>
+    <div id="Overlay">
+        
+      <div id="Contents">
+        
+        <input type="reset" id="OverlaySWoff" class="toggle">
+        <label class="Label close" for="OverlaySWoff">閉じる</label>
+        
+        <input id="block-03" type="radio" class="toggle button" name="Help" >
+        <label class="Label" for="block-03">CVDとは</label>
+        
+        <input id="block-02" type="radio" class="toggle button" name="Help" >
+        <label class="Label" for="block-02">統制語彙とは</label>
+
+        <input id="block-01" type="radio" class="toggle button" name="Help" >
+        <label class="Label block01" for="block-01">統制語彙の編集とは</label>
+
+        <div id="Section01" class="section">
+          <h2>統制語彙の編集とは</h2>
+          <p>モノの名前だったり事象だったり、同一の事柄に対して、いろいろな呼び方（言葉）が存在するときがあります。これは表現が豊かになる反面、なにかと不便です。そこで、これら同じ事柄を指す言葉の関係性を、誰にでもわかりやすく整理しようというのが<em>統制語彙の編集</em>です。</p>
+          <div class="Img">
+            <figure><img src="images/illst_1.png"></figure>
+          </div>
+        </div>
+
+        <div id="Section02" class="section">
+          <h2>統制語彙とは</h2>
+          <p>それぞれの言葉は、ほかの言葉とさまざまな関係を持ちます。</p>
+          <ul class="Emp">
+            <li>同じ意味を持つ言葉<em class="red">➡同義語</em></li>
+            <li>同じ意味を持つ言葉の中で代表となる言葉<em class="red">➡代表語</em></li>
+            <li>言葉を包括している言葉<em class="red">➡上位語</em></li>
+          </ul>
+          <p id="Point"><em>このような関係性を持つ用語の集まりを<br><em>統制語彙</em>といいます</em></p>
+          <div class="Img">
+            <figure><img src="images/illst_2.png"></figure>
+          </div>
+        </div>
+
+        <div id="Section03" class="section">
+          <h2>統制語彙作成支援ツール CVDとは</h2>
+          <p>統制語彙作成では、以下のような様々な用語の情報を編集する必要があります。</p>
+          <ul class="Emp clearfix">
+            <li>同義語</li>
+            <li>代表語</li>
+            <li>代表語のURI</li>
+            <li>上位語</li>
+          </ul>
+          <p>このような多くの関係性や情報を、それぞれの言葉・用語ごとに整理するのは大変な作業です。そこで、これらの作業を支援するために開発されたのが、<em>CVD（Controlled Vocabulary Designer）</em>です。</p>
+          <div class="Img">
+            <div class="BalloonRight">
+              <p>関係性を可視化して直感的な操作が可能</p>
+              <p>AIを活用することで、作業を効率化</p>
+            </div>
+            <figure><img src="images/illst_3.png"></figure>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    </form>
+  </div>
+
+  <div id="flowchart">
+    <h2>Vocabulary Creation Flow</h2>
+    <p>(Based on achievements in the agricultural sector (WAGRI) by Professor Takeda, NII)</p>
+    <dl id="flow1">
+      <dt>Document collection & extraction of candidate terms</dt>
+      <dd>approx. 1.5 months</dd>
+    </dl>
+    <dl id="flow2">
+      <dt>Definition of synonymous relationships and is-a relationships</dt>
+      <dd>approx. 1.5 months</dd>
+      <dd id="flowArrow">Creation of a controlled vocabulary</dd>
+    </dl>
+    <dl id="flow3">
+      <dt>Structuration (e.g. part-of, attribute-of, predicate logic)</dt>
+      <dd>approx. 3 months</dd>
+    </dl>
+  </div>
+  <figure><img src="images/img.png"></figure>
+</div>
+
+<div class="content content2">
+  <div id="Docker">
+    <h1>Docker and CVD</h1>
+    <p>Docker is a software platform that can build, test and deploy applications quickly.<br>
+      Docker packages software in the standardized unit called “container.”<br>
+      The container can contain all items required to execute software, such as a library, code and runtime.<br>
+      Docker can be used to execute application software easily without depending on the calculator environment.<br>
+      Since CVD is packaged in the container, it can start up promptly.
+    </p>
+  </div>
+</div>
+
+<div class="content content3">
+  <div class="Button">
+    <p><a href="https://github.com/fujitsu/controlled-vocabulary-designer" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">Download CVD</a></p>
+  </div>
+  <div class="Button">
+    <p><a href="getting-started_en.html">Quick Start Guide</a></p>
+  </div>
+  <div class="Button">
+    <p><a href="help_en.html">CVD Help</a></p>
+  </div>
+  <div class="Button">
+    <p><a href="index.html">日本語</a></p>
+  </div>
+</div>
+
+<div class="bgimg-1">
+  <footer>
+    <div id="footerArea">
+      <div id="FooterContent">
+        <figure><a href="index_en.html"><img src="images/cvd_img.svg"></a></figure>
+        <h1>CVD (Controlled Vocabulary Designer)</h1>
+        <p>Controlled Vocabulary Creation Support Tool</p>
+        <ul>
+          <li><a href="index_en.html">CVD Introduction Top Page</a></li>
+          <li><a href="simple-format_en.html">Details of SKOS-SC Format</a></li>
+          <li><a href="getting-started_en.html">Quick Start Guide</a></li>
+          <li><a href="help_en.html">CVD Help</a></li>
+          <li><a href="https://github.com/fujitsu/controlled-vocabulary-designer">Download CVD</a></li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>
