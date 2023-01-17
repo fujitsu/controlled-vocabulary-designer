@@ -1,0 +1,258 @@
+﻿<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>CVD - Quick Start Guide</title>
+    <meta name="description" content="CVD - Quick Start Guide">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/page_style.css">
+</head>
+    
+<body>
+
+<div class="bgimg-1">
+  <figure id="Logo"><a href="index_en.html"><img src="images/cvd_img.svg"></a></figure>
+</div>
+
+<div class="content content1">
+  <div class="content sticky">
+    <div class="Button">
+      <p><a href="https://github.com/fujitsu/controlled-vocabulary-designer" target="_blank" rel="noopener noreferrer"><img src="images/newwindow.svg">Download CVD</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="getting-started_en.html">Quick Start Guide</a></p>
+    </div>
+    <div class="Button">
+      <p><a href="help_en.html">CVD Help</a></p>
+    </div>
+  </div>
+  <div id="GettingStart" class="clearfix">
+    <h1>Quick Start Guide</h1>
+    <p>This page provides basic instructions on how to use CVD.</p>
+
+    <ul id="Nav">
+      <li><a href="#Chapter1">Starting CVD</a></li>
+      <li><a href="#Chapter2">Accessing CVD via a WEB browser</a></li>
+      <li><a href="#Chapter3">Operating CVD on a WEB browser</a></li>
+      <li><a href="#Chapter4">Importing files</a></li>
+      <li><a href="#Chapter5">Editing terms</a>
+        <ul>
+        <li><a href="#Chapter5-1">Editing a synonymous relationship and hierarchical relationship</a></li>
+        <ul>
+          <li><a href="#Chapter5-1-1">Editing a synonymous relationship</a></li>
+          <li><a href="#Chapter5-1-2">Editing a hierarchical relationship</a></li>
+        </ul>
+        <li><a href="#Chapter5-2">Display and edit detailed information</a></li>
+        </ul>
+      </li>
+      <li><a href="#Chapter6">Exporting files</a></li>
+    </ul>
+
+    <div id="Container">
+      <div id="Intro">
+        <p>It is assumed that the following versions of docker and docker-compose are already installed on your Linux machine:</p>
+        <ul>
+          <li>docker: Version 19.03 or higher</li>
+          <li>docker-compose: Version 1.23 or higher</li>
+        </ul>
+        <p>If docker and docker-compose are not installed, refer to
+           the <a href="https://matsuand.github.io/docs.docker.jp.onthefly/" target="_blank" rel="noopener noreferrer">official Docker website</a> or other page to install them.</p>
+      </div>
+      
+      <div id="Chapter1">
+        <h2>Starting CVD</h2>
+        <p>How to start CVD on a Linux machine</p>
+        <h3>1</h3>
+        <p>Clone the repository of CVD into the local Linux machine. Execute the following command in the terminal of the Linux machine.</p>
+        <pre><code>$ git clone https://github.com/fujitsu/controlled-vocabulary-designer.git</code></pre>
+        <h3>2</h3>
+        <p>Move to the folder of the cloned CVD repository and execute the following command in the terminal of the Linux machine.<sup>'(*1)</sup></p>
+        <pre><code>$ docker-compose up -d</code></pre>
+        <p><img src="images/getting_start1.png"></p>
+        <p class="comments">(*1) For use in a proxy environment, set <code>HTTP_PROXY and HTTPS_PROXY</code> to environment variables beforehand.</p>
+        <h3>3</h3>
+        <p>The startup is successful if the following is displayed in the terminal of the Linux machine.</p>
+        <p><img src="images/getting_start2.png"></p>
+      </div>
+
+      <div id="Chapter2">
+        <h2>Accessing CVD via a WEB browser</h2>
+        <p>How to access the started CVD via a WEB browser</p>
+        <h3>1</h3>
+        <p>Access the following site on the WEB browser<sup>(*2)</sup> used in your work environment.</p>
+        <pre><code>http://(hostname):10081/</code></pre>
+        <p>Or</p>
+        <pre><code>http://(LinuxマシンのIPアドレス):10081/</code></pre>
+        <p class="comments">(*2) The following browsers are supported:</p>
+        <ul class="comments">
+          <li>Google Chrome</li>
+          <li>Microsoft Edge</li>
+        </ul>
+        <h3>2</h3>
+        <p>The access via the WEB browser is successful if the screen shown in the following figure is displayed.</p>
+        <p><img src="images/getting_start3.png"></p>
+      </div>
+
+      <div id="Chapter3">
+        <h2>Operating CVD on a WEB browser</h2>
+        <p>How to operate CVD on a WEB browser</p>
+        <p>The following sections explain how to operate CVD on a WEB browser, using the following files in the sample-file folder in the cloned CVD repository:</p>
+        <ul>
+          <li>hensyugoi.csv</li>
+          <li>hensyugoi_meta.csv</li>
+          <li>sansyougoi.csv</li>
+        </ul>
+      </div>
+
+      <div id="Chapter4">
+        <h2>Importing files</h2>
+        <p>How to import files into CVD</p>
+        <h3>1</h3>
+        <p>Click Files (ファイル) > Open (開く) in the top left corner of the CVD screen to display the file import dialog box. 
+          Click the View (参照) button for “Editing Vocabulary (編集用語彙)” and select hensyugoi.csv.</p>
+        <p><img id="Img24" src="images/getting_start4.png"></p>
+        <h3>2</h3>
+        <p>Click the View (参照) button for “Editing Vocabulary_meta (編集用語彙_meta)” and select hensyugoi_meta.csv.</p>
+        <h3>3</h3>
+        <p>Click the View (参照) button for “Reference Vocabulary 1 (参照用語彙1)” and select sansyougoi.csv. Then, click OK below.</p>
+        <p><img src="images/getting_start5.png"></p>
+        <h3>4</h3>
+        <p>The file import is complete, when the dialog box disappears and terms are displayed as shown below. (Data in hensyugoi.csv is displayed on the screen.)</p>
+        <p><img src="images/getting_start7.png"></p>
+        <h3>5</h3>
+        <p>You can click “Basic Vocabulary Information (語彙基本情報)” at the top of the screen to check and edit the content of hensyugoi_meta.csv.</p>
+        <p><img id="Img8" src="images/getting_start8.png"></p>
+        <h3>6</h3>
+        <p>You can check the content of sansyougoi.csv by clicking “Reference Vocabulary 1 (参照用語彙1)” at the top of the screen.
+           (The content of sansyougoi.csv can only be displayed and it cannot be edited.)</p>
+        <p><img src="images/getting_start9.png"></p>
+      </div>
+
+      <div id="Chapter5">
+        <h2>Editing terms</h2>
+        <p>How to edit terms on CVD</p>
+        <h3>1</h3>
+        <p>Click the “Editing Vocabulary (編集用語彙)” tab at the top of the screen to display the content of hensyugoi.csv.
+          For example, search the screen for the term “conbini (コンビニ).” 
+          You can either look at the screen or use the search box to look for the term.
+           Clicking the search box displays a list of the terms contained in hensyugoi.csv.</p>
+        <p><img src="images/getting_start10.png"></p>
+        <h3>2</h3>
+        <p>Selecting “conbini (コンビニ)” in the search box displays “conbini (コンビニ)” at the center of the screen.</p>
+        <p><img src="images/getting_start11.png"></p>
+        <h3>3</h3>
+        <p>Move the display position of “conbini (コンビニ)” slightly, as it overlaps other terms and it is a little difficult to see.
+          Drag “conbini (コンビニ)” to an appropriate location.</p>
+        <p><img src="images/getting_start12.png"></p>
+        <h3>4</h3>
+        <p>Color the outline border of “conbini (コンビニ)” to make its location more visible. 
+          Click “Change Border Color (枠線色変更)” at the top of the screen and select an appropriate color. 
+          In this example, “Red (レッド)” is selected. Then, the outline border of “conbini (コンビニ)” turns red.</p>
+        <p><img src="images/getting_start13.png"></p>
+        
+        <h3 id="Chapter5-1" class="Title">Editing a synonymous relationship and hierarchical relationship</h3>
+        <p>How to edit the synonymous relationship and hierarchical relationship of “conbini (コンビニ)”</p>
+        <p>Placing the mouse pointer over “conbini (コンビニ)” displays three points. These points can be used to retrieve relationships of the term.</p>
+        <p><img id="Img14" src="images/getting_start14.png"></p>
+        <p><br></p>
+        <h3>1</h3>
+        <h4 id="Chapter5-1-1">Editing a synonymous relationship</h4>
+        <p>Set “convenience store (コンビニエンスストア)” as a synonym for “conbini (コンビニ),” for example.<br>
+          Place the mouse pointer over “conbini (コンビニ),” choose either the left or right point of the term and drag it, 
+          while holding down the mouse button. This allows you to draw a synonymous relationship line.</p>
+        <p><img id="Img15" src="images/getting_start15.png"></p>
+        <h3>2</h3>
+        <p>Drag and extend the synonymous relationship line, then release the mouse button over “convenience store (コンビニエンスストア).”
+          The following dialog box will appear. Check it and click OK.</p>
+        <p><img src="images/getting_start16.png"></p>
+        <h3>3</h3>
+        <p>As shown below, “conbini (コンビニ)” and “convenience store (コンビニエンスストア)” are now connected,
+           using a gray line. This gray line is a synonymous relationship line.</p>
+        <p><img src="images/getting_start17.png"></p>
+        <p><br></p>
+        <h3>1</h3>
+        <h4 id="Chapter5-1-2">Editing a hierarchical relationship</h4>
+        <p>For example, set “store (店舗)” as the hypernym of “convenience store (コンビニエンスストア).” <br>
+          As “store (店舗)” is not visible, overlapping “http://otherVocabulary/16,” drag it with the mouse and move it to an appropriate position.
+          Placing the mouse pointer over “convenience store (コンビニエンスストア)” displays three points. 
+          Hold down the mouse button over the top point and drag it to make a hierarchical relationship line appear.
+          </p>
+        <p><img src="images/getting_start18.png"></p>
+        <h3>2</h3>
+        <p>Drag the hierarchical relationship line and release the mouse button over “store (店舗).” 
+          When the next dialog box appears, check it and click OK.</p>
+        <p><img src="images/getting_start19.png"></p>
+        <h3>3</h3>
+        <p>“convenience store (コンビニエンスストア)” is now connected to “store (店舗)” at the end of a black arrow line, as shown below. 
+          This line is a hierarchical relationship line. (The term at the arrow end is the hypernym.)
+        </p>
+        <p><img src="images/getting_start20.png"></p>
+        <h3 id="Chapter5-2" class="Title">Displaying and editing detailed information</h3>
+        <p>How to use the Edit panel (編集パネル) to display and edit detailed information</p>
+        <h3>1</h3>
+        <p>After clicking “convenience store (コンビニエンスストア),” click Edit (編集) in the top right corner of the screen.</p>
+        <p><img src="images/getting_start21.png"></p>
+        <h3>2</h3>
+        <p>Information about “convenience store (コンビニエンスストア)” (hereinafter “Edit panel (編集パネル)”) is displayed.</p>
+        <p><img src="images/getting_start22.png"></p>
+        <h3>3</h3>
+        <p>The Edit panel (編集パネル) also allows you to edit synonyms, representative words and hypernyms.
+          Clicking a synonym text box displays candidate synonym results chosen by AI.
+          You can either select a term that seems to be a synonym from them or enter a term manually to set a synonym.
+          You can also set a hypernym in the same way.</p>
+        <p><img id="Img23" src="images/getting_start23.png"></p>
+        <h3>4</h3>
+        <p>The Edit panel (編集パネル) also allows you to change the URI of the representative word by editing its ID and edit the description of the term.<br>
+          This example shows how to edit the description of the term. 
+          In the Term description (用語の説明) text box, enter “Supplementary information about convenience store (コンビニエンスストアに関する補足情報です)” .
+          After finishing the editing, click the Apply (反映) button at the bottom of the box to save the edited data and close the Edit panel (編集パネル).</p>
+        <p><img id="Img24" src="images/getting_start24.png"></p>
+        <h3>5</h3>
+        <p>The same description of the term will be entered for all of its synonyms.<br>
+          Open the Edit panel (編集パネル) when “convenience store (コンビニエンスストア)” is still selected,
+           and then select “conbini (コンビニ)” from the pull-down menu at the top of the Edit panel (編集パネル) to switch to “conbini (コンビニ).” 
+           Check that the Term description (用語の説明) text box displays
+            “Supplementary information about convenience store (コンビニエンスストアに関する補足情報です),” which was entered earlier.</p>
+        <p><img id="Img25" src="images/getting_start25.png"></p>
+      </div>
+
+      <div id="Chapter6">
+        <h2>Exporting files</h2>
+        <p>How to export the data that is currently being edited on CVD into a file</p>
+        <p>The following three types of files can be exported:</p>
+        <ul>
+          <li>CSV (term list)</li>
+          <li>CSV (basic vocabulary information)</li>
+          <li>RDF</li>
+        </ul>
+        <p>All of them can be exported according to the same procedure. (A file format can be selected in the RDF export.)</p>
+        <p>The following example shows how to export CSV (term list).</p>
+        <p>Click Files (ファイル) > Save (保存) > Editing Vocabulary (編集用語彙) in the top left corner of the CVD screen.
+          When the dialog box shown in the following figure appears, enter any file name and click OK to download the file.</p>
+        <p><img src="images/getting_start26.png"></p>
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  <div id="FooterContent">
+    <figure><a href="index_en.html"><img src="images/cvd_img.svg"></a></figure>
+    <h1>CVD (Controlled Vocabulary Designer)</h1>
+    <p>Controlled Vocabulary Creation Support Tool</p>
+    <ul>
+      <li><a href="index_en.html">CVD Introduction Top Page</a></li>
+      <li><a href="simple-format_en.html">Details of the SKOS-SC format</a></li>
+      <li><a href="getting-started_en.html">Quick Start Guide</a></li>
+      <li><a href="help_en.html">CVD Help</a></li>
+      <li><a href="https://github.com/fujitsu/controlled-vocabulary-designer">Download CVD</a></li>
+    </ul>
+  </div>
+</footer>
+
+</body>
+</html>
