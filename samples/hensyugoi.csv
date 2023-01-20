@@ -1,0 +1,10 @@
+﻿用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明,作成日,最終更新日,同義語候補,上位語候補,x座標値,y座標値,色1,色2,確定済み用語
+コンビニ,コンビニエンスストア,ja,http://sampleVocab/1,http://sampleVocab/2,,コンビニエンスストアの略称です,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"コンビニエンスストア, store, the corner shop, drug store, convenience store","店, 店舗",3.779367076,-44.97713738,black,green,0
+コンビニエンスストア,コンビニエンスストア,ja,http://sampleVocab/1,http://sampleVocab/2,,コンビニエンスストアの略称です,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"コンビニ, the corner shop, store, drug store, convenience store","店, 店舗",16.81118132,-61.70717408,black,green,0
+convenience store,convenience store,en,http://sampleVocab/1,http://sampleVocab/2,,Alias of convenience store,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"drug store, store, the corner shop, shop, コンビニエンスストア",,-7.53980653,-51.30562908,black,green,0
+drug store,convenience store,en,http://sampleVocab/1,http://sampleVocab/2,,Alias of convenience store,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"store, the corner shop, convenience store, shop, コンビニエンスストア",,-7.911179493,-26.26668782,black,green,0
+the corner shop,convenience store,en,http://sampleVocab/1,http://sampleVocab/2,,Alias of convenience store,2021-04-02T12:43:02Z,2021-04-08T16:07:59Z,"shop, drug store, convenience store, store, コンビニエンスストア",,-43.68659491,42.18700014,black,green,0
+店舗,店舗,ja,http://sampleVocab/2,,http://otherVocab/16,,2021-04-01T11:40:15Z,2021-04-09T09:22:11Z,"store, drug store, コンビニエンスストア, the corner shop, コンビニ",店舗,7.237030405,-51.76710593,black,green,0
+店,店舗,ja,http://sampleVocab/2,,http://otherVocab/16,,2021-04-01T11:40:15Z,2021-04-09T09:22:11Z,"the corner shop, shop, convenience store, drug store, store",店舗,-47.93248755,34.79784645,black,green,0
+store,store,en,http://sampleVocab/2,,http://otherVocab/16,,2021-04-01T11:40:15Z,2021-04-09T09:22:11Z,"drug store, convenience store, the corner shop, shop, コンビニエンスストア",,9.110486157,-80.63532085,black,green,0
+shop,store,en,http://sampleVocab/2,,http://otherVocab/16,,2021-04-01T11:40:15Z,2021-04-09T09:22:11Z,"the corner shop, convenience store, drug store, store, コンビニエンスストア",,32.98654788,33.62595116,black,green,0
