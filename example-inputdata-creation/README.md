@@ -2,9 +2,6 @@
 編集用語彙、参照用語彙の作成例です。<br>
 domain_words.csv、domain_text.txt、reference.csv、reference.ttlのサンプルは「samples」ディレクトリーにあり、それぞれの説明はこのREADMEの下部に提示しています。
 
-編集語彙_meta.csvは別途作成する必要があります。
-トップフォルダの[README](../README.md)の「編集用語彙_metaのサンプル」についての項を参照ください。
-
 ## 編集用語彙を作成する方法
 domain_words.csvとdomain_text.txtをmountdir/data/に置き、Linuxマシンのターミナル上で以下のコマンドを実行します。
 1. ```$ cd example-inputdata-creation```
@@ -18,7 +15,11 @@ domain_words.csvとdomain_text.txtをmountdir/data/に置き、Linuxマシンの
 
 4. ```$ ./Hensyugoi.sh```
 
-mountdir/data/に、Hensyugoi.csvというファイル名で編集用語彙が出力されます。
+mountdir/data/に、以下のファイルが出力されます。
+  - Hensyugoi.csv：編集用語彙
+  - Hensyugoi_meta.csv：編集語彙_meta（※）
+
+（※）domain_words.csvに「代表語のURI」列が存在する場合は、Hensyugoi_meta.csvは出力されません。トップフォルダの[README](../README.md)の「編集用語彙_metaのサンプル」についての項を参考に、別途作成してください。
 
 ### domain_words.csv
 -  分野の用語一覧が記述されたCSVファイルです。
@@ -159,7 +160,6 @@ shop
 ```
 用語名,代表語,言語,代表語のURI,上位語のURI,他語彙体系の同義語のURI,用語の説明
 カイトウメン,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
-Gossypium barbadense,カイトウメン,en,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
 ペルー綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
 シーアイランド綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,
 エジプト綿,カイトウメン,ja,http://cavoc.org/cvo/ns/3/C822,http://cavoc.org/cvo/ns/3/C876,,

@@ -13,6 +13,7 @@ import inspect
 import pandas as pd
 import unicodedata
 import string
+import itertools
 
 from nltk.corpus import wordnet as wn
 from rdflib import Graph
@@ -49,13 +50,20 @@ def wordnet(voc_uri):
     # create dict {key: value} = {synset: headword(no duplicates)}
     # Because the same headword exists in more than one synset, remove the headword from the synset if the previous headword is included in the synset to eliminate duplicates
     # The reason for dedupe is that in CVD, if the same term exists in more than one synonym group, it will result in an error when reading the reference vocabulary file.
-    word_list = [] # list of headwords that have existed
+    dup_check = {}
+    word_list = []
+    word_list = list(set(itertools.chain.from_iterable(syn_word.values())))
+    dup_check = dict(zip(word_list, [0]*len(word_list)))
+    word_no_dup = []
+    syn_word_no_dup = {}  # {key: value} = {synset：headword（no duplicates）}
     for key in syn_word:
-        word_no_dup =\
-            list(set(syn_word[key]) & (set(word_list) ^ set(syn_word[key])))
-        word_list += word_no_dup
+        for word in syn_word[key]:
+            if dup_check[word] == 0:
+                word_no_dup.append(word)
+                dup_check[word] = 1
         syn_word_no_dup[key] = word_no_dup
-    print(datetime.datetime.now(), "---word_list loop End", location())
+        word_no_dup = []
+    print(datetime.datetime.now(), "---syn_word_no_dup loop End", location())
 
     # create dict {key: value} = {synset: preferred label of the first synset of the broader concepts}
     for key in syn_hyper:
@@ -94,10 +102,11 @@ def wordnet(voc_uri):
     for idx in sorted(delete_idx, reverse=True):
         output_all.pop(idx)
 
-    # extract only lines that the preferred label is included in the term name
+    # extract only lines that the preferred label is not included in the term name
+    key_term = dict(zip([term[0] for term in output_all], [0]*len(output_all)))
     delete_idx = []
     for idx, term in enumerate([term[1] for term in output_all]):
-        if term in (set([term[0] for term in output_all]) ^ set([term[1] for term in output_all])):
+        if term not in key_term:
             delete_idx.append(idx)
 
     delete_idx = list(set(delete_idx))
@@ -106,7 +115,7 @@ def wordnet(voc_uri):
 
     # if the broader term is not "" and is not included in the term name, replace it with ""
     for idx, term in enumerate([term[4] for term in output_all]):
-        if term in (set([term[0] for term in output_all]) ^ set([term[4] for term in output_all])) and term != "":
+        if term not in key_term and term != "":
             output_all[idx][4] = ""
             output_all[idx][5] = ""
 

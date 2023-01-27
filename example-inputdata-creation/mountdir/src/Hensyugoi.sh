@@ -47,7 +47,7 @@ fi
 
 PHASE="Hensyugoi"
 echo ${PHASE}
-python3 ./${PHASE}.py -c config.json -i WordEmbedding.npy SynonymExtraction.npy HypernymExtraction.npy Filtering.npy ../data/domain_words.csv -o ../data/Hensyugoi.csv || TEST_OK=NG
+python3 ./${PHASE}.py -c config.json -i WordEmbedding.npy SynonymExtraction.npy HypernymExtraction.npy Filtering.npy ../data/domain_words.csv -o ../data/Hensyugoi.csv ../data/Hensyugoi_meta.csv || TEST_OK=NG
 if [ "${TEST_OK}" != "OK" ]; then
     echo "${PHASE} Failed"
     exit 1
